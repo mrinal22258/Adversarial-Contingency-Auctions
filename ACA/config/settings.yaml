@@ -1,0 +1,51 @@
+# Adversarial Contingency Auctions (ACA) Configuration Settings
+# Defines parameters for heterogeneous fleet simulation on an adversarial mutated graph.
+
+# Graph Topology Settings
+graph:
+  num_nodes: 25              # Number of vertices in the environment graph
+  connection_probability: 0.3 # Probability of an edge existing between any node pair (for Erdős-Rényi)
+  edge_weight_range: [1.0, 15.0] # [min, max] range for traversal costs
+  seed: 42                    # Pseudo-random seed for graph generation
+
+# Heterogeneous Robot Fleet Configuration
+robots:
+  - type: "scout"
+    count: 2
+    battery_capacity: 120.0  # Max charge limit (units of energy)
+    battery_drain_rate: 1.0  # Energy consumption per step of idle/sensing
+    battery_move_cost: 2.5   # Energy consumption per unit of edge weight traversed
+    comm_budget: 100.0       # Max bits/messages allowed to send per time step
+    sensing_range: 2         # Sensing radius in graph hops
+    speed: 2.0               # Nodes traversed per unit time
+
+  - type: "heavy_lifter"
+    count: 3
+    battery_capacity: 300.0
+    battery_drain_rate: 2.5
+    battery_move_cost: 6.0
+    comm_budget: 40.0
+    sensing_range: 1
+    speed: 1.0
+
+# Strategic Adversary Profile (theta^*)
+adversary:
+  type: "reactive_blocker"   # Adversary behavior policy: reactive_blocker, random, or optimal_minimax
+  influence_radius: 1        # Number of hops away from robot where adversary can mutate paths
+  mutation_probability: 0.5  # Base probability of path blockage if robot is within range
+  max_active_blockages: 5    # Max number of concurrently blockaded edges in the graph
+  seed: 99
+
+# Decentralized Auction & Bidding Options
+auction:
+  consensus_rounds_max: 8    # Max iterations allowed for peer-to-peer consensus resolution (e.g., CBBA)
+  bid_epsilon: 0.01          # Minimum increment required to outbid an existing allocation
+  bundle_size_max: 5         # Maximum number of tasks in a bundle a single robot can claim
+  comm_range: 3              # Max hop distance over which robots can communicate directly
+
+# Global Simulation Settings
+simulation:
+  time_horizon: 150          # Max simulation time steps (ticks)
+  task_arrival_rate: 0.25    # Probability of a new task arriving at a tick
+  random_seed: 1337
+  metrics_export_path: "logs/simulation_metrics.json"
