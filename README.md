@@ -4,10 +4,11 @@ emoji: 🤖
 colorFrom: indigo
 colorTo: purple
 sdk: gradio
-sdk_version: 4.37.0
+sdk_version: 4.44.0
 app_file: app.py
 pinned: false
 license: mit
+python_version: "3.10"
 ---
 
 # Adversarial Contingency Auctions (ACA)
