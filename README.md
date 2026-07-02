@@ -11,6 +11,9 @@ license: mit
 python_version: "3.10"
 ---
 
+# 🚀 Live Demo
+👉 **https://huggingface.co/spaces/mrinal22258/adversarial-contingency-auctions**
+
 # Adversarial Contingency Auctions (ACA)
 
 A decentralized multi-robot task allocation algorithm combining contingency games, inconsistent-belief auction dynamics, and adversarial blockages.
