@@ -157,28 +157,89 @@ href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.cs
 </script>
 
 <style>
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #ffffff;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    overflow: hidden;
+}
 .animation {
-    display: inline-block;
-    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    padding: 6px;
+}
+.animation img {
+    max-width: 100%;
+    max-height: calc(100vh - 110px);
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    border-radius: 4px;
+}
+.anim-controls {
+    width: 100%;
+    max-width: 650px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 4px;
 }
 input[type=range].anim-slider {
-    width: 374px;
-    margin-left: auto;
-    margin-right: auto;
+    width: 90%;
+    max-width: 520px;
+    margin: 4px auto;
+    cursor: pointer;
 }
 .anim-buttons {
-    margin: 8px 0px;
+    margin: 4px 0px;
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    justify-content: center;
 }
 .anim-buttons button {
-    padding: 0;
-    width: 36px;
+    padding: 4px 10px;
+    min-width: 36px;
+    height: 30px;
+    border: 1px solid #d0d7de;
+    background: #f6f8fa;
+    border-radius: 6px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.15s;
+}
+.anim-buttons button:hover {
+    background: #e2e8f0;
+}
+.anim-state {
+    font-size: 13px;
+    color: #4a5568;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 2px;
 }
 .anim-state label {
     margin-right: 8px;
+    cursor: pointer;
 }
 .anim-state input {
     margin: 0;
     vertical-align: middle;
+    cursor: pointer;
 }
 </style>
 
