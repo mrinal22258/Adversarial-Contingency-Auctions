@@ -1,0 +1,124 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 480" width="100%" height="100%" style="background:#ffffff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+  <defs>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="115%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="3" stdDeviation="5" flood-color="#0f172a" flood-opacity="0.07"/>
+    </filter>
+    <marker id="arr-blue" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#2563eb"/>
+    </marker>
+    <marker id="arr-green" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#059669"/>
+    </marker>
+    <marker id="arr-purple" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#7c3aed"/>
+    </marker>
+  </defs>
+
+  <rect width="1200" height="480" fill="#f8fafc" rx="8"/>
+  <text x="600" y="32" text-anchor="middle" font-size="17" font-weight="700" fill="#0f172a">Fig. 7. Qualitative Multi-Robot Execution Traces under Reactive Adversarial Edge Mutations across Simulation Ticks</text>
+
+  <!-- FRAME 1: Tick 15 -->
+  <g transform="translate(30, 55)" filter="url(#shadow)">
+    <rect width="265" height="395" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.2"/>
+    <rect width="265" height="32" rx="8" fill="#1e293b"/>
+    <rect y="22" width="265" height="10" fill="#1e293b"/>
+    <text x="132" y="21" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">Tick t = 15: Initial Auction Allocation</text>
+
+    <!-- Graph Nodes -->
+    <circle cx="50" cy="90" r="12" fill="#3b82f6"/><text x="50" y="94" text-anchor="middle" font-size="9" font-weight="700" fill="#fff">R1</text>
+    <circle cx="50" cy="220" r="12" fill="#8b5cf6"/><text x="50" y="224" text-anchor="middle" font-size="9" font-weight="700" fill="#fff">R2</text>
+    <circle cx="130" cy="150" r="10" fill="#64748b"/><text x="130" y="153" text-anchor="middle" font-size="8" fill="#fff">v2</text>
+    <circle cx="210" cy="90" r="12" fill="#10b981"/><text x="210" y="94" text-anchor="middle" font-size="9" font-weight="700" fill="#fff">T1</text>
+    <circle cx="210" cy="220" r="12" fill="#10b981"/><text x="210" y="224" text-anchor="middle" font-size="9" font-weight="700" fill="#fff">T2</text>
+    <circle cx="130" cy="280" r="10" fill="#64748b"/><text x="130" y="283" text-anchor="middle" font-size="8" fill="#fff">v4</text>
+
+    <!-- Planned Edges -->
+    <line x1="62" y1="90" x2="198" y2="90" stroke="#3b82f6" stroke-width="2.5"/>
+    <line x1="62" y1="220" x2="198" y2="220" stroke="#8b5cf6" stroke-width="2.5"/>
+    <line x1="130" y1="160" x2="130" y2="270" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="3,3"/>
+
+    <!-- Diagnostics Box -->
+    <rect x="15" y="300" width="235" height="80" rx="6" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+    <text x="25" y="318" font-size="10" font-weight="700" fill="#1e293b">• SSI Clearing:</text>
+    <text x="25" y="334" font-size="10" fill="#334155">  R1 → Task T1 (Cost: 12.4)</text>
+    <text x="25" y="350" font-size="10" fill="#334155">  R2 → Task T2 (Cost: 18.2)</text>
+    <text x="25" y="368" font-size="10" fill="#047857">• Belief: Uniform [0.5, 0.5]</text>
+  </g>
+
+  <!-- FRAME 2: Tick 45 -->
+  <g transform="translate(325, 55)" filter="url(#shadow)">
+    <rect width="265" height="395" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.2"/>
+    <rect width="265" height="32" rx="8" fill="#b91c1c"/>
+    <rect y="22" width="265" height="10" fill="#b91c1c"/>
+    <text x="132" y="21" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">Tick t = 45: Reactive Jamming Active</text>
+
+    <!-- Graph Nodes -->
+    <circle cx="110" cy="90" r="12" fill="#3b82f6"/><text x="110" y="94" text-anchor="middle" font-size="9" font-weight="700" fill="#fff">R1</text>
+    <circle cx="90" cy="220" r="12" fill="#8b5cf6"/><text x="90" y="224" text-anchor="middle" font-size="9" font-weight="700" fill="#fff">R2</text>
+    <circle cx="210" cy="90" r="12" fill="#10b981"/><text x="210" y="94" text-anchor="middle" font-size="9" font-weight="700" fill="#fff">T1</text>
+    <circle cx="210" cy="220" r="12" fill="#10b981"/><text x="210" y="224" text-anchor="middle" font-size="9" font-weight="700" fill="#fff">T2</text>
+    <circle cx="160" cy="150" r="10" fill="#06b6d4"/><text x="160" y="153" text-anchor="middle" font-size="8" fill="#fff">v3</text>
+
+    <!-- Blocked Edge with Jammer -->
+    <line x1="122" y1="90" x2="198" y2="90" stroke="#dc2626" stroke-width="2.5" stroke-dasharray="4,4"/>
+    <polygon points="160,82 164,88 171,89 166,94 168,100 160,97 152,100 154,94 149,89 156,88" fill="#ef4444" stroke="#991b1b" stroke-width="1"/>
+
+    <!-- Diagnostics Box -->
+    <rect x="15" y="300" width="235" height="80" rx="6" fill="#fef2f2" stroke="#fecaca" stroke-width="1"/>
+    <text x="25" y="318" font-size="10" font-weight="700" fill="#991b1b">• Edge (R1 → T1) Blocked!</text>
+    <text x="25" y="334" font-size="10" fill="#334155">• Bayes Update: P_r(θ_2)=0.82</text>
+    <text x="25" y="350" font-size="10" fill="#334155">• Inconsistency σ_θ: 0.28</text>
+    <text x="25" y="368" font-size="10" font-weight="600" fill="#b91c1c">⚠️ Classical SSI resets here</text>
+  </g>
+
+  <!-- FRAME 3: Tick 65 -->
+  <g transform="translate(620, 55)" filter="url(#shadow)">
+    <rect width="265" height="395" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.2"/>
+    <rect width="265" height="32" rx="8" fill="#047857"/>
+    <rect y="22" width="265" height="10" fill="#047857"/>
+    <text x="132" y="21" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">Tick t = 65: Contingency Pivot Activated</text>
+
+    <!-- Graph Nodes -->
+    <circle cx="160" cy="150" r="12" fill="#3b82f6"/><text x="160" y="154" text-anchor="middle" font-size="9" font-weight="700" fill="#fff">R1</text>
+    <circle cx="140" cy="220" r="12" fill="#8b5cf6"/><text x="140" y="224" text-anchor="middle" font-size="9" font-weight="700" fill="#fff">R2</text>
+    <circle cx="210" cy="90" r="12" fill="#10b981"/><text x="210" y="94" text-anchor="middle" font-size="9" font-weight="700" fill="#fff">T1</text>
+    <circle cx="210" cy="220" r="12" fill="#10b981"/><text x="210" y="224" text-anchor="middle" font-size="9" font-weight="700" fill="#fff">T2</text>
+
+    <!-- Contingency Path Activated -->
+    <path d="M 110 90 L 155 140" fill="none" stroke="#059669" stroke-width="2.5" marker-end="url(#arr-green)"/>
+    <path d="M 168 140 L 205 98" fill="none" stroke="#059669" stroke-width="2.5" marker-end="url(#arr-green)"/>
+
+    <!-- Diagnostics Box -->
+    <rect x="15" y="300" width="235" height="80" rx="6" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1"/>
+    <text x="25" y="318" font-size="10" font-weight="700" fill="#047857">• Zero Global Re-Auctions!</text>
+    <text x="25" y="334" font-size="10" fill="#334155">• R1 activates Branch B via v3</text>
+    <text x="25" y="350" font-size="10" fill="#334155">• R2 unhindered on Task T2</text>
+    <text x="25" y="368" font-size="10" fill="#047857">• Comm msgs spent: 0</text>
+  </g>
+
+  <!-- FRAME 4: Tick 110 -->
+  <g transform="translate(915, 55)" filter="url(#shadow)">
+    <rect width="255" height="395" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.2"/>
+    <rect width="255" height="32" rx="8" fill="#4338ca"/>
+    <rect y="22" width="255" height="10" fill="#4338ca"/>
+    <text x="127" y="21" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">Tick t = 110: Successful Completion</text>
+
+    <!-- Graph Nodes -->
+    <circle cx="210" cy="90" r="14" fill="#059669"/><text x="210" y="95" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">✓ T1</text>
+    <circle cx="210" cy="220" r="14" fill="#059669"/><text x="210" y="225" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">✓ T2</text>
+
+    <!-- Completed checkmarks -->
+    <g transform="translate(70, 140)">
+      <circle cx="50" cy="30" r="22" fill="#dcfce7" stroke="#16a34a" stroke-width="2"/>
+      <path d="M 40 30 L 47 37 L 62 22" fill="none" stroke="#16a34a" stroke-width="3"/>
+      <text x="50" y="70" text-anchor="middle" font-size="11" font-weight="700" fill="#15803d">100% Missions Done</text>
+    </g>
+
+    <!-- Diagnostics Box -->
+    <rect x="15" y="300" width="225" height="80" rx="6" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1"/>
+    <text x="25" y="318" font-size="10" font-weight="700" fill="#1e293b">• Final Social Welfare: +184.2</text>
+    <text x="25" y="334" font-size="10" fill="#334155">• Fleet Battery: 62% remaining</text>
+    <text x="25" y="350" font-size="10" fill="#334155">• Consensus Rounds: 4 (≤ 8)</text>
+    <text x="25" y="368" font-size="10" font-weight="700" fill="#047857">✓ Verified Resilient Execution</text>
+  </g>
+</svg>

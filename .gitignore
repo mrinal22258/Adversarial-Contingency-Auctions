@@ -1,0 +1,29 @@
+# LaTeX build artifacts
+*.aux
+*.log
+*.out
+*.toc
+*.bbl
+*.blg
+*.synctex.gz
+*.fdb_latexmk
+*.fls
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+venv/
+env/
+.env
+
+# OS & Environment artifacts
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+powershell.bat
+powershell.cmd
+temp_gh/
+temp_hf/

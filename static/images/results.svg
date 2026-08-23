@@ -1,0 +1,175 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 680" width="100%" height="100%" style="background:#ffffff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+  <defs>
+    <filter id="shadow-card" x="-3%" y="-3%" width="106%" height="108%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#0f172a" flood-opacity="0.06"/>
+    </filter>
+    <linearGradient id="area-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#f59e0b" stop-opacity="0.02"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="680" fill="#f8fafc" rx="8"/>
+  <rect x="15" y="15" width="1170" height="650" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5" rx="8"/>
+
+  <text x="600" y="48" text-anchor="middle" font-size="20" font-weight="700" fill="#0f172a">Adversarial Contingency Auctions (ACA) — Fleet Performance Dashboard</text>
+  <text x="600" y="70" text-anchor="middle" font-size="12" fill="#64748b">Empirical telemetry tracking decentralized market dynamics, energy decay, belief convergence, and consensus costs</text>
+
+  <!-- SUBPLOT 1: Fleet Energy & Social Welfare -->
+  <g transform="translate(35, 95)" filter="url(#shadow-card)">
+    <rect width="545" height="255" rx="8" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
+    <text x="272" y="24" text-anchor="middle" font-size="13" font-weight="700" fill="#1e293b">Fleet Energy Depletion vs Social Welfare Trajectory</text>
+    
+    <g stroke="#f1f5f9" stroke-width="1">
+      <line x1="60" y1="45" x2="480" y2="45"/>
+      <line x1="60" y1="90" x2="480" y2="90"/>
+      <line x1="60" y1="135" x2="480" y2="135"/>
+      <line x1="60" y1="180" x2="480" y2="180"/>
+      <line x1="60" y1="215" x2="480" y2="215"/>
+    </g>
+
+    <line x1="60" y1="45" x2="60" y2="215" stroke="#94a3b8" stroke-width="1.5"/>
+    <line x1="480" y1="45" x2="480" y2="215" stroke="#94a3b8" stroke-width="1.5"/>
+    <line x1="60" y1="215" x2="480" y2="215" stroke="#94a3b8" stroke-width="1.5"/>
+
+    <text x="52" y="48" text-anchor="end" font-size="10" fill="#2563eb">1000</text>
+    <text x="52" y="93" text-anchor="end" font-size="10" fill="#2563eb">750</text>
+    <text x="52" y="138" text-anchor="end" font-size="10" fill="#2563eb">500</text>
+    <text x="52" y="183" text-anchor="end" font-size="10" fill="#2563eb">250</text>
+    <text x="52" y="218" text-anchor="end" font-size="10" fill="#2563eb">0</text>
+    <text x="18" y="130" text-anchor="middle" font-size="10" font-weight="600" fill="#2563eb" transform="rotate(-90 18 130)">Fleet Energy (Units)</text>
+
+    <text x="488" y="48" text-anchor="start" font-size="10" fill="#059669">+200</text>
+    <text x="488" y="93" text-anchor="start" font-size="10" fill="#059669">+100</text>
+    <text x="488" y="138" text-anchor="start" font-size="10" fill="#059669">0</text>
+    <text x="488" y="183" text-anchor="start" font-size="10" fill="#059669">-250</text>
+    <text x="488" y="218" text-anchor="start" font-size="10" fill="#059669">-500</text>
+    <text x="528" y="130" text-anchor="middle" font-size="10" font-weight="600" fill="#059669" transform="rotate(90 528 130)">Social Welfare</text>
+
+    <text x="60" y="230" text-anchor="middle" font-size="9" fill="#64748b">0</text>
+    <text x="144" y="230" text-anchor="middle" font-size="9" fill="#64748b">30</text>
+    <text x="228" y="230" text-anchor="middle" font-size="9" fill="#64748b">60</text>
+    <text x="312" y="230" text-anchor="middle" font-size="9" fill="#64748b">90</text>
+    <text x="396" y="230" text-anchor="middle" font-size="9" fill="#64748b">120</text>
+    <text x="480" y="230" text-anchor="middle" font-size="9" fill="#64748b">150</text>
+    <text x="270" y="244" text-anchor="middle" font-size="10" fill="#64748b">Simulation Ticks</text>
+
+    <polyline fill="none" stroke="#2563eb" stroke-width="2.5" points="
+      60,48 90,62 130,85 180,110 230,135 290,158 350,180 420,200 480,215
+    "/>
+
+    <polyline fill="none" stroke="#059669" stroke-width="2.5" stroke-dasharray="5,4" points="
+      60,110 80,125 110,65 150,90 180,50 220,78 280,120 350,165 420,200 480,215
+    "/>
+
+    <g transform="translate(140, 246)">
+      <line x1="0" y1="0" x2="20" y2="0" stroke="#2563eb" stroke-width="2.5"/>
+      <text x="25" y="4" font-size="10" fill="#334155">Fleet Battery</text>
+      <line x1="120" y1="0" x2="140" y2="0" stroke="#059669" stroke-width="2.5" stroke-dasharray="4,3"/>
+      <text x="145" y="4" font-size="10" fill="#334155">Social Welfare</text>
+    </g>
+  </g>
+
+  <!-- SUBPLOT 2: Information Inconsistency (Belief Divergence) -->
+  <g transform="translate(615, 95)" filter="url(#shadow-card)">
+    <rect width="545" height="255" rx="8" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
+    <text x="272" y="24" text-anchor="middle" font-size="13" font-weight="700" fill="#1e293b">Information Inconsistency (Local Beliefs StdDev across Fleet)</text>
+
+    <g stroke="#f1f5f9" stroke-width="1">
+      <line x1="60" y1="45" x2="495" y2="45"/>
+      <line x1="60" y1="88" x2="495" y2="88"/>
+      <line x1="60" y1="130" x2="495" y2="130"/>
+      <line x1="60" y1="172" x2="495" y2="172"/>
+      <line x1="60" y1="215" x2="495" y2="215"/>
+    </g>
+
+    <line x1="60" y1="45" x2="60" y2="215" stroke="#94a3b8" stroke-width="1.5"/>
+    <line x1="60" y1="215" x2="495" y2="215" stroke="#94a3b8" stroke-width="1.5"/>
+
+    <text x="52" y="48" text-anchor="end" font-size="10" fill="#7c3aed">0.35</text>
+    <text x="52" y="91" text-anchor="end" font-size="10" fill="#7c3aed">0.25</text>
+    <text x="52" y="133" text-anchor="end" font-size="10" fill="#7c3aed">0.15</text>
+    <text x="52" y="175" text-anchor="end" font-size="10" fill="#7c3aed">0.05</text>
+    <text x="52" y="218" text-anchor="end" font-size="10" fill="#7c3aed">0.00</text>
+    <text x="18" y="130" text-anchor="middle" font-size="10" font-weight="600" fill="#7c3aed" transform="rotate(-90 18 130)">Belief StdDev (Inconsistency)</text>
+
+    <text x="60" y="230" text-anchor="middle" font-size="9" fill="#64748b">0</text>
+    <text x="147" y="230" text-anchor="middle" font-size="9" fill="#64748b">30</text>
+    <text x="234" y="230" text-anchor="middle" font-size="9" fill="#64748b">60</text>
+    <text x="321" y="230" text-anchor="middle" font-size="9" fill="#64748b">90</text>
+    <text x="408" y="230" text-anchor="middle" font-size="9" fill="#64748b">120</text>
+    <text x="495" y="230" text-anchor="middle" font-size="9" fill="#64748b">150</text>
+    <text x="277" y="244" text-anchor="middle" font-size="10" fill="#64748b">Simulation Ticks</text>
+
+    <polyline fill="none" stroke="#7c3aed" stroke-width="2.5" points="
+      60,60 120,60 170,60 200,80 300,80 400,80 480,80 485,215 495,215
+    "/>
+
+    <circle cx="200" cy="80" r="4" fill="#7c3aed"/>
+    <text x="210" y="74" font-size="10" font-weight="600" fill="#7c3aed">Consensus Convergence</text>
+
+    <g transform="translate(180, 246)">
+      <line x1="0" y1="0" x2="20" y2="0" stroke="#7c3aed" stroke-width="2.5"/>
+      <text x="25" y="4" font-size="10" fill="#334155">Adversary Belief StdDev (Fleet Inconsistency)</text>
+    </g>
+  </g>
+
+  <!-- SUBPLOT 3: Mission Completions & Consensus Message Volume -->
+  <g transform="translate(35, 385)" filter="url(#shadow-card)">
+    <rect width="1125" height="240" rx="8" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
+    <text x="562" y="24" text-anchor="middle" font-size="13" font-weight="700" fill="#1e293b">Mission Completions &amp; Consensus Message Volume Progression</text>
+
+    <g stroke="#f1f5f9" stroke-width="1">
+      <line x1="70" y1="45" x2="1050" y2="45"/>
+      <line x1="70" y1="85" x2="1050" y2="85"/>
+      <line x1="70" y1="125" x2="1050" y2="125"/>
+      <line x1="70" y1="165" x2="1050" y2="165"/>
+      <line x1="70" y1="200" x2="1050" y2="200"/>
+    </g>
+
+    <polygon fill="url(#area-grad)" points="
+      70,200 110,200 110,55 1050,55 1050,200
+    "/>
+    <polyline fill="none" stroke="#f59e0b" stroke-width="2" points="
+      70,200 110,200 110,55 1050,55
+    "/>
+
+    <line x1="70" y1="45" x2="70" y2="200" stroke="#94a3b8" stroke-width="1.5"/>
+    <line x1="1050" y1="45" x2="1050" y2="200" stroke="#94a3b8" stroke-width="1.5"/>
+    <line x1="70" y1="200" x2="1050" y2="200" stroke="#94a3b8" stroke-width="1.5"/>
+
+    <text x="62" y="48" text-anchor="end" font-size="10" fill="#db2777">5</text>
+    <text x="62" y="88" text-anchor="end" font-size="10" fill="#db2777">4</text>
+    <text x="62" y="128" text-anchor="end" font-size="10" fill="#db2777">3</text>
+    <text x="62" y="168" text-anchor="end" font-size="10" fill="#db2777">1</text>
+    <text x="62" y="203" text-anchor="end" font-size="10" fill="#db2777">0</text>
+    <text x="25" y="125" text-anchor="middle" font-size="10" font-weight="600" fill="#db2777" transform="rotate(-90 25 125)">Tasks Completed (Count)</text>
+
+    <text x="1058" y="48" text-anchor="start" font-size="10" fill="#d97706">75</text>
+    <text x="1058" y="88" text-anchor="start" font-size="10" fill="#d97706">55</text>
+    <text x="1058" y="128" text-anchor="start" font-size="10" fill="#d97706">35</text>
+    <text x="1058" y="168" text-anchor="start" font-size="10" fill="#d97706">15</text>
+    <text x="1058" y="203" text-anchor="start" font-size="10" fill="#d97706">0</text>
+    <text x="1098" y="125" text-anchor="middle" font-size="10" font-weight="600" fill="#d97706" transform="rotate(90 1098 125)">Consensus Comm (κ)</text>
+
+    <text x="70" y="215" text-anchor="middle" font-size="9" fill="#64748b">0</text>
+    <text x="233" y="215" text-anchor="middle" font-size="9" fill="#64748b">25</text>
+    <text x="396" y="215" text-anchor="middle" font-size="9" fill="#64748b">50</text>
+    <text x="560" y="215" text-anchor="middle" font-size="9" fill="#64748b">75</text>
+    <text x="723" y="215" text-anchor="middle" font-size="9" fill="#64748b">100</text>
+    <text x="886" y="215" text-anchor="middle" font-size="9" fill="#64748b">125</text>
+    <text x="1050" y="215" text-anchor="middle" font-size="9" fill="#64748b">150</text>
+    <text x="560" y="230" text-anchor="middle" font-size="10" fill="#64748b">Simulation Ticks</text>
+
+    <polyline fill="none" stroke="#db2777" stroke-width="3" points="
+      70,200 95,200 100,165 140,165 150,135 220,135 230,105 320,105 330,70 380,70 390,45 1050,45
+    "/>
+
+    <g transform="translate(420, 228)">
+      <line x1="0" y1="0" x2="20" y2="0" stroke="#db2777" stroke-width="3"/>
+      <text x="25" y="4" font-size="10" fill="#334155">Cumulative Completed Tasks</text>
+      <rect x="210" y="-6" width="16" height="12" fill="url(#area-grad)" stroke="#f59e0b" stroke-width="1.5"/>
+      <text x="235" y="4" font-size="10" fill="#334155">Consensus Comm Spent (κ)</text>
+    </g>
+  </g>
+</svg>

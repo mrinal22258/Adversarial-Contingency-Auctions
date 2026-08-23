@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="fav-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4f46e5"/>
+      <stop offset="100%" stop-color="#7c3aed"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="16" fill="url(#fav-grad)"/>
+  <!-- Robot/Auction nodes icon -->
+  <circle cx="20" cy="22" r="6" fill="#38bdf8"/>
+  <circle cx="44" cy="22" r="6" fill="#f43f5e"/>
+  <circle cx="32" cy="44" r="7" fill="#10b981"/>
+  <line x1="20" y1="22" x2="44" y2="22" stroke="#ffffff" stroke-width="2.5" stroke-dasharray="3,3"/>
+  <line x1="20" y1="22" x2="32" y2="44" stroke="#ffffff" stroke-width="2.5"/>
+  <line x1="44" y1="22" x2="32" y2="44" stroke="#ffffff" stroke-width="2.5"/>
+  <circle cx="32" cy="44" r="3" fill="#ffffff"/>
+</svg>

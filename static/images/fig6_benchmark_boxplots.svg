@@ -1,0 +1,135 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 480" width="100%" height="100%" style="background:#ffffff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+  <defs>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="115%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="3" stdDeviation="5" flood-color="#0f172a" flood-opacity="0.07"/>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="480" fill="#f8fafc" rx="8"/>
+  <text x="600" y="32" text-anchor="middle" font-size="17" font-weight="700" fill="#0f172a">Fig. 6. Quantitative Benchmark Comparisons vs. State-of-the-Art Baselines under Adversarial Disruption</text>
+
+  <!-- SUBPLOT 1: Task Completion Rate -->
+  <g transform="translate(35, 55)" filter="url(#shadow)">
+    <rect width="360" height="395" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.2"/>
+    <text x="180" y="26" text-anchor="middle" font-size="13" font-weight="700" fill="#1e293b">(a) Task Completion Rate (%) [Higher is Better]</text>
+
+    <!-- Y-Axis Gridlines -->
+    <g stroke="#f1f5f9" stroke-width="1">
+      <line x1="50" y1="50" x2="330" y2="50"/><text x="42" y="54" text-anchor="end" font-size="10" fill="#64748b">100%</text>
+      <line x1="50" y1="115" x2="330" y2="115"/><text x="42" y="119" text-anchor="end" font-size="10" fill="#64748b">80%</text>
+      <line x1="50" y1="180" x2="330" y2="180"/><text x="42" y="184" text-anchor="end" font-size="10" fill="#64748b">60%</text>
+      <line x1="50" y1="245" x2="330" y2="245"/><text x="42" y="249" text-anchor="end" font-size="10" fill="#64748b">40%</text>
+      <line x1="50" y1="310" x2="330" y2="310"/><text x="42" y="314" text-anchor="end" font-size="10" fill="#64748b">20%</text>
+      <line x1="50" y1="350" x2="330" y2="350"/><text x="42" y="354" text-anchor="end" font-size="10" fill="#64748b">0%</text>
+    </g>
+
+    <!-- Bars -->
+    <!-- SSI: 68% (y: 154) -->
+    <rect x="65" y="154" width="40" height="196" rx="4" fill="#94a3b8"/>
+    <text x="85" y="145" text-anchor="middle" font-size="11" font-weight="700" fill="#475569">68%</text>
+    <text x="85" y="370" text-anchor="middle" font-size="10" fill="#334155">SSI</text>
+
+    <!-- CBBA: 82% (y: 108) -->
+    <rect x="120" y="108" width="40" height="242" rx="4" fill="#60a5fa"/>
+    <text x="140" y="99" text-anchor="middle" font-size="11" font-weight="700" fill="#2563eb">82%</text>
+    <text x="140" y="370" text-anchor="middle" font-size="10" fill="#334155">CBBA</text>
+
+    <!-- Greedy DRA: 74% (y: 134) -->
+    <rect x="175" y="134" width="40" height="216" rx="4" fill="#f87171"/>
+    <text x="195" y="125" text-anchor="middle" font-size="11" font-weight="700" fill="#dc2626">74%</text>
+    <text x="195" y="370" text-anchor="middle" font-size="10" fill="#334155">DRA</text>
+
+    <!-- ACA w/o KL: 84% (y: 102) -->
+    <rect x="230" y="102" width="40" height="248" rx="4" fill="#a78bfa"/>
+    <text x="250" y="93" text-anchor="middle" font-size="11" font-weight="700" fill="#7c3aed">84%</text>
+    <text x="250" y="370" text-anchor="middle" font-size="9" fill="#334155">No-KL</text>
+
+    <!-- Full ACA: 91% (y: 79) -->
+    <rect x="285" y="79" width="40" height="271" rx="4" fill="#10b981"/>
+    <text x="305" y="70" text-anchor="middle" font-size="11" font-weight="700" fill="#047857">91%</text>
+    <text x="305" y="370" text-anchor="middle" font-size="10" font-weight="700" fill="#047857">ACA</text>
+  </g>
+
+  <!-- SUBPLOT 2: Allocation Conflicts (%) -->
+  <g transform="translate(420, 55)" filter="url(#shadow)">
+    <rect width="360" height="395" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.2"/>
+    <text x="180" y="26" text-anchor="middle" font-size="13" font-weight="700" fill="#1e293b">(b) Allocation Conflicts (%) [Lower is Better]</text>
+
+    <!-- Y-Axis Gridlines -->
+    <g stroke="#f1f5f9" stroke-width="1">
+      <line x1="50" y1="50" x2="330" y2="50"/><text x="42" y="54" text-anchor="end" font-size="10" fill="#64748b">50%</text>
+      <line x1="50" y1="110" x2="330" y2="110"/><text x="42" y="114" text-anchor="end" font-size="10" fill="#64748b">40%</text>
+      <line x1="50" y1="170" x2="330" y2="170"/><text x="42" y="174" text-anchor="end" font-size="10" fill="#64748b">30%</text>
+      <line x1="50" y1="230" x2="330" y2="230"/><text x="42" y="234" text-anchor="end" font-size="10" fill="#64748b">20%</text>
+      <line x1="50" y1="290" x2="330" y2="290"/><text x="42" y="294" text-anchor="end" font-size="10" fill="#64748b">10%</text>
+      <line x1="50" y1="350" x2="330" y2="350"/><text x="42" y="354" text-anchor="end" font-size="10" fill="#64748b">0%</text>
+    </g>
+
+    <!-- Bars -->
+    <!-- SSI: 44% (y: 86) -->
+    <rect x="65" y="86" width="40" height="264" rx="4" fill="#94a3b8"/>
+    <text x="85" y="77" text-anchor="middle" font-size="11" font-weight="700" fill="#475569">44%</text>
+    <text x="85" y="370" text-anchor="middle" font-size="10" fill="#334155">SSI</text>
+
+    <!-- CBBA: 28% (y: 182) -->
+    <rect x="120" y="182" width="40" height="168" rx="4" fill="#60a5fa"/>
+    <text x="140" y="173" text-anchor="middle" font-size="11" font-weight="700" fill="#2563eb">28%</text>
+    <text x="140" y="370" text-anchor="middle" font-size="10" fill="#334155">CBBA</text>
+
+    <!-- Greedy DRA: 38% (y: 122) -->
+    <rect x="175" y="122" width="40" height="228" rx="4" fill="#f87171"/>
+    <text x="195" y="113" text-anchor="middle" font-size="11" font-weight="700" fill="#dc2626">38%</text>
+    <text x="195" y="370" text-anchor="middle" font-size="10" fill="#334155">DRA</text>
+
+    <!-- ACA w/o KL: 21% (y: 224) -->
+    <rect x="230" y="224" width="40" height="126" rx="4" fill="#a78bfa"/>
+    <text x="250" y="215" text-anchor="middle" font-size="11" font-weight="700" fill="#7c3aed">21%</text>
+    <text x="250" y="370" text-anchor="middle" font-size="9" fill="#334155">No-KL</text>
+
+    <!-- Full ACA: 5% (y: 320) -->
+    <rect x="285" y="320" width="40" height="30" rx="4" fill="#10b981"/>
+    <text x="305" y="311" text-anchor="middle" font-size="11" font-weight="700" fill="#047857">5%</text>
+    <text x="305" y="370" text-anchor="middle" font-size="10" font-weight="700" fill="#047857">ACA</text>
+  </g>
+
+  <!-- SUBPLOT 3: Consensus Comm Overhead (Messages) -->
+  <g transform="translate(805, 55)" filter="url(#shadow)">
+    <rect width="360" height="395" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.2"/>
+    <text x="180" y="26" text-anchor="middle" font-size="13" font-weight="700" fill="#1e293b">(c) Consensus Message Volume [Lower is Better]</text>
+
+    <!-- Y-Axis Gridlines -->
+    <g stroke="#f1f5f9" stroke-width="1">
+      <line x1="50" y1="50" x2="330" y2="50"/><text x="42" y="54" text-anchor="end" font-size="10" fill="#64748b">120</text>
+      <line x1="50" y1="110" x2="330" y2="110"/><text x="42" y="114" text-anchor="end" font-size="10" fill="#64748b">90</text>
+      <line x1="50" y1="170" x2="330" y2="170"/><text x="42" y="174" text-anchor="end" font-size="10" fill="#64748b">60</text>
+      <line x1="50" y1="230" x2="330" y2="230"/><text x="42" y="234" text-anchor="end" font-size="10" fill="#64748b">30</text>
+      <line x1="50" y1="350" x2="330" y2="350"/><text x="42" y="354" text-anchor="end" font-size="10" fill="#64748b">0</text>
+    </g>
+
+    <!-- Bars -->
+    <!-- SSI: 32 msgs (y: 286) -->
+    <rect x="65" y="286" width="40" height="64" rx="4" fill="#94a3b8"/>
+    <text x="85" y="277" text-anchor="middle" font-size="11" font-weight="700" fill="#475569">32</text>
+    <text x="85" y="370" text-anchor="middle" font-size="10" fill="#334155">SSI</text>
+
+    <!-- CBBA: 98 msgs (y: 154) -->
+    <rect x="120" y="154" width="40" height="196" rx="4" fill="#60a5fa"/>
+    <text x="140" y="145" text-anchor="middle" font-size="11" font-weight="700" fill="#2563eb">98</text>
+    <text x="140" y="370" text-anchor="middle" font-size="10" fill="#334155">CBBA</text>
+
+    <!-- Greedy DRA: 114 msgs (y: 122) -->
+    <rect x="175" y="122" width="40" height="228" rx="4" fill="#f87171"/>
+    <text x="195" y="113" text-anchor="middle" font-size="11" font-weight="700" fill="#dc2626">114</text>
+    <text x="195" y="370" text-anchor="middle" font-size="10" fill="#334155">DRA</text>
+
+    <!-- ACA w/o KL: 45 msgs (y: 260) -->
+    <rect x="230" y="260" width="40" height="90" rx="4" fill="#a78bfa"/>
+    <text x="250" y="251" text-anchor="middle" font-size="11" font-weight="700" fill="#7c3aed">45</text>
+    <text x="250" y="370" text-anchor="middle" font-size="9" fill="#334155">No-KL</text>
+
+    <!-- Full ACA: 24 msgs (y: 302) -->
+    <rect x="285" y="302" width="40" height="48" rx="4" fill="#10b981"/>
+    <text x="305" y="293" text-anchor="middle" font-size="11" font-weight="700" fill="#047857">24</text>
+    <text x="305" y="370" text-anchor="middle" font-size="10" font-weight="700" fill="#047857">ACA</text>
+  </g>
+</svg>
