@@ -1,0 +1,20 @@
+\begin{table*}[t]
+\centering
+\caption{Main Benchmark Results Across Graph Topologies and Adversary Types (Mean $\pm$ 95\% Bootstrap CI, $N = 120$ Paired Trials).
+$^\dagger$ denotes statistically significant difference vs.\ ACA ($p < 0.05$, paired Wilcoxon signed-rank test with Holm--Bonferroni correction).}
+\label{tab:main_results}
+\begin{tabular}{lcccccc}
+\toprule
+\textbf{Method} & \textbf{Completion (\%)} & \textbf{Net Welfare} & \textbf{Distinct Conf.} & \textbf{Total Conf.} & \textbf{Messages} & \textbf{Tick RT (ms)} \\
+\midrule
+\textbf{ACA (Ours)} & $81.6 \pm 3.0$ & $743 \pm 61$ & $5.7 \pm 0.6$ & $36.2 \pm 9.5$ & $342 \pm 22$ & $44.54 \pm 7.19$ \\
+CBBA \cite{choi2009cbba} & $68.6 \pm 3.5$$^\dagger$ & $724 \pm 47$ & $5.7 \pm 0.6$ & $28.0 \pm 5.6$ & $376 \pm 18$$^\dagger$ & $20.98 \pm 4.32$$^\dagger$ \\
+CBBA-Partial \cite{buckman2019partial} & $82.1 \pm 3.1$ & $864 \pm 49$$^\dagger$ & $5.7 \pm 0.6$ & $40.3 \pm 10.0$ & $353 \pm 25$$^\dagger$ & $23.42 \pm 4.32$$^\dagger$ \\
+CC-CBBA \cite{ponda2012cc} & $75.4 \pm 3.1$$^\dagger$ & $829 \pm 53$$^\dagger$ & $4.4 \pm 0.5$$^\dagger$ & $27.2 \pm 6.4$$^\dagger$ & $371 \pm 18$ & $28.63 \pm 3.56$$^\dagger$ \\
+Implicit (No Margin) \cite{alighanbari2005implicit} & $94.0 \pm 2.2$$^\dagger$ & $634 \pm 70$$^\dagger$ & $11.1 \pm 0.5$$^\dagger$ & $135.7 \pm 12.7$$^\dagger$ & $0 \pm 0$$^\dagger$ & $20.72 \pm 2.81$$^\dagger$ \\
+SSI \cite{koenig2006ssi} & $97.7 \pm 1.2$$^\dagger$ & $926 \pm 55$$^\dagger$ & $0.0 \pm 0.0$$^\dagger$ & $0.0 \pm 0.0$$^\dagger$ & $107 \pm 15$$^\dagger$ & $10.49 \pm 1.73$$^\dagger$ \\
+Pessimistic Robust & $6.9 \pm 1.1$$^\dagger$ & $103 \pm 17$$^\dagger$ & $0.0 \pm 0.0$$^\dagger$ & $0.0 \pm 0.0$$^\dagger$ & $363 \pm 1$ & $43.89 \pm 4.97$$^\dagger$ \\
+Full-Info Matching (Oracle) & $95.2 \pm 1.6$$^\dagger$ & $626 \pm 79$$^\dagger$ & $0.0 \pm 0.0$$^\dagger$ & $0.0 \pm 0.0$$^\dagger$ & $0 \pm 0$$^\dagger$ & $12.19 \pm 1.65$$^\dagger$ \\
+\bottomrule
+\end{tabular}
+\end{table*}

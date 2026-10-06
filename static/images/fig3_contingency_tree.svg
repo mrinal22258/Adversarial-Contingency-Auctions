@@ -1,0 +1,113 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 480" width="100%" height="100%" style="background:#ffffff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+  <defs>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="115%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="3" stdDeviation="5" flood-color="#0f172a" flood-opacity="0.07"/>
+    </filter>
+    <marker id="arrow-green" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#059669"/>
+    </marker>
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#2563eb"/>
+    </marker>
+    <marker id="arrow-amber" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#d97706"/>
+    </marker>
+  </defs>
+
+  <rect width="1200" height="480" fill="#f8fafc" rx="8"/>
+  <text x="600" y="32" text-anchor="middle" font-size="17" font-weight="700" fill="#0f172a">Fig. 3. Contingency-Aware A* Trajectory Branching Tree &amp; Bayesian Expected Cost Calculus</text>
+
+  <!-- PANEL A: Graph Trajectory View -->
+  <g transform="translate(35, 55)" filter="url(#shadow)">
+    <rect width="550" height="395" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.2"/>
+    <rect width="550" height="34" rx="8" fill="#0891b2"/>
+    <rect y="24" width="550" height="10" fill="#0891b2"/>
+    <text x="275" y="23" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">(a) Multi-Branch Spatial Trajectory Formulation</text>
+
+    <!-- Start Node -->
+    <circle cx="80" cy="180" r="18" fill="#3b82f6"/>
+    <text x="80" y="185" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">v_init</text>
+    <text x="80" y="215" text-anchor="middle" font-size="11" fill="#1e293b">Start Position</text>
+
+    <!-- Intermediate u Node -->
+    <circle cx="240" cy="180" r="16" fill="#64748b"/>
+    <text x="240" y="185" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">u</text>
+    <text x="240" y="215" text-anchor="middle" font-size="11" fill="#475569">Decision Point</text>
+
+    <!-- Intermediate v Node -->
+    <circle cx="390" cy="120" r="16" fill="#64748b"/>
+    <text x="390" y="125" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">v</text>
+
+    <!-- Goal Task Node -->
+    <circle cx="480" cy="180" r="18" fill="#10b981"/>
+    <text x="480" y="185" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">v_goal</text>
+    <text x="480" y="215" text-anchor="middle" font-size="11" fill="#065f46">Task Location</text>
+
+    <!-- Detour Node -->
+    <circle cx="360" cy="260" r="16" fill="#f59e0b"/>
+    <text x="360" y="265" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">w_det</text>
+    <text x="360" y="295" text-anchor="middle" font-size="11" fill="#b45309">Contingency Waypoint</text>
+
+    <!-- Paths -->
+    <!-- Start to u -->
+    <line x1="98" y1="180" x2="224" y2="180" stroke="#3b82f6" stroke-width="3"/>
+    <text x="160" y="170" text-anchor="middle" font-size="11" font-weight="600" fill="#2563eb">Cost(v_init → u)</text>
+
+    <!-- Branch A: Optimistic Path -->
+    <path d="M 254 170 L 376 128" fill="none" stroke="#10b981" stroke-width="3" marker-end="url(#arrow-green)"/>
+    <path d="M 404 128 L 466 170" fill="none" stroke="#10b981" stroke-width="3" marker-end="url(#arrow-green)"/>
+    <text x="320" y="135" text-anchor="middle" font-size="11" font-weight="700" fill="#059669">Branch A: Open (w_uv)</text>
+
+    <!-- Blocked Edge overlay -->
+    <g transform="translate(310, 140)">
+      <polygon points="8,0 11,6 18,7 12,12 14,19 8,15 2,19 4,12 -2,7 5,6" fill="#ef4444" stroke="#b91c1c" stroke-width="1"/>
+      <text x="8" y="30" text-anchor="middle" font-size="9" font-weight="700" fill="#dc2626">e_risk</text>
+    </g>
+
+    <!-- Branch B: Contingency Detour -->
+    <path d="M 254 190 L 346 250" fill="none" stroke="#d97706" stroke-width="3" stroke-dasharray="5,3" marker-end="url(#arrow-amber)"/>
+    <path d="M 374 250 L 466 190" fill="none" stroke="#d97706" stroke-width="3" stroke-dasharray="5,3" marker-end="url(#arrow-amber)"/>
+    <text x="330" y="225" text-anchor="middle" font-size="11" font-weight="700" fill="#d97706">Branch B: Detour Tree</text>
+
+    <!-- Math Summary Box -->
+    <rect x="25" y="325" width="500" height="55" rx="6" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1"/>
+    <text x="275" y="347" text-anchor="middle" font-size="11" font-weight="700" fill="#065f46">Optimistic Cost_A = Cost(v_init → u) + w(u,v) + Cost(v → v_goal)</text>
+    <text x="275" y="367" text-anchor="middle" font-size="11" font-weight="700" fill="#b45309">Contingency Cost_B = Cost(v_init → u) + Cost_detour(u → w_det → v_goal)</text>
+  </g>
+
+  <!-- PANEL B: Decision Tree & Bayesian Valuation -->
+  <g transform="translate(615, 55)" filter="url(#shadow)">
+    <rect width="550" height="395" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.2"/>
+    <rect width="550" height="34" rx="8" fill="#4338ca"/>
+    <rect y="24" width="550" height="10" fill="#4338ca"/>
+    <text x="275" y="23" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">(b) Bayesian Expected Cost &amp; Valuation Tree</text>
+
+    <!-- Root Decision Node -->
+    <rect x="200" y="60" width="150" height="40" rx="6" fill="#e0e7ff" stroke="#6366f1" stroke-width="1.5"/>
+    <text x="275" y="85" text-anchor="middle" font-size="12" font-weight="700" fill="#312e81">Root: Trajectory T(r, t)</text>
+
+    <!-- Branch Lines -->
+    <line x1="240" y1="100" x2="140" y2="160" stroke="#059669" stroke-width="2.5"/>
+    <line x1="310" y1="100" x2="410" y2="160" stroke="#d97706" stroke-width="2.5"/>
+
+    <text x="155" y="125" text-anchor="middle" font-size="11" font-weight="700" fill="#059669">1 - π_r(e) [Corridor Open]</text>
+    <text x="395" y="125" text-anchor="middle" font-size="11" font-weight="700" fill="#d97706">π_r(e) [Corridor Blocked]</text>
+
+    <!-- Leaf Nodes -->
+    <rect x="65" y="160" width="150" height="50" rx="6" fill="#dcfce7" stroke="#22c55e" stroke-width="1.5"/>
+    <text x="140" y="180" text-anchor="middle" font-size="11" font-weight="700" fill="#14532d">Branch A (Primary)</text>
+    <text x="140" y="200" text-anchor="middle" font-size="11" fill="#15803d">Cost_A</text>
+
+    <rect x="335" y="160" width="150" height="50" rx="6" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+    <text x="410" y="180" text-anchor="middle" font-size="11" font-weight="700" fill="#78350f">Branch B (Contingency)</text>
+    <text x="410" y="200" text-anchor="middle" font-size="11" fill="#b45309">Cost_B (Detour)</text>
+
+    <!-- Expected Value Equation Box -->
+    <rect x="25" y="235" width="500" height="145" rx="6" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2"/>
+    <text x="40" y="260" font-size="12" font-weight="700" fill="#1e293b">Exact Recourse Valuation Equation (Theorem 1):</text>
+    <text x="40" y="288" font-size="13" font-weight="700" fill="#4338ca">E_r[Cost] = (1 - π_r(e)) · Cost_A + π_r(e) · Cost_B</text>
+    <text x="40" y="315" font-size="11" fill="#334155">• Edge Marginal: π_r(e) = ∑_θ B_r(θ) · P(X_e = 1 | θ, s_t)</text>
+    <text x="40" y="335" font-size="11" fill="#334155">• Exact mathematical expectation over depth-d recourse policy</text>
+    <text x="40" y="358" font-size="11" font-weight="600" fill="#059669">✓ Robot pivots to precomputed detour locally with 0 messages</text>
+  </g>
+</svg>

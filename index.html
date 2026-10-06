@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="description" content="Adversarial Contingency Auctions (ACA): Strategic Multi-Robot Task Allocation under Inconsistent Beliefs and Adversarial Path Blockages.">
+  <meta name="keywords" content="Multi-Robot Systems, Decentralized Task Allocation, Sequential Single-Item Auctions, Contingency Branching, Adversarial Blockages, Bayesian Belief Modeling, Theory of Mind">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Adversarial Contingency Auctions: Strategic Multi-Robot Task Allocation under Inconsistent Beliefs and Adversarial Path Blockages</title>
+
+  <!-- Social preview (LinkedIn / X / Slack link cards) -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Adversarial Contingency Auctions: Strategic Multi-Robot Task Allocation under Inconsistent Beliefs and Adversarial Path Blockages">
+  <meta property="og:description" content="Coupling Sequential Single-Item auction mechanics with contingency branching trees and Bayesian belief modeling under active adversarial path blockages.">
+  <meta property="og:image" content="./static/images/fig1_motivation.svg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Adversarial Contingency Auctions (ACA)">
+  <meta name="twitter:description" content="Strategic Multi-Robot Task Allocation under Inconsistent Beliefs and Adversarial Path Blockages.">
+  <meta name="twitter:image" content="./static/images/fig1_motivation.svg">
+
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+  <link rel="icon" type="image/svg+xml" href="./static/images/favicon.svg">
+
+  <!-- MathJax for formulas -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']]
+      },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="./static/js/index.js"></script>
+
+  <style>
+    .no-wrap {
+      white-space: nowrap;
+    }
+    .publication-title {
+      max-width: 1200px;
+      margin: 0 auto;
+      line-height: 1.2;
+    }
+    .title.is-1.publication-title { font-size: 2.85rem; }
+    @media screen and (max-width: 1087px) {
+      .title.is-1.publication-title { font-size: 2.1rem; }
+    }
+    @media screen and (max-width: 768px) {
+      .title.is-1.publication-title { font-size: 1.75rem; }
+      .title.is-1.publication-title br { display: none; }
+    }
+    .video-container {
+      position: relative;
+      padding-bottom: 56.25%;
+      height: 0;
+      overflow: hidden;
+      max-width: 100%;
+      background: #000;
+      border-radius: 6px;
+    }
+    .video-container iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+</head>
+
+<body>
+
+<section class="hero">
+  <div class="hero-body">
+    <div class="container is-max-widescreen">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+          <h1 class="title is-1 publication-title">
+            Adversarial Contingency Auctions:<br>Strategic Multi-Robot Task Allocation under Inconsistent Beliefs and Adversarial Path Blockages
+          </h1>
+
+          <div class="is-size-4 publication-authors">
+            <span class="author-block">Research Codebase &amp; Multi-Robot Benchmark</span>
+          </div>
+
+          <div class="is-size-4 publication-authors">
+            <span class="author-block">
+              <a href="https://github.com/mrinal22258" target="_blank" rel="noopener noreferrer">Kumar Mrinal</a><sup>1</sup>
+            </span>
+          </div>
+
+          <div class="is-size-5 publication-affiliations">
+            <span class="author-block"><sup>1</sup> Department of Computer Science and Artificial Intelligence, IIIT Delhi, India</span>
+          </div>
+
+          <div class="column has-text-centered">
+            <div class="publication-links">
+              <!-- PDF Paper Link -->
+              <span class="link-block">
+                <a href="./paper.pdf" target="_blank" rel="noopener noreferrer"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fas fa-file-pdf"></i>
+                  </span>
+                  <span>Paper (PDF)</span>
+                </a>
+              </span>
+              <!-- LaTeX Source Link -->
+              <span class="link-block">
+                <a href="./paper.tex" target="_blank" rel="noopener noreferrer"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fas fa-file-code"></i>
+                  </span>
+                  <span>LaTeX Source</span>
+                </a>
+              </span>
+              <!-- Code Link -->
+              <span class="link-block">
+                <a href="https://github.com/mrinal22258/Adversarial-Contingency-Auctions" target="_blank" rel="noopener noreferrer"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fab fa-github"></i>
+                  </span>
+                  <span>Code &amp; Benchmarks</span>
+                </a>
+              </span>
+              <!-- Live Demo Link -->
+              <span class="link-block">
+                <a href="https://huggingface.co/spaces/mrinal22258/adversarial-contingency-auctions" target="_blank" rel="noopener noreferrer"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fas fa-robot"></i>
+                  </span>
+                  <span>Interactive Demo</span>
+                </a>
+              </span>
+              <!-- Benchmarks Link -->
+              <span class="link-block">
+                <a href="#benchmarks"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fas fa-table"></i>
+                  </span>
+                  <span>Benchmark Table</span>
+                </a>
+              </span>
+              <!-- BibTeX Link -->
+              <span class="link-block">
+                <a href="#BibTeX"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fas fa-quote-left"></i>
+                  </span>
+                  <span>Cite</span>
+                </a>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Teaser Visual Section -->
+<section class="hero teaser">
+  <div class="container is-max-desktop">
+    <div class="hero-body" style="text-align: center">
+      <div class="columns is-centered">
+        <img class="teaser-img" src="./static/images/fig1_motivation.svg" alt="ACA vs Baseline Motivation Diagram">
+      </div>
+      <h2 class="subtitle has-text-centered mt-3" style="font-size: 0.95rem; color: #7a7a7a;">
+        <b>Figure 1:</b> Motivating comparison between classical decentralized auctions (CBBA/SSI) and proposed ACA. When an adversary blocks a planned route, classical methods trigger cascading market nullifications and network-wide re-auctions. ACA activates precomputed contingency detour branches locally with zero market resets.
+      </h2>
+    </div>
+  </div>
+</section>
+
+<!-- Main Content Section -->
+<section class="section">
+  <div class="container is-max-desktop">
+
+    <!-- TL;DR -->
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-2">TL;DR</h2>
+        <div class="content has-text-justified">
+          <p>
+            Standard multi-robot auction mechanisms (CBBA, SSI) suffer cascading coordination resets when paths are maliciously blocked in adversarial environments. <b>Adversarial Contingency Auctions (ACA)</b> equips heterogeneous robot fleets with Bayesian belief modeling over hidden adversary policies ($\mathcal{P}(\theta^*)$), information-theoretic KL-divergence bid regularization, and precomputed contingency branching trees &mdash; enabling <b>autonomous, zero-overhead localized detour activation</b> without triggering expensive global market re-auctions.
+          </p>
+        </div>
+      </div>
+    </div>
+    <!--/ TL;DR -->
+
+    <!-- Abstract -->
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-2">Abstract</h2>
+        <div class="content has-text-justified">
+          <p>
+            Decentralized multi-robot task allocation in contested, uncertain environments is vulnerable to strategic adversarial edge blockages and inconsistent local beliefs among teammates. Standard market frameworks such as the Consensus-Based Bundle Algorithm (CBBA) and Sequential Single-Item (SSI) auctions require fleet-wide consensus and trigger cascading re-auction cycles upon path invalidation, inducing severe communication spikes and coordination latency. To overcome these limitations, we propose <b>Belief-Divergence-Aware Contingency Auctions (ACA)</b>, a decentralized market coordination mechanism that directly addresses inconsistent beliefs and dynamic blockages without requiring continuous belief synchronization. In ACA, robots evaluate tasks by bidding their expected recourse cost under a Bayesian posterior over adversary types. To mitigate allocation conflicts when subjective beliefs diverge, we derive a closed-form <b>Pinsker claim margin</b> $m_{r,j} = \Delta_j (\sqrt{\frac{1}{2} D'_{\text{KL}}} + \eta_{\text{eff}}) + \delta_{\text{map}}$ from Pinsker's inequality and total variation triangle bounds that guarantees conflict-free allocation without exchanging belief vectors. Furthermore, when traversing a blocked corridor, agents execute precomputed local recourse branches with zero communication messages, triggering re-auctions only upon recourse exhaustion. We establish theoretical guarantees on recourse valuation (Theorem 1), posterior concentration (Theorem 2), conflict-freedom (Theorem 3), and message bounds (Theorem 4). Extensive paired empirical evaluations across Random Geometric, Warehouse Grid, and Erdős–Rényi topologies ($N = 120$ paired trials per method) against seven literature baselines demonstrate that ACA reduces total task conflicts by 73% relative to margin-free implicit coordination while sustaining competitive task completion and communication efficiency.
+          </p>
+        </div>
+      </div>
+    </div>
+    <!--/ Abstract -->
+
+    <!-- Fleet & Adversary Modeling (Fig. 2) -->
+    <div class="columns is-centered has-text-centered mt-4">
+      <div class="column is-four-fifths">
+        <h2 class="title is-2">Heterogeneous Fleet &amp; Adversary Policy Space</h2>
+        <div class="content has-text-justified">
+          <p>
+            ACA partitions fleets into complementary operational classes and models adversary intent across a 3-tier behavioral space:
+          </p>
+        </div>
+        <img class="teaser-img" src="./static/images/fig2_adversary_model.svg" alt="Fleet Specs & Adversary Policies">
+        <p class="mt-3 has-text-grey" style="font-size: 0.95rem; text-align: justify;">
+          <b>Figure 2:</b> <i>(a)</i> Heterogeneous fleet model: Scout robots ($2.0\times$ speed, $2$-hop sensing, $100$ bits/tick comms) explore corridors and refine Bayesian priors, while Heavy Lifters ($300$ battery units) execute high-payload transport. <i>(b)</i> Adversary policies: Stochastic Jammer ($\theta_1$), Reactive Proximity Blocker ($\theta_2$), and Optimal Minimax Adversary ($\theta_3$). <i>(c)</i> Recursive Bayesian posterior updates and KL-divergence bid regularization.
+        </p>
+      </div>
+    </div>
+
+    <!-- Contingency Planning Foundations (Fig. 3) -->
+    <div class="columns is-centered has-text-centered mt-5">
+      <div class="column is-four-fifths">
+        <h2 class="title is-2">Contingency-Aware Trajectory Branching</h2>
+        <div class="content has-text-justified">
+          <p>
+            Rather than committing to a fragile single shortest path, ACA formulates a probabilistic trajectory branching tree:
+          </p>
+        </div>
+        <img class="teaser-img" src="./static/images/fig3_contingency_tree.svg" alt="Contingency Tree Diagram">
+        <p class="mt-3 has-text-grey" style="font-size: 0.95rem; text-align: justify;">
+          <b>Figure 3:</b> <i>(a)</i> Spatial formulation of primary optimistic branch $A$ and contingency detour branch $B$ around risky edge $e_{\text{risk}}$. <i>(b)</i> Bayesian expected cost decision tree where $\mathbb{E}_r[\text{Cost}] = P_r(\theta_1)\text{Cost}_A + (1-P_r(\theta_1))\text{Cost}_B$, enabling instant localized branch switching upon sensing $X_e = 1$.
+        </p>
+      </div>
+    </div>
+
+    <!-- Full Pipeline Architecture (Fig. 4) -->
+    <div class="columns is-centered has-text-centered mt-5">
+      <div class="column is-four-fifths">
+        <h2 class="title is-2">System Architecture Pipeline</h2>
+        <div class="content has-text-justified">
+          <p>
+            The complete 5-stage coordination architecture unifies heterogeneous reconnaissance, decentralized market clearance with disagreement regularization, proactive contingency routing, and Bayesian inconsistency convergence:
+          </p>
+        </div>
+        <img class="teaser-img" src="./static/images/pipeline.svg" alt="Full System Pipeline">
+        <p class="mt-3 has-text-grey" style="font-size: 0.95rem; text-align: justify;">
+          <b>Figure 4:</b> Comprehensive architectural pipeline of the ACA decentralized multi-agent coordination system.
+        </p>
+      </div>
+    </div>
+
+    <!-- Empirical Telemetry Dashboard -->
+    <div class="columns is-centered has-text-centered mt-5">
+      <div class="column is-four-fifths">
+        <h2 class="title is-2">Fleet Net Welfare &amp; Communication Overhead</h2>
+        <div class="content has-text-justified">
+          <p>
+            Discrete-event telemetry tracking fleet net welfare (task rewards collected minus movement costs) and communication message volume across methods:
+          </p>
+        </div>
+        <img class="teaser-img" src="./static/images/fig_welfare_messages.png" alt="Fleet Net Welfare and Messages">
+        <p class="mt-3 has-text-grey" style="font-size: 0.95rem; text-align: justify;">
+          <b>Figure 3:</b> Empirical telemetry: <i>(a)</i> Fleet net welfare across benchmark topologies. <i>(b)</i> Communication overhead: Zero-message recourse branch pivoting keeps communication bounded during persistent edge blockages.
+        </p>
+      </div>
+    </div>
+
+    <!-- Quantitative Baselines & Boxplots -->
+    <div class="columns is-centered has-text-centered mt-5">
+      <div class="column is-four-fifths">
+        <h2 class="title is-2">Quantitative Benchmark Comparisons</h2>
+        <div class="content has-text-justified">
+          <p>
+            Statistical comparison across 6 baseline coordination methods under persistent adversarial disruptions with 95% bootstrap confidence intervals:
+          </p>
+        </div>
+        <img class="teaser-img" src="./static/images/fig_completion_conflicts.png" alt="Benchmark Comparisons">
+        <p class="mt-3 has-text-grey" style="font-size: 0.95rem; text-align: justify;">
+          <b>Figure 2:</b> Empirical multi-agent performance across graph families (RGG, Warehouse Grid, Erdős–Rényi). <i>(a)</i> Task completion rate. <i>(b)</i> Total allocation conflicts: Pinsker claim margin significantly reduces conflicts compared to standard CBBA ($p &lt; 0.05$, paired Wilcoxon signed-rank test with Holm–Bonferroni correction).
+        </p>
+      </div>
+    </div>
+
+    <!-- Qualitative Execution Traces (Fig. 7) -->
+    <div class="columns is-centered has-text-centered mt-5">
+      <div class="column is-four-fifths">
+        <h2 class="title is-2">Qualitative Multi-Robot Execution Traces</h2>
+        <div class="content has-text-justified">
+          <p>
+            Step-by-step spatial execution trace tracking robot movements, reactive blockage triggering, and autonomous detour activation:
+          </p>
+        </div>
+        <img class="teaser-img" src="./static/images/fig7_qualitative_traces.svg" alt="Qualitative Execution Traces">
+        <p class="mt-3 has-text-grey" style="font-size: 0.95rem; text-align: justify;">
+          <b>Figure 7:</b> Snapshots across simulation ticks ($t=15, 45, 65, 110$) demonstrating reactive jamming detection, Bayesian prior update, autonomous contingency detour activation, and 100% mission completion without global re-auctioning.
+        </p>
+      </div>
+    </div>
+
+    <!-- Interactive Simulation Player -->
+    <div class="columns is-centered has-text-centered mt-5">
+      <div class="column is-four-fifths">
+        <h2 class="title is-2">Interactive Simulation Visualizer</h2>
+        <div class="content has-text-justified">
+          <p>
+            Scrub through simulation frames in real-time to inspect agent trajectories, active edge mutations, and dynamic branch activations:
+          </p>
+        </div>
+        <div class="box has-text-centered has-background-light p-5" style="border: 1px solid #dbdbdb; border-radius: 8px;">
+          <p class="is-size-5 mb-3"><strong>Live Simulation Telemetry &amp; Interactive Explorer</strong></p>
+          <p class="mb-4">Launch the interactive Gradio dashboard locally with full telemetry, step playback, and multi-algorithm inspection:</p>
+          <pre class="has-text-left" style="max-width: 480px; margin: 0 auto; background: #2c3e50; color: #ecf0f1; padding: 12px; border-radius: 6px;"><code>python app.py</code></pre>
+          <div class="mt-4">
+            <a href="https://huggingface.co/spaces/mrinal22258/adversarial-contingency-auctions" target="_blank" rel="noopener noreferrer"
+               class="external-link button is-normal is-rounded is-dark">
+              <span class="icon"><i class="fas fa-robot"></i></span>
+              <span>Open Online Demo on Hugging Face Spaces</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- Comprehensive Benchmark Evaluation Matrix -->
+<section class="section" id="benchmarks">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-2">Quantitative Benchmark Matrix</h2>
+        <div class="content has-text-justified">
+          <p>
+            Empirical results across 120 paired trials over shared random seeds (Mean &plusmn; 95% Bootstrap CI). &dagger; indicates statistically significant difference vs. ACA ($p &lt; 0.05$, paired Wilcoxon signed-rank test with Holm–Bonferroni correction):
+          </p>
+        </div>
+        <table class="table is-fullwidth is-hoverable is-striped">
+          <thead>
+            <tr>
+              <th>Method</th>
+              <th>Literature Source</th>
+              <th class="has-text-centered">Completion (%) &uarr;</th>
+              <th class="has-text-centered">Distinct Conf. &darr;</th>
+              <th class="has-text-centered">Total Conf. &darr;</th>
+              <th class="has-text-centered">Messages &darr;</th>
+              <th class="has-text-centered">Net Welfare &uarr;</th>
+              <th class="has-text-centered">Runtime (ms)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="background-color: #e6f4ea; font-weight: 600;">
+              <td><b>ACA (Ours)</b></td>
+              <td>This Work</td>
+              <td class="has-text-centered">81.6 &plusmn; 3.0</td>
+              <td class="has-text-centered">5.7 &plusmn; 0.6</td>
+              <td class="has-text-centered">36.2 &plusmn; 9.5</td>
+              <td class="has-text-centered">342 &plusmn; 22</td>
+              <td class="has-text-centered">743 &plusmn; 61</td>
+              <td class="has-text-centered">44.54 &plusmn; 7.19</td>
+            </tr>
+            <tr>
+              <td>CBBA</td>
+              <td>Choi et al. (IEEE T-RO 2009)</td>
+              <td class="has-text-centered">68.6 &plusmn; 3.5&dagger;</td>
+              <td class="has-text-centered">5.7 &plusmn; 0.6</td>
+              <td class="has-text-centered">28.0 &plusmn; 5.6</td>
+              <td class="has-text-centered">376 &plusmn; 18&dagger;</td>
+              <td class="has-text-centered">724 &plusmn; 47</td>
+              <td class="has-text-centered">20.98 &plusmn; 4.32&dagger;</td>
+            </tr>
+            <tr>
+              <td>CBBA-Partial</td>
+              <td>Buckman et al. (IEEE T-RO 2019)</td>
+              <td class="has-text-centered">82.1 &plusmn; 3.1</td>
+              <td class="has-text-centered">5.7 &plusmn; 0.6</td>
+              <td class="has-text-centered">40.3 &plusmn; 10.0</td>
+              <td class="has-text-centered">353 &plusmn; 25&dagger;</td>
+              <td class="has-text-centered">864 &plusmn; 49&dagger;</td>
+              <td class="has-text-centered">23.42 &plusmn; 4.32&dagger;</td>
+            </tr>
+            <tr>
+              <td>CC-CBBA</td>
+              <td>Ponda et al. (IEEE TCST 2012)</td>
+              <td class="has-text-centered">75.4 &plusmn; 3.1&dagger;</td>
+              <td class="has-text-centered">4.4 &plusmn; 0.5&dagger;</td>
+              <td class="has-text-centered">27.2 &plusmn; 6.4&dagger;</td>
+              <td class="has-text-centered">371 &plusmn; 18</td>
+              <td class="has-text-centered">829 &plusmn; 53&dagger;</td>
+              <td class="has-text-centered">28.63 &plusmn; 3.56&dagger;</td>
+            </tr>
+            <tr>
+              <td>Implicit (No Margin)</td>
+              <td>Alighanbari &amp; How (ACC 2005)</td>
+              <td class="has-text-centered">94.0 &plusmn; 2.2&dagger;</td>
+              <td class="has-text-centered">11.1 &plusmn; 0.5&dagger;</td>
+              <td class="has-text-centered">135.7 &plusmn; 12.7&dagger;</td>
+              <td class="has-text-centered">0 &plusmn; 0&dagger;</td>
+              <td class="has-text-centered">634 &plusmn; 70&dagger;</td>
+              <td class="has-text-centered">20.72 &plusmn; 2.81&dagger;</td>
+            </tr>
+            <tr>
+              <td>SSI</td>
+              <td>Koenig et al. (AAAI 2006)</td>
+              <td class="has-text-centered">97.7 &plusmn; 1.2&dagger;</td>
+              <td class="has-text-centered">0.0 &plusmn; 0.0&dagger;</td>
+              <td class="has-text-centered">0.0 &plusmn; 0.0&dagger;</td>
+              <td class="has-text-centered">107 &plusmn; 15&dagger;</td>
+              <td class="has-text-centered">926 &plusmn; 55&dagger;</td>
+              <td class="has-text-centered">10.49 &plusmn; 1.73&dagger;</td>
+            </tr>
+            <tr>
+              <td>Pessimistic Robust</td>
+              <td>Unblockable Corridors</td>
+              <td class="has-text-centered">6.9 &plusmn; 1.1&dagger;</td>
+              <td class="has-text-centered">0.0 &plusmn; 0.0&dagger;</td>
+              <td class="has-text-centered">0.0 &plusmn; 0.0&dagger;</td>
+              <td class="has-text-centered">363 &plusmn; 1</td>
+              <td class="has-text-centered">103 &plusmn; 17&dagger;</td>
+              <td class="has-text-centered">43.89 &plusmn; 4.97&dagger;</td>
+            </tr>
+            <tr>
+              <td>Centralized Oracle</td>
+              <td>Full-Info Hungarian Matching</td>
+              <td class="has-text-centered">95.2 &plusmn; 1.6&dagger;</td>
+              <td class="has-text-centered">0.0 &plusmn; 0.0&dagger;</td>
+              <td class="has-text-centered">0.0 &plusmn; 0.0&dagger;</td>
+              <td class="has-text-centered">0 &plusmn; 0&dagger;</td>
+              <td class="has-text-centered">626 &plusmn; 79&dagger;</td>
+              <td class="has-text-centered">12.19 &plusmn; 1.65&dagger;</td>
+            </tr>
+          </tbody>
+        </table>
+        <p style="font-size: 0.9rem; color: #7a7a7a; margin-top: 0.5rem; text-align: justify;">
+          <b>Table II:</b> Quantitative multi-agent performance across 120 paired simulation trials per method (960 total trials) logged directly from the empirical simulation pipeline.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BibTeX Section -->
+<section class="section" id="BibTeX">
+  <div class="container is-max-desktop content">
+    <div class="is-flex is-justify-content-space-between is-align-items-center mb-3">
+      <h2 class="title mb-0">BibTeX</h2>
+      <button id="copy-bibtex-btn" class="button is-small is-rounded is-outlined is-dark">
+        <span class="icon"><i class="fas fa-copy"></i></span>
+        <span>Copy BibTeX</span>
+      </button>
+    </div>
+    <p style="color: #7a7a7a; font-size: 0.95rem; margin-bottom: 0.75rem;">
+      <i>Official citation details will be updated once the peer-reviewed paper is formally published.</i>
+    </p>
+    <pre><code id="bibtex-code">@article{mrinal2024adversarial,
+  author  = {Mrinal, Kumar},
+  title   = {Adversarial Contingency Auctions: Strategic Multi-Robot Task Allocation under Inconsistent Beliefs and Adversarial Path Blockages},
+  journal = {Preprint / Working Paper},
+  year    = {2024},
+  url     = {https://github.com/mrinal22258/Adversarial-Contingency-Auctions}
+}</code></pre>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="container">
+    <div class="content has-text-centered">
+      <a class="icon-link"
+         href="./paper.pdf" target="_blank" rel="noopener noreferrer" title="Paper PDF">
+        <i class="fas fa-file-pdf"></i>
+      </a>
+      <a class="icon-link"
+         href="./paper.tex" target="_blank" rel="noopener noreferrer" title="LaTeX Source">
+        <i class="fas fa-file-code"></i>
+      </a>
+      <a class="icon-link external-link" href="https://github.com/mrinal22258/Adversarial-Contingency-Auctions" target="_blank" rel="noopener noreferrer" title="GitHub Repository">
+        <i class="fab fa-github"></i>
+      </a>
+      <a class="icon-link external-link" href="https://huggingface.co/spaces/mrinal22258/adversarial-contingency-auctions" target="_blank" rel="noopener noreferrer" title="HuggingFace Space">
+        <i class="fas fa-robot"></i>
+      </a>
+    </div>
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <div class="content has-text-centered">
+          <p style="color: #7a7a7a; font-size: 0.9rem;">
+            Adversarial Contingency Auctions (ACA) &bull; Kumar Mrinal
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

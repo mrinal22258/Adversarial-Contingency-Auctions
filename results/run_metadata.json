@@ -1,0 +1,39 @@
+{
+  "commit": "unknown",
+  "timestamp": "2026-10-06T09:54:16Z",
+  "total_trials": 960,
+  "families": [
+    [
+      "rgg",
+      35
+    ],
+    [
+      "warehouse",
+      30
+    ],
+    [
+      "er",
+      35
+    ]
+  ],
+  "adversaries": [
+    "theta_1_stochastic",
+    "theta_2_reactive",
+    "theta_3_budgeted_interdiction",
+    "theta_4_cyclic_patrol"
+  ],
+  "methods": [
+    "aca",
+    "cbba",
+    "cbba_partial",
+    "cc_cbba",
+    "implicit",
+    "ssi",
+    "pessimistic",
+    "oracle"
+  ],
+  "n_seeds": 10,
+  "n_robots": 4,
+  "n_tasks": 15,
+  "max_steps": 90
+}

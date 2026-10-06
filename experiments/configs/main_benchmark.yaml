@@ -1,0 +1,36 @@
+# Main Benchmark Configuration
+benchmark_name: "main_benchmark"
+seeds: 10
+max_steps: 90
+
+environments:
+  - family: "rgg"
+    n_nodes: 35
+  - family: "warehouse"
+    n_nodes: 30
+  - family: "er"
+    n_nodes: 35
+
+adversaries:
+  - "theta_1_stochastic"
+  - "theta_2_reactive"
+  - "theta_3_budgeted_interdiction"
+  - "theta_4_cyclic_patrol"
+
+methods:
+  - "aca"
+  - "aca_no_margin"
+  - "aca_depth_0"
+  - "cbba"
+  - "cbba_partial"
+  - "cc_cbba"
+  - "implicit"
+  - "ssi"
+  - "pessimistic"
+  - "oracle"
+
+fleet_sizes: [4]
+task_counts: [15]
+comm_range: 45.0
+p_drop: 0.05
+contingency_depth: 1
