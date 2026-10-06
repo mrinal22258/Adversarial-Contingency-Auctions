@@ -44,6 +44,7 @@ class ACAAllocator(CBBAAllocator):
         self.total_claim_evaluations: int = 0
         self.total_safe_claims: int = 0
         self.total_deferred_tasks: int = 0
+        self.logged_tv_observations: List[Tuple[float, float]] = []
 
     def _get_peer_edge_marginals(self, robot_id: int, peer_id: int) -> Dict[Tuple[Any, Any], float]:
         """Compute edge blockage marginals under peer s's ToM belief as estimated by robot r."""
@@ -125,13 +126,16 @@ class ACAAllocator(CBBAAllocator):
         tasks: Dict[int, Task],
         robot_positions: Dict[int, Tuple[float, float]],
         current_step: int = 0,
-    ) -> None:
+    ) -> Tuple[int, int]:
         """
         Phase 1: Local bundle construction with Pinsker Margin Claim Rule.
+        Returns (round_safe_claims, round_deferred_tasks) for this robot in this round.
         """
         robot = self.robots[robot_id]
         bundle = list(robot.bundle)
         edge_marginals = robot.get_edge_marginals()
+        round_safe = 0
+        round_deferred = 0
 
         while len(bundle) < self.bundle_limit:
             best_task_id = None
@@ -142,6 +146,16 @@ class ACAAllocator(CBBAAllocator):
             my_belief = robot.type_filter.get_belief_vector()
             max_kl = robot.tom_tracker.get_max_kl(my_belief)
             eta_eff = robot.tom_tracker.get_effective_eta(current_step)
+
+            # Log true TV vs eta_eff for Assumption 1 verification (Hypothesis H7)
+            for peer_id in self.fleet_ids:
+                if peer_id == robot_id:
+                    continue
+                p_hat = robot.tom_tracker.peer_beliefs.get(peer_id)
+                if p_hat is not None:
+                    p_true = self.robots[peer_id].type_filter.get_belief_vector()
+                    true_tv = float(0.5 * np.sum(np.abs(p_true - p_hat)))
+                    self.logged_tv_observations.append((true_tv, eta_eff))
 
             for tid, task in tasks.items():
                 if tid in bundle or task.completed:
@@ -187,9 +201,11 @@ class ACAAllocator(CBBAAllocator):
                     if not robot.pinsker_calc.can_claim_safely(my_cost, min_peer_cost, margin):
                         # Margin condition not satisfied: task deferred to consensus
                         self.total_deferred_tasks += 1
+                        round_deferred += 1
                         continue
                     else:
                         self.total_safe_claims += 1
+                        round_safe += 1
 
                 best_val = score
                 best_task_id = tid
@@ -203,6 +219,36 @@ class ACAAllocator(CBBAAllocator):
                 break
 
         robot.bundle = bundle
+        return round_safe, round_deferred
+
+    def handle_replan_requests(
+        self,
+        tasks: Dict[int, Task],
+        current_step: int,
+        robot_positions: Dict[int, Tuple[float, float]],
+    ) -> int:
+        """
+        Theorem 4: Bounded partial re-auction on recourse exhaustion.
+        Releases the blocked/exhausted task and any dependent downstream bundle tasks,
+        clears the robot replan requests, and returns the number of re-auction events.
+        """
+        replan_events = 0
+        for rid, robot in self.robots.items():
+            if robot.replan_requests:
+                replan_events += len(robot.replan_requests)
+                for tid in list(robot.replan_requests):
+                    if tid in robot.bundle:
+                        idx = robot.bundle.index(tid)
+                        released = robot.bundle[idx:]
+                        robot.bundle = robot.bundle[:idx]
+                        for r_tid in released:
+                            self.y[rid][r_tid] = 0.0
+                            self.z[rid][r_tid] = -1
+                    else:
+                        self.y[rid][tid] = 0.0
+                        self.z[rid][tid] = -1
+                robot.replan_requests.clear()
+        return replan_events
 
     def allocate_round(
         self,
@@ -213,9 +259,13 @@ class ACAAllocator(CBBAAllocator):
     ) -> Dict[str, Any]:
         """
         Execute ACA allocation round:
-        1. Local bundle construction with Pinsker margin.
-        2. Consensus message exchange for any deferred/unresolved items.
+        1. Handle replan requests from robots experiencing unresolvable blockages (Thm 4).
+        2. Local bundle construction with Pinsker margin.
+        3. Consensus message exchange for any deferred/unresolved items.
         """
+        # Handle replan requests from robots experiencing unresolvable blockages
+        round_replans = self.handle_replan_requests(tasks, current_step, robot_positions)
+
         # Clean up completed tasks from tables and robot bundles
         for rid in self.fleet_ids:
             self.robots[rid].bundle = [tid for tid in self.robots[rid].bundle if tid in tasks and not tasks[tid].completed]
@@ -226,9 +276,13 @@ class ACAAllocator(CBBAAllocator):
 
         # Phase 1: Local claim with Pinsker margin (safe claims committed directly)
         phase1_claims: Dict[int, List[int]] = {}
+        round_safe_claims = 0
+        round_deferred_tasks = 0
         for rid in self.fleet_ids:
             prev_bundle = set(self.robots[rid].bundle)
-            self._build_bundle_aca(rid, tasks, robot_positions, current_step=current_step)
+            r_safe, r_def = self._build_bundle_aca(rid, tasks, robot_positions, current_step=current_step)
+            round_safe_claims += r_safe
+            round_deferred_tasks += r_def
             phase1_claims[rid] = [tid for tid in self.robots[rid].bundle if tid not in prev_bundle]
 
         # Check safe-claim conflicts strictly among Phase 1 simultaneous safe claims
@@ -270,7 +324,8 @@ class ACAAllocator(CBBAAllocator):
             "consensus_rounds": rounds,
             "conflicts": conflicts,
             "safe_claim_conflicts": safe_claim_conflicts,
-            "safe_claims": self.total_safe_claims,
-            "deferred_tasks": self.total_deferred_tasks,
+            "safe_claims": round_safe_claims,
+            "deferred_tasks": round_deferred_tasks,
+            "replan_events": round_replans,
             "total_assigned": sum(len(r.bundle) for r in self.robots.values()),
         }

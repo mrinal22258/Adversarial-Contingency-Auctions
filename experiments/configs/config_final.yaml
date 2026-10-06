@@ -1,0 +1,65 @@
+# Final Benchmarking Sweep Configuration for Pre-Registration (prereg-v1)
+# Implements level execution layer (+LR), literature baselines, and ablation study.
+
+benchmark_name: "aca_final_evaluation"
+preregistration_tag: "prereg-v1"
+
+# Experimental Design:
+# Independent instances are indexed by (family, seed).
+# Disjoint seed allocation:
+pilot_seeds_range: [10000, 10009]
+final_seeds: 50 # n >= 50 independent instances per environment family
+
+max_steps: 80
+
+environments:
+  - family: "rgg"
+    n_nodes: 35
+  - family: "warehouse"
+    n_nodes: 30
+  - family: "er"
+    n_nodes: 35
+
+adversaries:
+  - "theta_1_stochastic"
+  - "theta_2_reactive"
+  - "theta_3_budgeted_interdiction"
+  - "theta_4_cyclic_patrol"
+
+methods:
+  # Proposed method and ablations
+  - "aca"
+  - "aca_no_margin"
+  - "aca_depth_0"
+  # Literature baselines (published: no detours)
+  - "cbba"
+  - "cbba_partial"
+  - "cc_cbba"
+  - "ssi"
+  # Level-execution baselines (+LR: same detour capability as ACA)
+  - "cbba_lr"
+  - "cbba_partial_lr"
+  - "cc_cbba_lr"
+  - "ssi_lr"
+  # Literature references
+  - "implicit"
+  - "pessimistic"
+  - "oracle"
+
+# Communication regimes
+comm_regimes:
+  benign:
+    comm_range: 50.0
+    p_drop: 0.02
+  constrained:
+    comm_range: 25.0
+    p_drop: 0.15
+  lossy:
+    comm_range: 20.0
+    p_drop: 0.30
+
+fleet_sizes: [4]
+task_counts: [15]
+default_comm_range: 30.0
+default_p_drop: 0.10
+contingency_depth: 1

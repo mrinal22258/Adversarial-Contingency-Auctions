@@ -1,0 +1,119 @@
+# Pre-Registered Statistical Hypotheses for Adversarial Contingency Auctions (ACA)
+# Protocol: Pre-registered prior to final benchmarking sweep (Phase 3).
+# Unit of Analysis: Independent instance (graph_family, seed), averaging internal replicates.
+
+hypotheses:
+  H1:
+    id: "H1"
+    title: "Recourse Efficacy"
+    description: "ACA with depth-1 local recourse achieves higher task completion percentage than ACA with depth-0 (no detours)."
+    metric: "completion_rate_pct"
+    comparison: "aca vs aca_depth_0"
+    direction: "greater"
+    tier: "primary"
+    alpha: 0.05
+    test: "paired_wilcoxon"
+    effect_size: "hodges_lehmann_difference"
+    correction: "holm"
+    minimum_effect: 5.0 # percentage points
+
+  H2:
+    id: "H2"
+    title: "Level Execution Benchmark Comparison (+LR)"
+    description: "ACA matches or outperforms baselines equipped with identical local recourse execution (+LR: CBBA+LR, CBBA-PR+LR, SSI+LR) under range-limited lossy comms."
+    metric: "completion_rate_pct"
+    secondary_metric: "net_welfare"
+    comparison: "aca vs {cbba_lr, cbba_partial_lr, ssi_lr}"
+    direction: "two_sided"
+    tier: "primary"
+    alpha: 0.05
+    test: "paired_wilcoxon"
+    effect_size: "cliffs_delta"
+    correction: "holm"
+    minimum_effect: 0.0
+
+  H3:
+    id: "H3"
+    title: "Welfare Non-Inferiority"
+    description: "ACA is non-inferior to the best-performing baseline on net welfare within a 5% equivalence margin."
+    metric: "net_welfare"
+    comparison: "aca vs best_baseline"
+    direction: "non_inferiority"
+    tier: "primary"
+    alpha: 0.05
+    test: "two_one_sided_tests_tost"
+    equivalence_margin: 0.05 # 5% of baseline welfare
+    correction: "holm"
+
+  H4:
+    id: "H4"
+    title: "Pinsker Margin Conflict Elimination"
+    description: "The Pinsker divergence claim margin reduces Phase-1 safe-claim conflicts to zero while maintaining completion within 5 pp of unconstrained ACA."
+    metric: "safe_claim_conflicts"
+    secondary_metric: "completion_rate_pct"
+    comparison: "aca vs aca_no_margin"
+    direction: "less"
+    tier: "primary"
+    alpha: 0.05
+    test: "paired_wilcoxon_and_tost"
+    equivalence_margin: 5.0 # percentage points
+    correction: "holm"
+
+  H5:
+    id: "H5"
+    title: "Bayesian Inference Advantage"
+    description: "Online Bayesian adversary inference improves task completion and welfare relative to a fixed uniform prior baseline."
+    metric: "completion_rate_pct"
+    comparison: "aca vs aca_no_inference"
+    direction: "greater"
+    tier: "secondary"
+    alpha: 0.05
+    test: "paired_wilcoxon"
+    effect_size: "cliffs_delta"
+    correction: "benjamini_hochberg"
+
+  H6:
+    id: "H6"
+    title: "Communication and Re-Auction Efficiency"
+    description: "ACA generates fewer total messages and re-auction events than full-consensus CBBA under unified packet and byte accounting."
+    metric: "total_messages"
+    secondary_metric: "reauction_events"
+    comparison: "aca vs cbba"
+    direction: "less"
+    tier: "secondary"
+    alpha: 0.05
+    test: "paired_wilcoxon"
+    effect_size: "hodges_lehmann_difference"
+    correction: "benjamini_hochberg"
+
+  H7:
+    id: "H7"
+    title: "Assumption 1 Empirical Validity"
+    description: "Assumption 1 (TV(B_s, B_hat_s) <= eta_eff) holds in at least 90% of evaluations under packet drop rate p_drop <= 0.10."
+    metric: "tv_bound_adherence_rate"
+    comparison: "empirical_rate vs 0.90"
+    direction: "greater_or_equal"
+    tier: "secondary"
+    alpha: 0.05
+    test: "exact_binomial_ci"
+    confidence_level: 0.95
+
+  H8:
+    id: "H8"
+    title: "Out-of-Model Adversary Robustness"
+    description: "Performance degrades gracefully under out-of-model cyclic patrol adversary (theta_4) without catastrophic deadlocks or zero-completion failure."
+    metric: "completion_rate_pct"
+    comparison: "aca on theta_4 vs best baseline on theta_4"
+    direction: "two_sided"
+    tier: "secondary"
+    alpha: 0.05
+    test: "paired_wilcoxon"
+    correction: "benjamini_hochberg"
+
+statistical_protocol:
+  unit_of_analysis: "instance"
+  bootstrap_replicates: 10000
+  bootstrap_ci_method: "BCa"
+  multiple_comparison_primary: "holm"
+  multiple_comparison_secondary: "benjamini_hochberg"
+  mixed_effects_formula: "metric ~ method * comm_regime + (1 | instance)"
