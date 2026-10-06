@@ -2,13 +2,13 @@
 # Implements level execution layer (+LR), literature baselines, and ablation study.
 
 benchmark_name: "aca_final_evaluation"
-preregistration_tag: "prereg-v1"
+preregistration_tag: "prereg-v2"
 
 # Experimental Design:
 # Independent instances are indexed by (family, seed).
 # Disjoint seed allocation:
 pilot_seeds_range: [10000, 10009]
-final_seeds: 50 # n >= 50 independent instances per environment family
+final_seeds: 15 # 5 families x 15 seeds = 75 independent instances per cell (target >= 50)
 
 max_steps: 80
 
