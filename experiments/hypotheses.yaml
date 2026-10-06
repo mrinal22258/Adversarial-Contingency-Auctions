@@ -1,6 +1,11 @@
 # Pre-Registered Statistical Hypotheses for Adversarial Contingency Auctions (ACA)
-# Protocol: Pre-registered prior to final benchmarking sweep (Phase 3).
+# Protocol: Pre-registered dated amendment (tag prereg-v2, 2026-10-06).
 # Unit of Analysis: Independent instance (graph_family, seed), averaging internal replicates.
+# Disjoint Seeds: Pilot (10000-10009), Final Evaluation (1-50).
+
+preregistration_version: "prereg-v2"
+amendment_date: "2026-10-06"
+amendment_notes: "Stratified H2 by communication regimes (benign, constrained, lossy) and environment types (real MovingAI/OSMnx maps vs synthetic benchmarks). Added explicit CTP and gossip baseline comparisons."
 
 hypotheses:
   H1:
@@ -20,10 +25,13 @@ hypotheses:
   H2:
     id: "H2"
     title: "Level Execution Benchmark Comparison (+LR)"
-    description: "ACA matches or outperforms baselines equipped with identical local recourse execution (+LR: CBBA+LR, CBBA-PR+LR, SSI+LR) under range-limited lossy comms."
+    description: "ACA matches or outperforms baselines equipped with identical local recourse execution (+LR: CBBA+LR, CBBA-PR+LR, SSI+LR, CTP) under communication constraints, stratified by comm regime (benign, constrained, lossy) and environment class (real maps: MovingAI warehouse and Boston road network vs synthetic benchmarks)."
     metric: "completion_rate_pct"
     secondary_metric: "net_welfare"
-    comparison: "aca vs {cbba_lr, cbba_partial_lr, ssi_lr}"
+    comparison: "aca vs {cbba_lr, cbba_partial_lr, ssi_lr, ctp_replan}"
+    stratification:
+      comm_regimes: ["benign", "constrained", "lossy"]
+      map_classes: ["real_maps", "synthetic"]
     direction: "two_sided"
     tier: "primary"
     alpha: 0.05

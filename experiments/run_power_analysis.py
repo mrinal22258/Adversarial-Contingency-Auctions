@@ -27,7 +27,23 @@ def run_pilot(pilot_seeds, methods, environments, adversaries, workers=4):
         for adv in adversaries:
             for seed in pilot_seeds:
                 for method in methods:
-                    tasks.append((fam, n_nodes, adv, method, 4, 15, seed, 70, 1))
+                    tasks.append((
+                        fam,
+                        n_nodes,
+                        adv,
+                        method,
+                        "constrained",
+                        25.0,
+                        0.15,
+                        4,
+                        15,
+                        seed,
+                        70,
+                        1,
+                        None,
+                        None,
+                        "pilot",
+                    ))
 
     print(f"Executing {len(tasks)} pilot simulation runs across {len(pilot_seeds)} seeds...")
     results = []
