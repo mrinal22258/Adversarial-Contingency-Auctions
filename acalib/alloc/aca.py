@@ -225,13 +225,16 @@ class ACAAllocator(CBBAAllocator):
                     self.y[rid][tid] = 0.0
 
         # Phase 1: Local claim with Pinsker margin (safe claims committed directly)
+        phase1_claims: Dict[int, List[int]] = {}
         for rid in self.fleet_ids:
+            prev_bundle = set(self.robots[rid].bundle)
             self._build_bundle_aca(rid, tasks, robot_positions, current_step=current_step)
+            phase1_claims[rid] = [tid for tid in self.robots[rid].bundle if tid not in prev_bundle]
 
-        # Check safe-claim conflicts strictly from Phase 1
+        # Check safe-claim conflicts strictly among Phase 1 simultaneous safe claims
         safe_claim_holders: Dict[int, List[int]] = {}
         for rid in self.fleet_ids:
-            for tid in self.robots[rid].bundle:
+            for tid in phase1_claims[rid]:
                 safe_claim_holders.setdefault(tid, []).append(rid)
         safe_claim_conflicts = sum(1 for holders in safe_claim_holders.values() if len(holders) > 1)
 

@@ -248,6 +248,7 @@ def main():
     # Save run metadata alongside results
     meta_path = os.path.join(os.path.dirname(args.output), "run_metadata.json")
     import scipy
+    import networkx as nx
     metadata = {
         "commit": get_git_commit_hash(),
         "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
@@ -255,6 +256,7 @@ def main():
         "numpy_version": np.__version__,
         "pandas_version": pd.__version__,
         "scipy_version": scipy.__version__,
+        "networkx_version": nx.__version__,
         "total_trials": len(df),
         "families": families,
         "adversaries": adversaries,

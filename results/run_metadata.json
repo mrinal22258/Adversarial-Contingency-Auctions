@@ -1,7 +1,12 @@
 {
-  "commit": "unknown",
-  "timestamp": "2026-10-06T09:54:16Z",
-  "total_trials": 960,
+  "commit": "a9e8a6fd09ee13d2dd297bbc30cc0206f73710cc",
+  "timestamp": "2026-10-06T10:48:31Z",
+  "python_version": "3.12.7 | packaged by Anaconda, Inc. | (main, Oct  4 2024, 13:17:27) [MSC v.1929 64 bit (AMD64)]",
+  "numpy_version": "2.2.4",
+  "pandas_version": "2.2.3",
+  "scipy_version": "1.13.1",
+  "networkx_version": "3.4.2",
+  "total_trials": 1200,
   "families": [
     [
       "rgg",
@@ -24,6 +29,8 @@
   ],
   "methods": [
     "aca",
+    "aca_no_margin",
+    "aca_depth_0",
     "cbba",
     "cbba_partial",
     "cc_cbba",

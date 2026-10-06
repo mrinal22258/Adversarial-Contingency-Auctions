@@ -276,10 +276,47 @@ def generate_numbers_macro_file(df: pd.DataFrame, out_macro_path: str = "results
     macros.append(f"\\newcommand{{\\aeCbbaMsgs}}{{{m_msg_cbba}}}")
     macros.append(f"\\newcommand{{\\aeCbbaMsgsCI}}{{{ci_msg_cbba}}}")
 
+    m_msg_ssi, ci_msg_ssi, _ = get_stats("ssi", "total_messages", 0)
+    macros.append(f"\\newcommand{{\\aeSsiMsgs}}{{{m_msg_ssi}}}")
+    macros.append(f"\\newcommand{{\\aeSsiMsgsCI}}{{{ci_msg_ssi}}}")
+
     # Runtime
     m_rt_aca, ci_rt_aca, _ = get_stats("aca", "mean_tick_runtime_ms", 2)
     macros.append(f"\\newcommand{{\\aeAcaRuntime}}{{{m_rt_aca}}}")
     macros.append(f"\\newcommand{{\\aeAcaRuntimeCI}}{{{ci_rt_aca}}}")
+
+    # Ablations and remaining baselines
+    m_nm_comp, ci_nm_comp, _ = get_stats("aca_no_margin", "completion_rate_pct", 1)
+    macros.append(f"\\newcommand{{\\aeAcaNoMarginComp}}{{{m_nm_comp}}}")
+    macros.append(f"\\newcommand{{\\aeAcaNoMarginCompCI}}{{{ci_nm_comp}}}")
+
+    m_nm_conf, ci_nm_conf, _ = get_stats("aca_no_margin", "total_conflicts", 1)
+    macros.append(f"\\newcommand{{\\aeAcaNoMarginTotConf}}{{{m_nm_conf}}}")
+    macros.append(f"\\newcommand{{\\aeAcaNoMarginTotConfCI}}{{{ci_nm_conf}}}")
+
+    m_nm_msg, ci_nm_msg, _ = get_stats("aca_no_margin", "total_messages", 0)
+    macros.append(f"\\newcommand{{\\aeAcaNoMarginMsgs}}{{{m_nm_msg}}}")
+    macros.append(f"\\newcommand{{\\aeAcaNoMarginMsgsCI}}{{{ci_nm_msg}}}")
+
+    m_d0_comp, ci_d0_comp, _ = get_stats("aca_depth_0", "completion_rate_pct", 1)
+    macros.append(f"\\newcommand{{\\aeAcaDepthZeroComp}}{{{m_d0_comp}}}")
+    macros.append(f"\\newcommand{{\\aeAcaDepthZeroCompCI}}{{{ci_d0_comp}}}")
+
+    m_d0_msg, ci_d0_msg, _ = get_stats("aca_depth_0", "total_messages", 0)
+    macros.append(f"\\newcommand{{\\aeAcaDepthZeroMsgs}}{{{m_d0_msg}}}")
+    macros.append(f"\\newcommand{{\\aeAcaDepthZeroMsgsCI}}{{{ci_d0_msg}}}")
+
+    m_w_cc, ci_w_cc, _ = get_stats("cc_cbba", "net_welfare", 0)
+    macros.append(f"\\newcommand{{\\aeCcCbbaWelfare}}{{{m_w_cc}}}")
+    macros.append(f"\\newcommand{{\\aeCcCbbaWelfareCI}}{{{ci_w_cc}}}")
+
+    m_ora_comp, ci_ora_comp, _ = get_stats("oracle", "completion_rate_pct", 1)
+    macros.append(f"\\newcommand{{\\aeOracleComp}}{{{m_ora_comp}}}")
+    macros.append(f"\\newcommand{{\\aeOracleCompCI}}{{{ci_ora_comp}}}")
+
+    m_ora_welf, ci_ora_welf, _ = get_stats("oracle", "net_welfare", 0)
+    macros.append(f"\\newcommand{{\\aeOracleWelfare}}{{{m_ora_welf}}}")
+    macros.append(f"\\newcommand{{\\aeOracleWelfareCI}}{{{ci_ora_welf}}}")
 
     os.makedirs(os.path.dirname(out_macro_path), exist_ok=True)
     with open(out_macro_path, "w", encoding="utf-8") as f:

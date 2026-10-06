@@ -28,6 +28,8 @@ plt.rcParams.update({
 
 METHOD_LABELS = {
     "aca": "ACA (Ours)",
+    "aca_no_margin": "ACA-NoMargin",
+    "aca_depth_0": "ACA-Depth0",
     "cbba": "CBBA",
     "cbba_partial": "CBBA-Partial",
     "cc_cbba": "CC-CBBA",

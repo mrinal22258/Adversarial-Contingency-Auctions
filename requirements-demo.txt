@@ -1,0 +1,6 @@
+# Demo dependencies (Gradio explorer)
+-r requirements.txt
+gradio==4.44.0
+huggingface_hub<=0.25.2
+pydantic==2.10.6
+starlette<0.38.0

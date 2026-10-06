@@ -131,37 +131,76 @@ class CentralizedOracleAllocator(BaseAllocator):
         assigned = {tid for r in robot_list for tid in r.bundle}
         unassigned = [t for t in active_tasks if t.task_id not in assigned]
 
-        # Assign remaining tasks on ground-truth open graph up to bundle_limit
-        for task in unassigned:
-            best_cost = float("inf")
-            best_robot = None
-            for robot in robot_list:
-                if len(robot.bundle) >= self.bundle_limit:
-                    continue
-                loc = robot.current_node
+        def tour_cost(robot, bundle):
+            if not bundle:
+                return 0.0
+            tot = 0.0
+            loc = robot.current_node
+            for tid in bundle:
+                t_node = tasks[tid].node
                 try:
-                    c = nx.shortest_path_length(g_open, loc, task.node, weight="weight")
-                    if c < best_cost:
-                        best_cost = c
-                        best_robot = robot
+                    tot += nx.shortest_path_length(g_open, loc, t_node, weight="weight")
                 except (nx.NetworkXNoPath, nx.NodeNotFound):
-                    pass
-            if best_robot is not None and best_cost < 500.0:
-                best_robot.bundle.append(task.task_id)
+                    tot += 500.0
+                loc = t_node
+            return tot
+
+        # Assign unassigned tasks via best marginal tour insertion on open graph
+        while unassigned:
+            best_inc = float("inf")
+            best_choice = None  # (task, robot, insert_pos)
+            for task in unassigned:
+                for robot in robot_list:
+                    if len(robot.bundle) >= self.bundle_limit:
+                        continue
+                    curr_c = tour_cost(robot, robot.bundle)
+                    for idx in range(len(robot.bundle) + 1):
+                        cand = robot.bundle[:idx] + [task.task_id] + robot.bundle[idx:]
+                        cand_c = tour_cost(robot, cand)
+                        inc = cand_c - curr_c
+                        if inc < best_inc:
+                            best_inc = inc
+                            best_choice = (task, robot, idx)
+
+            if best_choice is not None and best_inc < 400.0:
+                t_chosen, r_chosen, pos_chosen = best_choice
+                r_chosen.bundle.insert(pos_chosen, t_chosen.task_id)
+                unassigned.remove(t_chosen)
+            else:
+                break
 
         for robot in robot_list:
             if robot.bundle:
                 active_tid = robot.bundle[0]
                 target_node = tasks[active_tid].node
-                try:
-                    open_path = nx.shortest_path(g_open, robot.current_node, target_node, weight="weight")
-                    robot.active_task_id = active_tid
-                    robot.active_path = list(open_path)
-                    robot.path_index = 0
-                    robot.edge_progress = 0.0
-                    robot.status = "TRANSIT"
-                except Exception:
-                    robot.plan_task_bundle({tid: {"node": t.node} for tid, t in tasks.items()})
+
+                # Check if robot already has a valid open path to this task
+                path_valid = False
+                if (
+                    robot.active_task_id == active_tid
+                    and robot.active_path
+                    and robot.status in ("TRANSIT", "PIVOTED")
+                ):
+                    rem_nodes = robot.active_path[robot.path_index:]
+                    if len(rem_nodes) >= 1 and rem_nodes[-1] == target_node:
+                        rem_blocked = False
+                        for idx in range(len(rem_nodes) - 1):
+                            if self.blockage_process.is_blocked(rem_nodes[idx], rem_nodes[idx + 1]):
+                                rem_blocked = True
+                                break
+                        if not rem_blocked:
+                            path_valid = True
+
+                if not path_valid:
+                    try:
+                        open_path = nx.shortest_path(g_open, robot.current_node, target_node, weight="weight")
+                        robot.active_task_id = active_tid
+                        robot.active_path = list(open_path)
+                        robot.path_index = 0
+                        robot.edge_progress = 0.0
+                        robot.status = "TRANSIT"
+                    except Exception:
+                        robot.plan_task_bundle({tid: {"node": t.node} for tid, t in tasks.items()})
             else:
                 robot.active_task_id = None
                 robot.active_path = []

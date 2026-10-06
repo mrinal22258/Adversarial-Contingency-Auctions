@@ -19,6 +19,8 @@ adversaries:
 
 methods:
   - "aca"
+  - "aca_no_margin"
+  - "aca_depth_0"
   - "cbba"
   - "cbba_partial"
   - "cc_cbba"

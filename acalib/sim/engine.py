@@ -42,6 +42,7 @@ class SimulationEngine:
         task_arrival_mode: str = "batch",
         poisson_rate: float = 0.5,
         task_deadline: int = 250,
+        max_steps: int = 90,
         comm_range: float = 45.0,
         p_drop: float = 0.05,
         contingency_depth: int = 1,
@@ -60,6 +61,7 @@ class SimulationEngine:
         self.task_arrival_mode = task_arrival_mode
         self.poisson_rate = poisson_rate
         self.task_deadline = task_deadline
+        self.max_steps = max_steps
         self.comm_range = comm_range
         self.p_drop = p_drop
         self.contingency_depth = contingency_depth
