@@ -1,13 +1,21 @@
 {
-  "commit": "44ddc0fca409cc49f37bc49f1cc7907b226d3193",
-  "timestamp": "2026-10-06T10:48:31Z",
+  "commit": "9443b0e0573d2f3894698f13ae7f5cecdf7054a0",
+  "timestamp": "2026-10-06T15:35:15Z",
   "python_version": "3.12.7 | packaged by Anaconda, Inc. | (main, Oct  4 2024, 13:17:27) [MSC v.1929 64 bit (AMD64)]",
   "numpy_version": "2.2.4",
   "pandas_version": "2.2.3",
   "scipy_version": "1.13.1",
   "networkx_version": "3.4.2",
-  "total_trials": 1200,
-  "families": [
+  "total_trials": 17100,
+  "environments": [
+    [
+      "warehouse_movingai",
+      36
+    ],
+    [
+      "road_osmnx",
+      40
+    ],
     [
       "rgg",
       35
@@ -31,16 +39,43 @@
     "aca",
     "aca_no_margin",
     "aca_depth_0",
+    "aca_depth_2",
+    "aca_no_inference",
+    "aca_oracle_adv",
     "cbba",
     "cbba_partial",
     "cc_cbba",
-    "implicit",
     "ssi",
+    "cbba_lr",
+    "cbba_partial_lr",
+    "cc_cbba_lr",
+    "ssi_lr",
+    "ctp_replan",
+    "cbba_gossip",
+    "implicit",
     "pessimistic",
-    "oracle"
+    "clairvoyant_greedy"
   ],
-  "n_seeds": 10,
-  "n_robots": 4,
-  "n_tasks": 15,
-  "max_steps": 90
+  "comm_regimes": {
+    "benign": {
+      "comm_range": 50.0,
+      "p_drop": 0.02
+    },
+    "constrained": {
+      "comm_range": 25.0,
+      "p_drop": 0.15
+    },
+    "lossy": {
+      "comm_range": 20.0,
+      "p_drop": 0.3
+    }
+  },
+  "n_seeds": 15,
+  "fleet_sizes": [
+    4
+  ],
+  "task_counts": [
+    15
+  ],
+  "max_steps": 80
 }

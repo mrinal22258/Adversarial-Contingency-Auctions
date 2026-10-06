@@ -65,5 +65,50 @@ For every phase and change:
   2. Environments: Integrated MovingAI MAPF warehouse benchmark (`warehouse_movingai`) and Downtown Boston urban street network (`road_osmnx`) with SHA-256 verification and topological sizing.
   3. Baselines: Implemented CTP Replan-on-Discovery (`ctp_replan`), CBBA Belief Gossip (`cbba_gossip`), Decentralized SSI with reachability (`ssi`), Clairvoyant Greedy (`clairvoyant_greedy`), and level-execution `+LR` variants (`cbba_lr`, `ssi_lr`, etc.).
   4. Ablations: Wired `aca_no_margin`, `aca_depth_0`, `aca_depth_2`, `aca_no_inference` (frozen uniform prior), `aca_oracle_adv` (known adversary type), and `aca_kappa_<val>` sweep.
-  5. Test Suite: Added `tests/test_sweep_crn_and_comms.py` verifying CRN coupling across 5 distinct methods, comm range sensitivity, and SSI auctioneer reachability (44 passing tests).
+  5. Test Suite: Added `tests/test_sweep_crn_and_comms.py` verifying CRN coupling across 5 distinct methods, comm range sensitivity, and SSI auctioneer reachability (46 passing tests).
+
+---
+
+### Phase B: Pre-Registration v2 & Pilot Power Analysis
+- **Status:** Complete
+- **Git Tag:** `prereg-v2`
+- **Changes made:**
+  1. Ran disjoint pilot power analysis on seeds 10000–10007 (192 trials) across disparate methods; computed paired standard deviations and sample size requirements ($N \ge 50$ per cell). Saved to `results/power_analysis.csv`.
+  2. Updated `experiments/hypotheses.yaml` with H2 stratified by communication regime (benign, constrained, lossy) and map type (real vs synthetic).
+  3. Built Tier A High-Fidelity SITL module in `hw/tier_a_sitl/sitl_runner.py` with unicycle kinematics ($v_{\max} = 0.22\text{ m/s}, \omega_{\max} = 2.84\text{ rad/s}$), line-of-sight tracking, Gaussian odometry noise, and lossy DDS emulation.
+
+---
+
+### Phase C: Full Final Sweep & Statistical Pipeline
+- **Status:** Complete
+- **Changes made:**
+  1. Executed full 17,100-trial experimental sweep across 15 seeds $\times$ 5 environments $\times$ 4 adversaries $\times$ 3 comm regimes $\times$ 19 methods. Saved to `results/runs.jsonl`, `results/traces/*.parquet`, and `results/raw_results.csv`.
+  2. Executed `experiments/run_statistical_tests.py` on independent instance units `(graph_family, seed)`:
+     - H1 (Recourse Efficacy): Supported ($+4.23$ pp, HL median $+3.89$, $p = 2.21 \times 10^{-9}$, Holm adj $p = 1.33 \times 10^{-8}$).
+     - H2 (Level Execution): ACA superior vs `cbba_lr` ($+1.67$ pp, $p = 0.0012$) and vs `ssi_lr` ($+8.86$ pp, $p = 5.94 \times 10^{-7}$); parity vs `cbba_partial_lr` ($+0.44$ pp, $p = 0.415$).
+     - H3 (Welfare Non-Inferiority): CBBA-PR retains higher net welfare by preserving unblocked remainder routes rather than replanning.
+     - H4 (Margin Conflict Impact): Parity under consensus ($p = 0.226$) with exactly 0 safe-claim conflicts maintained.
+  3. Generated `RESULTS_VERDICT.md` strictly mapping all statistical findings.
+
+---
+
+### Phase D: Theoretical Manuscript Refinements
+- **Status:** Complete
+- **Changes made in `paper.tex`:**
+  1. Downgraded independent recourse valuation to Proposition 1 as a tractable submodular surrogate under conditional edge independence.
+  2. Inserted Proposition 2 (Safe-Claim Monotonicity in Two-Phase Auctions), proving safe claims are preserved through Phase 2 consensus without revocation.
+  3. Formulated Theorem 1 with explicit Lipschitz bounds via total variation duality.
+  4. Expanded Section II (Related Work) with Table I comparing discrete bundle auctions against continuous trajectory planning (Kundu '24) and continuous contingency games (Peters '24).
+  5. Confirmed Tier A SITL validation scope in Section VI (zero physical hardware trials).
+
+---
+
+### Phase E, F, G: Linter, Tables, Figures, and Compilation
+- **Status:** Complete
+- **Changes made:**
+  1. Ran `tools/lint_paper.py`: Verified 0 errors, 0 forbidden hardcoded numbers, 0 missing provenance sidecars.
+  2. Ran `experiments/make_tables.py`: Generated `results/table_main_results.tex`, `results/table_main_results.md`, and `results/numbers.tex` directly from `raw_results.csv` (Rule R1).
+  3. Ran `experiments/make_figures.py`: Generated publication vector PDF/PNG figures in `results/figures/` and `static/images/` with sidecar `.provenance.json` files.
+  4. Compiled 6-page IEEE RA-L manuscript `paper.pdf` via MiKTeX `pdflatex` (0 errors).
+
 

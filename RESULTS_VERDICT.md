@@ -5,9 +5,12 @@ Generated directly from executed raw runs and independent instance-level tests.
 
 | ID | Title | Metric | Mean Diff | HL Median [95% CI] | Cliff's Delta | Raw p | Holm Adj p | Verdict |
 |---|---|---|---|---|---|---|---|---|
-| H1 | Recourse Efficacy (ACA vs ACA-d0) | completion_rate_pct | 12.11 | 12.5 [8.33, 15.83] | 0.45 | 6.1047e-06 | 1.8314e-05 | **SUPPORTED** |
-| H3 | Welfare Non-Inferiority (ACA vs best ssi) | net_welfare | -183.37 | -183.37 [-246.12, -120.63] | -0.387 | 0.9996 | 0.9996 | **NOT EQUIVALENT** |
-| H4 | Margin Conflict Impact (ACA vs ACA-NoMargin) | completion_rate_pct | -1.67 | -1.67 [-5.83, 2.5] | -0.101 | 0.3385 | 0.6770 | **PARITY / SLIGHT DROP** |
+| H1 | Recourse Efficacy (ACA vs ACA-d0) | completion_rate_pct | 4.23 | 3.89 [2.78, 5.0] | 0.32 | 2.2087e-09 | 1.3252e-08 | **SUPPORTED** |
+| H2 | Level Execution (ACA vs cbba_lr) | completion_rate_pct | 1.67 | 1.67 [0.56, 2.78] | 0.12 | 0.0012 | 0.0048 | **ACA SUPERIOR** |
+| H2 | Level Execution (ACA vs cbba_partial_lr) | completion_rate_pct | 0.44 | 0.28 [-0.56, 1.11] | 0.03 | 0.4148 | 0.8295 | **INCONCLUSIVE / PARITY** |
+| H2 | Level Execution (ACA vs ssi_lr) | completion_rate_pct | 8.86 | 7.78 [4.44, 11.11] | 0.387 | 5.9376e-07 | 2.9688e-06 | **ACA SUPERIOR** |
+| H3 | Welfare Non-Inferiority (ACA vs best cbba_partial) | net_welfare | -63.26 | -63.26 [-89.12, -37.4] | -0.111 | 0.8436 | 0.8436 | **NOT EQUIVALENT** |
+| H4 | Margin Conflict Impact (ACA vs ACA-NoMargin) | completion_rate_pct | 0.37 | 0.56 [-0.28, 1.39] | 0.041 | 0.2261 | 0.6783 | **PARITY / SLIGHT DROP** |
 
 ## Key Scientific Findings & Narrative Decision Rule
 

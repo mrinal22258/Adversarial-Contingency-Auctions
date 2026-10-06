@@ -1,9 +1,9 @@
 {
   "figure_file": "static/images\\fig_effect_size_heatmap.pdf",
-  "git_commit": "d63db141f2f34d966b4521fb1a135c479c266282",
+  "git_commit": "9443b0e0573d2f3894698f13ae7f5cecdf7054a0",
   "source_files": [
     "results/stats/instance_aggregated_results.csv"
   ],
-  "n_instances": 300,
+  "n_instances": 1425,
   "metadata": {}
 }

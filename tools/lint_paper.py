@@ -35,32 +35,48 @@ def check_figure_provenance(tex_content: str, base_dir: str) -> list:
     return errors
 
 
-def check_hardcoded_numbers_in_results(tex_content: str) -> list:
-    """
-    Check Results / Evaluation section for raw percentage gains or hardcoded p-values
-    that should be defined as \\ae... macros from numbers.tex.
-    """
-    errors = []
-    # Find text in Results section
-    results_match = re.search(r"\\section\{Experimental Results\}", tex_content)
-    if not results_match:
-        results_match = re.search(r"\\section\{Experiments.*?\}", tex_content)
+FORBIDDEN_NUMERIC_PATTERNS = [
+    (r"\+?13\.0", "Hand-typed '13.0' found (must use \\ae... macro)"),
+    (r"\b0\.41\b", "Hand-typed '0.41' found (must use \\ae... macro)"),
+    (r"p\s*=\s*0\.88", "Hand-typed 'p = 0.88' found (must use \\ae... macro)"),
+    (r"p\s*=\s*0\.62", "Hand-typed 'p = 0.62' found (must use \\ae... macro)"),
+    (r"\b1200\s+total\b", "Hand-typed '1200 total' found (must use \\aeTotalTrials macro)"),
+    (r"34\s+messages", "Hand-typed '34 messages' found (must use \\ae... macro)"),
+    (r"(?:~|\approx)?\s*3\s*%\s*safe", "Hand-typed '~3% safe' found (must use \\ae... macro)"),
+    (r"10\s+seeds", "Hand-typed '10 seeds' found (must be consistent with actual sweep seeds)"),
+]
 
-    if results_match:
-        res_text = tex_content[results_match.start():]
-        # Check for forbidden hand-typed patterns like "+13.0%", "p = 0.62", "p = 0.88", "Cliff's delta = 0.41"
-        forbidden_patterns = [
-            (r"\+13\.0", "Hand-typed '+13.0' found (use \\aeGainOverCBBA)"),
-            (r"p\s*=\s*0\.62", "Hand-typed 'p = 0.62' found (use macro)"),
-            (r"p\s*=\s*0\.88", "Hand-typed 'p = 0.88' found (use macro)"),
-            (r"delta\s*=\s*0\.41", "Hand-typed 'delta = 0.41' found (use macro)"),
-            (r"34\s+messages", "Hand-typed '34 messages' found (use macro)"),
-        ]
-        for pat, msg in forbidden_patterns:
-            if re.search(pat, res_text, re.IGNORECASE):
-                errors.append(msg)
+FORBIDDEN_PHRASES = [
+    (r"\bExtensive\b", "Forbidden hype word 'Extensive' found (be specific about protocol)"),
+    (r"\bTheoretical Bound\b", "Forbidden phrase 'Theoretical Bound' for greedy oracle found (must be 'Clairvoyant Greedy')"),
+]
+
+
+def check_hardcoded_numbers(tex_content: str) -> list:
+    """Check entire paper for hand-typed numbers and forbidden misleading phrases."""
+    errors = []
+    # Strip comments
+    lines = [line.split("%")[0] for line in tex_content.splitlines()]
+    clean_text = "\n".join(lines)
+
+    for pat, msg in FORBIDDEN_NUMERIC_PATTERNS:
+        if re.search(pat, clean_text, re.IGNORECASE):
+            errors.append(msg)
+
+    for pat, msg in FORBIDDEN_PHRASES:
+        if re.search(pat, clean_text):
+            errors.append(msg)
+
+    # Check for physical hardware claims (Tier A is simulation only)
+    # Allows "hardware" only when discussing future physical work or hardware limitations
+    hw_matches = re.finditer(r"\bhardware\b", clean_text, re.IGNORECASE)
+    for m in hw_matches:
+        snippet = clean_text[max(0, m.start() - 50): min(len(clean_text), m.end() + 50)].lower()
+        if not any(allowed in snippet for allowed in ["future", "limitation", "physical", "scope", "not", "tier a"]):
+            errors.append(f"Unsubstantiated 'hardware' claim without physical robot trial: '...{snippet.strip()}...'")
 
     return errors
+
 
 
 def main():
@@ -74,7 +90,7 @@ def main():
 
     errors = []
     errors.extend(check_figure_provenance(content, os.path.dirname(os.path.abspath(tex_path))))
-    errors.extend(check_hardcoded_numbers_in_results(content))
+    errors.extend(check_hardcoded_numbers(content))
 
     if errors:
         print("LINTER FAILURE: Issues found in paper.tex:")

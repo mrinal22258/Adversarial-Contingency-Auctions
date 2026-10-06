@@ -1,9 +1,24 @@
-# Main Benchmark Configuration
-benchmark_name: "main_benchmark"
-seeds: 10
-max_steps: 90
+# Final Benchmarking Sweep Configuration for Pre-Registration (prereg-v1)
+# Implements level execution layer (+LR), literature baselines, and ablation study.
+
+benchmark_name: "aca_final_evaluation"
+preregistration_tag: "prereg-v2"
+
+# Experimental Design:
+# Independent instances are indexed by (family, seed).
+# Disjoint seed allocation:
+pilot_seeds_range: [10000, 10009]
+final_seeds: 15 # 5 families x 15 seeds = 75 independent instances per cell (target >= 50)
+
+max_steps: 80
 
 environments:
+  # Real environments (Required: MovingAI warehouse MAPF benchmark & OSMnx Boston road network)
+  - family: "warehouse_movingai"
+    n_nodes: 36
+  - family: "road_osmnx"
+    n_nodes: 40
+  # Synthetic families (labeled stress tests)
   - family: "rgg"
     n_nodes: 35
   - family: "warehouse"
@@ -18,19 +33,45 @@ adversaries:
   - "theta_4_cyclic_patrol"
 
 methods:
+  # Proposed method and ablations
   - "aca"
   - "aca_no_margin"
   - "aca_depth_0"
+  - "aca_depth_2"
+  - "aca_no_inference"
+  - "aca_oracle_adv"
+  # Literature baselines (published: no detours)
   - "cbba"
   - "cbba_partial"
   - "cc_cbba"
-  - "implicit"
   - "ssi"
+  # Level-execution baselines (+LR: same detour capability as ACA)
+  - "cbba_lr"
+  - "cbba_partial_lr"
+  - "cc_cbba_lr"
+  - "ssi_lr"
+  # CTP replan-on-discovery & Belief Gossip baselines
+  - "ctp_replan"
+  - "cbba_gossip"
+  # References
+  - "implicit"
   - "pessimistic"
-  - "oracle"
+  - "clairvoyant_greedy"
+
+# Communication regimes
+comm_regimes:
+  benign:
+    comm_range: 50.0
+    p_drop: 0.02
+  constrained:
+    comm_range: 25.0
+    p_drop: 0.15
+  lossy:
+    comm_range: 20.0
+    p_drop: 0.30
 
 fleet_sizes: [4]
 task_counts: [15]
-comm_range: 45.0
-p_drop: 0.05
+default_comm_range: 30.0
+default_p_drop: 0.10
 contingency_depth: 1

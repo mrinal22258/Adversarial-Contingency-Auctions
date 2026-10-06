@@ -65,9 +65,9 @@ def hodges_lehmann_difference(x: List[float], y: List[float], ci: float = 0.95) 
     return hl_median, lower, upper
 
 
-def cliffs_delta(x: List[float], y: List[float], ci: float = 0.95, n_bootstrap: int = 2000, seed: int = 42) -> Tuple[float, float, float]:
+def cliffs_delta(x: List[float], y: List[float], ci: float = 0.95, n_bootstrap: int = 0, seed: int = 42) -> Tuple[float, float, float]:
     """
-    Compute Cliff's delta non-parametric effect size and bootstrap CI.
+    Compute Cliff's delta non-parametric effect size and optional bootstrap CI.
     d in [-1, 1]. |d| < 0.147 (negligible), < 0.33 (small), < 0.474 (medium), >= 0.474 (large).
     Returns (delta, lower_ci, upper_ci).
     """
@@ -82,6 +82,9 @@ def cliffs_delta(x: List[float], y: List[float], ci: float = 0.95, n_bootstrap: 
     greater = np.sum(diff > 0)
     less = np.sum(diff < 0)
     delta = float((greater - less) / (n_x * n_y))
+
+    if n_bootstrap <= 0:
+        return delta, delta, delta
 
     # Bootstrap CI
     rng = np.random.default_rng(seed)
@@ -257,3 +260,10 @@ def bootstrap_ci(
     upper = float(np.percentile(boot_means, 100.0 * (1.0 - alpha / 2.0)))
 
     return mean_val, lower, upper
+
+
+def format_latex_ci(mean: float, low: float, high: float, decimals: int = 1) -> str:
+    """Format mean and symmetric half-width CI as LaTeX $mean \pm half_ci$."""
+    half_ci = 0.5 * (high - low)
+    return f"${mean:.{decimals}f} \\pm {half_ci:.{decimals}f}$"
+
