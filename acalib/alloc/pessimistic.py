@@ -73,11 +73,12 @@ class PessimisticRobustAllocator(CBBAAllocator):
         return score, len(bundle)
 
 
-class CentralizedOracleAllocator(BaseAllocator):
+class ClairvoyantGreedyAllocator(BaseAllocator):
     """
-    Centralized Omniscient Oracle.
-    Knows the true ground-truth graph state and active blockages,
-    assigning tasks globally via minimum cost Hungarian matching.
+    Clairvoyant Greedy Heuristic Reference (formerly 'Centralized Oracle').
+    Heuristic reference with full ground-truth observation of currently unblocked edges,
+    assigning tasks via Hungarian matching and greedy tour insertion.
+    NOTE: As established in the audit, this is a greedy heuristic, NOT an exact theoretical upper bound.
     """
 
     def __init__(
@@ -208,3 +209,7 @@ class CentralizedOracleAllocator(BaseAllocator):
 
         total_assigned = sum(len(r.bundle) for r in robot_list)
         return {"conflicts": 0, "total_assigned": total_assigned}
+
+
+# Backwards compatibility alias
+CentralizedOracleAllocator = ClairvoyantGreedyAllocator

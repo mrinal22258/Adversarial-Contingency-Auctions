@@ -49,3 +49,21 @@ For every phase and change:
 - **Changes made:**
   1. Created `experiments/hypotheses.yaml` with explicit pre-registered hypotheses H1–H8.
   2. Defined primary and secondary families, test directions, minimum effects of interest, Holm/BH corrections, and instance-level analysis units.
+
+---
+
+### Phase A: Make the Sweep Real
+- **Status:** Complete
+- **Changes made:**
+  1. `run_sweep.py`: Completely rewritten with support for:
+     - Reading `comm_regimes` (`benign`, `constrained`, `lossy`), `final_seeds` (50 per cell), fleet/task grids.
+     - Decoupled RNG via `numpy.random.SeedSequence.spawn(5)` for graph topology, robot starts, task draws, blockage realizations, and communication packet drops.
+     - Pre-drawn per-edge, per-step blockage uniform variates $(U_{\text{clear}}, U_{\text{onset}})$ guaranteeing 100% strict Common Random Numbers (CRN) across all tested methods.
+     - Resumability keyed on `(config_hash, seed, graph_family, adversary, comm_regime, method)` with one JSONL record per completed trial (`results/runs.jsonl`).
+     - Per-step telemetry traces (mean/max TV, true adversary belief, margin, message/byte count, active blockages) saved to `results/traces/<run_id>.parquet`.
+     - Pre-flight calculation displaying total runs, cached runs, empirical rate (14.1 trials/s with 8 workers), and estimated ETA before launching.
+  2. Environments: Integrated MovingAI MAPF warehouse benchmark (`warehouse_movingai`) and Downtown Boston urban street network (`road_osmnx`) with SHA-256 verification and topological sizing.
+  3. Baselines: Implemented CTP Replan-on-Discovery (`ctp_replan`), CBBA Belief Gossip (`cbba_gossip`), Decentralized SSI with reachability (`ssi`), Clairvoyant Greedy (`clairvoyant_greedy`), and level-execution `+LR` variants (`cbba_lr`, `ssi_lr`, etc.).
+  4. Ablations: Wired `aca_no_margin`, `aca_depth_0`, `aca_depth_2`, `aca_no_inference` (frozen uniform prior), `aca_oracle_adv` (known adversary type), and `aca_kappa_<val>` sweep.
+  5. Test Suite: Added `tests/test_sweep_crn_and_comms.py` verifying CRN coupling across 5 distinct methods, comm range sensitivity, and SSI auctioneer reachability (44 passing tests).
+

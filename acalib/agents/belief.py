@@ -56,8 +56,15 @@ class BayesianTypeFilter:
             self.beliefs = {t: uniform for t in self.types}
         self._normalize()
 
-        # Cache of processed observation keys: (step, canonical_edge) -> state
         self._processed_observations: Set[Tuple[int, Tuple[Any, Any]]] = set()
+        self.frozen: bool = False
+
+    def set_oracle(self, adv_type: AdversaryType) -> None:
+        """Set belief strictly to 1.0 on adv_type (oracle adversary knowledge) and freeze."""
+        for t in self.types:
+            self.beliefs[t] = 1.0 if t == adv_type else 0.0
+        self._normalize()
+        self.frozen = True
 
     def _normalize(self) -> None:
         total = sum(self.beliefs.values())
@@ -110,6 +117,9 @@ class BayesianTypeFilter:
         Bayesian update upon observing edge at a specific step.
         Ensures each observation is processed at most once per time step.
         """
+        if self.frozen:
+            return
+
         c_edge = canonical_edge(edge[0], edge[1])
         obs_key = (step, c_edge)
         if obs_key in self._processed_observations:

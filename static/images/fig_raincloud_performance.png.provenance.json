@@ -1,0 +1,9 @@
+{
+  "figure_file": "static/images\\fig_raincloud_performance.png",
+  "git_commit": "d63db141f2f34d966b4521fb1a135c479c266282",
+  "source_files": [
+    "results/stats/instance_aggregated_results.csv"
+  ],
+  "n_instances": 300,
+  "metadata": {}
+}

@@ -41,6 +41,7 @@ class BaseAllocator(abc.ABC):
         self.robots = robots
         self.comm_net = comm_net
         self.bundle_limit = bundle_limit
+        self.fleet_ids = list(self.robots.keys())
 
     @abc.abstractmethod
     def allocate_round(

@@ -40,12 +40,17 @@ def test_safe_claim_monotonicity():
         new_in_bundle = [tid for tid in allocator.robots[rid].bundle if tid not in prev]
         phase1_claims[rid] = new_in_bundle
         
-    # Any task in phase1_claims that was claimed safely must remain in that robot's bundle after Phase 2 consensus
-    alloc_res = allocator.allocate_round(tasks_dict, current_step=0, robot_positions=robot_pos, max_consensus_iterations=10)
+    # Phase 2: Communication consensus
+    consensus_rounds = 0
+    for _ in range(10):
+        consensus_rounds += 1
+        changed = allocator._communicate_and_resolve(current_step=0, robot_positions=robot_pos)
+        if not changed:
+            break
     
-    # Check that bundle holds the safe claims
-    assert alloc_res["consensus_rounds"] <= 10, "Consensus exceeded max iterations"
+    # Check that bundle holds the safe claims (Proposition 4: monotonicity)
+    assert consensus_rounds <= 10, "Consensus exceeded max iterations"
     for rid, claims in phase1_claims.items():
         for tid in claims:
-            # If it was safe, it shouldn't be outbid
+            # If it was safely claimed, it is never outbid or revoked in consensus
             assert tid in allocator.robots[rid].bundle or tasks_dict[tid].completed

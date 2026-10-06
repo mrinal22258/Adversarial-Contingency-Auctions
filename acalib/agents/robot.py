@@ -40,6 +40,7 @@ class RobotAgent:
         self.fleet_ids = fleet_ids
         self.speed = speed
         self.sensor_range = sensor_range
+        self.contingency_depth = contingency_depth
         self.eta = eta
         self.risky_edges = risky_edges
 
@@ -225,78 +226,7 @@ class RobotAgent:
     ) -> None:
         """
         Execute movement along active path at designated speed.
-        Implements Alg. 1 Contingency Branch Pivot upon encountering blockages.
+        Delegates to shared LocalRecourseExecutor ensuring identical execution physics and pivot semantics across all allocators.
         """
-        if self.active_task_id is None or self.status in ("IDLE", "EXHAUSTED_NEEDS_REPLAN"):
-            return
-
-        if self.path_index >= len(self.active_path) - 1:
-            # Arrived at task destination!
-            task_info = tasks_dict.get(self.active_task_id)
-            self.completed_tasks.append(self.active_task_id)
-            # Remove from bundle
-            if self.active_task_id in self.bundle:
-                self.bundle.remove(self.active_task_id)
-            if self.active_task_id in self.assigned_plans:
-                del self.assigned_plans[self.active_task_id]
-
-            # Move to next task in bundle
-            self.plan_task_bundle(tasks_dict)
-            return
-
-        u = self.active_path[self.path_index]
-        v = self.active_path[self.path_index + 1]
-        c_e = canonical_edge(u, v)
-        edge_weight = self.graph[u][v].get("weight", 1.0)
-
-        # Check if approaching edge is blocked right before traversal or at current node
-        if self.edge_progress == 0.0 and blockage_process.is_blocked(u, v):
-            # Blockage encountered! Check for precomputed recourse detour
-            current_plan = self.assigned_plans.get(self.active_task_id)
-            if current_plan is not None:
-                detour = current_plan.detours.get((u, v), current_plan.detours.get(c_e))
-                if detour is not None:
-                    # Check if detour first edge is open
-                    detour_viable = True
-                    if len(detour) >= 2:
-                        d_u, d_v = detour[0], detour[1]
-                        if blockage_process.is_blocked(d_u, d_v):
-                            detour_viable = False
-
-                    if detour_viable:
-                        # LOCAL RECOURSE PIVOT (Alg. 1, line 19)
-                        # Pivot without requiring communication or global re-auction!
-                        self.active_path = list(detour)
-                        self.path_index = 0
-                        self.edge_progress = 0.0
-                        self.status = "PIVOTED"
-                        return
-
-            # All recourse detours blocked or exhausted!
-            # Trigger partial re-auction request and release task
-            self.status = "EXHAUSTED_NEEDS_REPLAN"
-            self.replan_requests.append(self.active_task_id)
-            if self.active_task_id in self.bundle:
-                self.bundle.remove(self.active_task_id)
-            self.active_task_id = None
-            return
-
-        # Advance along edge (u, v)
-        travel_step = self.speed * dt
-        self.edge_progress += travel_step
-
-        pos_u = np.array(self.graph.nodes[u].get("pos", (0, 0)))
-        pos_v = np.array(self.graph.nodes[v].get("pos", (0, 0)))
-
-        if self.edge_progress >= edge_weight:
-            # Completed traversal of edge (u, v)
-            self.current_node = v
-            self.pos = (float(pos_v[0]), float(pos_v[1]))
-            self.path_index += 1
-            self.edge_progress = 0.0
-        else:
-            # Interpolate position along edge
-            frac = self.edge_progress / max(1e-5, edge_weight)
-            interpolated = pos_u + frac * (pos_v - pos_u)
-            self.pos = (float(interpolated[0]), float(interpolated[1]))
-            self.status = "TRANSIT"
+        from .executor import LocalRecourseExecutor
+        LocalRecourseExecutor.step_execution(self, blockage_process, tasks_dict, dt=dt)

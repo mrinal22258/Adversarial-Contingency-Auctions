@@ -13,6 +13,12 @@ final_seeds: 50 # n >= 50 independent instances per environment family
 max_steps: 80
 
 environments:
+  # Real environments (Required: MovingAI warehouse MAPF benchmark & OSMnx Boston road network)
+  - family: "warehouse_movingai"
+    n_nodes: 36
+  - family: "road_osmnx"
+    n_nodes: 40
+  # Synthetic families (labeled stress tests)
   - family: "rgg"
     n_nodes: 35
   - family: "warehouse"
@@ -31,6 +37,9 @@ methods:
   - "aca"
   - "aca_no_margin"
   - "aca_depth_0"
+  - "aca_depth_2"
+  - "aca_no_inference"
+  - "aca_oracle_adv"
   # Literature baselines (published: no detours)
   - "cbba"
   - "cbba_partial"
@@ -41,10 +50,13 @@ methods:
   - "cbba_partial_lr"
   - "cc_cbba_lr"
   - "ssi_lr"
-  # Literature references
+  # CTP replan-on-discovery & Belief Gossip baselines
+  - "ctp_replan"
+  - "cbba_gossip"
+  # References
   - "implicit"
   - "pessimistic"
-  - "oracle"
+  - "clairvoyant_greedy"
 
 # Communication regimes
 comm_regimes:

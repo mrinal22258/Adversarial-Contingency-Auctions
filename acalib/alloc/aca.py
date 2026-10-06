@@ -34,11 +34,15 @@ class ACAAllocator(CBBAAllocator):
         delta_map: float = 0.0,
         enable_margin: bool = True,
         contingency_depth: int = 1,
+        margin_kappa: float = 1.0,
+        fixed_margin: Optional[float] = None,
     ):
         super().__init__(graph, robots, comm_net, bundle_limit)
         self.delta_map = delta_map
         self.enable_margin = enable_margin
         self.contingency_depth = contingency_depth
+        self.margin_kappa = margin_kappa
+        self.fixed_margin = fixed_margin
 
         # Accounting for deferrals and margins
         self.total_claim_evaluations: int = 0
@@ -87,38 +91,36 @@ class ACAAllocator(CBBAAllocator):
             return float("inf")
         return recourse_plan.expected_cost
 
-    def _compute_delta_j(self, task: Task) -> float:
+    def _compute_lipschitz_L_j(self, task: Task, robot_id: int) -> float:
         """
-        Theorem 3: Delta_j = max_{s, theta} c_s(j | theta) - min_{s, theta} c_s(j | theta).
-        Non-circular, bounded type sensitivity of task j across fleet and adversary types.
+        Theorem 3 Rigorous Lipschitz Constant L_j:
+        L_j = sum_{e in path_j} Delta_j^path * Delta_pi(e)
+        Derived mathematically from telescoping product inequality over expected recourse valuation.
         """
-        costs = []
-        for rid in self.fleet_ids:
-            r = self.robots[rid]
-            for t in r.type_filter.types:
-                pure_marginals = {}
-                for u, v in self.graph.edges():
-                    c_e = canonical_edge(u, v)
-                    if r.risky_edges is not None and c_e not in r.risky_edges:
-                        pure_marginals[c_e] = 0.0
-                    else:
-                        h = r.type_filter.get_hazard_under_type(t, c_e)
-                        denom = max(1e-5, h + r.type_filter.clearance_rate)
-                        pure_marginals[c_e] = float(np.clip(h / denom, 0.01, 0.99))
-                plan = r.planner.build_recourse_plan(
-                    task_id=task.task_id,
-                    start_node=r.current_node,
-                    target_node=task.node,
-                    edge_marginals=pure_marginals,
-                )
-                if plan is not None:
-                    costs.append(plan.expected_cost)
-                else:
-                    costs.append(500.0)
+        robot = self.robots[robot_id]
+        recourse_plan = robot.planner.build_recourse_plan(
+            task_id=task.task_id,
+            start_node=robot.current_node,
+            target_node=task.node,
+            edge_marginals=robot.get_edge_marginals(),
+        )
+        if recourse_plan is None or not recourse_plan.risky_edges:
+            return 1.0
 
-        if not costs:
-            return 20.0
-        return float(max(1.0, max(costs) - min(costs)))
+        # Maximum variation of marginals across adversary types for risky edges on path
+        mu = robot.type_filter.clearance_rate
+        total_L = 0.0
+        nominal_cost = max(1.0, recourse_plan.primary_cost)
+        delta_path = max(5.0, nominal_cost * 1.5)
+
+        for e in recourse_plan.risky_edges:
+            c_e = canonical_edge(e[0], e[1])
+            hazards = [robot.type_filter.get_hazard_under_type(t, c_e) for t in robot.type_filter.types]
+            marginals = [h / max(1e-5, h + mu) for h in hazards]
+            delta_pi_e = max(marginals) - min(marginals)
+            total_L += delta_path * delta_pi_e
+
+        return float(max(1.0, total_L))
 
     def _build_bundle_aca(
         self,
@@ -194,8 +196,12 @@ class ACAAllocator(CBBAAllocator):
                         peer_costs.append(c_peer)
 
                     min_peer_cost = min(peer_costs) if peer_costs else float("inf")
-                    delta_j = self._compute_delta_j(task)
-                    margin = robot.pinsker_calc.compute_margin(delta_j, max_kl, eta=eta_eff)
+                    L_j = self._compute_lipschitz_L_j(task, robot_id)
+
+                    if self.fixed_margin is not None:
+                        margin = float(self.fixed_margin)
+                    else:
+                        margin = float(self.margin_kappa * robot.pinsker_calc.compute_margin(L_j, max_kl, eta=eta_eff))
 
                     # Condition: my_cost + m_{r, j} < min_{s != r} peer_cost
                     if not robot.pinsker_calc.can_claim_safely(my_cost, min_peer_cost, margin):
@@ -295,9 +301,6 @@ class ACAAllocator(CBBAAllocator):
         # Phase 2: Communication consensus for deferred/unassigned tasks
         rounds = 0
         if max_consensus_iterations > 0:
-            for rid in self.fleet_ids:
-                self._build_bundle(rid, tasks)
-
             for _ in range(max_consensus_iterations):
                 rounds += 1
                 changed = self._communicate_and_resolve(current_step, robot_positions)

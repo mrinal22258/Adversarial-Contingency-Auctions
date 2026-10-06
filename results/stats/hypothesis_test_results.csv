@@ -1,0 +1,4 @@
+hypothesis_id,title,metric,comparison,n_instances,mean_aca,mean_comparator,mean_diff,hl_median_diff,hl_ci_95,cliffs_delta,cliffs_ci_95,cohens_dz,raw_p_value,test_type,tier,adj_p_value,significant
+H1,Recourse Efficacy (ACA vs ACA-d0),completion_rate_pct,aca - aca_depth_0,30,81.56,69.44,12.11,12.5,"[8.33, 15.83]",0.45,"[0.179, 0.713]",1.211,6.104703669250282e-06,paired_wilcoxon_greater,primary,1.8314111007750844e-05,True
+H3,Welfare Non-Inferiority (ACA vs best ssi),net_welfare,aca - ssi,30,743.1,926.48,-183.37,-183.37,"[-246.12, -120.63]",-0.387,N/A,-0.907,0.999564318325305,tost_non_inferiority,primary,0.999564318325305,False
+H4,Margin Conflict Impact (ACA vs ACA-NoMargin),completion_rate_pct,aca - aca_no_margin,30,81.56,83.22,-1.67,-1.67,"[-5.83, 2.5]",-0.101,N/A,-0.122,0.3384786226892751,paired_wilcoxon_two_sided,primary,0.6769572453785502,False

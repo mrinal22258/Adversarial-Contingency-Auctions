@@ -18,6 +18,7 @@ from ..env.adversaries import (
 from ..env.blockage_process import PersistentBlockageProcess
 from ..env.comm import CommunicationNetwork
 from ..agents.robot import RobotAgent
+from ..agents.belief import compute_tv_distance
 from ..alloc.base import Task, BaseAllocator
 from ..alloc.cbba import CBBAAllocator
 from ..alloc.aca import ACAAllocator
@@ -25,8 +26,15 @@ from ..alloc.ssi import SSIAllocator
 from ..alloc.cbba_partial import CBBAPartialReplanAllocator
 from ..alloc.cc_cbba import ChanceConstrainedCBBAAllocator
 from ..alloc.implicit import ImplicitCoordinationAllocator
-from ..alloc.pessimistic import PessimisticRobustAllocator, CentralizedOracleAllocator
+from ..alloc.pessimistic import (
+    PessimisticRobustAllocator,
+    ClairvoyantGreedyAllocator,
+    CentralizedOracleAllocator,
+)
+from ..alloc.ctp_replan import CTPReplanAllocator
+from ..alloc.cbba_gossip import CBBABeliefGossipAllocator
 from .metrics import SimulationMetrics
+import pandas as pd
 
 
 class SimulationEngine:
@@ -51,6 +59,13 @@ class SimulationEngine:
         adversary_budget_k: int = 4,
         seed: Optional[int] = None,
         robot_speeds: Optional[List[float]] = None,
+        custom_start_nodes: Optional[List[Any]] = None,
+        custom_tasks: Optional[Dict[int, Task]] = None,
+        predrawn_clear_uniforms: Optional[Dict[Tuple[Tuple[Any, Any], int], float]] = None,
+        predrawn_onset_uniforms: Optional[Dict[Tuple[Tuple[Any, Any], int], float]] = None,
+        custom_risky_edges: Optional[Set[Tuple[Any, Any]]] = None,
+        comm_net_seed: Optional[int] = None,
+        record_traces: bool = False,
         **kwargs: Any,
     ):
         self.graph = graph
@@ -69,6 +84,8 @@ class SimulationEngine:
         self.clearance_rate = clearance_rate
         self.adversary_budget_k = adversary_budget_k
         self.rng = np.random.default_rng(seed)
+        self.record_traces = record_traces
+        self.traces: List[Dict[str, Any]] = []
 
         # 1. Adversary and Persistent Blockage Process
         self.adversary = create_adversary(
@@ -82,23 +99,39 @@ class SimulationEngine:
             adversary=self.adversary,
             risk_fraction=risk_fraction,
             clearance_rate=clearance_rate,
-            seed=int(self.rng.integers(0, 1000000)),
+            seed=int(self.rng.integers(0, 1000000)) if comm_net_seed is None else comm_net_seed,
+            custom_risky_edges=custom_risky_edges,
+            predrawn_clear_uniforms=predrawn_clear_uniforms,
+            predrawn_onset_uniforms=predrawn_onset_uniforms,
         )
 
         # 2. Communication Network
         self.comm_net = CommunicationNetwork(
             comm_range=comm_range,
             p_drop=p_drop,
-            seed=int(self.rng.integers(0, 1000000)),
+            seed=int(self.rng.integers(0, 1000000)) if comm_net_seed is None else comm_net_seed + 1,
         )
 
         # 3. Robots
-        nodes_list = list(graph.nodes())
+        nodes_list = sorted(list(graph.nodes()))
         self.robots: Dict[int, RobotAgent] = {}
         fleet_ids = list(range(n_robots))
 
+        # Determine level execution depth for robots
+        if self.allocator_type == "aca_depth_0":
+            r_depth = 0
+        elif self.allocator_type == "aca_depth_2":
+            r_depth = 2
+        elif self.allocator_type.endswith("_lr") or self.allocator_type.startswith("aca"):
+            r_depth = contingency_depth if contingency_depth > 0 else 1
+        else:
+            r_depth = 0
+
         for rid in range(n_robots):
-            start_node = nodes_list[int(self.rng.integers(0, len(nodes_list)))]
+            if custom_start_nodes is not None and len(custom_start_nodes) > 0:
+                start_node = custom_start_nodes[rid % len(custom_start_nodes)]
+            else:
+                start_node = nodes_list[int(self.rng.integers(0, len(nodes_list)))]
             spd = 5.0 if robot_speeds is None else robot_speeds[rid % len(robot_speeds)]
             self.robots[rid] = RobotAgent(
                 robot_id=rid,
@@ -106,7 +139,7 @@ class SimulationEngine:
                 graph=graph,
                 fleet_ids=fleet_ids,
                 speed=spd,
-                contingency_depth=contingency_depth,
+                contingency_depth=r_depth,
                 risky_edges=self.blockage_process.risky_edges,
             )
 
@@ -114,10 +147,60 @@ class SimulationEngine:
         self.allocator = self._create_allocator(self.allocator_type, kwargs)
 
         # 5. Tasks
-        self.tasks: Dict[int, Task] = self._generate_tasks(nodes_list)
+        if custom_tasks is not None:
+            import copy
+            self.tasks = copy.deepcopy(custom_tasks)
+        else:
+            self.tasks = self._generate_tasks(nodes_list)
 
     def _create_allocator(self, alloc_type: str, kwargs: Dict[str, Any]) -> BaseAllocator:
-        if alloc_type in ("aca", "aca_cbba"):
+        if alloc_type.startswith("aca_kappa_"):
+            try:
+                k_val = float(alloc_type.split("aca_kappa_")[1])
+            except ValueError:
+                k_val = 1.0
+            return ACAAllocator(
+                graph=self.graph,
+                robots=self.robots,
+                comm_net=self.comm_net,
+                contingency_depth=self.contingency_depth,
+                margin_kappa=k_val,
+                enable_margin=True,
+            )
+        elif alloc_type == "aca_depth_2":
+            return ACAAllocator(
+                graph=self.graph,
+                robots=self.robots,
+                comm_net=self.comm_net,
+                contingency_depth=2,
+                delta_map=kwargs.get("delta_map", 0.0),
+                enable_margin=True,
+            )
+        elif alloc_type == "aca_no_inference":
+            alloc = ACAAllocator(
+                graph=self.graph,
+                robots=self.robots,
+                comm_net=self.comm_net,
+                contingency_depth=self.contingency_depth,
+                delta_map=kwargs.get("delta_map", 0.0),
+                enable_margin=True,
+            )
+            for r in self.robots.values():
+                r.type_filter.frozen = True
+            return alloc
+        elif alloc_type == "aca_oracle_adv":
+            alloc = ACAAllocator(
+                graph=self.graph,
+                robots=self.robots,
+                comm_net=self.comm_net,
+                contingency_depth=self.contingency_depth,
+                delta_map=kwargs.get("delta_map", 0.0),
+                enable_margin=True,
+            )
+            for r in self.robots.values():
+                r.type_filter.set_oracle(self.adversary_type)
+            return alloc
+        elif alloc_type in ("aca", "aca_cbba"):
             return ACAAllocator(
                 graph=self.graph,
                 robots=self.robots,
@@ -144,19 +227,19 @@ class SimulationEngine:
                 delta_map=kwargs.get("delta_map", 0.0),
                 enable_margin=kwargs.get("enable_margin", True),
             )
-        elif alloc_type == "cbba":
+        elif alloc_type in ("cbba", "cbba_lr"):
             return CBBAAllocator(
                 graph=self.graph,
                 robots=self.robots,
                 comm_net=self.comm_net,
             )
-        elif alloc_type in ("cbba_partial", "partial_replan"):
+        elif alloc_type in ("cbba_partial", "partial_replan", "cbba_partial_lr"):
             return CBBAPartialReplanAllocator(
                 graph=self.graph,
                 robots=self.robots,
                 comm_net=self.comm_net,
             )
-        elif alloc_type in ("cc_cbba", "chance_constrained"):
+        elif alloc_type in ("cc_cbba", "chance_constrained", "cc_cbba_lr"):
             alpha_risk = kwargs.get("alpha_risk", 0.30)
             return ChanceConstrainedCBBAAllocator(
                 graph=self.graph,
@@ -164,14 +247,26 @@ class SimulationEngine:
                 comm_net=self.comm_net,
                 alpha_risk=alpha_risk,
             )
-        elif alloc_type in ("implicit", "implicit_no_margin"):
+        elif alloc_type in ("implicit", "implicit_no_margin", "implicit_lr"):
             return ImplicitCoordinationAllocator(
                 graph=self.graph,
                 robots=self.robots,
                 comm_net=self.comm_net,
             )
-        elif alloc_type in ("ssi", "sequential_single_item"):
+        elif alloc_type in ("ssi", "sequential_single_item", "ssi_lr"):
             return SSIAllocator(
+                graph=self.graph,
+                robots=self.robots,
+                comm_net=self.comm_net,
+            )
+        elif alloc_type in ("ctp_replan", "ctp", "ctp_lr"):
+            return CTPReplanAllocator(
+                graph=self.graph,
+                robots=self.robots,
+                comm_net=self.comm_net,
+            )
+        elif alloc_type in ("cbba_gossip", "gossip", "cbba_gossip_lr"):
+            return CBBABeliefGossipAllocator(
                 graph=self.graph,
                 robots=self.robots,
                 comm_net=self.comm_net,
@@ -182,8 +277,8 @@ class SimulationEngine:
                 robots=self.robots,
                 comm_net=self.comm_net,
             )
-        elif alloc_type in ("oracle", "centralized_oracle"):
-            return CentralizedOracleAllocator(
+        elif alloc_type in ("oracle", "centralized_oracle", "clairvoyant_greedy"):
+            return ClairvoyantGreedyAllocator(
                 graph=self.graph,
                 robots=self.robots,
                 comm_net=self.comm_net,
@@ -343,6 +438,37 @@ class SimulationEngine:
 
         tick_elapsed_ms = (time.perf_counter() - tick_start) * 1000.0
         self.metrics.per_tick_runtimes_ms.append(tick_elapsed_ms)
+
+        if self.record_traces:
+            fleet_b = [r.type_filter.get_belief_vector() for r in self.robots.values()]
+            tvs = [
+                compute_tv_distance(fleet_b[i], fleet_b[j])
+                for i in range(len(fleet_b))
+                for j in range(i + 1, len(fleet_b))
+            ]
+            mean_tv = float(np.mean(tvs)) if tvs else 0.0
+            max_tv = float(np.max(tvs)) if tvs else 0.0
+            true_idx = CanonicalTypeSet.index(self.adversary_type) if self.adversary_type in CanonicalTypeSet else -1
+            mean_b_true = float(np.mean([b[true_idx] for b in fleet_b])) if (true_idx >= 0 and fleet_b) else 0.0
+
+            # Margin observation
+            margin_val = 0.0
+            if hasattr(self.allocator, "last_computed_margin"):
+                margin_val = float(getattr(self.allocator, "last_computed_margin", 0.0))
+
+            self.traces.append({
+                "step": step,
+                "mean_pairwise_tv": mean_tv,
+                "max_pairwise_tv": max_tv,
+                "mean_belief_true": mean_b_true,
+                "margin": margin_val,
+                "total_messages": self.comm_net.total_messages_sent,
+                "total_bytes": self.comm_net.total_bytes_sent,
+                "completed_tasks": self.metrics.completed_tasks,
+                "active_blockages": len(self.blockage_process.get_blocked_edges()),
+                "replan_events": self.metrics.reauction_events,
+            })
+
         self.current_step += 1
         return True
 
@@ -367,4 +493,9 @@ class SimulationEngine:
             if not cont:
                 break
         return self.finalize()
+
+    def get_trace_df(self) -> pd.DataFrame:
+        """Return recorded per-step telemetry traces as a pandas DataFrame."""
+        return pd.DataFrame(self.traces)
+
 
