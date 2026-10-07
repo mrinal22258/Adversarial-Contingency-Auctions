@@ -114,20 +114,54 @@ class PhysicsWorld:
             bid = p.createMultiBody(0.0, col, vis, pos, physicsClientId=self.client_id)
             self.static_obstacles.append(bid)
 
-        # Consolidate internal shelving blocks (10 longitudinal warehouse picking racks)
-        n_racks = 8
-        rack_w = 4.0
-        rack_l = self.scale * 0.70
-        half_ext = [rack_w / 2.0, rack_l / 2.0, 0.5]
-        col_shape = p.createCollisionShape(p.GEOM_BOX, halfExtents=half_ext, physicsClientId=self.client_id)
-        vis_shape = p.createVisualShape(p.GEOM_BOX, halfExtents=half_ext, rgbaColor=[0.3, 0.3, 0.35, 1.0], physicsClientId=self.client_id)
+        # Build physical racks from actual MovingAI map file
+        with open(filepath, "r", encoding="utf-8") as f:
+            lines = [line.strip() for line in f if line.strip()]
+        # Skip header lines to reach map data
+        map_idx = 0
+        while map_idx < len(lines) and not lines[map_idx].startswith("map"):
+            map_idx += 1
+        map_idx += 1
+        grid = lines[map_idx:]
+        height = len(grid)
+        width = len(grid[0])
+        B = 8
+        n_br = height // B
+        n_bc = width // B
+        cell_w = self.scale / n_bc
+        cell_h = self.scale / n_br
 
-        spacing = self.scale / (n_racks + 1)
-        for i in range(1, n_racks + 1):
-            pos_x = float(i * spacing)
-            pos_y = float(self.scale / 2.0)
-            bid = p.createMultiBody(0.0, col_shape, vis_shape, [pos_x, pos_y, 0.5], physicsClientId=self.client_id)
-            self.static_obstacles.append(bid)
+        col_shape = p.createCollisionShape(
+            p.GEOM_BOX,
+            halfExtents=[cell_w * 0.45, cell_h * 0.45, 0.5],
+            physicsClientId=self.client_id,
+        )
+        vis_shape = p.createVisualShape(
+            p.GEOM_BOX,
+            halfExtents=[cell_w * 0.45, cell_h * 0.45, 0.5],
+            rgbaColor=[0.3, 0.3, 0.35, 1.0],
+            physicsClientId=self.client_id,
+        )
+
+        for br in range(n_br):
+            for bc in range(n_bc):
+                sub = [
+                    grid[r][c]
+                    for r in range(br * B, min(height, (br + 1) * B))
+                    for c in range(bc * B, min(width, (bc + 1) * B))
+                ]
+                passable_ratio = sub.count(".") / len(sub)
+                if passable_ratio < 0.4:
+                    pos_x = float(bc * cell_w + cell_w / 2.0)
+                    pos_y = float((n_br - 1 - br) * cell_h + cell_h / 2.0)
+                    bid = p.createMultiBody(
+                        0.0,
+                        col_shape,
+                        vis_shape,
+                        [pos_x, pos_y, 0.5],
+                        physicsClientId=self.client_id,
+                    )
+                    self.static_obstacles.append(bid)
 
     def _build_road_network_physical_geometry(self):
         """Instantiate physical boundary curbs along road boundaries."""

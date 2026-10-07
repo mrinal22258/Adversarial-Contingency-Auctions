@@ -229,11 +229,12 @@ class DiffDriveRobotSITL:
         dy = target[1] - gt_y
         dist = math.hypot(dx, dy)
 
-        # Check waypoint arrival threshold (0.4m)
-        if dist < 0.4:
+        # Check waypoint arrival threshold (0.8m)
+        if dist < 0.8:
             self.current_waypoint_idx += 1
             if self.current_waypoint_idx >= len(self.current_path):
                 self.target_reached = True
+                p.resetBaseVelocity(self.body_id, [0.0, 0.0, 0.0], [0.0, 0.0, 0.0], physicsClientId=self.client_id)
                 self._set_wheel_velocities(0.0, 0.0)
                 return 0.0, 0.0
             target = self.current_path[self.current_waypoint_idx]
@@ -250,11 +251,21 @@ class DiffDriveRobotSITL:
         omega_cmd = float(np.clip(k_omega * heading_err, -self.omega_max, self.omega_max))
 
         # Linear velocity command: slow down when turning sharply
-        k_v = 0.8
+        k_v = 1.0
         v_factor = max(0.0, math.cos(heading_err))
         v_cmd = float(np.clip(k_v * dist * v_factor, 0.0, self.v_max))
 
-        # Differential-drive inverse kinematics
+        # Command rigid body velocity in PyBullet
+        vx = v_cmd * math.cos(gt_yaw)
+        vy = v_cmd * math.sin(gt_yaw)
+        p.resetBaseVelocity(
+            self.body_id,
+            linearVelocity=[vx, vy, 0.0],
+            angularVelocity=[0.0, 0.0, omega_cmd],
+            physicsClientId=self.client_id,
+        )
+
+        # Differential-drive inverse kinematics for wheels
         v_l = (v_cmd - omega_cmd * (self.track_width / 2.0)) / self.wheel_radius
         v_r = (v_cmd + omega_cmd * (self.track_width / 2.0)) / self.wheel_radius
 

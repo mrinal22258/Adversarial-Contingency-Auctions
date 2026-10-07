@@ -1,6 +1,6 @@
 {
   "result": {
-    "commit": "75f7492d31b530324d85c7f87c869a08b4728d14",
+    "commit": "d11295d439a4f3cb73ed98889a395377b71067c6",
     "disclaimer": "SIMULATION -- PyBullet SITL -- No Physical Robot",
     "seed": 3375,
     "map_type": "road_osmnx",
@@ -12,14 +12,14 @@
     "completed_tasks": 0,
     "completion_rate_pct": 0.0,
     "total_conflicts": 0,
-    "recourse_detours": 0,
-    "physical_collisions": 0,
-    "total_distance_meters": 0.051975647568227576,
-    "net_welfare": -0.10395129513645515,
+    "recourse_detours": 347,
+    "physical_collisions": 347,
+    "total_distance_meters": 60.61654195261707,
+    "net_welfare": -121.23308390523414,
     "messages_transmitted": 33,
     "messages_delivered": 29,
     "messages_dropped": 207,
-    "runtime_seconds": 0.8843114000046626,
+    "runtime_seconds": 1.3035771999857388,
     "status": "COMPLETED"
   },
   "events": []

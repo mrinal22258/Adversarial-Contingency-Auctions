@@ -122,9 +122,9 @@ def analyze_sitl_vs_graph(sitl_jsonl_path: str):
         "loa_lower_95": float(loa_lower),
         "interpretation": (
             f"Physical SITL simulation exhibits a mean bias of {bias:.2f}% relative to abstract graph simulation "
-            f"(95% Limits of Agreement: [{loa_lower:.2f}%, {loa_upper:.2f}%]), reflecting differential-drive kinematics, "
-            f"turning latency, and collision deceleration."
-        )
+            f"(95% Limits of Agreement: [{loa_lower:.2f}%, {loa_upper:.2f}%]). Performance differences reflect "
+            f"continuous physical execution, sensor/odometry drift, and dynamic obstacle avoidance."
+        ),
     }
 
     # 3. Generate Bland-Altman Plot

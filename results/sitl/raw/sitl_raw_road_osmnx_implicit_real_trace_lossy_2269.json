@@ -1,6 +1,6 @@
 {
   "result": {
-    "commit": "75f7492d31b530324d85c7f87c869a08b4728d14",
+    "commit": "d11295d439a4f3cb73ed98889a395377b71067c6",
     "disclaimer": "SIMULATION -- PyBullet SITL -- No Physical Robot",
     "seed": 2269,
     "map_type": "road_osmnx",
@@ -9,18 +9,49 @@
     "comm_regime": "lossy",
     "n_robots": 4,
     "n_tasks": 8,
-    "completed_tasks": 0,
-    "completion_rate_pct": 0.0,
-    "total_conflicts": 200,
+    "completed_tasks": 5,
+    "completion_rate_pct": 62.5,
+    "total_conflicts": 217,
     "recourse_detours": 0,
     "physical_collisions": 0,
-    "total_distance_meters": 0.05458769686106453,
-    "net_welfare": -0.10917539372212906,
-    "messages_transmitted": 29,
-    "messages_delivered": 26,
-    "messages_dropped": 211,
-    "runtime_seconds": 2.766979199979687,
+    "total_distance_meters": 273.67232962023627,
+    "net_welfare": -47.34465924047254,
+    "messages_transmitted": 69,
+    "messages_delivered": 58,
+    "messages_dropped": 171,
+    "runtime_seconds": 3.213509699999122,
     "status": "COMPLETED"
   },
-  "events": []
+  "events": [
+    {
+      "step": 2,
+      "event": "task_completed",
+      "task_id": 1,
+      "robot_id": 1
+    },
+    {
+      "step": 2,
+      "event": "task_completed",
+      "task_id": 7,
+      "robot_id": 3
+    },
+    {
+      "step": 5,
+      "event": "task_completed",
+      "task_id": 4,
+      "robot_id": 0
+    },
+    {
+      "step": 9,
+      "event": "task_completed",
+      "task_id": 3,
+      "robot_id": 3
+    },
+    {
+      "step": 19,
+      "event": "task_completed",
+      "task_id": 0,
+      "robot_id": 3
+    }
+  ]
 }

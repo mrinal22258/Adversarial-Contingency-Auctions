@@ -64,6 +64,7 @@ class RobotAgent:
 
         # Local edge observation memory
         self.known_edge_states: Dict[Tuple[Any, Any], EdgeState] = {}
+        self.blocked_edges: Set[Tuple[Any, Any]] = set()
 
         # Execution flags
         self.status: str = "IDLE"  # IDLE, TRANSIT, PIVOTED, EXHAUSTED_NEEDS_REPLAN
@@ -85,6 +86,7 @@ class RobotAgent:
         self.path_index = 0
         self.edge_progress = 0.0
         self.known_edge_states.clear()
+        self.blocked_edges.clear()
         self.status = "IDLE"
         self.completed_tasks.clear()
         self.failed_tasks.clear()

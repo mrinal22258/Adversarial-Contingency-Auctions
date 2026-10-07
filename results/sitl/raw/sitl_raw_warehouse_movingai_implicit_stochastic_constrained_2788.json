@@ -1,6 +1,6 @@
 {
   "result": {
-    "commit": "75f7492d31b530324d85c7f87c869a08b4728d14",
+    "commit": "d11295d439a4f3cb73ed98889a395377b71067c6",
     "disclaimer": "SIMULATION -- PyBullet SITL -- No Physical Robot",
     "seed": 2788,
     "map_type": "warehouse_movingai",
@@ -9,18 +9,67 @@
     "comm_regime": "constrained",
     "n_robots": 4,
     "n_tasks": 8,
-    "completed_tasks": 0,
-    "completion_rate_pct": 0.0,
-    "total_conflicts": 160,
+    "completed_tasks": 8,
+    "completion_rate_pct": 100.0,
+    "total_conflicts": 121,
     "recourse_detours": 0,
-    "physical_collisions": 0,
-    "total_distance_meters": 0.09474537756871465,
-    "net_welfare": -0.1894907551374293,
-    "messages_transmitted": 119,
-    "messages_delivered": 113,
-    "messages_dropped": 121,
-    "runtime_seconds": 0.5549252000055276,
+    "physical_collisions": 9,
+    "total_distance_meters": 215.21934522858749,
+    "net_welfare": 369.56130954282503,
+    "messages_transmitted": 129,
+    "messages_delivered": 121,
+    "messages_dropped": 99,
+    "runtime_seconds": 1.8929125999857206,
     "status": "COMPLETED"
   },
-  "events": []
+  "events": [
+    {
+      "step": 0,
+      "event": "task_completed",
+      "task_id": 5,
+      "robot_id": 2
+    },
+    {
+      "step": 0,
+      "event": "task_completed",
+      "task_id": 1,
+      "robot_id": 1
+    },
+    {
+      "step": 2,
+      "event": "task_completed",
+      "task_id": 3,
+      "robot_id": 0
+    },
+    {
+      "step": 2,
+      "event": "task_completed",
+      "task_id": 6,
+      "robot_id": 1
+    },
+    {
+      "step": 3,
+      "event": "task_completed",
+      "task_id": 0,
+      "robot_id": 3
+    },
+    {
+      "step": 8,
+      "event": "task_completed",
+      "task_id": 4,
+      "robot_id": 1
+    },
+    {
+      "step": 10,
+      "event": "task_completed",
+      "task_id": 7,
+      "robot_id": 3
+    },
+    {
+      "step": 18,
+      "event": "task_completed",
+      "task_id": 2,
+      "robot_id": 3
+    }
+  ]
 }

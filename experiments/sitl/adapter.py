@@ -225,4 +225,8 @@ class SITLAllocatorAdapter:
             node_path = [start_node, dest_node]
 
         waypoints = [pos_dict[n] for n in node_path]
+        if len(waypoints) > 1:
+            d_first = float(np.hypot(start_pos[0] - waypoints[0][0], start_pos[1] - waypoints[0][1]))
+            if d_first < 1.0:
+                waypoints = waypoints[1:]
         return waypoints

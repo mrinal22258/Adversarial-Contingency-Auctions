@@ -1,6 +1,6 @@
 {
   "result": {
-    "commit": "75f7492d31b530324d85c7f87c869a08b4728d14",
+    "commit": "d11295d439a4f3cb73ed98889a395377b71067c6",
     "disclaimer": "SIMULATION -- PyBullet SITL -- No Physical Robot",
     "seed": 2096,
     "map_type": "warehouse_movingai",
@@ -14,12 +14,12 @@
     "total_conflicts": 0,
     "recourse_detours": 0,
     "physical_collisions": 0,
-    "total_distance_meters": 0.05365466811733549,
-    "net_welfare": -0.10730933623467098,
+    "total_distance_meters": 1.5494459501967461,
+    "net_welfare": -3.0988919003934923,
     "messages_transmitted": 32,
     "messages_delivered": 29,
     "messages_dropped": 208,
-    "runtime_seconds": 0.6376856999995653,
+    "runtime_seconds": 1.3294677000085358,
     "status": "COMPLETED"
   },
   "events": []

@@ -66,6 +66,7 @@ def run_single_sitl_trial(
     n_robots: int = 4,
     n_tasks: int = 8,
     max_steps: int = 20,
+    adv_budget_k: int = 4,
     save_raw_log: bool = True,
     record_history: bool = False,
 ) -> Dict[str, Any]:
@@ -117,7 +118,7 @@ def run_single_sitl_trial(
     else:
         adv_type = AdversaryType.STOCHASTIC
 
-    adversary = create_adversary(adv_type, budget_k=4, clearance_rate=0.15)
+    adversary = create_adversary(adv_type, budget_k=adv_budget_k, clearance_rate=0.15)
     edge_bc = nx.edge_betweenness_centrality(graph)
     sorted_edges = sorted(edge_bc.items(), key=lambda x: x[1], reverse=True)
     risky_edges = {canonical_edge(u, v) for (u, v), _ in sorted_edges[:6]}
@@ -163,6 +164,7 @@ def run_single_sitl_trial(
     physical_collisions = 0
     total_distance_m = 0.0
     known_blocked_edges: Set[Tuple[int, int]] = set()
+    current_robot_targets: Dict[int, Optional[int]] = {rid: None for rid in range(n_robots)}
 
     event_log = []
 
@@ -209,23 +211,32 @@ def run_single_sitl_trial(
         conflicts_step = len(all_claimed) - len(set(all_claimed))
         total_conflicts += max(0, conflicts_step)
 
-        # F. Waypoint path assignment
+        # F. Waypoint path assignment (only replan if target changed, target reached, or collision occurred)
         for rid, r in robots.items():
             assigned_b = bundles.get(rid, [])
             target_t = assigned_b[0] if assigned_b else None
             curr_xy = gt_poses[rid][:2]
-            waypoints = adapter.compute_waypoint_path(
-                robot_id=rid,
-                target_task_id=target_t,
-                start_pos=curr_xy,
-                blocked_edges=known_blocked_edges,
-            )
-            r.set_path(waypoints)
+            target_changed = (target_t != current_robot_targets.get(rid))
+            path_needed = r.target_reached or (len(r.current_path) == 0)
+
+            if target_changed or path_needed or r.collision_detected:
+                current_robot_targets[rid] = target_t
+                if target_t is not None:
+                    waypoints = adapter.compute_waypoint_path(
+                        robot_id=rid,
+                        target_task_id=target_t,
+                        start_pos=curr_xy,
+                        blocked_edges=known_blocked_edges,
+                    )
+                    r.set_path(waypoints)
+                else:
+                    r.set_path([])
 
         # Simultaneous physical stepping across all robots
-        for _ in range(8):
+        # 100 sub-steps at 1/60s = 1.67 seconds of physical simulation per auction step
+        for _ in range(100):
             for rid, r in robots.items():
-                r.update_controller(dt=0.1)
+                r.update_controller(dt=1.0 / 60.0)
             world.step_simulation(n_steps=1)
             for rid, r in robots.items():
                 hit_barrier = r.check_collisions(barrier_ids)
@@ -236,18 +247,32 @@ def run_single_sitl_trial(
                     if method in ["aca", "aca_no_margin", "cbba_partial_lr", "ssi_lr"]:
                         recourse_detours += 1
 
-        # Check task completion
-        for rid, r in robots.items():
-            assigned_b = bundles.get(rid, [])
-            target_t = assigned_b[0] if assigned_b else None
-            curr_xy = r.get_ground_truth_pose()[:2]
-            if target_t is not None and target_t not in completed_tasks:
-                t_pos = pos_dict[tasks[target_t].node]
-                dist_to_task = math.hypot(curr_xy[0] - t_pos[0], curr_xy[1] - t_pos[1])
-                if dist_to_task < 3.5:
-                    completed_tasks.add(target_t)
-                    tasks[target_t].completed = True
-                    event_log.append({"step": step, "event": "task_completed", "task_id": target_t, "robot_id": rid})
+            # Check task completion during physical execution
+            for rid, r in robots.items():
+                assigned_b = bundles.get(rid, [])
+                target_t = current_robot_targets.get(rid)
+                if target_t is not None and target_t not in completed_tasks:
+                    curr_xy = r.get_ground_truth_pose()[:2]
+                    t_pos = pos_dict[tasks[target_t].node]
+                    dist_to_task = math.hypot(curr_xy[0] - t_pos[0], curr_xy[1] - t_pos[1])
+                    if dist_to_task < 3.0:
+                        completed_tasks.add(target_t)
+                        tasks[target_t].completed = True
+                        event_log.append({"step": step, "event": "task_completed", "task_id": target_t, "robot_id": rid})
+                        # Advance to next task in bundle if available
+                        remaining_b = [t for t in assigned_b if t not in completed_tasks]
+                        next_t = remaining_b[0] if remaining_b else None
+                        current_robot_targets[rid] = next_t
+                        if next_t is not None:
+                            wps = adapter.compute_waypoint_path(
+                                robot_id=rid,
+                                target_task_id=next_t,
+                                start_pos=curr_xy,
+                                blocked_edges=known_blocked_edges,
+                            )
+                            r.set_path(wps)
+                        else:
+                            r.set_path([])
 
         if record_history:
             step_state = {
