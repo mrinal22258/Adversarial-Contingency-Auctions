@@ -1,0 +1,25 @@
+                                         Mixed Linear Model Regression Results
+=======================================================================================================================
+Model:                              MixedLM                   Dependent Variable:                   completion_rate_pct
+No. Observations:                   3600                      Method:                               REML               
+No. Groups:                         75                        Scale:                                94.4473            
+Min. group size:                    48                        Log-Likelihood:                       -13408.5035        
+Max. group size:                    48                        Converged:                            Yes                
+Mean group size:                    48.0                                                                               
+-----------------------------------------------------------------------------------------------------------------------
+                                                                             Coef.  Std.Err.   z    P>|z| [0.025 0.975]
+-----------------------------------------------------------------------------------------------------------------------
+Intercept                                                                    85.044    1.018 83.546 0.000 83.049 87.040
+C(method, Treatment('aca'))[T.cbba_partial_lr]                               -5.600    0.794 -7.057 0.000 -7.155 -4.045
+C(method, Treatment('aca'))[T.ctp_replan]                                    10.622    0.794 13.386 0.000  9.067 12.177
+C(method, Treatment('aca'))[T.implicit]                                       8.867    0.794 11.174 0.000  7.311 10.422
+C(comm_regime)[T.constrained]                                                 4.733    0.794  5.965 0.000  3.178  6.289
+C(comm_regime)[T.lossy]                                                       6.578    0.794  8.290 0.000  5.023  8.133
+C(method, Treatment('aca'))[T.cbba_partial_lr]:C(comm_regime)[T.constrained]  4.556    1.122  4.060 0.000  2.356  6.755
+C(method, Treatment('aca'))[T.ctp_replan]:C(comm_regime)[T.constrained]      -4.511    1.122 -4.020 0.000 -6.711 -2.312
+C(method, Treatment('aca'))[T.implicit]:C(comm_regime)[T.constrained]        -5.222    1.122 -4.654 0.000 -7.422 -3.023
+C(method, Treatment('aca'))[T.cbba_partial_lr]:C(comm_regime)[T.lossy]        6.444    1.122  5.743 0.000  4.245  8.644
+C(method, Treatment('aca'))[T.ctp_replan]:C(comm_regime)[T.lossy]            -6.356    1.122 -5.664 0.000 -8.555 -4.156
+C(method, Treatment('aca'))[T.implicit]:C(comm_regime)[T.lossy]              -6.711    1.122 -5.980 0.000 -8.911 -4.512
+Group Var                                                                    54.103    0.958                           
+=======================================================================================================================

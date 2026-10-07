@@ -1,5 +1,5 @@
 """
-Interactive Web Application for Belief-Divergence-Aware Contingency Auctions (ACA).
+Interactive Web Application for Adversarial Contingency Auctions (ACA).
 Built with Gradio and powered directly by the acalib simulation engine.
 """
 
@@ -239,7 +239,7 @@ with gr.Blocks(theme=theme, title="ACA Simulation Explorer") as demo:
 
     gr.Markdown(
         """
-        # Belief-Divergence-Aware Contingency Auctions (ACA)
+        # Adversarial Contingency Auctions (ACA)
         ### Interactive Multi-Robot Task Allocation under Strategic Blockages
         """
     )

@@ -1,0 +1,261 @@
+{
+  "aca": {
+    "aca": {
+      "wins": 0,
+      "ties": 75,
+      "losses": 0
+    },
+    "aca_no_margin": {
+      "wins": 25,
+      "ties": 12,
+      "losses": 38
+    },
+    "ctp_replan": {
+      "wins": 7,
+      "ties": 9,
+      "losses": 59
+    },
+    "implicit": {
+      "wins": 12,
+      "ties": 9,
+      "losses": 54
+    },
+    "cbba_lr": {
+      "wins": 44,
+      "ties": 10,
+      "losses": 21
+    },
+    "cbba_partial_lr": {
+      "wins": 38,
+      "ties": 15,
+      "losses": 22
+    },
+    "ssi_lr": {
+      "wins": 46,
+      "ties": 6,
+      "losses": 23
+    }
+  },
+  "aca_no_margin": {
+    "aca": {
+      "wins": 38,
+      "ties": 12,
+      "losses": 25
+    },
+    "aca_no_margin": {
+      "wins": 0,
+      "ties": 75,
+      "losses": 0
+    },
+    "ctp_replan": {
+      "wins": 12,
+      "ties": 12,
+      "losses": 51
+    },
+    "implicit": {
+      "wins": 15,
+      "ties": 12,
+      "losses": 48
+    },
+    "cbba_lr": {
+      "wins": 55,
+      "ties": 5,
+      "losses": 15
+    },
+    "cbba_partial_lr": {
+      "wins": 47,
+      "ties": 7,
+      "losses": 21
+    },
+    "ssi_lr": {
+      "wins": 48,
+      "ties": 5,
+      "losses": 22
+    }
+  },
+  "ctp_replan": {
+    "aca": {
+      "wins": 59,
+      "ties": 9,
+      "losses": 7
+    },
+    "aca_no_margin": {
+      "wins": 51,
+      "ties": 12,
+      "losses": 12
+    },
+    "ctp_replan": {
+      "wins": 0,
+      "ties": 75,
+      "losses": 0
+    },
+    "implicit": {
+      "wins": 31,
+      "ties": 30,
+      "losses": 14
+    },
+    "cbba_lr": {
+      "wins": 63,
+      "ties": 6,
+      "losses": 6
+    },
+    "cbba_partial_lr": {
+      "wins": 59,
+      "ties": 8,
+      "losses": 8
+    },
+    "ssi_lr": {
+      "wins": 60,
+      "ties": 11,
+      "losses": 4
+    }
+  },
+  "implicit": {
+    "aca": {
+      "wins": 54,
+      "ties": 9,
+      "losses": 12
+    },
+    "aca_no_margin": {
+      "wins": 48,
+      "ties": 12,
+      "losses": 15
+    },
+    "ctp_replan": {
+      "wins": 14,
+      "ties": 30,
+      "losses": 31
+    },
+    "implicit": {
+      "wins": 0,
+      "ties": 75,
+      "losses": 0
+    },
+    "cbba_lr": {
+      "wins": 63,
+      "ties": 6,
+      "losses": 6
+    },
+    "cbba_partial_lr": {
+      "wins": 54,
+      "ties": 8,
+      "losses": 13
+    },
+    "ssi_lr": {
+      "wins": 56,
+      "ties": 14,
+      "losses": 5
+    }
+  },
+  "cbba_lr": {
+    "aca": {
+      "wins": 21,
+      "ties": 10,
+      "losses": 44
+    },
+    "aca_no_margin": {
+      "wins": 15,
+      "ties": 5,
+      "losses": 55
+    },
+    "ctp_replan": {
+      "wins": 6,
+      "ties": 6,
+      "losses": 63
+    },
+    "implicit": {
+      "wins": 6,
+      "ties": 6,
+      "losses": 63
+    },
+    "cbba_lr": {
+      "wins": 0,
+      "ties": 75,
+      "losses": 0
+    },
+    "cbba_partial_lr": {
+      "wins": 6,
+      "ties": 30,
+      "losses": 39
+    },
+    "ssi_lr": {
+      "wins": 43,
+      "ties": 4,
+      "losses": 28
+    }
+  },
+  "cbba_partial_lr": {
+    "aca": {
+      "wins": 22,
+      "ties": 15,
+      "losses": 38
+    },
+    "aca_no_margin": {
+      "wins": 21,
+      "ties": 7,
+      "losses": 47
+    },
+    "ctp_replan": {
+      "wins": 8,
+      "ties": 8,
+      "losses": 59
+    },
+    "implicit": {
+      "wins": 13,
+      "ties": 8,
+      "losses": 54
+    },
+    "cbba_lr": {
+      "wins": 39,
+      "ties": 30,
+      "losses": 6
+    },
+    "cbba_partial_lr": {
+      "wins": 0,
+      "ties": 75,
+      "losses": 0
+    },
+    "ssi_lr": {
+      "wins": 44,
+      "ties": 6,
+      "losses": 25
+    }
+  },
+  "ssi_lr": {
+    "aca": {
+      "wins": 23,
+      "ties": 6,
+      "losses": 46
+    },
+    "aca_no_margin": {
+      "wins": 22,
+      "ties": 5,
+      "losses": 48
+    },
+    "ctp_replan": {
+      "wins": 4,
+      "ties": 11,
+      "losses": 60
+    },
+    "implicit": {
+      "wins": 5,
+      "ties": 14,
+      "losses": 56
+    },
+    "cbba_lr": {
+      "wins": 28,
+      "ties": 4,
+      "losses": 43
+    },
+    "cbba_partial_lr": {
+      "wins": 25,
+      "ties": 6,
+      "losses": 44
+    },
+    "ssi_lr": {
+      "wins": 0,
+      "ties": 75,
+      "losses": 0
+    }
+  }
+}

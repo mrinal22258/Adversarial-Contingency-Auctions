@@ -267,3 +267,118 @@ def format_latex_ci(mean: float, low: float, high: float, decimals: int = 1) -> 
     half_ci = 0.5 * (high - low)
     return f"${mean:.{decimals}f} \\pm {half_ci:.{decimals}f}$"
 
+
+def exact_binomial_test(
+    k_successes: int,
+    n_trials: int,
+    p0: float = 0.90,
+    confidence_level: float = 0.95,
+    alternative: str = "greater",
+) -> Dict[str, Any]:
+    """
+    Exact binomial test against a pre-declared threshold p0 with exact Clopper-Pearson CI.
+    """
+    if n_trials <= 0:
+        return {
+            "p0": p0,
+            "successes": 0,
+            "n_trials": 0,
+            "rate": 0.0,
+            "p_value": 1.0,
+            "ci_lower": 0.0,
+            "ci_upper": 0.0,
+            "adheres": False,
+        }
+
+    b_res = stats.binomtest(k_successes, n_trials, p=p0, alternative=alternative)
+    ci = b_res.proportion_ci(confidence_level=confidence_level, method="exact")
+    emp_rate = float(k_successes / n_trials)
+
+    return {
+        "p0": p0,
+        "successes": int(k_successes),
+        "n_trials": int(n_trials),
+        "rate": emp_rate,
+        "p_value": float(b_res.pvalue),
+        "ci_lower": float(ci.low),
+        "ci_upper": float(ci.high),
+        "adheres": bool(emp_rate >= p0 and b_res.pvalue <= (1.0 - confidence_level)),
+    }
+
+
+def friedman_nemenyi_analysis(
+    matrix_df: Any,
+    alpha: float = 0.05,
+) -> Dict[str, Any]:
+    """
+    Perform Friedman omnibus test followed by Nemenyi critical difference calculation.
+    matrix_df: DataFrame with rows = instances, columns = methods.
+    """
+    methods = list(matrix_df.columns)
+    k = len(methods)
+    N = len(matrix_df)
+    if k < 2 or N < 3:
+        return {"friedman_stat": 0.0, "p_value": 1.0, "mean_ranks": {}, "cd": 0.0}
+
+    # Rank each instance row across methods (higher is better: rank 1 is highest)
+    # scipy.stats.rankdata ranks ascending, so we rank negative values to get rank 1 = best
+    ranks = np.zeros((N, k))
+    for i in range(N):
+        row = matrix_df.iloc[i].values
+        # Rank 1 for largest value
+        ranks[i] = stats.rankdata(-row, method="average")
+
+    mean_ranks = {methods[j]: float(np.mean(ranks[:, j])) for j in range(k)}
+
+    # Friedman test
+    try:
+        col_arrays = [ranks[:, j] for j in range(k)]
+        stat, p_val = stats.friedmanchisquare(*col_arrays)
+    except Exception:
+        stat, p_val = 0.0, 1.0
+
+    # Nemenyi critical difference:
+    # CD = q_alpha * sqrt(k*(k+1)/(6*N))
+    # where q_alpha is the Studentized range statistic critical value / sqrt(2)
+    try:
+        q_alpha = stats.studentized_range.ppf(1.0 - alpha, k, np.inf) / np.sqrt(2.0)
+        cd = float(q_alpha * np.sqrt(k * (k + 1) / (6.0 * N)))
+    except Exception:
+        cd = 0.0
+
+    return {
+        "n_instances": int(N),
+        "n_methods": int(k),
+        "methods": methods,
+        "mean_ranks": mean_ranks,
+        "friedman_stat": float(stat),
+        "p_value": float(p_val),
+        "nemenyi_cd": float(cd),
+    }
+
+
+def win_tie_loss_matrix(
+    pivoted_df: Any,
+    margin: float = 1.0,
+) -> Dict[str, Dict[str, Dict[str, int]]]:
+    """
+    Compute pairwise win/tie/loss counts between all methods on matched instances.
+    margin: threshold below which difference is considered a tie (e.g., 1.0 pp).
+    """
+    methods = list(pivoted_df.columns)
+    results = {}
+    for m1 in methods:
+        results[m1] = {}
+        for m2 in methods:
+            if m1 == m2:
+                results[m1][m2] = {"wins": 0, "ties": len(pivoted_df), "losses": 0}
+                continue
+            diff = pivoted_df[m1] - pivoted_df[m2]
+            valid = diff.dropna()
+            wins = int((valid > margin).sum())
+            losses = int((valid < -margin).sum())
+            ties = int((np.abs(valid) <= margin).sum())
+            results[m1][m2] = {"wins": wins, "ties": ties, "losses": losses}
+    return results
+
+

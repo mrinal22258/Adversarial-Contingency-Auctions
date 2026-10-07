@@ -1,4 +1,4 @@
-# Belief-Divergence-Aware Contingency Auctions (ACA)
+# Adversarial Contingency Auctions (ACA)
 
 > **Decentralized Multi-Robot Task Allocation under Strategic Blockages & Divergent Beliefs**
 
@@ -12,7 +12,7 @@
 ## 📌 Executive Summary
 In decentralized multi-robot task allocation, strategic adversarial path blockages and inconsistent local worldviews induce coordination failures. Standard market mechanisms (e.g., CBBA, SSI) assume consensus and require cascading market re-auctions upon path invalidation, causing communication surges and delays.
 
-**Belief-Divergence-Aware Contingency Auctions (ACA)** addresses these vulnerabilities through three mechanisms:
+**Adversarial Contingency Auctions (ACA)** addresses these vulnerabilities through three mechanisms:
 1. **Expected-Recourse Valuation (Theorem 1):** Robots bid their expected recourse cost over a depth-$d$ contingency branching policy under a Bayesian posterior over adversary types.
 2. **Pinsker Belief-Divergence Claim Margin (Theorem 3):** Tasks are claimed safely via a closed-form margin $m_{r,j} = \Delta_j (\sqrt{\frac{1}{2} D'_{\text{KL}}} + \eta_{\text{eff}}) + \delta_{\text{map}}$ derived from Pinsker's inequality and total variation triangle bounds, guaranteeing conflict-free safe claims under bounded belief estimation error without exchanging belief vectors.
 3. **Local Detour Execution (Proposition 2):** Blockage encounters activate local precomputed detours with zero communication messages, resorting to market re-auctions only upon recourse tree exhaustion.
@@ -77,7 +77,7 @@ python tools/lint_paper.py
 ```bibtex
 @article{mrinal2026aca,
   author  = {Mrinal, Kumar},
-  title   = {Belief-Divergence-Aware Contingency Auctions for Decentralized Multi-Robot Task Allocation under Strategic Blockages},
+  title   = {Adversarial Contingency Auctions for Decentralized Multi-Robot Task Allocation under Strategic Blockages},
   journal = {IEEE Robotics and Automation Letters},
   year    = {2026}
 }

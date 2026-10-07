@@ -256,8 +256,18 @@ def check_staleness(tex_content: str, base_dir: str = REPO_ROOT) -> List[str]:
     raw_results_path = os.path.join(results_dir, "raw_results.csv")
     runs_jsonl_path = os.path.join(results_dir, "runs.jsonl")
 
-    # 1. results git_commit != code commit
-    allow_ancestor = os.environ.get("ALLOW_ANCESTOR_COMMIT") == "1"
+    # 1. results git_commit != code commit (Rule R1: must equal HEAD with a clean tree)
+    git_bin = shutil.which("git") or r"C:\Program Files\Git\cmd\git.exe"
+    try:
+        status_res = subprocess.run([git_bin, "status", "--porcelain"], capture_output=True, text=True, check=False)
+        if status_res.returncode == 0 and status_res.stdout.strip():
+            # Ignore paper.pdf if it's being regenerated
+            dirty_lines = [l for l in status_res.stdout.strip().splitlines() if not l.endswith("paper.pdf")]
+            if dirty_lines:
+                errors.append(f"Dirty working tree: {len(dirty_lines)} uncommitted changes detected. Results commit must equal HEAD with a clean tree.")
+    except Exception:
+        pass
+
     if current_commit:
         if os.path.exists(runs_jsonl_path) and os.path.getsize(runs_jsonl_path) > 0:
             with open(runs_jsonl_path, "r", encoding="utf-8") as f:
@@ -265,41 +275,24 @@ def check_staleness(tex_content: str, base_dir: str = REPO_ROOT) -> List[str]:
                 if first_line:
                     try:
                         rec = json.loads(first_line)
-                        res_commit = rec.get("git_commit")
+                        res_commit = rec.get("git_commit", rec.get("commit"))
                         if res_commit and res_commit != current_commit:
-                            is_ancestor = False
-                            if allow_ancestor:
-                                git_bin = shutil.which("git") or r"C:\Program Files\Git\cmd\git.exe"
-                                try:
-                                    res = subprocess.run([git_bin, "merge-base", "--is-ancestor", res_commit, current_commit], check=False)
-                                    is_ancestor = (res.returncode == 0)
-                                except Exception:
-                                    pass
-                            if not is_ancestor:
-                                errors.append(
-                                    f"Stale results: runs.jsonl commit ({res_commit}) != repository HEAD ({current_commit})"
-                                )
+                            errors.append(
+                                f"Stale results: runs.jsonl commit ({res_commit}) != repository HEAD ({current_commit})"
+                            )
                     except Exception:
                         pass
         elif os.path.exists(raw_results_path):
             try:
                 import pandas as pd
                 df_head = pd.read_csv(raw_results_path, nrows=5)
-                if "git_commit" in df_head.columns:
-                    res_commit = str(df_head["git_commit"].iloc[0])
+                commit_col = "git_commit" if "git_commit" in df_head.columns else ("commit" if "commit" in df_head.columns else None)
+                if commit_col:
+                    res_commit = str(df_head[commit_col].iloc[0])
                     if res_commit and res_commit != current_commit:
-                        is_ancestor = False
-                        if allow_ancestor:
-                            git_bin = shutil.which("git") or r"C:\Program Files\Git\cmd\git.exe"
-                            try:
-                                res = subprocess.run([git_bin, "merge-base", "--is-ancestor", res_commit, current_commit], check=False)
-                                is_ancestor = (res.returncode == 0)
-                            except Exception:
-                                pass
-                        if not is_ancestor:
-                            errors.append(
-                                f"Stale results: raw_results.csv commit ({res_commit}) != repository HEAD ({current_commit})"
-                            )
+                        errors.append(
+                            f"Stale results: raw_results.csv commit ({res_commit}) != repository HEAD ({current_commit})"
+                        )
             except Exception:
                 pass
 
@@ -416,11 +409,7 @@ def main():
     import argparse
     parser = argparse.ArgumentParser(description="Strict Paper & Provenance Linter")
     parser.add_argument("--tex-path", default="paper.tex", help="Path to paper.tex")
-    parser.add_argument("--allow-ancestor-commit", action="store_true", help="Allow results commit if it is an ancestor of repository HEAD")
     args = parser.parse_args()
-
-    if args.allow_ancestor_commit:
-        os.environ["ALLOW_ANCESTOR_COMMIT"] = "1"
 
     errors = lint_paper(args.tex_path)
     if errors:

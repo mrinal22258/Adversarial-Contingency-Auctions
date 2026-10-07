@@ -32,4 +32,6 @@ results/traces/
 results/traces.zip
 results/*_pre_a1.*
 results/runs_cleaned.jsonl
+results/runs_extended.jsonl
+results/tv_evaluations.jsonl
 experiments/scratch/

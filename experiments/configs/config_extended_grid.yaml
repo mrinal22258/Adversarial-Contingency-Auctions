@@ -1,0 +1,74 @@
+# Extended Evaluation Grid Configuration (prereg-v3, Step 4.3)
+# Protocol: LHS + OFAT parameter sweep with n >= 50 independent instances per family.
+
+benchmark_name: "aca_extended_grid"
+preregistration_tag: "prereg-v3"
+
+# Disjoint seed allocation ensuring n >= 50 independent instances per environment family
+final_seeds: 50 # 5 families x 50 seeds = 250 independent instances
+
+max_steps: 80
+
+environments:
+  # Real environments (MovingAI warehouse MAPF & OSMnx Boston road network)
+  - family: "warehouse_movingai"
+    n_nodes: 38
+  - family: "road_osmnx"
+    n_nodes: 216
+  # Synthetic benchmark stress test families
+  - family: "rgg"
+    n_nodes: 35
+  - family: "warehouse"
+    n_nodes: 30
+  - family: "er"
+    n_nodes: 35
+
+adversaries:
+  - "theta_1_stochastic"
+  - "theta_2_reactive"
+  - "theta_3_budgeted_interdiction"
+  - "theta_4_cyclic_patrol"
+  - "theta_6_switching"
+
+methods:
+  - "aca"
+  - "aca_no_margin"
+  - "aca_depth_0"
+  - "aca_no_inference"
+  - "cbba"
+  - "cbba_lr"
+  - "cbba_partial_lr"
+  - "ssi_lr"
+  - "ctp_replan"
+  - "implicit"
+  - "clairvoyant_greedy"
+
+# OFAT Base Configuration
+default_fleet_size: 4
+default_task_count: 15
+default_comm_range: 30.0
+default_p_drop: 0.10
+contingency_depth: 1
+
+# OFAT Parameter Variations
+ofat_factors:
+  fleet_sizes: [4, 8, 12]
+  task_counts: [15, 30, 60]
+  comm_ranges: [15, 25, 35, 50, 80]
+  p_drops: [0.0, 0.05, 0.20, 0.40]
+  environmental_variants:
+    - "standard_batch"
+    - "poisson_arrivals"
+    - "network_partitions"
+    - "misspecified_prior"
+
+comm_regimes:
+  benign:
+    comm_range: 50.0
+    p_drop: 0.02
+  constrained:
+    comm_range: 25.0
+    p_drop: 0.15
+  lossy:
+    comm_range: 20.0
+    p_drop: 0.30

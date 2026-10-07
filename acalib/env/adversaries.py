@@ -18,6 +18,7 @@ class AdversaryType(str, Enum):
     BUDGETED_INTERDICTION = "theta_3_budgeted_interdiction"
     CYCLIC_PATROL = "theta_4_cyclic_patrol"
     REAL_TRACE_REPLAY = "theta_5_real_trace_replay"
+    SWITCHING = "theta_6_switching"
 
 
 CanonicalTypeSet = [
@@ -355,6 +356,38 @@ class RealTraceReplayAdversary(Adversary):
         return hazards
 
 
+class SwitchingAdversary(Adversary):
+    """
+    theta_6: Switching Adversary that dynamically changes behavioral policies mid-trial
+    (e.g. starts reactive to fleet density, then pivots to cyclic patrol on critical bottlenecks).
+    """
+
+    def __init__(
+        self,
+        switch_step: int = 40,
+        budget_k: int = 4,
+        clearance_rate: float = 0.15,
+        **kwargs: Any,
+    ):
+        super().__init__(AdversaryType.SWITCHING, budget_k=budget_k, clearance_rate=clearance_rate)
+        self.switch_step = switch_step
+        self.adv1 = ReactiveAdversary(budget_k=budget_k, clearance_rate=clearance_rate)
+        self.adv2 = CyclicPatrolAdversary(budget_k=budget_k, clearance_rate=clearance_rate)
+
+    def get_onset_hazards(
+        self,
+        graph: nx.Graph,
+        risky_edges: Set[Tuple[Any, Any]],
+        current_blockages: Set[Tuple[Any, Any]],
+        fleet_states: Dict[int, Any],
+        step: int,
+    ) -> Dict[Tuple[Any, Any], float]:
+        if step < self.switch_step:
+            return self.adv1.get_onset_hazards(graph, risky_edges, current_blockages, fleet_states, step)
+        else:
+            return self.adv2.get_onset_hazards(graph, risky_edges, current_blockages, fleet_states, step)
+
+
 def create_adversary(
     adv_type: AdversaryType,
     budget_k: int = 4,
@@ -384,6 +417,11 @@ def create_adversary(
     elif adv_type == AdversaryType.REAL_TRACE_REPLAY or str(adv_type) in ("theta_5_real_trace_replay", "real_trace_replay"):
         return RealTraceReplayAdversary(
             budget_k=budget_k, clearance_rate=clearance_rate, **kwargs
+        )
+    elif adv_type == AdversaryType.SWITCHING or str(adv_type) in ("theta_6_switching", "switching"):
+        switch_step = kwargs.get("switch_step", 40)
+        return SwitchingAdversary(
+            switch_step=switch_step, budget_k=budget_k, clearance_rate=clearance_rate, **kwargs
         )
     else:
         raise ValueError(f"Unknown adversary type: {adv_type}")

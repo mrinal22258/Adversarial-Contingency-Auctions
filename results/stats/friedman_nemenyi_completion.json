@@ -1,0 +1,25 @@
+{
+  "n_instances": 75,
+  "n_methods": 7,
+  "methods": [
+    "aca",
+    "aca_no_margin",
+    "ctp_replan",
+    "implicit",
+    "cbba_lr",
+    "cbba_partial_lr",
+    "ssi_lr"
+  ],
+  "mean_ranks": {
+    "aca": 4.333333333333333,
+    "aca_no_margin": 3.8133333333333335,
+    "ctp_replan": 2.0933333333333333,
+    "implicit": 2.5933333333333333,
+    "cbba_lr": 5.3533333333333335,
+    "cbba_partial_lr": 4.52,
+    "ssi_lr": 5.293333333333333
+  },
+  "friedman_stat": 159.06821552150268,
+  "p_value": 9.3276564049471e-32,
+  "nemenyi_cd": 1.0400695402422817
+}

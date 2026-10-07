@@ -1,0 +1,32 @@
+{
+  "figure_file": "C:\\Users\\krmri\\Downloads\\Adversarial-Contingency-Auctions-main\\Adversarial-Contingency-Auctions-main\\results\\figures\\fig_ci_width_scaling.pdf",
+  "commit": "9a49d163639894a489152a4155fa7d2f9b496864",
+  "disclaimer": "SIMULATION ONLY -- CI Width Scaling Analysis",
+  "sample_sizes": [
+    10,
+    16,
+    22,
+    28,
+    34,
+    40,
+    46,
+    52,
+    58,
+    64,
+    70
+  ],
+  "mean_widths": [
+    8.686111111111114,
+    6.180555555555563,
+    5.216666666666671,
+    4.638888888888891,
+    4.113888888888892,
+    3.750000000000002,
+    3.4805555555555596,
+    3.3638888888888907,
+    3.1333333333333377,
+    2.9722222222222263,
+    2.8500000000000005
+  ],
+  "n_total_instances": 75
+}

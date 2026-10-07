@@ -1,11 +1,18 @@
 # Pre-Registered Statistical Hypotheses for Adversarial Contingency Auctions (ACA)
-# Protocol: Pre-registered dated amendment (tag prereg-v2, 2026-10-06).
+# Protocol: Pre-registered dated amendment (tag prereg-v3, 2026-10-07).
 # Unit of Analysis: Independent instance (graph_family, seed), averaging internal replicates.
-# Disjoint Seeds: Pilot (10000-10009), Final Evaluation (1-50).
+# Disjoint Seeds: Pilot (10000-10009), Final Evaluation (1-50+).
 
-preregistration_version: "prereg-v2"
-amendment_date: "2026-10-06"
-amendment_notes: "Stratified H2 by communication regimes (benign, constrained, lossy) and environment types (real MovingAI/OSMnx maps vs synthetic benchmarks). Added explicit CTP and gossip baseline comparisons."
+preregistration_version: "prereg-v3"
+amendment_date: "2026-10-07"
+amendment_notes: >
+  Step 4 overhaul:
+  1. Fixed verdict labeling rule for directional hypotheses (H6 direction 'less' -> fewer messages reads SUPPORTED).
+  2. Fixed H7 exact binomial test against pre-declared 0.90 threshold with Clopper-Pearson CI.
+  3. Upgraded H4 to dual-criteria test: safe-claim conflict reduction (direction 'less') + TOST equivalence on completion (margin 5.0 pp).
+  4. Added explicit comparator hypotheses: ACA vs CTP Replan (H2_CTP) and ACA vs Implicit (H2_IMPLICIT), stratified across all regimes and real vs synthetic maps.
+  5. Formalized H3 comparator selection rule: best baseline chosen by highest mean metric across benchmark instances.
+  6. Extended evaluation grid: R in {4,8,12}, M in {15,30,60}, comm_range in {15,25,35,50,80}, p_drop in {0,0.05,0.20,0.40}, n >= 50 instances per family.
 
 hypotheses:
   H1:
@@ -25,10 +32,10 @@ hypotheses:
   H2:
     id: "H2"
     title: "Level Execution Benchmark Comparison (+LR)"
-    description: "ACA matches or outperforms baselines equipped with identical local recourse execution (+LR: CBBA+LR, CBBA-PR+LR, SSI+LR, CTP) under communication constraints, stratified by comm regime (benign, constrained, lossy) and environment class (real maps: MovingAI warehouse and Boston road network vs synthetic benchmarks)."
+    description: "ACA matches or outperforms baselines equipped with identical local recourse execution (+LR: CBBA+LR, CBBA-PR+LR, SSI+LR) under communication constraints, stratified by comm regime (benign, constrained, lossy) and environment class (real maps: MovingAI warehouse and Boston road network vs synthetic benchmarks)."
     metric: "completion_rate_pct"
     secondary_metric: "net_welfare"
-    comparison: "aca vs {cbba_lr, cbba_partial_lr, ssi_lr, ctp_replan}"
+    comparison: "aca vs {cbba_lr, cbba_partial_lr, ssi_lr}"
     stratification:
       comm_regimes: ["benign", "constrained", "lossy"]
       map_classes: ["real_maps", "synthetic"]
@@ -40,12 +47,47 @@ hypotheses:
     correction: "holm"
     minimum_effect: 0.0
 
+  H2_CTP:
+    id: "H2_CTP"
+    title: "Comparator Evaluation: ACA vs CTP Replan"
+    description: "Evaluates task completion and net welfare between ACA and CTP Replan (replan-on-discovery) across all communication regimes and map types (real MovingAI/Boston vs synthetic)."
+    metric: "completion_rate_pct"
+    secondary_metric: "net_welfare"
+    comparison: "aca vs ctp_replan"
+    stratification:
+      comm_regimes: ["benign", "constrained", "lossy"]
+      map_classes: ["real_maps", "synthetic"]
+    direction: "two_sided"
+    tier: "primary"
+    alpha: 0.05
+    test: "paired_wilcoxon"
+    effect_size: "cliffs_delta"
+    correction: "holm"
+
+  H2_IMPLICIT:
+    id: "H2_IMPLICIT"
+    title: "Comparator Evaluation: ACA vs Implicit Coordination"
+    description: "Evaluates task completion and net welfare between ACA and Implicit Coordination baseline across all communication regimes and map types."
+    metric: "completion_rate_pct"
+    secondary_metric: "net_welfare"
+    comparison: "aca vs implicit"
+    stratification:
+      comm_regimes: ["benign", "constrained", "lossy"]
+      map_classes: ["real_maps", "synthetic"]
+    direction: "two_sided"
+    tier: "primary"
+    alpha: 0.05
+    test: "paired_wilcoxon"
+    effect_size: "cliffs_delta"
+    correction: "holm"
+
   H3:
     id: "H3"
-    title: "Welfare Non-Inferiority"
-    description: "ACA is non-inferior to the best-performing baseline on net welfare within a 5% equivalence margin."
+    title: "Welfare Non-Inferiority vs Best Baseline"
+    description: "ACA is non-inferior to the best-performing baseline on net welfare within a 5% equivalence margin, where the best baseline is chosen by pre-declared rule: max mean welfare across candidate baselines."
     metric: "net_welfare"
     comparison: "aca vs best_baseline"
+    comparator_selection_rule: "max_mean_net_welfare_among_baselines"
     direction: "non_inferiority"
     tier: "primary"
     alpha: 0.05
@@ -55,8 +97,8 @@ hypotheses:
 
   H4:
     id: "H4"
-    title: "Pinsker Margin Conflict Elimination"
-    description: "The Pinsker divergence claim margin reduces Phase-1 safe-claim conflicts to zero while maintaining completion within 5 pp of unconstrained ACA."
+    title: "Pinsker Margin Safe-Claim Conflict Reduction and Completion Preservation"
+    description: "The Pinsker divergence claim margin reduces Phase-1 safe-claim conflicts relative to unconstrained ACA (direction: less), while maintaining completion equivalence within a 5.0 pp margin via TOST."
     metric: "safe_claim_conflicts"
     secondary_metric: "completion_rate_pct"
     comparison: "aca vs aca_no_margin"
@@ -97,9 +139,10 @@ hypotheses:
   H7:
     id: "H7"
     title: "Assumption 1 Empirical Validity"
-    description: "Assumption 1 (TV(B_s, B_hat_s) <= eta_eff) holds in at least 90% of evaluations under packet drop rate p_drop <= 0.10."
+    description: "Assumption 1 (TV(B_s, B_hat_s) <= eta_eff) holds in at least 90% of evaluations under packet drop rate p_drop <= 0.10, tested via exact binomial test against pre-declared threshold 0.90 with Clopper-Pearson CI."
     metric: "tv_bound_adherence_rate"
     comparison: "empirical_rate vs 0.90"
+    predeclared_threshold: 0.90
     direction: "greater_or_equal"
     tier: "secondary"
     alpha: 0.05
@@ -125,3 +168,7 @@ statistical_protocol:
   multiple_comparison_primary: "holm"
   multiple_comparison_secondary: "benjamini_hochberg"
   mixed_effects_formula: "metric ~ method * comm_regime + (1 | instance)"
+  stratified_reporting:
+    - "real_maps"
+    - "synthetic"
+    - "pooled"

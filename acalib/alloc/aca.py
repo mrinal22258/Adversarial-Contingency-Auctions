@@ -17,7 +17,7 @@ from ..env.adversaries import canonical_edge
 
 class ACAAllocator(CBBAAllocator):
     """
-    ACA-CBBA: Belief-Divergence-Aware Contingency Auction.
+    ACA-CBBA: Adversarial Contingency Auction.
     Features:
     1. Type-aware expected recourse cost valuation (Thm 1).
     2. Pinsker belief-divergence claim margin m_{r, j} (Thm 3).

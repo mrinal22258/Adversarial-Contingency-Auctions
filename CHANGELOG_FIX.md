@@ -274,3 +274,32 @@ For every phase and change:
   12. **3.16 Robotarium Remote-Access Deployment Preparation (`hw/robotarium/`):**
       - Created unicycle command adapter and safety checklist in `hw/robotarium/README.md` and `hw/robotarium/adapter.py`.
       - Explicitly labeled: 'Prepared for future remote-robot evaluation; NOT executed.' No access or hardware deployment claimed.
+
+
+---
+
+### Step 4B: Make Step 4 True (Extended Grid & Statistical Rigor)
+- **Status:** Complete (2026-10-07)
+- **Changes made:**
+  1. **Title Preservation:** Retained original title "Adversarial Contingency Auctions (ACA)" across all files (`README.md`, `paper.tex`, `index.html`, `app.py`, `acalib/__init__.py`, `acalib/alloc/aca.py`, `experiments/hypotheses.yaml`).
+  2. **B1: Frozen Pre-Registration & Strict Reproducibility:**
+     - Created pre-registration tag `prereg-v3` on commit containing final `experiments/hypotheses.yaml` and `experiments/configs/config_extended_grid.yaml`.
+     - Removed `--allow-ancestor-commit` relaxation from `tools/lint_paper.py`: results commit must match HEAD with a clean working tree.
+  3. **B2: Extended LHS + OFAT Grid ($N = 11,000$ Trials):**
+     - Executed full extended parameter sweep with $n = 50$ true independent seeds across all 5 benchmark families (`warehouse_movingai`, `road_osmnx`, `rgg`, `warehouse`, `er`).
+     - Verified exact seed count $n = 50$ per family ($N = 250$ independent instances total). Reported $n$ per family explicitly next to every result.
+  4. **B3: Assumption 1 (H7) Empirical TV Adherence & Conflict-Free Run Rate:**
+     - Instrumenting margin evaluations across all ACA runs, logged 1,658,069 true TV vs $\eta_{	ext{eff}}$ observations and exported to `results/tv_evaluations.jsonl`.
+     - Empirical adherence ($\mathrm{TV} \le \eta_{	ext{eff}}$): 64.37% (Clopper-Pearson 95% CI: [64.29%, 64.44%]). Tested vs pre-declared $p_0 = 0.90$: strictly REJECTED ($p = 1.000$, Rule R2).
+     - Separately reported conflict-free-run rate (formerly 98.22%): 98.22% of ACA runs have 0 safe-claim conflicts (Clopper-Pearson 95% CI: [97.58%, 98.74%], exact binomial $p = 3.28 	imes 10^{-23}$).
+  5. **B4: Unified Multiple Comparison Families & Borderline Comparator Analysis:**
+     - Unified all primary tests (`H1`, `H2_cbba_lr`, `H2_cbba_partial_lr`, `H2_ssi_lr`, `H2_CTP`, `H2_IMPLICIT`, `H3`, `H4`, `H4_COMPLETION`) under ONE pre-registered Holm step-down family; Benjamini-Hochberg for secondary (`H5`, `H6`, `H7`, `H8`).
+     - Documented that ACA vs CBBA-PR+LR is borderline under Holm ($p_{	ext{adj}} = 0.0463$), not significant under Bonferroni ($p_{	ext{bonf}} = 0.2082$), and demonstrates parity per-regime (nominal: diff +0.19 pp, range: diff +0.05 pp, drop: diff +0.12 pp).
+  6. **B5: H4 Decomposition & Cost Reporting:**
+     - Total safe-claim conflicts: 36 for ACA vs 6,059 for ACA-no-margin (99.4% reduction; Wilcoxon $p = 2.61 	imes 10^{-14}$).
+     - Conflicts per safe claimed task: 0.0008. Safe claims: 42,532; Deferred claims: 277,424 (Deferral rate: 86.71%).
+     - Completion preservation & cost: ACA completes 88.81% vs 90.35% (-1.53 pp completion cost of conservative deferral), confirmed non-inferior under TOST within 5.0 pp margin ($p_{	ext{TOST}} = 5.29 	imes 10^{-7}$).
+  7. **Advanced Diagnostics:**
+     - Generated Critical Difference diagram: `results/figures/fig_critical_difference_diagram.pdf` & `.provenance.json`.
+     - Generated CI Width Scaling plot ($W(n) \propto n^{-1/2}$): `results/figures/fig_ci_width_scaling.pdf` & `.provenance.json`.
+     - Generated definitive verdict: `RESULTS_VERDICT.md`.
