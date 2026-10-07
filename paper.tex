@@ -285,12 +285,24 @@ compared to $\sum_j [1 - \prod_i (1 - \pi_i)] \mathcal{O}(|\mathcal{R}| \cdot \m
 
 \subsection{Experimental Setup and Baselines}
 All experiments were conducted across five graph topology families, encompassing two real benchmark maps and three synthetic stress-test graph models:
+
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=0.32\textwidth]{static/images/fig_map_movingai_warehouse}%
+\hfill
+\includegraphics[width=0.32\textwidth]{static/images/fig_map_boston_road}%
+\hfill
+\includegraphics[width=0.34\textwidth]{static/images/fig_map_synthetic_families}
+\caption{Benchmark Navigation Topologies: (Left) Real MovingAI warehouse map ($63 \times 161$ grid, 5,699 passable cells) and coarsened navigation backbone ($n = 38, |E| = 59$). (Center) Real Downtown Boston road network ($n = 216, |E| = 323$) displaying risk corridors, robot starts ($R = 4$), task locations ($M = 8$), and communication range ($r_{\mathrm{comm}} = 25$). (Right) Synthetic benchmark families evaluated as stress tests (Random Geometric, Warehouse Grid, Erd\H{o}s--R\'enyi).}
+\label{fig:benchmark_maps}
+\end{figure*}
+
 \begin{enumerate}
-    \item \textbf{MovingAI Warehouse MAPF Benchmark:} Standard automated storage and retrieval warehouse benchmark (\texttt{warehouse-10-20-10-2-1.map}, 5,699 passable cells, 8,778 edges) deterministically coarsened by corridor block pooling into $n = 38$ waypoint nodes and $|E| = 59$ traversable corridor edges.
-    \item \textbf{Downtown Boston Road Network:} Real-world street topology extracted via OSMnx 2.1.1 (\texttt{boston\_downtown\_drive.graphml}) comprising $n = 216$ street intersections and $|E| = 323$ traversable roadway segments.
+    \item \textbf{MovingAI Warehouse MAPF Benchmark:} Standard automated storage and retrieval warehouse benchmark (\texttt{warehouse-10-20-10-2-1.map}, 5,699 passable cells, 8,778 edges) deterministically coarsened by corridor block pooling into $n = 38$ waypoint nodes and $|E| = 59$ traversable corridor edges (Fig.~\ref{fig:benchmark_maps}, Left).
+    \item \textbf{Downtown Boston Road Network:} Real-world street topology extracted via OSMnx 2.1.1 (\texttt{boston\_downtown\_drive.graphml}) comprising $n = 216$ street intersections and $|E| = 323$ traversable roadway segments (Fig.~\ref{fig:benchmark_maps}, Center).
     \item \textbf{Random Geometric Graphs (RGG):} Metric embedding in $[0, 100] \times [0, 100]$ ($n = 35$, radius $r_c \approx 25$).
     \item \textbf{Warehouse Grid Graphs:} Grid layouts with dedicated aisles ($n = 30$).
-    \item \textbf{Erd\H{o}s-R\'enyi Graphs (ER):} $G(n, p)$ topologies ($n = 35, p = 0.12$).
+    \item \textbf{Erd\H{o}s-R\'enyi Graphs (ER):} $G(n, p)$ topologies ($n = 35, p = 0.12$) (Fig.~\ref{fig:benchmark_maps}, Right).
 \end{enumerate}
 
 We benchmarked ACA against literature baselines, level-execution variants (+LR) with identical detour capability, and clean algorithmic ablations:
@@ -306,6 +318,13 @@ We benchmarked ACA against literature baselines, level-execution variants (+LR) 
 \end{itemize}
 
 \input{results/table_main_results.tex}
+
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=\textwidth]{static/images/fig_rollout_keyframes_boston}
+\caption{Synchronized Rollout Execution Keyframes on Downtown Boston Road Network under Identical Seed and Adversarial Blockage Stream: Columns depict ACA (Ours, Left), CTP Replan (Center), and Standard CBBA (Right) across time steps $t \in \{0, 4, 8, 14\}$. When corridors are blocked (orange markers with physical barriers), standard CBBA drops entire bundles and incurs market re-auction delays, whereas ACA executes zero-message local recourse detours. Full rollout animations available in supplementary material.}
+\label{fig:rollout_keyframes}
+\end{figure*}
 
 \subsection{Quantitative Results and Statistical Analysis}
 Table~\ref{tab:main_results} reports the quantitative performance across $N = \aeTrials$ paired trials over identical random seeds (\aeSeedsCount\ seeds $\times$ 5 graph families $\times$ 4 adversary types $\times$ 3 communication regimes). Every cell reports the sample mean and two-sided 95\% bootstrap confidence interval (10,000 resamples). Statistically significant differences vs.~ACA ($p < 0.05$, paired Wilcoxon signed-rank test with Holm--Bonferroni correction) are designated with $\dagger$.

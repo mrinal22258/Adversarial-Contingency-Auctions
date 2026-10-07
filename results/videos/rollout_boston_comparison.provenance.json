@@ -1,0 +1,15 @@
+{
+  "video_file": "results/videos/rollout_boston_comparison.mp4",
+  "gif_file": "results/videos/rollout_boston_comparison.gif",
+  "map_type": "boston",
+  "seed": 42,
+  "max_steps": 18,
+  "n_frames": 18,
+  "methods_compared": [
+    "aca",
+    "ctp_replan",
+    "cbba"
+  ],
+  "git_commit": "75f7492d31b530324d85c7f87c869a08b4728d14",
+  "disclaimer": "SIMULATION ONLY \u2014 No physical robots or hardware used."
+}

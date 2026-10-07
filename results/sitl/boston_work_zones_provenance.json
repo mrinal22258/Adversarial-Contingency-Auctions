@@ -1,0 +1,23 @@
+{
+  "dataset_name": "City of Boston Public Works Active Work Zones",
+  "source_url": "https://data.boston.gov/dataset/f9f57091-92f3-463a-8f1c-93e46361296d/resource/36fcf981-e414-4891-93ea-f5905cec46fc/download/tmpmv42bph5.csv",
+  "source_portal": "Analyze Boston (Open Data Portal)",
+  "source_organization": "City of Boston Public Works Department",
+  "license": "Open Data Commons Public Domain Dedication and License (PDDL)",
+  "access_date": "2026-10-07",
+  "file_size_bytes": 105451,
+  "sha256": "26b456a6b5857c8380b0d439978ba2fdb3eb2402c3b0bafad6331fca41d663e1",
+  "relevant_fields": [
+    "Street",
+    "Status"
+  ],
+  "total_records_processed": 460,
+  "records_matched": 64,
+  "records_dropped": 396,
+  "dropped_reasons": "Records were dropped because the City of Boston Public Works dataset covers the entire municipality of Boston (including Dorchester, Roxbury, East Boston, Allston, Hyde Park, Brighton), whereas the benchmark road graph represents the Downtown Boston pedestrian core (Financial District / Boston Common).",
+  "graph_nodes": 216,
+  "graph_edges": 323,
+  "matched_graph_edges": 112,
+  "matched_edge_percentage": 34.67,
+  "defensibility_verdict": "DEFENSIBLE_AND_REPRODUCIBLE"
+}

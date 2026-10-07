@@ -1,0 +1,114 @@
+{
+  "commit": "75f7492d31b530324d85c7f87c869a08b4728d14",
+  "disclaimer": "SIMULATION ONLY -- Physics-Based Software-in-the-Loop Evaluation",
+  "total_trials_analyzed": 1440,
+  "successful_trials": 1418,
+  "failed_trials": 22,
+  "sitl_method_summary": {
+    "aca": {
+      "n_trials": 234,
+      "completion_mean": 0.8012820512820513,
+      "completion_std": 3.4780177962957963,
+      "welfare_mean": 6.230743821233657,
+      "messages_mean": 39.74786324786325,
+      "recourse_mean": 0.0,
+      "distance_mean": 0.08975629451137598,
+      "collisions_mean": 0.0,
+      "conflicts_mean": 86.72649572649573
+    },
+    "aca_no_margin": {
+      "n_trials": 237,
+      "completion_mean": 1.0548523206751055,
+      "completion_std": 3.6671855230274013,
+      "welfare_mean": 8.251213677871236,
+      "messages_mean": 37.48523206751055,
+      "recourse_mean": 0.0,
+      "distance_mean": 0.0938024437648029,
+      "collisions_mean": 0.0,
+      "conflicts_mean": 143.9198312236287
+    },
+    "cbba_partial_lr": {
+      "n_trials": 237,
+      "completion_mean": 1.0548523206751055,
+      "completion_std": 3.8434882857470316,
+      "welfare_mean": 8.23398120526486,
+      "messages_mean": 42.61603375527426,
+      "recourse_mean": 0.0,
+      "distance_mean": 0.10241868006799223,
+      "collisions_mean": 0.0,
+      "conflicts_mean": 143.51054852320675
+    },
+    "ctp_replan": {
+      "n_trials": 236,
+      "completion_mean": 0.2648305084745763,
+      "completion_std": 2.1409861450457885,
+      "welfare_mean": 1.9025509235846407,
+      "messages_mean": 41.98728813559322,
+      "recourse_mean": 0.0,
+      "distance_mean": 0.1080465721059849,
+      "collisions_mean": 0.0,
+      "conflicts_mean": 0.0
+    },
+    "implicit": {
+      "n_trials": 236,
+      "completion_mean": 0.6885593220338984,
+      "completion_std": 2.857881308800164,
+      "welfare_mean": 5.330298598345077,
+      "messages_mean": 37.40677966101695,
+      "recourse_mean": 0.0,
+      "distance_mean": 0.08908798896305437,
+      "collisions_mean": 0.0,
+      "conflicts_mean": 174.635593220339
+    },
+    "ssi_lr": {
+      "n_trials": 238,
+      "completion_mean": 0.10504201680672269,
+      "completion_std": 1.1434531119919975,
+      "welfare_mean": 0.6423450899600328,
+      "messages_mean": 40.46638655462185,
+      "recourse_mean": 0.0,
+      "distance_mean": 0.09899552224687436,
+      "collisions_mean": 0.0,
+      "conflicts_mean": 0.0
+    }
+  },
+  "ranking_preservation": {
+    "common_methods": [
+      "aca",
+      "aca_no_margin",
+      "cbba_partial_lr",
+      "ctp_replan",
+      "implicit",
+      "ssi_lr"
+    ],
+    "ranking_graph_sim": [
+      "ctp_replan",
+      "implicit",
+      "aca",
+      "aca_no_margin",
+      "cbba_partial_lr",
+      "ssi_lr"
+    ],
+    "ranking_sitl_physics": [
+      "cbba_partial_lr",
+      "aca_no_margin",
+      "aca",
+      "implicit",
+      "ctp_replan",
+      "ssi_lr"
+    ],
+    "spearman_rho": -0.11595420713048969,
+    "spearman_pvalue": 0.826848213385815,
+    "kendall_tau": -0.27602622373694163,
+    "kendall_pvalue": 0.44421673013860674,
+    "ranking_preserved": false
+  },
+  "bland_altman": {
+    "metric": "completion_rate_pct",
+    "bias_mean_difference": -79.45509691000875,
+    "sd_difference": 7.394879052641792,
+    "loa_upper_95": -64.96113396683083,
+    "loa_lower_95": -93.94905985318667,
+    "interpretation": "Physical SITL simulation exhibits a mean bias of -79.46% relative to abstract graph simulation (95% Limits of Agreement: [-93.95%, -64.96%]), reflecting differential-drive kinematics, turning latency, and collision deceleration."
+  }
+}

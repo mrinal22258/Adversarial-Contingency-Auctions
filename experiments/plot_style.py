@@ -7,6 +7,8 @@ Adheres strictly to IEEE formatting guidelines:
 - Standardized method markers, colors, and line widths
 """
 
+import os
+import sys
 import json
 import subprocess
 import matplotlib.pyplot as plt

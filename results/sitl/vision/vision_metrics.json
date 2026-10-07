@@ -1,0 +1,17 @@
+{
+  "disclaimer": "SYNTHETIC-VISION SIMULATION ONLY -- No physical cameras or robots used.",
+  "git_commit": "75f7492d31b530324d85c7f87c869a08b4728d14",
+  "total_frames_analyzed": 30,
+  "total_marker_opportunities": 120,
+  "successful_detections": 103,
+  "detection_rate_pct": 85.83333333333333,
+  "missed_marker_rate_pct": 14.166666666666671,
+  "occlusion_events": 5,
+  "latency_ticks": 1,
+  "position_error_mean_meters": 0.1544212494051923,
+  "position_error_rmse_meters": 0.16874925874783248,
+  "position_error_max_meters": 0.2743406934934941,
+  "orientation_error_mean_rad": 1.5196001501567769,
+  "orientation_error_mean_deg": 87.06667515142948,
+  "orientation_error_rmse_rad": 1.7491874518580157
+}

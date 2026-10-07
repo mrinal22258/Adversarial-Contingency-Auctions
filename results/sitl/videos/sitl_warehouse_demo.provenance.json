@@ -1,0 +1,26 @@
+{
+  "video_path": "C:\\Users\\krmri\\Downloads\\Adversarial-Contingency-Auctions-main\\Adversarial-Contingency-Auctions-main\\results\\sitl\\videos\\sitl_warehouse_demo.mp4",
+  "disclaimer": "SIMULATION -- PyBullet SITL -- No Physical Robot",
+  "commit": "75f7492d31b530324d85c7f87c869a08b4728d14",
+  "seed": 2042,
+  "map_type": "warehouse_movingai",
+  "method": "aca",
+  "adversary": "reactive",
+  "comm_regime": "constrained",
+  "fps": 4,
+  "total_frames": 20,
+  "resolution": "1000x1000",
+  "sim_steps": 20,
+  "source_trial_result": {
+    "status": "COMPLETED",
+    "completed_tasks": 0,
+    "completion_rate_pct": 0.0,
+    "recourse_pivots": null,
+    "messages_transmitted": 188,
+    "safe_claim_conflicts": null
+  },
+  "dependency_info": {
+    "pybullet_version": "3.2.7",
+    "opencv_version": "4.11.0"
+  }
+}

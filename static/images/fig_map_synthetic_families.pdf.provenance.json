@@ -1,0 +1,18 @@
+{
+  "figure_file": "C:\\Users\\krmri\\Downloads\\Adversarial-Contingency-Auctions-main\\Adversarial-Contingency-Auctions-main\\static\\images\\fig_map_synthetic_families.pdf",
+  "git_commit": "75f7492d31b530324d85c7f87c869a08b4728d14",
+  "source_files": [
+    "acalib/env/graph_families.py"
+  ],
+  "n_instances": 3,
+  "generator_script": "make_map_figures.py",
+  "metadata": {
+    "synthetic_families": [
+      "rgg",
+      "warehouse",
+      "er"
+    ],
+    "seed": 42,
+    "label": "synthetic stress test"
+  }
+}

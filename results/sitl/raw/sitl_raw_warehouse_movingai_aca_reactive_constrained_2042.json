@@ -1,0 +1,6939 @@
+{
+  "result": {
+    "commit": "75f7492d31b530324d85c7f87c869a08b4728d14",
+    "disclaimer": "SIMULATION -- PyBullet SITL -- No Physical Robot",
+    "seed": 2042,
+    "map_type": "warehouse_movingai",
+    "method": "aca",
+    "adversary": "reactive",
+    "comm_regime": "constrained",
+    "n_robots": 4,
+    "n_tasks": 8,
+    "completed_tasks": 0,
+    "completion_rate_pct": 0.0,
+    "total_conflicts": 0,
+    "recourse_detours": 0,
+    "physical_collisions": 0,
+    "total_distance_meters": 0.4589667365541626,
+    "net_welfare": -0.9179334731083252,
+    "messages_transmitted": 188,
+    "messages_delivered": 178,
+    "messages_dropped": 52,
+    "runtime_seconds": 0.9465652999933809,
+    "status": "COMPLETED",
+    "history": [
+      {
+        "step": 0,
+        "sim_time": 0.0,
+        "robots": {
+          "0": {
+            "ground_truth_pos": [
+              14.997853653389441,
+              28.577090369171845
+            ],
+            "ground_truth_theta": 2.689008962064657,
+            "current_path": [
+              [
+                15.0,
+                28.571428571428573
+              ],
+              [
+                15.0,
+                14.285714285714286
+              ],
+              [
+                15.0,
+                0.0
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "1": {
+            "ground_truth_pos": [
+              -0.002770444306060097,
+              57.14846397629136
+            ],
+            "ground_truth_theta": -0.1845537825424235,
+            "current_path": [
+              [
+                0.0,
+                57.142857142857146
+              ],
+              [
+                0.0,
+                71.42857142857143
+              ],
+              [
+                5.0,
+                71.42857142857143
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "2": {
+            "ground_truth_pos": [
+              10.004646189335482,
+              42.84478140199338
+            ],
+            "ground_truth_theta": 0.8960905745693657,
+            "current_path": [
+              [
+                10.0,
+                42.85714285714286
+              ],
+              [
+                10.0,
+                57.142857142857146
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "3": {
+            "ground_truth_pos": [
+              14.997471799870208,
+              42.86287413769336
+            ],
+            "ground_truth_theta": -0.5942805472669386,
+            "current_path": [],
+            "state": "IDLE"
+          }
+        },
+        "tasks": {
+          "0": {
+            "pos": [
+              25.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "1": {
+            "pos": [
+              15.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "2": {
+            "pos": [
+              5.0,
+              71.42857142857143
+            ],
+            "completed": false,
+            "claimed_by": 1
+          },
+          "3": {
+            "pos": [
+              10.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          },
+          "4": {
+            "pos": [
+              15.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "5": {
+            "pos": [
+              20.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "6": {
+            "pos": [
+              0.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "7": {
+            "pos": [
+              20.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          }
+        },
+        "blockages": [
+          [
+            13,
+            19
+          ],
+          [
+            25,
+            29
+          ],
+          [
+            19,
+            25
+          ]
+        ],
+        "completed_tasks": 0,
+        "completion_rate_pct": 0.0,
+        "recourse_pivots": 0,
+        "comm_metrics": {
+          "comm_range": 25.0,
+          "p_drop": 0.05,
+          "latency_steps": 1,
+          "messages_generated": 12,
+          "messages_transmitted": 9,
+          "messages_delivered": 0,
+          "messages_dropped_range": 2,
+          "messages_dropped_packet_loss": 1,
+          "total_messages_dropped": 3,
+          "total_bytes_transmitted": 1152
+        }
+      },
+      {
+        "step": 1,
+        "sim_time": 0.8,
+        "robots": {
+          "0": {
+            "ground_truth_pos": [
+              14.999297497019464,
+              28.57442449986743
+            ],
+            "ground_truth_theta": 2.6883674362522787,
+            "current_path": [
+              [
+                15.0,
+                28.571428571428573
+              ],
+              [
+                15.0,
+                14.285714285714286
+              ],
+              [
+                15.0,
+                0.0
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "1": {
+            "ground_truth_pos": [
+              -0.000799017646371074,
+              57.14586835798082
+            ],
+            "ground_truth_theta": -0.18510793279028281,
+            "current_path": [
+              [
+                0.0,
+                57.142857142857146
+              ],
+              [
+                0.0,
+                71.42857142857143
+              ],
+              [
+                5.0,
+                71.42857142857143
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "2": {
+            "ground_truth_pos": [
+              9.997292126414644,
+              42.845048831984094
+            ],
+            "ground_truth_theta": 1.0384171443446801,
+            "current_path": [
+              [
+                10.0,
+                42.85714285714286
+              ],
+              [
+                10.0,
+                57.142857142857146
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "3": {
+            "ground_truth_pos": [
+              14.999278944176131,
+              42.860293684073206
+            ],
+            "ground_truth_theta": -0.5948444970130775,
+            "current_path": [],
+            "state": "IDLE"
+          }
+        },
+        "tasks": {
+          "0": {
+            "pos": [
+              25.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "1": {
+            "pos": [
+              15.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "2": {
+            "pos": [
+              5.0,
+              71.42857142857143
+            ],
+            "completed": false,
+            "claimed_by": 1
+          },
+          "3": {
+            "pos": [
+              10.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          },
+          "4": {
+            "pos": [
+              15.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "5": {
+            "pos": [
+              20.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "6": {
+            "pos": [
+              0.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "7": {
+            "pos": [
+              20.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          }
+        },
+        "blockages": [
+          [
+            13,
+            19
+          ],
+          [
+            25,
+            29
+          ],
+          [
+            19,
+            25
+          ]
+        ],
+        "completed_tasks": 0,
+        "completion_rate_pct": 0.0,
+        "recourse_pivots": 0,
+        "comm_metrics": {
+          "comm_range": 25.0,
+          "p_drop": 0.05,
+          "latency_steps": 1,
+          "messages_generated": 24,
+          "messages_transmitted": 19,
+          "messages_delivered": 9,
+          "messages_dropped_range": 4,
+          "messages_dropped_packet_loss": 1,
+          "total_messages_dropped": 5,
+          "total_bytes_transmitted": 2432
+        }
+      },
+      {
+        "step": 2,
+        "sim_time": 1.6,
+        "robots": {
+          "0": {
+            "ground_truth_pos": [
+              14.999575861536394,
+              28.572867092592006
+            ],
+            "ground_truth_theta": 2.6883234907460096,
+            "current_path": [
+              [
+                15.0,
+                28.571428571428573
+              ],
+              [
+                15.0,
+                14.285714285714286
+              ],
+              [
+                15.0,
+                0.0
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "1": {
+            "ground_truth_pos": [
+              -0.00032335822263304827,
+              57.144299056846805
+            ],
+            "ground_truth_theta": -0.185104237254792,
+            "current_path": [
+              [
+                0.0,
+                57.142857142857146
+              ],
+              [
+                0.0,
+                71.42857142857143
+              ],
+              [
+                5.0,
+                71.42857142857143
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "2": {
+            "ground_truth_pos": [
+              10.015189875717063,
+              42.82656391045154
+            ],
+            "ground_truth_theta": 0.9135124252494451,
+            "current_path": [
+              [
+                10.0,
+                42.85714285714286
+              ],
+              [
+                10.0,
+                57.142857142857146
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "3": {
+            "ground_truth_pos": [
+              14.999680183886182,
+              42.85870754414607
+            ],
+            "ground_truth_theta": -0.5949049082667257,
+            "current_path": [],
+            "state": "IDLE"
+          }
+        },
+        "tasks": {
+          "0": {
+            "pos": [
+              25.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "1": {
+            "pos": [
+              15.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "2": {
+            "pos": [
+              5.0,
+              71.42857142857143
+            ],
+            "completed": false,
+            "claimed_by": 1
+          },
+          "3": {
+            "pos": [
+              10.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          },
+          "4": {
+            "pos": [
+              15.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "5": {
+            "pos": [
+              20.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "6": {
+            "pos": [
+              0.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "7": {
+            "pos": [
+              20.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          }
+        },
+        "blockages": [
+          [
+            13,
+            19
+          ],
+          [
+            25,
+            29
+          ],
+          [
+            19,
+            25
+          ]
+        ],
+        "completed_tasks": 0,
+        "completion_rate_pct": 0.0,
+        "recourse_pivots": 0,
+        "comm_metrics": {
+          "comm_range": 25.0,
+          "p_drop": 0.05,
+          "latency_steps": 1,
+          "messages_generated": 36,
+          "messages_transmitted": 28,
+          "messages_delivered": 19,
+          "messages_dropped_range": 6,
+          "messages_dropped_packet_loss": 2,
+          "total_messages_dropped": 8,
+          "total_bytes_transmitted": 3584
+        }
+      },
+      {
+        "step": 3,
+        "sim_time": 2.4000000000000004,
+        "robots": {
+          "0": {
+            "ground_truth_pos": [
+              14.999700614745713,
+              28.57207128917034
+            ],
+            "ground_truth_theta": 2.6883072697270842,
+            "current_path": [
+              [
+                15.0,
+                28.571428571428573
+              ],
+              [
+                15.0,
+                14.285714285714286
+              ],
+              [
+                15.0,
+                0.0
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "1": {
+            "ground_truth_pos": [
+              -9.684091383413049e-05,
+              57.14349577149002
+            ],
+            "ground_truth_theta": -0.1851084779925662,
+            "current_path": [
+              [
+                0.0,
+                57.142857142857146
+              ],
+              [
+                0.0,
+                71.42857142857143
+              ],
+              [
+                5.0,
+                71.42857142857143
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "2": {
+            "ground_truth_pos": [
+              10.004868923451282,
+              42.83693716866356
+            ],
+            "ground_truth_theta": 1.1033569732635067,
+            "current_path": [
+              [
+                10.0,
+                42.85714285714286
+              ],
+              [
+                10.0,
+                57.142857142857146
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "3": {
+            "ground_truth_pos": [
+              14.999866222071745,
+              42.857895597320365
+            ],
+            "ground_truth_theta": -0.5949260113161425,
+            "current_path": [],
+            "state": "IDLE"
+          }
+        },
+        "tasks": {
+          "0": {
+            "pos": [
+              25.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "1": {
+            "pos": [
+              15.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "2": {
+            "pos": [
+              5.0,
+              71.42857142857143
+            ],
+            "completed": false,
+            "claimed_by": 1
+          },
+          "3": {
+            "pos": [
+              10.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          },
+          "4": {
+            "pos": [
+              15.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "5": {
+            "pos": [
+              20.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "6": {
+            "pos": [
+              0.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "7": {
+            "pos": [
+              20.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          }
+        },
+        "blockages": [
+          [
+            19,
+            25
+          ]
+        ],
+        "completed_tasks": 0,
+        "completion_rate_pct": 0.0,
+        "recourse_pivots": 0,
+        "comm_metrics": {
+          "comm_range": 25.0,
+          "p_drop": 0.05,
+          "latency_steps": 1,
+          "messages_generated": 48,
+          "messages_transmitted": 38,
+          "messages_delivered": 28,
+          "messages_dropped_range": 8,
+          "messages_dropped_packet_loss": 2,
+          "total_messages_dropped": 10,
+          "total_bytes_transmitted": 4864
+        }
+      },
+      {
+        "step": 4,
+        "sim_time": 3.2,
+        "robots": {
+          "0": {
+            "ground_truth_pos": [
+              14.999749790436736,
+              28.5716602876561
+            ],
+            "ground_truth_theta": 2.68829693703336,
+            "current_path": [
+              [
+                15.0,
+                28.571428571428573
+              ],
+              [
+                15.0,
+                14.285714285714286
+              ],
+              [
+                15.0,
+                0.0
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "1": {
+            "ground_truth_pos": [
+              6.4523798033475266e-06,
+              57.14307997359038
+            ],
+            "ground_truth_theta": -0.18511705021113098,
+            "current_path": [
+              [
+                0.0,
+                57.142857142857146
+              ],
+              [
+                0.0,
+                71.42857142857143
+              ],
+              [
+                5.0,
+                71.42857142857143
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "2": {
+            "ground_truth_pos": [
+              10.014222628513028,
+              42.81317305987567
+            ],
+            "ground_truth_theta": 1.1947823348988484,
+            "current_path": [
+              [
+                10.0,
+                42.85714285714286
+              ],
+              [
+                10.0,
+                57.142857142857146
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "3": {
+            "ground_truth_pos": [
+              14.999946612376956,
+              42.85747529419131
+            ],
+            "ground_truth_theta": -0.5949376988494901,
+            "current_path": [],
+            "state": "IDLE"
+          }
+        },
+        "tasks": {
+          "0": {
+            "pos": [
+              25.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "1": {
+            "pos": [
+              15.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "2": {
+            "pos": [
+              5.0,
+              71.42857142857143
+            ],
+            "completed": false,
+            "claimed_by": 1
+          },
+          "3": {
+            "pos": [
+              10.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          },
+          "4": {
+            "pos": [
+              15.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "5": {
+            "pos": [
+              20.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "6": {
+            "pos": [
+              0.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "7": {
+            "pos": [
+              20.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          }
+        },
+        "blockages": [
+          [
+            19,
+            25
+          ]
+        ],
+        "completed_tasks": 0,
+        "completion_rate_pct": 0.0,
+        "recourse_pivots": 0,
+        "comm_metrics": {
+          "comm_range": 25.0,
+          "p_drop": 0.05,
+          "latency_steps": 1,
+          "messages_generated": 60,
+          "messages_transmitted": 47,
+          "messages_delivered": 38,
+          "messages_dropped_range": 10,
+          "messages_dropped_packet_loss": 3,
+          "total_messages_dropped": 13,
+          "total_bytes_transmitted": 6016
+        }
+      },
+      {
+        "step": 5,
+        "sim_time": 4.0,
+        "robots": {
+          "0": {
+            "ground_truth_pos": [
+              14.9997612665922,
+              28.57144583032407
+            ],
+            "ground_truth_theta": 2.6882881165430423,
+            "current_path": [
+              [
+                15.0,
+                28.571428571428573
+              ],
+              [
+                15.0,
+                14.285714285714286
+              ],
+              [
+                15.0,
+                0.0
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "1": {
+            "ground_truth_pos": [
+              4.781678266338308e-05,
+              57.142862028042735
+            ],
+            "ground_truth_theta": -0.18512709015422577,
+            "current_path": [
+              [
+                0.0,
+                57.142857142857146
+              ],
+              [
+                0.0,
+                71.42857142857143
+              ],
+              [
+                5.0,
+                71.42857142857143
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "2": {
+            "ground_truth_pos": [
+              10.001420632045003,
+              42.81116367000624
+            ],
+            "ground_truth_theta": 1.160734182438941,
+            "current_path": [
+              [
+                10.0,
+                42.85714285714286
+              ],
+              [
+                10.0,
+                57.142857142857146
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "3": {
+            "ground_truth_pos": [
+              14.999973962911602,
+              42.85725493508038
+            ],
+            "ground_truth_theta": -0.5949463407372697,
+            "current_path": [],
+            "state": "IDLE"
+          }
+        },
+        "tasks": {
+          "0": {
+            "pos": [
+              25.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "1": {
+            "pos": [
+              15.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "2": {
+            "pos": [
+              5.0,
+              71.42857142857143
+            ],
+            "completed": false,
+            "claimed_by": 1
+          },
+          "3": {
+            "pos": [
+              10.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          },
+          "4": {
+            "pos": [
+              15.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "5": {
+            "pos": [
+              20.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "6": {
+            "pos": [
+              0.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "7": {
+            "pos": [
+              20.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          }
+        },
+        "blockages": [],
+        "completed_tasks": 0,
+        "completion_rate_pct": 0.0,
+        "recourse_pivots": 0,
+        "comm_metrics": {
+          "comm_range": 25.0,
+          "p_drop": 0.05,
+          "latency_steps": 1,
+          "messages_generated": 72,
+          "messages_transmitted": 57,
+          "messages_delivered": 47,
+          "messages_dropped_range": 12,
+          "messages_dropped_packet_loss": 3,
+          "total_messages_dropped": 15,
+          "total_bytes_transmitted": 7296
+        }
+      },
+      {
+        "step": 6,
+        "sim_time": 4.800000000000001,
+        "robots": {
+          "0": {
+            "ground_truth_pos": [
+              14.999754354285525,
+              28.571332052536693
+            ],
+            "ground_truth_theta": 2.688282609160053,
+            "current_path": [
+              [
+                15.0,
+                28.571428571428573
+              ],
+              [
+                15.0,
+                14.285714285714286
+              ],
+              [
+                15.0,
+                0.0
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "1": {
+            "ground_truth_pos": [
+              5.568595672603783e-05,
+              57.14274297633338
+            ],
+            "ground_truth_theta": -0.18512878374369876,
+            "current_path": [
+              [
+                0.0,
+                57.142857142857146
+              ],
+              [
+                0.0,
+                71.42857142857143
+              ],
+              [
+                5.0,
+                71.42857142857143
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "2": {
+            "ground_truth_pos": [
+              9.990874030095785,
+              42.833524487198154
+            ],
+            "ground_truth_theta": 1.1508639242000602,
+            "current_path": [
+              [
+                10.0,
+                42.85714285714286
+              ],
+              [
+                10.0,
+                57.142857142857146
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "3": {
+            "ground_truth_pos": [
+              14.99997082032423,
+              42.85713435931217
+            ],
+            "ground_truth_theta": -0.594945507391995,
+            "current_path": [],
+            "state": "IDLE"
+          }
+        },
+        "tasks": {
+          "0": {
+            "pos": [
+              25.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "1": {
+            "pos": [
+              15.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "2": {
+            "pos": [
+              5.0,
+              71.42857142857143
+            ],
+            "completed": false,
+            "claimed_by": 1
+          },
+          "3": {
+            "pos": [
+              10.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          },
+          "4": {
+            "pos": [
+              15.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "5": {
+            "pos": [
+              20.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "6": {
+            "pos": [
+              0.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "7": {
+            "pos": [
+              20.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          }
+        },
+        "blockages": [
+          [
+            25,
+            29
+          ],
+          [
+            19,
+            25
+          ]
+        ],
+        "completed_tasks": 0,
+        "completion_rate_pct": 0.0,
+        "recourse_pivots": 0,
+        "comm_metrics": {
+          "comm_range": 25.0,
+          "p_drop": 0.05,
+          "latency_steps": 1,
+          "messages_generated": 84,
+          "messages_transmitted": 66,
+          "messages_delivered": 57,
+          "messages_dropped_range": 14,
+          "messages_dropped_packet_loss": 4,
+          "total_messages_dropped": 18,
+          "total_bytes_transmitted": 8448
+        }
+      },
+      {
+        "step": 7,
+        "sim_time": 5.6000000000000005,
+        "robots": {
+          "0": {
+            "ground_truth_pos": [
+              14.999735366844435,
+              28.57126730268974
+            ],
+            "ground_truth_theta": 2.688285076614779,
+            "current_path": [
+              [
+                15.0,
+                28.571428571428573
+              ],
+              [
+                15.0,
+                14.285714285714286
+              ],
+              [
+                15.0,
+                0.0
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "1": {
+            "ground_truth_pos": [
+              3.992037623939512e-05,
+              57.14266687743184
+            ],
+            "ground_truth_theta": -0.18511696424773935,
+            "current_path": [
+              [
+                0.0,
+                57.142857142857146
+              ],
+              [
+                0.0,
+                71.42857142857143
+              ],
+              [
+                5.0,
+                71.42857142857143
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "2": {
+            "ground_truth_pos": [
+              9.977569888775331,
+              42.88582057411855
+            ],
+            "ground_truth_theta": 1.0989804271150017,
+            "current_path": [
+              [
+                10.0,
+                42.85714285714286
+              ],
+              [
+                10.0,
+                57.142857142857146
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "3": {
+            "ground_truth_pos": [
+              14.999950252372878,
+              42.85705964338031
+            ],
+            "ground_truth_theta": -0.5949354146176076,
+            "current_path": [],
+            "state": "IDLE"
+          }
+        },
+        "tasks": {
+          "0": {
+            "pos": [
+              25.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "1": {
+            "pos": [
+              15.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "2": {
+            "pos": [
+              5.0,
+              71.42857142857143
+            ],
+            "completed": false,
+            "claimed_by": 1
+          },
+          "3": {
+            "pos": [
+              10.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          },
+          "4": {
+            "pos": [
+              15.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "5": {
+            "pos": [
+              20.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "6": {
+            "pos": [
+              0.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "7": {
+            "pos": [
+              20.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          }
+        },
+        "blockages": [
+          [
+            25,
+            29
+          ],
+          [
+            19,
+            25
+          ]
+        ],
+        "completed_tasks": 0,
+        "completion_rate_pct": 0.0,
+        "recourse_pivots": 0,
+        "comm_metrics": {
+          "comm_range": 25.0,
+          "p_drop": 0.05,
+          "latency_steps": 1,
+          "messages_generated": 96,
+          "messages_transmitted": 75,
+          "messages_delivered": 66,
+          "messages_dropped_range": 16,
+          "messages_dropped_packet_loss": 5,
+          "total_messages_dropped": 21,
+          "total_bytes_transmitted": 9600
+        }
+      },
+      {
+        "step": 8,
+        "sim_time": 6.4,
+        "robots": {
+          "0": {
+            "ground_truth_pos": [
+              14.999712451448382,
+              28.571227287983902
+            ],
+            "ground_truth_theta": 2.6882964164206054,
+            "current_path": [
+              [
+                15.0,
+                28.571428571428573
+              ],
+              [
+                15.0,
+                14.285714285714286
+              ],
+              [
+                15.0,
+                0.0
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "1": {
+            "ground_truth_pos": [
+              1.9838764112410134e-05,
+              57.142620848937895
+            ],
+            "ground_truth_theta": -0.18509819189474835,
+            "current_path": [
+              [
+                0.0,
+                57.142857142857146
+              ],
+              [
+                0.0,
+                71.42857142857143
+              ],
+              [
+                5.0,
+                71.42857142857143
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "2": {
+            "ground_truth_pos": [
+              9.960187348801535,
+              42.888214107911566
+            ],
+            "ground_truth_theta": 0.9286146089307112,
+            "current_path": [
+              [
+                10.0,
+                42.85714285714286
+              ],
+              [
+                10.0,
+                57.142857142857146
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "3": {
+            "ground_truth_pos": [
+              14.99992669968234,
+              42.85701414437984
+            ],
+            "ground_truth_theta": -0.594916678979805,
+            "current_path": [],
+            "state": "IDLE"
+          }
+        },
+        "tasks": {
+          "0": {
+            "pos": [
+              25.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "1": {
+            "pos": [
+              15.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "2": {
+            "pos": [
+              5.0,
+              71.42857142857143
+            ],
+            "completed": false,
+            "claimed_by": 1
+          },
+          "3": {
+            "pos": [
+              10.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          },
+          "4": {
+            "pos": [
+              15.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "5": {
+            "pos": [
+              20.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "6": {
+            "pos": [
+              0.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "7": {
+            "pos": [
+              20.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          }
+        },
+        "blockages": [
+          [
+            13,
+            19
+          ],
+          [
+            19,
+            25
+          ]
+        ],
+        "completed_tasks": 0,
+        "completion_rate_pct": 0.0,
+        "recourse_pivots": 0,
+        "comm_metrics": {
+          "comm_range": 25.0,
+          "p_drop": 0.05,
+          "latency_steps": 1,
+          "messages_generated": 108,
+          "messages_transmitted": 85,
+          "messages_delivered": 75,
+          "messages_dropped_range": 18,
+          "messages_dropped_packet_loss": 5,
+          "total_messages_dropped": 23,
+          "total_bytes_transmitted": 10880
+        }
+      },
+      {
+        "step": 9,
+        "sim_time": 7.2,
+        "robots": {
+          "0": {
+            "ground_truth_pos": [
+              14.999721308799606,
+              28.571222060371497
+            ],
+            "ground_truth_theta": 2.6882998085584293,
+            "current_path": [
+              [
+                15.0,
+                28.571428571428573
+              ],
+              [
+                15.0,
+                14.285714285714286
+              ],
+              [
+                15.0,
+                0.0
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "1": {
+            "ground_truth_pos": [
+              2.0068178531426447e-05,
+              57.14260737234244
+            ],
+            "ground_truth_theta": -0.1850917277044185,
+            "current_path": [
+              [
+                0.0,
+                57.142857142857146
+              ],
+              [
+                0.0,
+                71.42857142857143
+              ],
+              [
+                5.0,
+                71.42857142857143
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "2": {
+            "ground_truth_pos": [
+              9.94580196378564,
+              42.914010407561086
+            ],
+            "ground_truth_theta": 0.6843695865870517,
+            "current_path": [
+              [
+                10.0,
+                42.85714285714286
+              ],
+              [
+                10.0,
+                57.142857142857146
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "3": {
+            "ground_truth_pos": [
+              14.999920918181813,
+              42.85660596519572
+            ],
+            "ground_truth_theta": -0.5948976783119264,
+            "current_path": [],
+            "state": "IDLE"
+          }
+        },
+        "tasks": {
+          "0": {
+            "pos": [
+              25.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "1": {
+            "pos": [
+              15.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "2": {
+            "pos": [
+              5.0,
+              71.42857142857143
+            ],
+            "completed": false,
+            "claimed_by": 1
+          },
+          "3": {
+            "pos": [
+              10.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          },
+          "4": {
+            "pos": [
+              15.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "5": {
+            "pos": [
+              20.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "6": {
+            "pos": [
+              0.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "7": {
+            "pos": [
+              20.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          }
+        },
+        "blockages": [
+          [
+            13,
+            19
+          ],
+          [
+            25,
+            29
+          ],
+          [
+            19,
+            25
+          ]
+        ],
+        "completed_tasks": 0,
+        "completion_rate_pct": 0.0,
+        "recourse_pivots": 0,
+        "comm_metrics": {
+          "comm_range": 25.0,
+          "p_drop": 0.05,
+          "latency_steps": 1,
+          "messages_generated": 120,
+          "messages_transmitted": 94,
+          "messages_delivered": 85,
+          "messages_dropped_range": 20,
+          "messages_dropped_packet_loss": 6,
+          "total_messages_dropped": 26,
+          "total_bytes_transmitted": 12032
+        }
+      },
+      {
+        "step": 10,
+        "sim_time": 8.0,
+        "robots": {
+          "0": {
+            "ground_truth_pos": [
+              14.999690240009876,
+              28.57121704780096
+            ],
+            "ground_truth_theta": 2.6882982824985744,
+            "current_path": [
+              [
+                15.0,
+                28.571428571428573
+              ],
+              [
+                15.0,
+                14.285714285714286
+              ],
+              [
+                15.0,
+                0.0
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "1": {
+            "ground_truth_pos": [
+              2.2479873775781966e-05,
+              57.1426066375638
+            ],
+            "ground_truth_theta": -0.1850925751721565,
+            "current_path": [
+              [
+                0.0,
+                57.142857142857146
+              ],
+              [
+                0.0,
+                71.42857142857143
+              ],
+              [
+                5.0,
+                71.42857142857143
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "2": {
+            "ground_truth_pos": [
+              9.935106808215544,
+              42.92041258874967
+            ],
+            "ground_truth_theta": 0.5393538154284668,
+            "current_path": [
+              [
+                10.0,
+                42.85714285714286
+              ],
+              [
+                10.0,
+                57.142857142857146
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "3": {
+            "ground_truth_pos": [
+              14.99992817876112,
+              42.85679666609988
+            ],
+            "ground_truth_theta": -0.5948535522766254,
+            "current_path": [],
+            "state": "IDLE"
+          }
+        },
+        "tasks": {
+          "0": {
+            "pos": [
+              25.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "1": {
+            "pos": [
+              15.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "2": {
+            "pos": [
+              5.0,
+              71.42857142857143
+            ],
+            "completed": false,
+            "claimed_by": 1
+          },
+          "3": {
+            "pos": [
+              10.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          },
+          "4": {
+            "pos": [
+              15.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "5": {
+            "pos": [
+              20.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "6": {
+            "pos": [
+              0.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "7": {
+            "pos": [
+              20.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          }
+        },
+        "blockages": [
+          [
+            13,
+            19
+          ],
+          [
+            25,
+            29
+          ],
+          [
+            18,
+            24
+          ],
+          [
+            19,
+            25
+          ]
+        ],
+        "completed_tasks": 0,
+        "completion_rate_pct": 0.0,
+        "recourse_pivots": 0,
+        "comm_metrics": {
+          "comm_range": 25.0,
+          "p_drop": 0.05,
+          "latency_steps": 1,
+          "messages_generated": 132,
+          "messages_transmitted": 103,
+          "messages_delivered": 94,
+          "messages_dropped_range": 22,
+          "messages_dropped_packet_loss": 7,
+          "total_messages_dropped": 29,
+          "total_bytes_transmitted": 13184
+        }
+      },
+      {
+        "step": 11,
+        "sim_time": 8.8,
+        "robots": {
+          "0": {
+            "ground_truth_pos": [
+              14.99968822058085,
+              28.571213639704556
+            ],
+            "ground_truth_theta": 2.688305397953319,
+            "current_path": [
+              [
+                15.0,
+                28.571428571428573
+              ],
+              [
+                15.0,
+                14.285714285714286
+              ],
+              [
+                15.0,
+                0.0
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "1": {
+            "ground_truth_pos": [
+              1.828754323664049e-05,
+              57.14261040262436
+            ],
+            "ground_truth_theta": -0.18509102720341092,
+            "current_path": [
+              [
+                0.0,
+                57.142857142857146
+              ],
+              [
+                0.0,
+                71.42857142857143
+              ],
+              [
+                5.0,
+                71.42857142857143
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "2": {
+            "ground_truth_pos": [
+              9.907660897679195,
+              42.909667873814655
+            ],
+            "ground_truth_theta": 0.5511579269210635,
+            "current_path": [
+              [
+                10.0,
+                42.85714285714286
+              ],
+              [
+                10.0,
+                57.142857142857146
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "3": {
+            "ground_truth_pos": [
+              14.999930511797965,
+              42.85689674717821
+            ],
+            "ground_truth_theta": -0.5948493037304894,
+            "current_path": [],
+            "state": "IDLE"
+          }
+        },
+        "tasks": {
+          "0": {
+            "pos": [
+              25.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "1": {
+            "pos": [
+              15.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "2": {
+            "pos": [
+              5.0,
+              71.42857142857143
+            ],
+            "completed": false,
+            "claimed_by": 1
+          },
+          "3": {
+            "pos": [
+              10.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          },
+          "4": {
+            "pos": [
+              15.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "5": {
+            "pos": [
+              20.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "6": {
+            "pos": [
+              0.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "7": {
+            "pos": [
+              20.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          }
+        },
+        "blockages": [
+          [
+            25,
+            29
+          ],
+          [
+            18,
+            24
+          ],
+          [
+            19,
+            25
+          ]
+        ],
+        "completed_tasks": 0,
+        "completion_rate_pct": 0.0,
+        "recourse_pivots": 0,
+        "comm_metrics": {
+          "comm_range": 25.0,
+          "p_drop": 0.05,
+          "latency_steps": 1,
+          "messages_generated": 144,
+          "messages_transmitted": 111,
+          "messages_delivered": 103,
+          "messages_dropped_range": 24,
+          "messages_dropped_packet_loss": 9,
+          "total_messages_dropped": 33,
+          "total_bytes_transmitted": 14208
+        }
+      },
+      {
+        "step": 12,
+        "sim_time": 9.600000000000001,
+        "robots": {
+          "0": {
+            "ground_truth_pos": [
+              14.99969463755923,
+              28.571212144133735
+            ],
+            "ground_truth_theta": 2.6883129169084676,
+            "current_path": [
+              [
+                15.0,
+                28.571428571428573
+              ],
+              [
+                15.0,
+                14.285714285714286
+              ],
+              [
+                15.0,
+                0.0
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "1": {
+            "ground_truth_pos": [
+              1.5553582212665125e-05,
+              57.14261277370122
+            ],
+            "ground_truth_theta": -0.18508948017011081,
+            "current_path": [
+              [
+                0.0,
+                57.142857142857146
+              ],
+              [
+                0.0,
+                71.42857142857143
+              ],
+              [
+                5.0,
+                71.42857142857143
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "2": {
+            "ground_truth_pos": [
+              9.89892002648839,
+              42.92725476609851
+            ],
+            "ground_truth_theta": 0.3443257204807585,
+            "current_path": [
+              [
+                10.0,
+                42.85714285714286
+              ],
+              [
+                10.0,
+                57.142857142857146
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "3": {
+            "ground_truth_pos": [
+              14.999931374288668,
+              42.85694948786166
+            ],
+            "ground_truth_theta": -0.5948551018120157,
+            "current_path": [],
+            "state": "IDLE"
+          }
+        },
+        "tasks": {
+          "0": {
+            "pos": [
+              25.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "1": {
+            "pos": [
+              15.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "2": {
+            "pos": [
+              5.0,
+              71.42857142857143
+            ],
+            "completed": false,
+            "claimed_by": 1
+          },
+          "3": {
+            "pos": [
+              10.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          },
+          "4": {
+            "pos": [
+              15.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "5": {
+            "pos": [
+              20.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "6": {
+            "pos": [
+              0.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "7": {
+            "pos": [
+              20.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          }
+        },
+        "blockages": [
+          [
+            25,
+            29
+          ],
+          [
+            19,
+            25
+          ]
+        ],
+        "completed_tasks": 0,
+        "completion_rate_pct": 0.0,
+        "recourse_pivots": 0,
+        "comm_metrics": {
+          "comm_range": 25.0,
+          "p_drop": 0.05,
+          "latency_steps": 1,
+          "messages_generated": 156,
+          "messages_transmitted": 121,
+          "messages_delivered": 111,
+          "messages_dropped_range": 26,
+          "messages_dropped_packet_loss": 9,
+          "total_messages_dropped": 35,
+          "total_bytes_transmitted": 15488
+        }
+      },
+      {
+        "step": 13,
+        "sim_time": 10.4,
+        "robots": {
+          "0": {
+            "ground_truth_pos": [
+              14.999692451587373,
+              28.571217572709518
+            ],
+            "ground_truth_theta": 2.6883102799446497,
+            "current_path": [
+              [
+                15.0,
+                28.571428571428573
+              ],
+              [
+                15.0,
+                14.285714285714286
+              ],
+              [
+                15.0,
+                0.0
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "1": {
+            "ground_truth_pos": [
+              1.4900610354498857e-05,
+              57.142614041545436
+            ],
+            "ground_truth_theta": -0.18508768153033484,
+            "current_path": [
+              [
+                0.0,
+                57.142857142857146
+              ],
+              [
+                0.0,
+                71.42857142857143
+              ],
+              [
+                5.0,
+                71.42857142857143
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "2": {
+            "ground_truth_pos": [
+              9.922508085246514,
+              42.96496763827949
+            ],
+            "ground_truth_theta": 0.3047115205043535,
+            "current_path": [
+              [
+                10.0,
+                42.85714285714286
+              ],
+              [
+                10.0,
+                57.142857142857146
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "3": {
+            "ground_truth_pos": [
+              14.999931157595595,
+              42.856977367950684
+            ],
+            "ground_truth_theta": -0.5948596264394636,
+            "current_path": [],
+            "state": "IDLE"
+          }
+        },
+        "tasks": {
+          "0": {
+            "pos": [
+              25.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "1": {
+            "pos": [
+              15.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "2": {
+            "pos": [
+              5.0,
+              71.42857142857143
+            ],
+            "completed": false,
+            "claimed_by": 1
+          },
+          "3": {
+            "pos": [
+              10.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          },
+          "4": {
+            "pos": [
+              15.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "5": {
+            "pos": [
+              20.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "6": {
+            "pos": [
+              0.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "7": {
+            "pos": [
+              20.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          }
+        },
+        "blockages": [
+          [
+            25,
+            29
+          ],
+          [
+            18,
+            24
+          ],
+          [
+            19,
+            25
+          ]
+        ],
+        "completed_tasks": 0,
+        "completion_rate_pct": 0.0,
+        "recourse_pivots": 0,
+        "comm_metrics": {
+          "comm_range": 25.0,
+          "p_drop": 0.05,
+          "latency_steps": 1,
+          "messages_generated": 168,
+          "messages_transmitted": 130,
+          "messages_delivered": 121,
+          "messages_dropped_range": 28,
+          "messages_dropped_packet_loss": 10,
+          "total_messages_dropped": 38,
+          "total_bytes_transmitted": 16640
+        }
+      },
+      {
+        "step": 14,
+        "sim_time": 11.200000000000001,
+        "robots": {
+          "0": {
+            "ground_truth_pos": [
+              14.999692742768525,
+              28.571217528844286
+            ],
+            "ground_truth_theta": 2.6883078221565357,
+            "current_path": [
+              [
+                15.0,
+                28.571428571428573
+              ],
+              [
+                15.0,
+                14.285714285714286
+              ],
+              [
+                15.0,
+                0.0
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "1": {
+            "ground_truth_pos": [
+              1.516353886101568e-05,
+              57.14261433455288
+            ],
+            "ground_truth_theta": -0.1850862236577168,
+            "current_path": [
+              [
+                0.0,
+                57.142857142857146
+              ],
+              [
+                0.0,
+                71.42857142857143
+              ],
+              [
+                5.0,
+                71.42857142857143
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "2": {
+            "ground_truth_pos": [
+              9.937249499718416,
+              42.998209477127546
+            ],
+            "ground_truth_theta": 0.19478111305403467,
+            "current_path": [
+              [
+                10.0,
+                42.85714285714286
+              ],
+              [
+                10.0,
+                57.142857142857146
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "3": {
+            "ground_truth_pos": [
+              14.99992915176898,
+              42.85699019667725
+            ],
+            "ground_truth_theta": -0.5948610696654714,
+            "current_path": [],
+            "state": "IDLE"
+          }
+        },
+        "tasks": {
+          "0": {
+            "pos": [
+              25.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "1": {
+            "pos": [
+              15.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "2": {
+            "pos": [
+              5.0,
+              71.42857142857143
+            ],
+            "completed": false,
+            "claimed_by": 1
+          },
+          "3": {
+            "pos": [
+              10.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          },
+          "4": {
+            "pos": [
+              15.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "5": {
+            "pos": [
+              20.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "6": {
+            "pos": [
+              0.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "7": {
+            "pos": [
+              20.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          }
+        },
+        "blockages": [
+          [
+            25,
+            29
+          ],
+          [
+            18,
+            24
+          ],
+          [
+            19,
+            25
+          ]
+        ],
+        "completed_tasks": 0,
+        "completion_rate_pct": 0.0,
+        "recourse_pivots": 0,
+        "comm_metrics": {
+          "comm_range": 25.0,
+          "p_drop": 0.05,
+          "latency_steps": 1,
+          "messages_generated": 180,
+          "messages_transmitted": 140,
+          "messages_delivered": 130,
+          "messages_dropped_range": 30,
+          "messages_dropped_packet_loss": 10,
+          "total_messages_dropped": 40,
+          "total_bytes_transmitted": 17920
+        }
+      },
+      {
+        "step": 15,
+        "sim_time": 12.0,
+        "robots": {
+          "0": {
+            "ground_truth_pos": [
+              14.999693063944457,
+              28.571217716384528
+            ],
+            "ground_truth_theta": 2.6883053163306116,
+            "current_path": [
+              [
+                15.0,
+                28.571428571428573
+              ],
+              [
+                15.0,
+                14.285714285714286
+              ],
+              [
+                15.0,
+                0.0
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "1": {
+            "ground_truth_pos": [
+              1.4351328973009385e-05,
+              57.14261446350823
+            ],
+            "ground_truth_theta": -0.18508454646946032,
+            "current_path": [
+              [
+                0.0,
+                57.142857142857146
+              ],
+              [
+                0.0,
+                71.42857142857143
+              ],
+              [
+                5.0,
+                71.42857142857143
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "2": {
+            "ground_truth_pos": [
+              9.93823247181626,
+              43.00973418214506
+            ],
+            "ground_truth_theta": 0.10778071637763226,
+            "current_path": [
+              [
+                10.0,
+                42.85714285714286
+              ],
+              [
+                10.0,
+                57.142857142857146
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "3": {
+            "ground_truth_pos": [
+              14.999926841059093,
+              42.8569942716999
+            ],
+            "ground_truth_theta": -0.5948586516892076,
+            "current_path": [],
+            "state": "IDLE"
+          }
+        },
+        "tasks": {
+          "0": {
+            "pos": [
+              25.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "1": {
+            "pos": [
+              15.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "2": {
+            "pos": [
+              5.0,
+              71.42857142857143
+            ],
+            "completed": false,
+            "claimed_by": 1
+          },
+          "3": {
+            "pos": [
+              10.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          },
+          "4": {
+            "pos": [
+              15.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "5": {
+            "pos": [
+              20.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "6": {
+            "pos": [
+              0.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "7": {
+            "pos": [
+              20.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          }
+        },
+        "blockages": [
+          [
+            25,
+            29
+          ],
+          [
+            18,
+            24
+          ],
+          [
+            19,
+            25
+          ]
+        ],
+        "completed_tasks": 0,
+        "completion_rate_pct": 0.0,
+        "recourse_pivots": 0,
+        "comm_metrics": {
+          "comm_range": 25.0,
+          "p_drop": 0.05,
+          "latency_steps": 1,
+          "messages_generated": 192,
+          "messages_transmitted": 148,
+          "messages_delivered": 140,
+          "messages_dropped_range": 32,
+          "messages_dropped_packet_loss": 12,
+          "total_messages_dropped": 44,
+          "total_bytes_transmitted": 18944
+        }
+      },
+      {
+        "step": 16,
+        "sim_time": 12.8,
+        "robots": {
+          "0": {
+            "ground_truth_pos": [
+              14.999693377496286,
+              28.571217910370365
+            ],
+            "ground_truth_theta": 2.6883028037298575,
+            "current_path": [
+              [
+                15.0,
+                28.571428571428573
+              ],
+              [
+                15.0,
+                14.285714285714286
+              ],
+              [
+                15.0,
+                0.0
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "1": {
+            "ground_truth_pos": [
+              1.3932606950141742e-05,
+              57.14261502442605
+            ],
+            "ground_truth_theta": -0.18508280868920934,
+            "current_path": [
+              [
+                0.0,
+                57.142857142857146
+              ],
+              [
+                0.0,
+                71.42857142857143
+              ],
+              [
+                5.0,
+                71.42857142857143
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "2": {
+            "ground_truth_pos": [
+              9.9422857641505,
+              43.00146004626207
+            ],
+            "ground_truth_theta": 0.29086036501111057,
+            "current_path": [
+              [
+                10.0,
+                42.85714285714286
+              ],
+              [
+                10.0,
+                57.142857142857146
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "3": {
+            "ground_truth_pos": [
+              14.999926009324579,
+              42.856995695980224
+            ],
+            "ground_truth_theta": -0.5948560663311192,
+            "current_path": [],
+            "state": "IDLE"
+          }
+        },
+        "tasks": {
+          "0": {
+            "pos": [
+              25.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "1": {
+            "pos": [
+              15.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "2": {
+            "pos": [
+              5.0,
+              71.42857142857143
+            ],
+            "completed": false,
+            "claimed_by": 1
+          },
+          "3": {
+            "pos": [
+              10.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          },
+          "4": {
+            "pos": [
+              15.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "5": {
+            "pos": [
+              20.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "6": {
+            "pos": [
+              0.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "7": {
+            "pos": [
+              20.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          }
+        },
+        "blockages": [
+          [
+            13,
+            19
+          ],
+          [
+            25,
+            29
+          ],
+          [
+            18,
+            24
+          ],
+          [
+            19,
+            25
+          ]
+        ],
+        "completed_tasks": 0,
+        "completion_rate_pct": 0.0,
+        "recourse_pivots": 0,
+        "comm_metrics": {
+          "comm_range": 25.0,
+          "p_drop": 0.05,
+          "latency_steps": 1,
+          "messages_generated": 204,
+          "messages_transmitted": 158,
+          "messages_delivered": 148,
+          "messages_dropped_range": 34,
+          "messages_dropped_packet_loss": 12,
+          "total_messages_dropped": 46,
+          "total_bytes_transmitted": 20224
+        }
+      },
+      {
+        "step": 17,
+        "sim_time": 13.600000000000001,
+        "robots": {
+          "0": {
+            "ground_truth_pos": [
+              14.999693681048926,
+              28.57121806676226
+            ],
+            "ground_truth_theta": 2.688300294380503,
+            "current_path": [
+              [
+                15.0,
+                28.571428571428573
+              ],
+              [
+                15.0,
+                14.285714285714286
+              ],
+              [
+                15.0,
+                0.0
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "1": {
+            "ground_truth_pos": [
+              1.4080351043474643e-05,
+              57.14261580789349
+            ],
+            "ground_truth_theta": -0.18508087371810977,
+            "current_path": [
+              [
+                0.0,
+                57.142857142857146
+              ],
+              [
+                0.0,
+                71.42857142857143
+              ],
+              [
+                5.0,
+                71.42857142857143
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "2": {
+            "ground_truth_pos": [
+              9.932493827148864,
+              43.01957074709665
+            ],
+            "ground_truth_theta": 0.31500909535008226,
+            "current_path": [
+              [
+                10.0,
+                42.85714285714286
+              ],
+              [
+                10.0,
+                57.142857142857146
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "3": {
+            "ground_truth_pos": [
+              14.999926413537025,
+              42.856997315334944
+            ],
+            "ground_truth_theta": -0.5948565478972638,
+            "current_path": [],
+            "state": "IDLE"
+          }
+        },
+        "tasks": {
+          "0": {
+            "pos": [
+              25.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "1": {
+            "pos": [
+              15.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "2": {
+            "pos": [
+              5.0,
+              71.42857142857143
+            ],
+            "completed": false,
+            "claimed_by": 1
+          },
+          "3": {
+            "pos": [
+              10.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          },
+          "4": {
+            "pos": [
+              15.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "5": {
+            "pos": [
+              20.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "6": {
+            "pos": [
+              0.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "7": {
+            "pos": [
+              20.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          }
+        },
+        "blockages": [
+          [
+            13,
+            19
+          ],
+          [
+            25,
+            29
+          ],
+          [
+            18,
+            24
+          ],
+          [
+            19,
+            25
+          ]
+        ],
+        "completed_tasks": 0,
+        "completion_rate_pct": 0.0,
+        "recourse_pivots": 0,
+        "comm_metrics": {
+          "comm_range": 25.0,
+          "p_drop": 0.05,
+          "latency_steps": 1,
+          "messages_generated": 216,
+          "messages_transmitted": 168,
+          "messages_delivered": 158,
+          "messages_dropped_range": 36,
+          "messages_dropped_packet_loss": 12,
+          "total_messages_dropped": 48,
+          "total_bytes_transmitted": 21504
+        }
+      },
+      {
+        "step": 18,
+        "sim_time": 14.4,
+        "robots": {
+          "0": {
+            "ground_truth_pos": [
+              14.999693999193793,
+              28.5712182760073
+            ],
+            "ground_truth_theta": 2.688297780573806,
+            "current_path": [
+              [
+                15.0,
+                28.571428571428573
+              ],
+              [
+                15.0,
+                14.285714285714286
+              ],
+              [
+                15.0,
+                0.0
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "1": {
+            "ground_truth_pos": [
+              1.4251025041976684e-05,
+              57.14261592492713
+            ],
+            "ground_truth_theta": -0.18507926644135678,
+            "current_path": [
+              [
+                0.0,
+                57.142857142857146
+              ],
+              [
+                0.0,
+                71.42857142857143
+              ],
+              [
+                5.0,
+                71.42857142857143
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "2": {
+            "ground_truth_pos": [
+              9.921450484821325,
+              43.02059868822097
+            ],
+            "ground_truth_theta": 0.320869310344532,
+            "current_path": [
+              [
+                10.0,
+                42.85714285714286
+              ],
+              [
+                10.0,
+                57.142857142857146
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "3": {
+            "ground_truth_pos": [
+              14.99992626697314,
+              42.85699636850973
+            ],
+            "ground_truth_theta": -0.5948556384691157,
+            "current_path": [],
+            "state": "IDLE"
+          }
+        },
+        "tasks": {
+          "0": {
+            "pos": [
+              25.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "1": {
+            "pos": [
+              15.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "2": {
+            "pos": [
+              5.0,
+              71.42857142857143
+            ],
+            "completed": false,
+            "claimed_by": 1
+          },
+          "3": {
+            "pos": [
+              10.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          },
+          "4": {
+            "pos": [
+              15.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "5": {
+            "pos": [
+              20.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "6": {
+            "pos": [
+              0.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "7": {
+            "pos": [
+              20.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          }
+        },
+        "blockages": [
+          [
+            13,
+            19
+          ],
+          [
+            25,
+            29
+          ],
+          [
+            18,
+            24
+          ],
+          [
+            19,
+            25
+          ]
+        ],
+        "completed_tasks": 0,
+        "completion_rate_pct": 0.0,
+        "recourse_pivots": 0,
+        "comm_metrics": {
+          "comm_range": 25.0,
+          "p_drop": 0.05,
+          "latency_steps": 1,
+          "messages_generated": 228,
+          "messages_transmitted": 178,
+          "messages_delivered": 168,
+          "messages_dropped_range": 38,
+          "messages_dropped_packet_loss": 12,
+          "total_messages_dropped": 50,
+          "total_bytes_transmitted": 22784
+        }
+      },
+      {
+        "step": 19,
+        "sim_time": 15.200000000000001,
+        "robots": {
+          "0": {
+            "ground_truth_pos": [
+              14.999694315420829,
+              28.571218491782005
+            ],
+            "ground_truth_theta": 2.6882952614141753,
+            "current_path": [
+              [
+                15.0,
+                28.571428571428573
+              ],
+              [
+                15.0,
+                14.285714285714286
+              ],
+              [
+                15.0,
+                0.0
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "1": {
+            "ground_truth_pos": [
+              1.3812259437889584e-05,
+              57.14261662216027
+            ],
+            "ground_truth_theta": -0.18507775265456744,
+            "current_path": [
+              [
+                0.0,
+                57.142857142857146
+              ],
+              [
+                0.0,
+                71.42857142857143
+              ],
+              [
+                5.0,
+                71.42857142857143
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "2": {
+            "ground_truth_pos": [
+              9.911359967704652,
+              43.0117598451667
+            ],
+            "ground_truth_theta": 0.5626684435240898,
+            "current_path": [
+              [
+                10.0,
+                42.85714285714286
+              ],
+              [
+                10.0,
+                57.142857142857146
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "3": {
+            "ground_truth_pos": [
+              14.999925439484938,
+              42.856995849038114
+            ],
+            "ground_truth_theta": -0.594855437266213,
+            "current_path": [],
+            "state": "IDLE"
+          }
+        },
+        "tasks": {
+          "0": {
+            "pos": [
+              25.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "1": {
+            "pos": [
+              15.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "2": {
+            "pos": [
+              5.0,
+              71.42857142857143
+            ],
+            "completed": false,
+            "claimed_by": 1
+          },
+          "3": {
+            "pos": [
+              10.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          },
+          "4": {
+            "pos": [
+              15.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "5": {
+            "pos": [
+              20.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "6": {
+            "pos": [
+              0.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "7": {
+            "pos": [
+              20.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          }
+        },
+        "blockages": [
+          [
+            13,
+            19
+          ],
+          [
+            25,
+            29
+          ],
+          [
+            18,
+            24
+          ],
+          [
+            19,
+            25
+          ]
+        ],
+        "completed_tasks": 0,
+        "completion_rate_pct": 0.0,
+        "recourse_pivots": 0,
+        "comm_metrics": {
+          "comm_range": 25.0,
+          "p_drop": 0.05,
+          "latency_steps": 1,
+          "messages_generated": 240,
+          "messages_transmitted": 188,
+          "messages_delivered": 178,
+          "messages_dropped_range": 40,
+          "messages_dropped_packet_loss": 12,
+          "total_messages_dropped": 52,
+          "total_bytes_transmitted": 24064
+        }
+      }
+    ]
+  },
+  "events": [
+    {
+      "step": 0,
+      "type": "step_snapshot",
+      "snapshot": {
+        "step": 0,
+        "sim_time": 0.0,
+        "robots": {
+          "0": {
+            "ground_truth_pos": [
+              14.997853653389441,
+              28.577090369171845
+            ],
+            "ground_truth_theta": 2.689008962064657,
+            "current_path": [
+              [
+                15.0,
+                28.571428571428573
+              ],
+              [
+                15.0,
+                14.285714285714286
+              ],
+              [
+                15.0,
+                0.0
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "1": {
+            "ground_truth_pos": [
+              -0.002770444306060097,
+              57.14846397629136
+            ],
+            "ground_truth_theta": -0.1845537825424235,
+            "current_path": [
+              [
+                0.0,
+                57.142857142857146
+              ],
+              [
+                0.0,
+                71.42857142857143
+              ],
+              [
+                5.0,
+                71.42857142857143
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "2": {
+            "ground_truth_pos": [
+              10.004646189335482,
+              42.84478140199338
+            ],
+            "ground_truth_theta": 0.8960905745693657,
+            "current_path": [
+              [
+                10.0,
+                42.85714285714286
+              ],
+              [
+                10.0,
+                57.142857142857146
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "3": {
+            "ground_truth_pos": [
+              14.997471799870208,
+              42.86287413769336
+            ],
+            "ground_truth_theta": -0.5942805472669386,
+            "current_path": [],
+            "state": "IDLE"
+          }
+        },
+        "tasks": {
+          "0": {
+            "pos": [
+              25.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "1": {
+            "pos": [
+              15.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "2": {
+            "pos": [
+              5.0,
+              71.42857142857143
+            ],
+            "completed": false,
+            "claimed_by": 1
+          },
+          "3": {
+            "pos": [
+              10.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          },
+          "4": {
+            "pos": [
+              15.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "5": {
+            "pos": [
+              20.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "6": {
+            "pos": [
+              0.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "7": {
+            "pos": [
+              20.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          }
+        },
+        "blockages": [
+          [
+            13,
+            19
+          ],
+          [
+            25,
+            29
+          ],
+          [
+            19,
+            25
+          ]
+        ],
+        "completed_tasks": 0,
+        "completion_rate_pct": 0.0,
+        "recourse_pivots": 0,
+        "comm_metrics": {
+          "comm_range": 25.0,
+          "p_drop": 0.05,
+          "latency_steps": 1,
+          "messages_generated": 12,
+          "messages_transmitted": 9,
+          "messages_delivered": 0,
+          "messages_dropped_range": 2,
+          "messages_dropped_packet_loss": 1,
+          "total_messages_dropped": 3,
+          "total_bytes_transmitted": 1152
+        }
+      }
+    },
+    {
+      "step": 1,
+      "type": "step_snapshot",
+      "snapshot": {
+        "step": 1,
+        "sim_time": 0.8,
+        "robots": {
+          "0": {
+            "ground_truth_pos": [
+              14.999297497019464,
+              28.57442449986743
+            ],
+            "ground_truth_theta": 2.6883674362522787,
+            "current_path": [
+              [
+                15.0,
+                28.571428571428573
+              ],
+              [
+                15.0,
+                14.285714285714286
+              ],
+              [
+                15.0,
+                0.0
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "1": {
+            "ground_truth_pos": [
+              -0.000799017646371074,
+              57.14586835798082
+            ],
+            "ground_truth_theta": -0.18510793279028281,
+            "current_path": [
+              [
+                0.0,
+                57.142857142857146
+              ],
+              [
+                0.0,
+                71.42857142857143
+              ],
+              [
+                5.0,
+                71.42857142857143
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "2": {
+            "ground_truth_pos": [
+              9.997292126414644,
+              42.845048831984094
+            ],
+            "ground_truth_theta": 1.0384171443446801,
+            "current_path": [
+              [
+                10.0,
+                42.85714285714286
+              ],
+              [
+                10.0,
+                57.142857142857146
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "3": {
+            "ground_truth_pos": [
+              14.999278944176131,
+              42.860293684073206
+            ],
+            "ground_truth_theta": -0.5948444970130775,
+            "current_path": [],
+            "state": "IDLE"
+          }
+        },
+        "tasks": {
+          "0": {
+            "pos": [
+              25.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "1": {
+            "pos": [
+              15.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "2": {
+            "pos": [
+              5.0,
+              71.42857142857143
+            ],
+            "completed": false,
+            "claimed_by": 1
+          },
+          "3": {
+            "pos": [
+              10.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          },
+          "4": {
+            "pos": [
+              15.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "5": {
+            "pos": [
+              20.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "6": {
+            "pos": [
+              0.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "7": {
+            "pos": [
+              20.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          }
+        },
+        "blockages": [
+          [
+            13,
+            19
+          ],
+          [
+            25,
+            29
+          ],
+          [
+            19,
+            25
+          ]
+        ],
+        "completed_tasks": 0,
+        "completion_rate_pct": 0.0,
+        "recourse_pivots": 0,
+        "comm_metrics": {
+          "comm_range": 25.0,
+          "p_drop": 0.05,
+          "latency_steps": 1,
+          "messages_generated": 24,
+          "messages_transmitted": 19,
+          "messages_delivered": 9,
+          "messages_dropped_range": 4,
+          "messages_dropped_packet_loss": 1,
+          "total_messages_dropped": 5,
+          "total_bytes_transmitted": 2432
+        }
+      }
+    },
+    {
+      "step": 2,
+      "type": "step_snapshot",
+      "snapshot": {
+        "step": 2,
+        "sim_time": 1.6,
+        "robots": {
+          "0": {
+            "ground_truth_pos": [
+              14.999575861536394,
+              28.572867092592006
+            ],
+            "ground_truth_theta": 2.6883234907460096,
+            "current_path": [
+              [
+                15.0,
+                28.571428571428573
+              ],
+              [
+                15.0,
+                14.285714285714286
+              ],
+              [
+                15.0,
+                0.0
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "1": {
+            "ground_truth_pos": [
+              -0.00032335822263304827,
+              57.144299056846805
+            ],
+            "ground_truth_theta": -0.185104237254792,
+            "current_path": [
+              [
+                0.0,
+                57.142857142857146
+              ],
+              [
+                0.0,
+                71.42857142857143
+              ],
+              [
+                5.0,
+                71.42857142857143
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "2": {
+            "ground_truth_pos": [
+              10.015189875717063,
+              42.82656391045154
+            ],
+            "ground_truth_theta": 0.9135124252494451,
+            "current_path": [
+              [
+                10.0,
+                42.85714285714286
+              ],
+              [
+                10.0,
+                57.142857142857146
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "3": {
+            "ground_truth_pos": [
+              14.999680183886182,
+              42.85870754414607
+            ],
+            "ground_truth_theta": -0.5949049082667257,
+            "current_path": [],
+            "state": "IDLE"
+          }
+        },
+        "tasks": {
+          "0": {
+            "pos": [
+              25.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "1": {
+            "pos": [
+              15.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "2": {
+            "pos": [
+              5.0,
+              71.42857142857143
+            ],
+            "completed": false,
+            "claimed_by": 1
+          },
+          "3": {
+            "pos": [
+              10.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          },
+          "4": {
+            "pos": [
+              15.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "5": {
+            "pos": [
+              20.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "6": {
+            "pos": [
+              0.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "7": {
+            "pos": [
+              20.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          }
+        },
+        "blockages": [
+          [
+            13,
+            19
+          ],
+          [
+            25,
+            29
+          ],
+          [
+            19,
+            25
+          ]
+        ],
+        "completed_tasks": 0,
+        "completion_rate_pct": 0.0,
+        "recourse_pivots": 0,
+        "comm_metrics": {
+          "comm_range": 25.0,
+          "p_drop": 0.05,
+          "latency_steps": 1,
+          "messages_generated": 36,
+          "messages_transmitted": 28,
+          "messages_delivered": 19,
+          "messages_dropped_range": 6,
+          "messages_dropped_packet_loss": 2,
+          "total_messages_dropped": 8,
+          "total_bytes_transmitted": 3584
+        }
+      }
+    },
+    {
+      "step": 3,
+      "type": "step_snapshot",
+      "snapshot": {
+        "step": 3,
+        "sim_time": 2.4000000000000004,
+        "robots": {
+          "0": {
+            "ground_truth_pos": [
+              14.999700614745713,
+              28.57207128917034
+            ],
+            "ground_truth_theta": 2.6883072697270842,
+            "current_path": [
+              [
+                15.0,
+                28.571428571428573
+              ],
+              [
+                15.0,
+                14.285714285714286
+              ],
+              [
+                15.0,
+                0.0
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "1": {
+            "ground_truth_pos": [
+              -9.684091383413049e-05,
+              57.14349577149002
+            ],
+            "ground_truth_theta": -0.1851084779925662,
+            "current_path": [
+              [
+                0.0,
+                57.142857142857146
+              ],
+              [
+                0.0,
+                71.42857142857143
+              ],
+              [
+                5.0,
+                71.42857142857143
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "2": {
+            "ground_truth_pos": [
+              10.004868923451282,
+              42.83693716866356
+            ],
+            "ground_truth_theta": 1.1033569732635067,
+            "current_path": [
+              [
+                10.0,
+                42.85714285714286
+              ],
+              [
+                10.0,
+                57.142857142857146
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "3": {
+            "ground_truth_pos": [
+              14.999866222071745,
+              42.857895597320365
+            ],
+            "ground_truth_theta": -0.5949260113161425,
+            "current_path": [],
+            "state": "IDLE"
+          }
+        },
+        "tasks": {
+          "0": {
+            "pos": [
+              25.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "1": {
+            "pos": [
+              15.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "2": {
+            "pos": [
+              5.0,
+              71.42857142857143
+            ],
+            "completed": false,
+            "claimed_by": 1
+          },
+          "3": {
+            "pos": [
+              10.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          },
+          "4": {
+            "pos": [
+              15.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "5": {
+            "pos": [
+              20.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "6": {
+            "pos": [
+              0.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "7": {
+            "pos": [
+              20.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          }
+        },
+        "blockages": [
+          [
+            19,
+            25
+          ]
+        ],
+        "completed_tasks": 0,
+        "completion_rate_pct": 0.0,
+        "recourse_pivots": 0,
+        "comm_metrics": {
+          "comm_range": 25.0,
+          "p_drop": 0.05,
+          "latency_steps": 1,
+          "messages_generated": 48,
+          "messages_transmitted": 38,
+          "messages_delivered": 28,
+          "messages_dropped_range": 8,
+          "messages_dropped_packet_loss": 2,
+          "total_messages_dropped": 10,
+          "total_bytes_transmitted": 4864
+        }
+      }
+    },
+    {
+      "step": 4,
+      "type": "step_snapshot",
+      "snapshot": {
+        "step": 4,
+        "sim_time": 3.2,
+        "robots": {
+          "0": {
+            "ground_truth_pos": [
+              14.999749790436736,
+              28.5716602876561
+            ],
+            "ground_truth_theta": 2.68829693703336,
+            "current_path": [
+              [
+                15.0,
+                28.571428571428573
+              ],
+              [
+                15.0,
+                14.285714285714286
+              ],
+              [
+                15.0,
+                0.0
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "1": {
+            "ground_truth_pos": [
+              6.4523798033475266e-06,
+              57.14307997359038
+            ],
+            "ground_truth_theta": -0.18511705021113098,
+            "current_path": [
+              [
+                0.0,
+                57.142857142857146
+              ],
+              [
+                0.0,
+                71.42857142857143
+              ],
+              [
+                5.0,
+                71.42857142857143
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "2": {
+            "ground_truth_pos": [
+              10.014222628513028,
+              42.81317305987567
+            ],
+            "ground_truth_theta": 1.1947823348988484,
+            "current_path": [
+              [
+                10.0,
+                42.85714285714286
+              ],
+              [
+                10.0,
+                57.142857142857146
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "3": {
+            "ground_truth_pos": [
+              14.999946612376956,
+              42.85747529419131
+            ],
+            "ground_truth_theta": -0.5949376988494901,
+            "current_path": [],
+            "state": "IDLE"
+          }
+        },
+        "tasks": {
+          "0": {
+            "pos": [
+              25.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "1": {
+            "pos": [
+              15.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "2": {
+            "pos": [
+              5.0,
+              71.42857142857143
+            ],
+            "completed": false,
+            "claimed_by": 1
+          },
+          "3": {
+            "pos": [
+              10.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          },
+          "4": {
+            "pos": [
+              15.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "5": {
+            "pos": [
+              20.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "6": {
+            "pos": [
+              0.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "7": {
+            "pos": [
+              20.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          }
+        },
+        "blockages": [
+          [
+            19,
+            25
+          ]
+        ],
+        "completed_tasks": 0,
+        "completion_rate_pct": 0.0,
+        "recourse_pivots": 0,
+        "comm_metrics": {
+          "comm_range": 25.0,
+          "p_drop": 0.05,
+          "latency_steps": 1,
+          "messages_generated": 60,
+          "messages_transmitted": 47,
+          "messages_delivered": 38,
+          "messages_dropped_range": 10,
+          "messages_dropped_packet_loss": 3,
+          "total_messages_dropped": 13,
+          "total_bytes_transmitted": 6016
+        }
+      }
+    },
+    {
+      "step": 5,
+      "type": "step_snapshot",
+      "snapshot": {
+        "step": 5,
+        "sim_time": 4.0,
+        "robots": {
+          "0": {
+            "ground_truth_pos": [
+              14.9997612665922,
+              28.57144583032407
+            ],
+            "ground_truth_theta": 2.6882881165430423,
+            "current_path": [
+              [
+                15.0,
+                28.571428571428573
+              ],
+              [
+                15.0,
+                14.285714285714286
+              ],
+              [
+                15.0,
+                0.0
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "1": {
+            "ground_truth_pos": [
+              4.781678266338308e-05,
+              57.142862028042735
+            ],
+            "ground_truth_theta": -0.18512709015422577,
+            "current_path": [
+              [
+                0.0,
+                57.142857142857146
+              ],
+              [
+                0.0,
+                71.42857142857143
+              ],
+              [
+                5.0,
+                71.42857142857143
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "2": {
+            "ground_truth_pos": [
+              10.001420632045003,
+              42.81116367000624
+            ],
+            "ground_truth_theta": 1.160734182438941,
+            "current_path": [
+              [
+                10.0,
+                42.85714285714286
+              ],
+              [
+                10.0,
+                57.142857142857146
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "3": {
+            "ground_truth_pos": [
+              14.999973962911602,
+              42.85725493508038
+            ],
+            "ground_truth_theta": -0.5949463407372697,
+            "current_path": [],
+            "state": "IDLE"
+          }
+        },
+        "tasks": {
+          "0": {
+            "pos": [
+              25.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "1": {
+            "pos": [
+              15.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "2": {
+            "pos": [
+              5.0,
+              71.42857142857143
+            ],
+            "completed": false,
+            "claimed_by": 1
+          },
+          "3": {
+            "pos": [
+              10.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          },
+          "4": {
+            "pos": [
+              15.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "5": {
+            "pos": [
+              20.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "6": {
+            "pos": [
+              0.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "7": {
+            "pos": [
+              20.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          }
+        },
+        "blockages": [],
+        "completed_tasks": 0,
+        "completion_rate_pct": 0.0,
+        "recourse_pivots": 0,
+        "comm_metrics": {
+          "comm_range": 25.0,
+          "p_drop": 0.05,
+          "latency_steps": 1,
+          "messages_generated": 72,
+          "messages_transmitted": 57,
+          "messages_delivered": 47,
+          "messages_dropped_range": 12,
+          "messages_dropped_packet_loss": 3,
+          "total_messages_dropped": 15,
+          "total_bytes_transmitted": 7296
+        }
+      }
+    },
+    {
+      "step": 6,
+      "type": "step_snapshot",
+      "snapshot": {
+        "step": 6,
+        "sim_time": 4.800000000000001,
+        "robots": {
+          "0": {
+            "ground_truth_pos": [
+              14.999754354285525,
+              28.571332052536693
+            ],
+            "ground_truth_theta": 2.688282609160053,
+            "current_path": [
+              [
+                15.0,
+                28.571428571428573
+              ],
+              [
+                15.0,
+                14.285714285714286
+              ],
+              [
+                15.0,
+                0.0
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "1": {
+            "ground_truth_pos": [
+              5.568595672603783e-05,
+              57.14274297633338
+            ],
+            "ground_truth_theta": -0.18512878374369876,
+            "current_path": [
+              [
+                0.0,
+                57.142857142857146
+              ],
+              [
+                0.0,
+                71.42857142857143
+              ],
+              [
+                5.0,
+                71.42857142857143
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "2": {
+            "ground_truth_pos": [
+              9.990874030095785,
+              42.833524487198154
+            ],
+            "ground_truth_theta": 1.1508639242000602,
+            "current_path": [
+              [
+                10.0,
+                42.85714285714286
+              ],
+              [
+                10.0,
+                57.142857142857146
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "3": {
+            "ground_truth_pos": [
+              14.99997082032423,
+              42.85713435931217
+            ],
+            "ground_truth_theta": -0.594945507391995,
+            "current_path": [],
+            "state": "IDLE"
+          }
+        },
+        "tasks": {
+          "0": {
+            "pos": [
+              25.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "1": {
+            "pos": [
+              15.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "2": {
+            "pos": [
+              5.0,
+              71.42857142857143
+            ],
+            "completed": false,
+            "claimed_by": 1
+          },
+          "3": {
+            "pos": [
+              10.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          },
+          "4": {
+            "pos": [
+              15.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "5": {
+            "pos": [
+              20.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "6": {
+            "pos": [
+              0.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "7": {
+            "pos": [
+              20.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          }
+        },
+        "blockages": [
+          [
+            25,
+            29
+          ],
+          [
+            19,
+            25
+          ]
+        ],
+        "completed_tasks": 0,
+        "completion_rate_pct": 0.0,
+        "recourse_pivots": 0,
+        "comm_metrics": {
+          "comm_range": 25.0,
+          "p_drop": 0.05,
+          "latency_steps": 1,
+          "messages_generated": 84,
+          "messages_transmitted": 66,
+          "messages_delivered": 57,
+          "messages_dropped_range": 14,
+          "messages_dropped_packet_loss": 4,
+          "total_messages_dropped": 18,
+          "total_bytes_transmitted": 8448
+        }
+      }
+    },
+    {
+      "step": 7,
+      "type": "step_snapshot",
+      "snapshot": {
+        "step": 7,
+        "sim_time": 5.6000000000000005,
+        "robots": {
+          "0": {
+            "ground_truth_pos": [
+              14.999735366844435,
+              28.57126730268974
+            ],
+            "ground_truth_theta": 2.688285076614779,
+            "current_path": [
+              [
+                15.0,
+                28.571428571428573
+              ],
+              [
+                15.0,
+                14.285714285714286
+              ],
+              [
+                15.0,
+                0.0
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "1": {
+            "ground_truth_pos": [
+              3.992037623939512e-05,
+              57.14266687743184
+            ],
+            "ground_truth_theta": -0.18511696424773935,
+            "current_path": [
+              [
+                0.0,
+                57.142857142857146
+              ],
+              [
+                0.0,
+                71.42857142857143
+              ],
+              [
+                5.0,
+                71.42857142857143
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "2": {
+            "ground_truth_pos": [
+              9.977569888775331,
+              42.88582057411855
+            ],
+            "ground_truth_theta": 1.0989804271150017,
+            "current_path": [
+              [
+                10.0,
+                42.85714285714286
+              ],
+              [
+                10.0,
+                57.142857142857146
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "3": {
+            "ground_truth_pos": [
+              14.999950252372878,
+              42.85705964338031
+            ],
+            "ground_truth_theta": -0.5949354146176076,
+            "current_path": [],
+            "state": "IDLE"
+          }
+        },
+        "tasks": {
+          "0": {
+            "pos": [
+              25.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "1": {
+            "pos": [
+              15.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "2": {
+            "pos": [
+              5.0,
+              71.42857142857143
+            ],
+            "completed": false,
+            "claimed_by": 1
+          },
+          "3": {
+            "pos": [
+              10.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          },
+          "4": {
+            "pos": [
+              15.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "5": {
+            "pos": [
+              20.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "6": {
+            "pos": [
+              0.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "7": {
+            "pos": [
+              20.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          }
+        },
+        "blockages": [
+          [
+            25,
+            29
+          ],
+          [
+            19,
+            25
+          ]
+        ],
+        "completed_tasks": 0,
+        "completion_rate_pct": 0.0,
+        "recourse_pivots": 0,
+        "comm_metrics": {
+          "comm_range": 25.0,
+          "p_drop": 0.05,
+          "latency_steps": 1,
+          "messages_generated": 96,
+          "messages_transmitted": 75,
+          "messages_delivered": 66,
+          "messages_dropped_range": 16,
+          "messages_dropped_packet_loss": 5,
+          "total_messages_dropped": 21,
+          "total_bytes_transmitted": 9600
+        }
+      }
+    },
+    {
+      "step": 8,
+      "type": "step_snapshot",
+      "snapshot": {
+        "step": 8,
+        "sim_time": 6.4,
+        "robots": {
+          "0": {
+            "ground_truth_pos": [
+              14.999712451448382,
+              28.571227287983902
+            ],
+            "ground_truth_theta": 2.6882964164206054,
+            "current_path": [
+              [
+                15.0,
+                28.571428571428573
+              ],
+              [
+                15.0,
+                14.285714285714286
+              ],
+              [
+                15.0,
+                0.0
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "1": {
+            "ground_truth_pos": [
+              1.9838764112410134e-05,
+              57.142620848937895
+            ],
+            "ground_truth_theta": -0.18509819189474835,
+            "current_path": [
+              [
+                0.0,
+                57.142857142857146
+              ],
+              [
+                0.0,
+                71.42857142857143
+              ],
+              [
+                5.0,
+                71.42857142857143
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "2": {
+            "ground_truth_pos": [
+              9.960187348801535,
+              42.888214107911566
+            ],
+            "ground_truth_theta": 0.9286146089307112,
+            "current_path": [
+              [
+                10.0,
+                42.85714285714286
+              ],
+              [
+                10.0,
+                57.142857142857146
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "3": {
+            "ground_truth_pos": [
+              14.99992669968234,
+              42.85701414437984
+            ],
+            "ground_truth_theta": -0.594916678979805,
+            "current_path": [],
+            "state": "IDLE"
+          }
+        },
+        "tasks": {
+          "0": {
+            "pos": [
+              25.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "1": {
+            "pos": [
+              15.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "2": {
+            "pos": [
+              5.0,
+              71.42857142857143
+            ],
+            "completed": false,
+            "claimed_by": 1
+          },
+          "3": {
+            "pos": [
+              10.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          },
+          "4": {
+            "pos": [
+              15.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "5": {
+            "pos": [
+              20.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "6": {
+            "pos": [
+              0.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "7": {
+            "pos": [
+              20.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          }
+        },
+        "blockages": [
+          [
+            13,
+            19
+          ],
+          [
+            19,
+            25
+          ]
+        ],
+        "completed_tasks": 0,
+        "completion_rate_pct": 0.0,
+        "recourse_pivots": 0,
+        "comm_metrics": {
+          "comm_range": 25.0,
+          "p_drop": 0.05,
+          "latency_steps": 1,
+          "messages_generated": 108,
+          "messages_transmitted": 85,
+          "messages_delivered": 75,
+          "messages_dropped_range": 18,
+          "messages_dropped_packet_loss": 5,
+          "total_messages_dropped": 23,
+          "total_bytes_transmitted": 10880
+        }
+      }
+    },
+    {
+      "step": 9,
+      "type": "step_snapshot",
+      "snapshot": {
+        "step": 9,
+        "sim_time": 7.2,
+        "robots": {
+          "0": {
+            "ground_truth_pos": [
+              14.999721308799606,
+              28.571222060371497
+            ],
+            "ground_truth_theta": 2.6882998085584293,
+            "current_path": [
+              [
+                15.0,
+                28.571428571428573
+              ],
+              [
+                15.0,
+                14.285714285714286
+              ],
+              [
+                15.0,
+                0.0
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "1": {
+            "ground_truth_pos": [
+              2.0068178531426447e-05,
+              57.14260737234244
+            ],
+            "ground_truth_theta": -0.1850917277044185,
+            "current_path": [
+              [
+                0.0,
+                57.142857142857146
+              ],
+              [
+                0.0,
+                71.42857142857143
+              ],
+              [
+                5.0,
+                71.42857142857143
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "2": {
+            "ground_truth_pos": [
+              9.94580196378564,
+              42.914010407561086
+            ],
+            "ground_truth_theta": 0.6843695865870517,
+            "current_path": [
+              [
+                10.0,
+                42.85714285714286
+              ],
+              [
+                10.0,
+                57.142857142857146
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "3": {
+            "ground_truth_pos": [
+              14.999920918181813,
+              42.85660596519572
+            ],
+            "ground_truth_theta": -0.5948976783119264,
+            "current_path": [],
+            "state": "IDLE"
+          }
+        },
+        "tasks": {
+          "0": {
+            "pos": [
+              25.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "1": {
+            "pos": [
+              15.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "2": {
+            "pos": [
+              5.0,
+              71.42857142857143
+            ],
+            "completed": false,
+            "claimed_by": 1
+          },
+          "3": {
+            "pos": [
+              10.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          },
+          "4": {
+            "pos": [
+              15.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "5": {
+            "pos": [
+              20.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "6": {
+            "pos": [
+              0.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "7": {
+            "pos": [
+              20.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          }
+        },
+        "blockages": [
+          [
+            13,
+            19
+          ],
+          [
+            25,
+            29
+          ],
+          [
+            19,
+            25
+          ]
+        ],
+        "completed_tasks": 0,
+        "completion_rate_pct": 0.0,
+        "recourse_pivots": 0,
+        "comm_metrics": {
+          "comm_range": 25.0,
+          "p_drop": 0.05,
+          "latency_steps": 1,
+          "messages_generated": 120,
+          "messages_transmitted": 94,
+          "messages_delivered": 85,
+          "messages_dropped_range": 20,
+          "messages_dropped_packet_loss": 6,
+          "total_messages_dropped": 26,
+          "total_bytes_transmitted": 12032
+        }
+      }
+    },
+    {
+      "step": 10,
+      "type": "step_snapshot",
+      "snapshot": {
+        "step": 10,
+        "sim_time": 8.0,
+        "robots": {
+          "0": {
+            "ground_truth_pos": [
+              14.999690240009876,
+              28.57121704780096
+            ],
+            "ground_truth_theta": 2.6882982824985744,
+            "current_path": [
+              [
+                15.0,
+                28.571428571428573
+              ],
+              [
+                15.0,
+                14.285714285714286
+              ],
+              [
+                15.0,
+                0.0
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "1": {
+            "ground_truth_pos": [
+              2.2479873775781966e-05,
+              57.1426066375638
+            ],
+            "ground_truth_theta": -0.1850925751721565,
+            "current_path": [
+              [
+                0.0,
+                57.142857142857146
+              ],
+              [
+                0.0,
+                71.42857142857143
+              ],
+              [
+                5.0,
+                71.42857142857143
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "2": {
+            "ground_truth_pos": [
+              9.935106808215544,
+              42.92041258874967
+            ],
+            "ground_truth_theta": 0.5393538154284668,
+            "current_path": [
+              [
+                10.0,
+                42.85714285714286
+              ],
+              [
+                10.0,
+                57.142857142857146
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "3": {
+            "ground_truth_pos": [
+              14.99992817876112,
+              42.85679666609988
+            ],
+            "ground_truth_theta": -0.5948535522766254,
+            "current_path": [],
+            "state": "IDLE"
+          }
+        },
+        "tasks": {
+          "0": {
+            "pos": [
+              25.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "1": {
+            "pos": [
+              15.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "2": {
+            "pos": [
+              5.0,
+              71.42857142857143
+            ],
+            "completed": false,
+            "claimed_by": 1
+          },
+          "3": {
+            "pos": [
+              10.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          },
+          "4": {
+            "pos": [
+              15.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "5": {
+            "pos": [
+              20.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "6": {
+            "pos": [
+              0.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "7": {
+            "pos": [
+              20.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          }
+        },
+        "blockages": [
+          [
+            13,
+            19
+          ],
+          [
+            25,
+            29
+          ],
+          [
+            18,
+            24
+          ],
+          [
+            19,
+            25
+          ]
+        ],
+        "completed_tasks": 0,
+        "completion_rate_pct": 0.0,
+        "recourse_pivots": 0,
+        "comm_metrics": {
+          "comm_range": 25.0,
+          "p_drop": 0.05,
+          "latency_steps": 1,
+          "messages_generated": 132,
+          "messages_transmitted": 103,
+          "messages_delivered": 94,
+          "messages_dropped_range": 22,
+          "messages_dropped_packet_loss": 7,
+          "total_messages_dropped": 29,
+          "total_bytes_transmitted": 13184
+        }
+      }
+    },
+    {
+      "step": 11,
+      "type": "step_snapshot",
+      "snapshot": {
+        "step": 11,
+        "sim_time": 8.8,
+        "robots": {
+          "0": {
+            "ground_truth_pos": [
+              14.99968822058085,
+              28.571213639704556
+            ],
+            "ground_truth_theta": 2.688305397953319,
+            "current_path": [
+              [
+                15.0,
+                28.571428571428573
+              ],
+              [
+                15.0,
+                14.285714285714286
+              ],
+              [
+                15.0,
+                0.0
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "1": {
+            "ground_truth_pos": [
+              1.828754323664049e-05,
+              57.14261040262436
+            ],
+            "ground_truth_theta": -0.18509102720341092,
+            "current_path": [
+              [
+                0.0,
+                57.142857142857146
+              ],
+              [
+                0.0,
+                71.42857142857143
+              ],
+              [
+                5.0,
+                71.42857142857143
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "2": {
+            "ground_truth_pos": [
+              9.907660897679195,
+              42.909667873814655
+            ],
+            "ground_truth_theta": 0.5511579269210635,
+            "current_path": [
+              [
+                10.0,
+                42.85714285714286
+              ],
+              [
+                10.0,
+                57.142857142857146
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "3": {
+            "ground_truth_pos": [
+              14.999930511797965,
+              42.85689674717821
+            ],
+            "ground_truth_theta": -0.5948493037304894,
+            "current_path": [],
+            "state": "IDLE"
+          }
+        },
+        "tasks": {
+          "0": {
+            "pos": [
+              25.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "1": {
+            "pos": [
+              15.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "2": {
+            "pos": [
+              5.0,
+              71.42857142857143
+            ],
+            "completed": false,
+            "claimed_by": 1
+          },
+          "3": {
+            "pos": [
+              10.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          },
+          "4": {
+            "pos": [
+              15.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "5": {
+            "pos": [
+              20.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "6": {
+            "pos": [
+              0.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "7": {
+            "pos": [
+              20.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          }
+        },
+        "blockages": [
+          [
+            25,
+            29
+          ],
+          [
+            18,
+            24
+          ],
+          [
+            19,
+            25
+          ]
+        ],
+        "completed_tasks": 0,
+        "completion_rate_pct": 0.0,
+        "recourse_pivots": 0,
+        "comm_metrics": {
+          "comm_range": 25.0,
+          "p_drop": 0.05,
+          "latency_steps": 1,
+          "messages_generated": 144,
+          "messages_transmitted": 111,
+          "messages_delivered": 103,
+          "messages_dropped_range": 24,
+          "messages_dropped_packet_loss": 9,
+          "total_messages_dropped": 33,
+          "total_bytes_transmitted": 14208
+        }
+      }
+    },
+    {
+      "step": 12,
+      "type": "step_snapshot",
+      "snapshot": {
+        "step": 12,
+        "sim_time": 9.600000000000001,
+        "robots": {
+          "0": {
+            "ground_truth_pos": [
+              14.99969463755923,
+              28.571212144133735
+            ],
+            "ground_truth_theta": 2.6883129169084676,
+            "current_path": [
+              [
+                15.0,
+                28.571428571428573
+              ],
+              [
+                15.0,
+                14.285714285714286
+              ],
+              [
+                15.0,
+                0.0
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "1": {
+            "ground_truth_pos": [
+              1.5553582212665125e-05,
+              57.14261277370122
+            ],
+            "ground_truth_theta": -0.18508948017011081,
+            "current_path": [
+              [
+                0.0,
+                57.142857142857146
+              ],
+              [
+                0.0,
+                71.42857142857143
+              ],
+              [
+                5.0,
+                71.42857142857143
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "2": {
+            "ground_truth_pos": [
+              9.89892002648839,
+              42.92725476609851
+            ],
+            "ground_truth_theta": 0.3443257204807585,
+            "current_path": [
+              [
+                10.0,
+                42.85714285714286
+              ],
+              [
+                10.0,
+                57.142857142857146
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "3": {
+            "ground_truth_pos": [
+              14.999931374288668,
+              42.85694948786166
+            ],
+            "ground_truth_theta": -0.5948551018120157,
+            "current_path": [],
+            "state": "IDLE"
+          }
+        },
+        "tasks": {
+          "0": {
+            "pos": [
+              25.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "1": {
+            "pos": [
+              15.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "2": {
+            "pos": [
+              5.0,
+              71.42857142857143
+            ],
+            "completed": false,
+            "claimed_by": 1
+          },
+          "3": {
+            "pos": [
+              10.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          },
+          "4": {
+            "pos": [
+              15.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "5": {
+            "pos": [
+              20.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "6": {
+            "pos": [
+              0.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "7": {
+            "pos": [
+              20.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          }
+        },
+        "blockages": [
+          [
+            25,
+            29
+          ],
+          [
+            19,
+            25
+          ]
+        ],
+        "completed_tasks": 0,
+        "completion_rate_pct": 0.0,
+        "recourse_pivots": 0,
+        "comm_metrics": {
+          "comm_range": 25.0,
+          "p_drop": 0.05,
+          "latency_steps": 1,
+          "messages_generated": 156,
+          "messages_transmitted": 121,
+          "messages_delivered": 111,
+          "messages_dropped_range": 26,
+          "messages_dropped_packet_loss": 9,
+          "total_messages_dropped": 35,
+          "total_bytes_transmitted": 15488
+        }
+      }
+    },
+    {
+      "step": 13,
+      "type": "step_snapshot",
+      "snapshot": {
+        "step": 13,
+        "sim_time": 10.4,
+        "robots": {
+          "0": {
+            "ground_truth_pos": [
+              14.999692451587373,
+              28.571217572709518
+            ],
+            "ground_truth_theta": 2.6883102799446497,
+            "current_path": [
+              [
+                15.0,
+                28.571428571428573
+              ],
+              [
+                15.0,
+                14.285714285714286
+              ],
+              [
+                15.0,
+                0.0
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "1": {
+            "ground_truth_pos": [
+              1.4900610354498857e-05,
+              57.142614041545436
+            ],
+            "ground_truth_theta": -0.18508768153033484,
+            "current_path": [
+              [
+                0.0,
+                57.142857142857146
+              ],
+              [
+                0.0,
+                71.42857142857143
+              ],
+              [
+                5.0,
+                71.42857142857143
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "2": {
+            "ground_truth_pos": [
+              9.922508085246514,
+              42.96496763827949
+            ],
+            "ground_truth_theta": 0.3047115205043535,
+            "current_path": [
+              [
+                10.0,
+                42.85714285714286
+              ],
+              [
+                10.0,
+                57.142857142857146
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "3": {
+            "ground_truth_pos": [
+              14.999931157595595,
+              42.856977367950684
+            ],
+            "ground_truth_theta": -0.5948596264394636,
+            "current_path": [],
+            "state": "IDLE"
+          }
+        },
+        "tasks": {
+          "0": {
+            "pos": [
+              25.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "1": {
+            "pos": [
+              15.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "2": {
+            "pos": [
+              5.0,
+              71.42857142857143
+            ],
+            "completed": false,
+            "claimed_by": 1
+          },
+          "3": {
+            "pos": [
+              10.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          },
+          "4": {
+            "pos": [
+              15.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "5": {
+            "pos": [
+              20.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "6": {
+            "pos": [
+              0.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "7": {
+            "pos": [
+              20.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          }
+        },
+        "blockages": [
+          [
+            25,
+            29
+          ],
+          [
+            18,
+            24
+          ],
+          [
+            19,
+            25
+          ]
+        ],
+        "completed_tasks": 0,
+        "completion_rate_pct": 0.0,
+        "recourse_pivots": 0,
+        "comm_metrics": {
+          "comm_range": 25.0,
+          "p_drop": 0.05,
+          "latency_steps": 1,
+          "messages_generated": 168,
+          "messages_transmitted": 130,
+          "messages_delivered": 121,
+          "messages_dropped_range": 28,
+          "messages_dropped_packet_loss": 10,
+          "total_messages_dropped": 38,
+          "total_bytes_transmitted": 16640
+        }
+      }
+    },
+    {
+      "step": 14,
+      "type": "step_snapshot",
+      "snapshot": {
+        "step": 14,
+        "sim_time": 11.200000000000001,
+        "robots": {
+          "0": {
+            "ground_truth_pos": [
+              14.999692742768525,
+              28.571217528844286
+            ],
+            "ground_truth_theta": 2.6883078221565357,
+            "current_path": [
+              [
+                15.0,
+                28.571428571428573
+              ],
+              [
+                15.0,
+                14.285714285714286
+              ],
+              [
+                15.0,
+                0.0
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "1": {
+            "ground_truth_pos": [
+              1.516353886101568e-05,
+              57.14261433455288
+            ],
+            "ground_truth_theta": -0.1850862236577168,
+            "current_path": [
+              [
+                0.0,
+                57.142857142857146
+              ],
+              [
+                0.0,
+                71.42857142857143
+              ],
+              [
+                5.0,
+                71.42857142857143
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "2": {
+            "ground_truth_pos": [
+              9.937249499718416,
+              42.998209477127546
+            ],
+            "ground_truth_theta": 0.19478111305403467,
+            "current_path": [
+              [
+                10.0,
+                42.85714285714286
+              ],
+              [
+                10.0,
+                57.142857142857146
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "3": {
+            "ground_truth_pos": [
+              14.99992915176898,
+              42.85699019667725
+            ],
+            "ground_truth_theta": -0.5948610696654714,
+            "current_path": [],
+            "state": "IDLE"
+          }
+        },
+        "tasks": {
+          "0": {
+            "pos": [
+              25.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "1": {
+            "pos": [
+              15.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "2": {
+            "pos": [
+              5.0,
+              71.42857142857143
+            ],
+            "completed": false,
+            "claimed_by": 1
+          },
+          "3": {
+            "pos": [
+              10.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          },
+          "4": {
+            "pos": [
+              15.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "5": {
+            "pos": [
+              20.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "6": {
+            "pos": [
+              0.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "7": {
+            "pos": [
+              20.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          }
+        },
+        "blockages": [
+          [
+            25,
+            29
+          ],
+          [
+            18,
+            24
+          ],
+          [
+            19,
+            25
+          ]
+        ],
+        "completed_tasks": 0,
+        "completion_rate_pct": 0.0,
+        "recourse_pivots": 0,
+        "comm_metrics": {
+          "comm_range": 25.0,
+          "p_drop": 0.05,
+          "latency_steps": 1,
+          "messages_generated": 180,
+          "messages_transmitted": 140,
+          "messages_delivered": 130,
+          "messages_dropped_range": 30,
+          "messages_dropped_packet_loss": 10,
+          "total_messages_dropped": 40,
+          "total_bytes_transmitted": 17920
+        }
+      }
+    },
+    {
+      "step": 15,
+      "type": "step_snapshot",
+      "snapshot": {
+        "step": 15,
+        "sim_time": 12.0,
+        "robots": {
+          "0": {
+            "ground_truth_pos": [
+              14.999693063944457,
+              28.571217716384528
+            ],
+            "ground_truth_theta": 2.6883053163306116,
+            "current_path": [
+              [
+                15.0,
+                28.571428571428573
+              ],
+              [
+                15.0,
+                14.285714285714286
+              ],
+              [
+                15.0,
+                0.0
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "1": {
+            "ground_truth_pos": [
+              1.4351328973009385e-05,
+              57.14261446350823
+            ],
+            "ground_truth_theta": -0.18508454646946032,
+            "current_path": [
+              [
+                0.0,
+                57.142857142857146
+              ],
+              [
+                0.0,
+                71.42857142857143
+              ],
+              [
+                5.0,
+                71.42857142857143
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "2": {
+            "ground_truth_pos": [
+              9.93823247181626,
+              43.00973418214506
+            ],
+            "ground_truth_theta": 0.10778071637763226,
+            "current_path": [
+              [
+                10.0,
+                42.85714285714286
+              ],
+              [
+                10.0,
+                57.142857142857146
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "3": {
+            "ground_truth_pos": [
+              14.999926841059093,
+              42.8569942716999
+            ],
+            "ground_truth_theta": -0.5948586516892076,
+            "current_path": [],
+            "state": "IDLE"
+          }
+        },
+        "tasks": {
+          "0": {
+            "pos": [
+              25.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "1": {
+            "pos": [
+              15.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "2": {
+            "pos": [
+              5.0,
+              71.42857142857143
+            ],
+            "completed": false,
+            "claimed_by": 1
+          },
+          "3": {
+            "pos": [
+              10.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          },
+          "4": {
+            "pos": [
+              15.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "5": {
+            "pos": [
+              20.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "6": {
+            "pos": [
+              0.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "7": {
+            "pos": [
+              20.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          }
+        },
+        "blockages": [
+          [
+            25,
+            29
+          ],
+          [
+            18,
+            24
+          ],
+          [
+            19,
+            25
+          ]
+        ],
+        "completed_tasks": 0,
+        "completion_rate_pct": 0.0,
+        "recourse_pivots": 0,
+        "comm_metrics": {
+          "comm_range": 25.0,
+          "p_drop": 0.05,
+          "latency_steps": 1,
+          "messages_generated": 192,
+          "messages_transmitted": 148,
+          "messages_delivered": 140,
+          "messages_dropped_range": 32,
+          "messages_dropped_packet_loss": 12,
+          "total_messages_dropped": 44,
+          "total_bytes_transmitted": 18944
+        }
+      }
+    },
+    {
+      "step": 16,
+      "type": "step_snapshot",
+      "snapshot": {
+        "step": 16,
+        "sim_time": 12.8,
+        "robots": {
+          "0": {
+            "ground_truth_pos": [
+              14.999693377496286,
+              28.571217910370365
+            ],
+            "ground_truth_theta": 2.6883028037298575,
+            "current_path": [
+              [
+                15.0,
+                28.571428571428573
+              ],
+              [
+                15.0,
+                14.285714285714286
+              ],
+              [
+                15.0,
+                0.0
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "1": {
+            "ground_truth_pos": [
+              1.3932606950141742e-05,
+              57.14261502442605
+            ],
+            "ground_truth_theta": -0.18508280868920934,
+            "current_path": [
+              [
+                0.0,
+                57.142857142857146
+              ],
+              [
+                0.0,
+                71.42857142857143
+              ],
+              [
+                5.0,
+                71.42857142857143
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "2": {
+            "ground_truth_pos": [
+              9.9422857641505,
+              43.00146004626207
+            ],
+            "ground_truth_theta": 0.29086036501111057,
+            "current_path": [
+              [
+                10.0,
+                42.85714285714286
+              ],
+              [
+                10.0,
+                57.142857142857146
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "3": {
+            "ground_truth_pos": [
+              14.999926009324579,
+              42.856995695980224
+            ],
+            "ground_truth_theta": -0.5948560663311192,
+            "current_path": [],
+            "state": "IDLE"
+          }
+        },
+        "tasks": {
+          "0": {
+            "pos": [
+              25.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "1": {
+            "pos": [
+              15.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "2": {
+            "pos": [
+              5.0,
+              71.42857142857143
+            ],
+            "completed": false,
+            "claimed_by": 1
+          },
+          "3": {
+            "pos": [
+              10.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          },
+          "4": {
+            "pos": [
+              15.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "5": {
+            "pos": [
+              20.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "6": {
+            "pos": [
+              0.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "7": {
+            "pos": [
+              20.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          }
+        },
+        "blockages": [
+          [
+            13,
+            19
+          ],
+          [
+            25,
+            29
+          ],
+          [
+            18,
+            24
+          ],
+          [
+            19,
+            25
+          ]
+        ],
+        "completed_tasks": 0,
+        "completion_rate_pct": 0.0,
+        "recourse_pivots": 0,
+        "comm_metrics": {
+          "comm_range": 25.0,
+          "p_drop": 0.05,
+          "latency_steps": 1,
+          "messages_generated": 204,
+          "messages_transmitted": 158,
+          "messages_delivered": 148,
+          "messages_dropped_range": 34,
+          "messages_dropped_packet_loss": 12,
+          "total_messages_dropped": 46,
+          "total_bytes_transmitted": 20224
+        }
+      }
+    },
+    {
+      "step": 17,
+      "type": "step_snapshot",
+      "snapshot": {
+        "step": 17,
+        "sim_time": 13.600000000000001,
+        "robots": {
+          "0": {
+            "ground_truth_pos": [
+              14.999693681048926,
+              28.57121806676226
+            ],
+            "ground_truth_theta": 2.688300294380503,
+            "current_path": [
+              [
+                15.0,
+                28.571428571428573
+              ],
+              [
+                15.0,
+                14.285714285714286
+              ],
+              [
+                15.0,
+                0.0
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "1": {
+            "ground_truth_pos": [
+              1.4080351043474643e-05,
+              57.14261580789349
+            ],
+            "ground_truth_theta": -0.18508087371810977,
+            "current_path": [
+              [
+                0.0,
+                57.142857142857146
+              ],
+              [
+                0.0,
+                71.42857142857143
+              ],
+              [
+                5.0,
+                71.42857142857143
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "2": {
+            "ground_truth_pos": [
+              9.932493827148864,
+              43.01957074709665
+            ],
+            "ground_truth_theta": 0.31500909535008226,
+            "current_path": [
+              [
+                10.0,
+                42.85714285714286
+              ],
+              [
+                10.0,
+                57.142857142857146
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "3": {
+            "ground_truth_pos": [
+              14.999926413537025,
+              42.856997315334944
+            ],
+            "ground_truth_theta": -0.5948565478972638,
+            "current_path": [],
+            "state": "IDLE"
+          }
+        },
+        "tasks": {
+          "0": {
+            "pos": [
+              25.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "1": {
+            "pos": [
+              15.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "2": {
+            "pos": [
+              5.0,
+              71.42857142857143
+            ],
+            "completed": false,
+            "claimed_by": 1
+          },
+          "3": {
+            "pos": [
+              10.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          },
+          "4": {
+            "pos": [
+              15.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "5": {
+            "pos": [
+              20.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "6": {
+            "pos": [
+              0.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "7": {
+            "pos": [
+              20.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          }
+        },
+        "blockages": [
+          [
+            13,
+            19
+          ],
+          [
+            25,
+            29
+          ],
+          [
+            18,
+            24
+          ],
+          [
+            19,
+            25
+          ]
+        ],
+        "completed_tasks": 0,
+        "completion_rate_pct": 0.0,
+        "recourse_pivots": 0,
+        "comm_metrics": {
+          "comm_range": 25.0,
+          "p_drop": 0.05,
+          "latency_steps": 1,
+          "messages_generated": 216,
+          "messages_transmitted": 168,
+          "messages_delivered": 158,
+          "messages_dropped_range": 36,
+          "messages_dropped_packet_loss": 12,
+          "total_messages_dropped": 48,
+          "total_bytes_transmitted": 21504
+        }
+      }
+    },
+    {
+      "step": 18,
+      "type": "step_snapshot",
+      "snapshot": {
+        "step": 18,
+        "sim_time": 14.4,
+        "robots": {
+          "0": {
+            "ground_truth_pos": [
+              14.999693999193793,
+              28.5712182760073
+            ],
+            "ground_truth_theta": 2.688297780573806,
+            "current_path": [
+              [
+                15.0,
+                28.571428571428573
+              ],
+              [
+                15.0,
+                14.285714285714286
+              ],
+              [
+                15.0,
+                0.0
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "1": {
+            "ground_truth_pos": [
+              1.4251025041976684e-05,
+              57.14261592492713
+            ],
+            "ground_truth_theta": -0.18507926644135678,
+            "current_path": [
+              [
+                0.0,
+                57.142857142857146
+              ],
+              [
+                0.0,
+                71.42857142857143
+              ],
+              [
+                5.0,
+                71.42857142857143
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "2": {
+            "ground_truth_pos": [
+              9.921450484821325,
+              43.02059868822097
+            ],
+            "ground_truth_theta": 0.320869310344532,
+            "current_path": [
+              [
+                10.0,
+                42.85714285714286
+              ],
+              [
+                10.0,
+                57.142857142857146
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "3": {
+            "ground_truth_pos": [
+              14.99992626697314,
+              42.85699636850973
+            ],
+            "ground_truth_theta": -0.5948556384691157,
+            "current_path": [],
+            "state": "IDLE"
+          }
+        },
+        "tasks": {
+          "0": {
+            "pos": [
+              25.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "1": {
+            "pos": [
+              15.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "2": {
+            "pos": [
+              5.0,
+              71.42857142857143
+            ],
+            "completed": false,
+            "claimed_by": 1
+          },
+          "3": {
+            "pos": [
+              10.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          },
+          "4": {
+            "pos": [
+              15.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "5": {
+            "pos": [
+              20.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "6": {
+            "pos": [
+              0.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "7": {
+            "pos": [
+              20.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          }
+        },
+        "blockages": [
+          [
+            13,
+            19
+          ],
+          [
+            25,
+            29
+          ],
+          [
+            18,
+            24
+          ],
+          [
+            19,
+            25
+          ]
+        ],
+        "completed_tasks": 0,
+        "completion_rate_pct": 0.0,
+        "recourse_pivots": 0,
+        "comm_metrics": {
+          "comm_range": 25.0,
+          "p_drop": 0.05,
+          "latency_steps": 1,
+          "messages_generated": 228,
+          "messages_transmitted": 178,
+          "messages_delivered": 168,
+          "messages_dropped_range": 38,
+          "messages_dropped_packet_loss": 12,
+          "total_messages_dropped": 50,
+          "total_bytes_transmitted": 22784
+        }
+      }
+    },
+    {
+      "step": 19,
+      "type": "step_snapshot",
+      "snapshot": {
+        "step": 19,
+        "sim_time": 15.200000000000001,
+        "robots": {
+          "0": {
+            "ground_truth_pos": [
+              14.999694315420829,
+              28.571218491782005
+            ],
+            "ground_truth_theta": 2.6882952614141753,
+            "current_path": [
+              [
+                15.0,
+                28.571428571428573
+              ],
+              [
+                15.0,
+                14.285714285714286
+              ],
+              [
+                15.0,
+                0.0
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "1": {
+            "ground_truth_pos": [
+              1.3812259437889584e-05,
+              57.14261662216027
+            ],
+            "ground_truth_theta": -0.18507775265456744,
+            "current_path": [
+              [
+                0.0,
+                57.142857142857146
+              ],
+              [
+                0.0,
+                71.42857142857143
+              ],
+              [
+                5.0,
+                71.42857142857143
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "2": {
+            "ground_truth_pos": [
+              9.911359967704652,
+              43.0117598451667
+            ],
+            "ground_truth_theta": 0.5626684435240898,
+            "current_path": [
+              [
+                10.0,
+                42.85714285714286
+              ],
+              [
+                10.0,
+                57.142857142857146
+              ]
+            ],
+            "state": "MOVING"
+          },
+          "3": {
+            "ground_truth_pos": [
+              14.999925439484938,
+              42.856995849038114
+            ],
+            "ground_truth_theta": -0.594855437266213,
+            "current_path": [],
+            "state": "IDLE"
+          }
+        },
+        "tasks": {
+          "0": {
+            "pos": [
+              25.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "1": {
+            "pos": [
+              15.0,
+              85.71428571428572
+            ],
+            "completed": false,
+            "claimed_by": null
+          },
+          "2": {
+            "pos": [
+              5.0,
+              71.42857142857143
+            ],
+            "completed": false,
+            "claimed_by": 1
+          },
+          "3": {
+            "pos": [
+              10.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          },
+          "4": {
+            "pos": [
+              15.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "5": {
+            "pos": [
+              20.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "6": {
+            "pos": [
+              0.0,
+              0.0
+            ],
+            "completed": false,
+            "claimed_by": 0
+          },
+          "7": {
+            "pos": [
+              20.0,
+              57.142857142857146
+            ],
+            "completed": false,
+            "claimed_by": 2
+          }
+        },
+        "blockages": [
+          [
+            13,
+            19
+          ],
+          [
+            25,
+            29
+          ],
+          [
+            18,
+            24
+          ],
+          [
+            19,
+            25
+          ]
+        ],
+        "completed_tasks": 0,
+        "completion_rate_pct": 0.0,
+        "recourse_pivots": 0,
+        "comm_metrics": {
+          "comm_range": 25.0,
+          "p_drop": 0.05,
+          "latency_steps": 1,
+          "messages_generated": 240,
+          "messages_transmitted": 188,
+          "messages_delivered": 178,
+          "messages_dropped_range": 40,
+          "messages_dropped_packet_loss": 12,
+          "total_messages_dropped": 52,
+          "total_bytes_transmitted": 24064
+        }
+      }
+    }
+  ]
+}

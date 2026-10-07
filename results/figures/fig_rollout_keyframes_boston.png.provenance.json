@@ -1,0 +1,13 @@
+{
+  "figure_file": "C:\\Users\\krmri\\Downloads\\Adversarial-Contingency-Auctions-main\\Adversarial-Contingency-Auctions-main\\results\\figures\\fig_rollout_keyframes_boston.png",
+  "git_commit": "75f7492d31b530324d85c7f87c869a08b4728d14",
+  "source_files": [
+    "data/maps/boston_downtown_drive.graphml"
+  ],
+  "n_instances": 1,
+  "generator_script": "make_rollout_videos.py",
+  "metadata": {
+    "map_type": "boston",
+    "generator_script": "make_rollout_videos.py"
+  }
+}

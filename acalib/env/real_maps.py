@@ -234,7 +234,11 @@ def generate_real_road_network(
             dist = float(np.linalg.norm(pu - pv))
             # Use OSM length if available, else scaled Euclidean
             osm_len = float(edge_data.get("length", dist))
-            g_undir.add_edge(u, v, weight=dist, length=dist, osm_length=osm_len)
+            street_name = edge_data.get("name", "")
+            highway_type = edge_data.get("highway", "")
+            g_undir.add_edge(
+                u, v, weight=dist, length=dist, osm_length=osm_len, name=street_name, highway=highway_type
+            )
 
     # Extract largest connected component
     if not nx.is_connected(g_undir):

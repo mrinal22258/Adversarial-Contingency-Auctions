@@ -1,0 +1,13 @@
+{
+  "figure_file": "C:\\Users\\krmri\\Downloads\\Adversarial-Contingency-Auctions-main\\Adversarial-Contingency-Auctions-main\\static\\images\\fig_rollout_keyframes_warehouse.png",
+  "git_commit": "75f7492d31b530324d85c7f87c869a08b4728d14",
+  "source_files": [
+    "data/maps/warehouse-10-20-10-2-1.map"
+  ],
+  "n_instances": 1,
+  "generator_script": "make_rollout_videos.py",
+  "metadata": {
+    "map_type": "warehouse",
+    "generator_script": "make_rollout_videos.py"
+  }
+}

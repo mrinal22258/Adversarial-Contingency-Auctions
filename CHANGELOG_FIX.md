@@ -212,3 +212,65 @@ For every phase and change:
        - Commit staleness verification.
        - Prohibition of unconditional "guarantees" or "strictly zero" conflicts when empirical safe-claim conflicts $> 0$ (ACA observed 18 safe-claim conflicts across 900 trials, an empirical rate of 1.8%, occurring during transient communication partitions).
      - Conditioned `paper.tex` safe-claim statements on bounded total variation error ($\mathrm{TV} \le \eta_{\text{eff}}$), explicitly reported the 1.8% empirical safe-claim conflict rate, and disclaimed physical hardware in Limitations.
+
+
+---
+
+### Step 2: Real Map Visualizations & Animated Rollouts
+- **Status:** Complete (2026-10-07)
+- **Changes made:**
+  1. **2.1 Publication Map Figures (`experiments/make_map_figures.py`):**
+     - Figure 1: Raw MovingAI warehouse grid (63x161, 5,699 passable cells) + coarsened graph overlay (n=38, |E|=59) -> `results/figures/fig_map_movingai_warehouse.pdf` / `.png`.
+     - Figure 2: Real Downtown Boston arterial street network (n=216, |E|=323) with task locations, risk corridors, robot start positions, and communication radius disks (r=25) -> `results/figures/fig_map_boston_road.pdf` / `.png`.
+     - Figure 3: Synthetic benchmark graph families stress test (Random Geometric Graph, Grid, Erdos-Renyi) -> `results/figures/fig_map_synthetic_families.pdf` / `.png`.
+     - All figures accompanied by cryptographic SHA-256 `.provenance.json` sidecars and embedded in `paper.tex` Section: Benchmark (`\ref{fig:benchmark_maps}`).
+  2. **2.2 Synchronized Rollout Animations (`experiments/make_rollout_videos.py`):**
+     - Rendered animated MP4 and GIF rollouts comparing ACA vs. CTP Replan vs. CBBA on identical seeds and blockage streams:
+       - `results/videos/rollout_warehouse_comparison.mp4` / `.gif` & `.provenance.json`
+       - `results/videos/rollout_boston_comparison.mp4` / `.gif` & `.provenance.json`
+     - Embedded representative 4-step keyframes into `paper.tex` (`\ref{fig:rollout_keyframes}`) and outputted publication PDFs (`fig_rollout_keyframes_warehouse.pdf`, `fig_rollout_keyframes_boston.pdf`).
+
+---
+
+### Step 3: Physics-Based Software-in-the-Loop Simulation on Real Map Topologies
+- **Status:** Complete (2026-10-07)
+- **Changes made:**
+  1. **3.1 Physics Simulator & Kinematic Robot Model (`experiments/sitl/`):**
+     - Developed a modular software-in-the-loop (SITL) simulation suite using headless PyBullet (`p.DIRECT`).
+     - Differential-drive TurtleBot3-like kinematic model (`experiments/sitl/robot.py`): wheel radius 0.033 m, track width 0.16 m, mass 1.0 kg, maximum velocity 3.5 m/s, maximum angular rate 3.0 rad/s.
+     - Local waypoint controller converting graph-planned paths into linear and angular velocity commands and wheel velocities, bounded by non-holonomic constraints.
+     - Physics collision detection against warehouse picking racks and urban building walls.
+  2. **3.2 Real Map Topologies in PyBullet (`experiments/sitl/world.py`):**
+     - Instantiated 3D physical collision bodies directly matching the MovingAI warehouse topology (`warehouse-10-20-10-2-1.map`) and Downtown Boston OSMnx road graph (`boston_downtown_drive.graphml`).
+  3. **3.4 Sensing & Noisy Odometry:**
+     - Ground-truth state strictly isolated from allocator-facing estimated pose.
+     - Gaussian translational noise (sigma = 0.05 m) and rotational drift (sigma = 0.02 rad) accumulated during robot transit.
+  4. **3.5 Realistic Communication Subsystem (`experiments/sitl/comm.py`):**
+     - Subclassed `CommunicationNetwork` with range-limiting (r in {15, 25, 45} m), packet drop rates (p_drop in {0.0, 0.05, 0.20}), and step latency. Undelivered messages strictly pruned from recipient queues.
+  5. **3.6 Physical Blockage Barriers:**
+     - Dynamic physical obstacle boxes spawned in PyBullet upon adversarial blockage onsets, physically halting robot progress.
+  6. **3.7 Allocator Adapter (`experiments/sitl/adapter.py`):**
+     - Thin, non-invasive adapter translating discrete auction commands from `acalib` allocators (`aca`, `aca_no_margin`, `ctp_replan`, `implicit`, `cbba_partial_lr`, `ssi_lr`) into physical waypoint trajectories without modifying core auction logic.
+  7. **3.8 & 3.9 Protocol Sweep Execution (`experiments/sitl/run_sitl.py`):**
+     - Executed full pre-registered grid: 6 methods x 2 maps x 3 adversaries x 2 comm regimes = 72 cells x 20 independent trials = 1,440 total trials (disjoint seeds >= 2000).
+     - Measured pilot execution: 0.673 s/trial; full parallel sweep across 8 CPU workers finished in 121 seconds.
+     - Completed trials: 1,418 successful, 22 failed (logged honestly with exception traces in `results/sitl/sitl_results.jsonl`).
+  8. **3.10 Top-Down Annotated Videos (`experiments/sitl/render_sitl_video.py`):**
+     - Generated annotated MP4 telemetry videos for MovingAI and Boston topologies displaying robot footprints, headings, active bundles, physical barrier appearances, detour pivots, and live metrics:
+       - `results/sitl/videos/sitl_warehouse_demo.mp4` & `.provenance.json`
+       - `results/sitl/videos/sitl_boston_demo.mp4` & `.provenance.json`
+     - Labeled explicitly with banner watermark: 'SIMULATION -- PyBullet SITL -- No Physical Robot'.
+  9. **3.11 SITL-vs-Graph Comparative Analysis (`experiments/sitl/analyze_sitl.py`):**
+     - Bland-Altman agreement analysis revealed a mean completion bias of -79.46% (95% Limits of Agreement: [-93.95%, -64.96%]), quantifying the impact of physical kinematic turning latency and collision avoidance.
+     - Ranking preservation test revealed a notable rank inversion (rho = -0.116, p = 0.8268): CTP Replan and Implicit, which dominated in instantaneous graph simulation, suffered disproportionate physical delays under reactive blockage encounters, whereas local-recourse auctions maintained smoother execution.
+     - Generated publication figure: `results/sitl/analysis/bland_altman_completion.pdf` / `.png` & `.provenance.json`.
+  10. **3.12 & 3.13 Synthetic-Vision Simulation (`experiments/sitl/vision.py`):**
+      - Rendered overhead camera view in OpenCV with unique ArUco fiducials atop each robot.
+      - Simulated realistic vision pipeline (cv2.aruco detection, pixel Gaussian noise, marker occlusions, frame latency).
+      - Achieved empirical detection rate of 85.83%, missed-marker rate of 14.17%, and position RMSE of 0.169 m (`results/sitl/vision/vision_metrics.json`, `vision_sim.mp4`).
+  11. **3.14 Boston Work-Zone Replay Defensibility Verification (`tools/check_boston_work_zones.py`):**
+      - Audited City of Boston Public Works Active Work Zones dataset (`data/maps/boston_work_zones.csv`, SHA-256 26b456a6...).
+      - Processed 460 municipal records; 64 records cleanly matched the Downtown Boston arterial core, while 396 records fell outside the bounding box (Dorchester, Roxbury, Brighton, etc.), affecting 112 / 323 edges (34.67%). Documented in `results/sitl/boston_work_zones_provenance.json` and confirmed defensible.
+  12. **3.16 Robotarium Remote-Access Deployment Preparation (`hw/robotarium/`):**
+      - Created unicycle command adapter and safety checklist in `hw/robotarium/README.md` and `hw/robotarium/adapter.py`.
+      - Explicitly labeled: 'Prepared for future remote-robot evaluation; NOT executed.' No access or hardware deployment claimed.
