@@ -47,8 +47,9 @@ METHOD_STYLES = {
     "cbba_gossip": {"label": "CBBA Gossip", "color": "#4682B4", "marker": "H", "zorder": 5, "lw": 1.4},
     "implicit": {"label": "Implicit", "color": OKABE_ITO["grey"], "marker": "x", "zorder": 3, "lw": 1.2},
     "pessimistic": {"label": "Pessimistic Ref.", "color": "#708090", "marker": "*", "zorder": 2, "lw": 1.2},
-    "clairvoyant_greedy": {"label": "Clairvoyant Greedy", "color": OKABE_ITO["black"], "marker": "+", "zorder": 2, "lw": 1.2},
-    "oracle": {"label": "Clairvoyant Greedy", "color": OKABE_ITO["black"], "marker": "+", "zorder": 2, "lw": 1.2},
+    "clairvoyant_greedy": {"label": "Clairvoyant Greedy (Ref, not bound)", "color": OKABE_ITO["black"], "marker": "+", "zorder": 2, "lw": 1.2},
+    "oracle": {"label": "Clairvoyant Greedy (Ref, not bound)", "color": OKABE_ITO["black"], "marker": "+", "zorder": 2, "lw": 1.2},
+    "foresight_opt": {"label": "Foresight Opt (CP-SAT bound)", "color": "#8B0000", "marker": "D", "zorder": 1, "lw": 1.5},
 }
 
 
@@ -87,11 +88,13 @@ def get_git_commit():
 
 def write_figure_provenance(fig_path: str, source_files: list, n_instances: int, extra_meta: dict = None):
     """Write sidecar .provenance.json file."""
+    gen_script = os.path.basename(sys.argv[0]) if sys.argv else "experiments/make_figures.py"
     provenance = {
         "figure_file": fig_path,
         "git_commit": get_git_commit(),
         "source_files": source_files,
         "n_instances": n_instances,
+        "generator_script": gen_script,
         "metadata": extra_meta or {},
     }
     json_path = fig_path + ".provenance.json"

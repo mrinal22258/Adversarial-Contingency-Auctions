@@ -40,8 +40,9 @@ METHOD_PRETTY = {
     "cbba_gossip": "CBBA Belief Gossip",
     "implicit": "Implicit (No Consensus) \\cite{alighanbari2005implicit}",
     "pessimistic": "Pessimistic Robust",
-    "clairvoyant_greedy": "Full-Info Matching (Oracle)",
-    "oracle": "Full-Info Matching (Oracle)",
+    "clairvoyant_greedy": "Clairvoyant greedy (reference, not a bound)",
+    "oracle": "Clairvoyant greedy (reference, not a bound)",
+    "foresight_opt": "Foresight Optimal (CP-SAT bound)",
 }
 
 

@@ -1,39 +1,109 @@
 """
-Unit tests for tools/lint_paper.py linter (Phase G.4).
-Verifies that:
-1. Hard-coded numbers (+13.0, 0.41, 1200, p=0.88) are flagged.
-2. Forbidden hype phrases ('Extensive', 'Theoretical Bound') are flagged.
-3. Clean LaTeX with macros and provenance files passes.
+Unit tests for tools/lint_paper.py (Step 0.4).
+Verifies that the linter strictly catches:
+- 'strictly 0' claims
+- 'Theoretical bound' claims
+- Unsubstantiated 'hardware' / 'Gazebo' claims
+- Unsubstantiated 'MovingAI' / 'OSMnx' claims without real data
+- Literal numbers in results sections outside macros
 """
 
+import os
 import pytest
-from tools.lint_paper import check_hardcoded_numbers, check_figure_provenance
+from tools.lint_paper import (
+    check_strict_claims,
+    check_unmacroed_literal_numbers,
+    check_figure_provenance,
+    check_staleness,
+    lint_paper,
+)
 
 
-def test_linter_detects_forbidden_numbers_and_phrases():
-    dirty_tex = r"""
-    \begin{abstract}
-    Extensive experiments demonstrate +13.0 pp gain over CBBA across 1200 total runs.
-    We compare against a Theoretical Bound oracle with p = 0.88 and Cliff's delta = 0.41.
-    Approximately 3% safe claims are achieved with 34 messages.
-    \end{abstract}
-    """
-    errors = check_hardcoded_numbers(dirty_tex)
-    assert len(errors) >= 5
-    assert any("13.0" in e for e in errors)
-    assert any("Extensive" in e for e in errors)
-    assert any("Theoretical Bound" in e for e in errors)
-    assert any("1200" in e for e in errors)
+BAD_PAPER_TEX = r"""
+\documentclass{article}
+\begin{document}
+
+\section{Introduction}
+We evaluate our method on real hardware in Gazebo and real DDS middleware.
+Our algorithm guarantees strictly 0 conflicts in Phase 1.
+We compare against the theoretical bound provided by the Oracle.
+
+\section{Experimental Evaluation}
+Our algorithm achieved 88.4\% completion rate compared to 79.8\% for CBBA.
+The p-value was statistically significant with p = 0.0012.
+A total of 17100 trials were conducted.
+
+\includegraphics{static/images/missing_figure.pdf}
+
+\end{document}
+"""
+
+CLEAN_SNIPPET = r"""
+\documentclass{article}
+\begin{document}
+
+\section{Introduction}
+We evaluate our multi-robot auction mechanism in simulated environments.
+Safe-claim conflicts are strictly bounded under Assumption 1.
+We compare against Clairvoyant greedy (reference, not a bound).
+We note that physical hardware validation remains future work.
+
+\section{Experimental Evaluation}
+Our algorithm achieved \aeAcaCompletion\% completion rate.
+The difference was statistically significant (\aePVal).
+A total of \aeTotalTrials\ trials were conducted.
+
+\end{document}
+"""
 
 
-def test_linter_passes_on_clean_macroized_tex():
-    clean_tex = r"""
-    \begin{abstract}
-    Rigorous paired empirical evaluations across controlled communication regimes
-    demonstrate \aeGainOverCbba{} percentage points gain over CBBA across \aeTotalTrials{} trials.
-    We compare against a Clairvoyant Greedy baseline.
-    Phase 1 safe claims achieve \aeSafeClaimRate{} with \aeAcaMsgs{} messages.
-    \end{abstract}
-    """
-    errors = check_hardcoded_numbers(clean_tex)
-    assert len(errors) == 0, f"Unexpected errors on clean tex: {errors}"
+def test_linter_catches_bad_claims():
+    """Verify that linter catches all prohibited claims on a deliberately bad paper."""
+    errors = check_strict_claims(BAD_PAPER_TEX)
+    
+    # Must catch strictly 0
+    assert any("strictly 0" in e.lower() for e in errors), "Must catch 'strictly 0' claim"
+    
+    # Must catch Theoretical bound
+    assert any("theoretical bound" in e.lower() for e in errors), "Must catch 'Theoretical bound' claim"
+    
+    # Must catch Gazebo
+    assert any("gazebo" in e.lower() for e in errors), "Must catch 'Gazebo' claim"
+
+    # Must catch hardware without physical data
+    assert any("hardware" in e.lower() for e in errors), "Must catch 'hardware' claim"
+
+
+def test_linter_catches_literal_numbers():
+    """Verify that linter catches unmacroed numbers in results section."""
+    errors = check_unmacroed_literal_numbers(BAD_PAPER_TEX)
+    
+    # Must catch 88.4% or 79.8%
+    assert any("88.4" in e or "79.8" in e for e in errors), "Must catch literal percentage numbers"
+    
+    # Must catch p = 0.0012
+    assert any("p-value" in e.lower() or "0.0012" in e for e in errors), "Must catch literal p-value"
+
+
+def test_linter_catches_missing_figure_provenance():
+    """Verify that linter catches figures missing .provenance.json sidecar."""
+    errors = check_figure_provenance(BAD_PAPER_TEX, base_dir=".")
+    assert any("missing_figure" in e for e in errors), "Must catch missing figure provenance"
+
+
+def test_clean_snippet_passes():
+    """Verify that clean text adhering to all rules produces zero errors."""
+    claim_errors = check_strict_claims(CLEAN_SNIPPET)
+    num_errors = check_unmacroed_literal_numbers(CLEAN_SNIPPET)
+    assert len(claim_errors) == 0, f"Unexpected claim errors: {claim_errors}"
+    assert len(num_errors) == 0, f"Unexpected number errors: {num_errors}"
+
+
+def test_linter_catches_staleness():
+    """Verify that linter catches staleness issues (e.g. outdated map node sizes in raw_results)."""
+    # BAD_PAPER_TEX with mismatched node citation
+    tex_bad_sizes = r"MovingAI ($n = 999$) and Boston ($n = 999$)"
+    errors = check_staleness(tex_bad_sizes)
+    # The current repo state has stale commit or stale node counts from previous run
+    assert len(errors) > 0, "check_staleness must report violations on stale data or mismatched map citations"
+

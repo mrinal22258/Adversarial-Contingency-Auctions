@@ -14,9 +14,10 @@ __pycache__/
 *.py[cod]
 *$py.class
 .pytest_cache/
-venv/
-env/
+/venv/
+/env/
 .env
+cache/
 
 # OS & Environment artifacts
 .DS_Store
@@ -28,3 +29,7 @@ powershell.cmd
 temp_gh/
 temp_hf/
 results/traces/
+results/traces.zip
+results/*_pre_a1.*
+results/runs_cleaned.jsonl
+experiments/scratch/

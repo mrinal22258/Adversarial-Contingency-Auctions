@@ -188,15 +188,139 @@ def evaluate_hypotheses(inst_df: pd.DataFrame, raw_df: pd.DataFrame, hypotheses_
             "tier": "primary",
         })
 
-    # Apply Multiple-Comparison Corrections
+    # H5: Bayesian Inference Advantage (ACA vs ACA-No-Inference)
+    if "aca" in pivots["completion_rate_pct"] and "aca_no_inference" in pivots["completion_rate_pct"]:
+        x_c = pivots["completion_rate_pct"]["aca"].dropna()
+        y_c = pivots["completion_rate_pct"]["aca_no_inference"].dropna()
+        common = x_c.index.intersection(y_c.index)
+        stat, p_val = paired_wilcoxon_test(list(x_c.loc[common]), list(y_c.loc[common]), alternative="greater")
+        hl, hl_low, hl_high = hodges_lehmann_difference(list(x_c.loc[common]), list(y_c.loc[common]))
+
+        results.append({
+            "hypothesis_id": "H5",
+            "title": "Bayesian Inference Advantage (ACA vs ACA-NoInference)",
+            "metric": "completion_rate_pct",
+            "comparison": "aca - aca_no_inference",
+            "n_instances": len(common),
+            "mean_aca": round(float(x_c.loc[common].mean()), 2),
+            "mean_comparator": round(float(y_c.loc[common].mean()), 2),
+            "mean_diff": round(float((x_c.loc[common] - y_c.loc[common]).mean()), 2),
+            "hl_median_diff": round(hl, 2),
+            "hl_ci_95": f"[{round(hl_low, 2)}, {round(hl_high, 2)}]",
+            "cliffs_delta": round(cliffs_delta(list(x_c.loc[common]), list(y_c.loc[common]))[0], 3),
+            "cliffs_ci_95": "N/A",
+            "cohens_dz": round(paired_cohens_dz(list(x_c.loc[common]), list(y_c.loc[common])), 3),
+            "raw_p_value": p_val,
+            "test_type": "paired_wilcoxon_greater",
+            "tier": "secondary",
+        })
+
+    # H6: Communication and Re-Auction Efficiency (ACA vs CBBA)
+    if "aca" in pivots["total_messages"] and "cbba" in pivots["total_messages"]:
+        x_c = pivots["total_messages"]["aca"].dropna()
+        y_c = pivots["total_messages"]["cbba"].dropna()
+        common = x_c.index.intersection(y_c.index)
+        stat, p_val = paired_wilcoxon_test(list(x_c.loc[common]), list(y_c.loc[common]), alternative="less")
+        hl, hl_low, hl_high = hodges_lehmann_difference(list(x_c.loc[common]), list(y_c.loc[common]))
+
+        results.append({
+            "hypothesis_id": "H6",
+            "title": "Communication Efficiency (ACA vs CBBA)",
+            "metric": "total_messages",
+            "comparison": "aca - cbba",
+            "n_instances": len(common),
+            "mean_aca": round(float(x_c.loc[common].mean()), 2),
+            "mean_comparator": round(float(y_c.loc[common].mean()), 2),
+            "mean_diff": round(float((x_c.loc[common] - y_c.loc[common]).mean()), 2),
+            "hl_median_diff": round(hl, 2),
+            "hl_ci_95": f"[{round(hl_low, 2)}, {round(hl_high, 2)}]",
+            "cliffs_delta": round(cliffs_delta(list(x_c.loc[common]), list(y_c.loc[common]))[0], 3),
+            "cliffs_ci_95": "N/A",
+            "cohens_dz": round(paired_cohens_dz(list(x_c.loc[common]), list(y_c.loc[common])), 3),
+            "raw_p_value": p_val,
+            "test_type": "paired_wilcoxon_less",
+            "tier": "secondary",
+        })
+
+    # H7: Assumption 1 Empirical Validity (TV bound adherence rate >= 0.90)
+    if "safe_claim_conflicts" in raw_df.columns:
+        aca_runs = raw_df[raw_df["method"] == "aca"]
+        total_evals = len(aca_runs)
+        # Runs with 0 safe claim conflicts satisfy Assumption 1 guarantee
+        adhered = int((aca_runs["safe_claim_conflicts"] == 0).sum())
+        from scipy.stats import binomtest
+        b_res = binomtest(adhered, total_evals, p=0.90, alternative="greater")
+        ci = b_res.proportion_ci(confidence_level=0.95)
+
+        results.append({
+            "hypothesis_id": "H7",
+            "title": "Assumption 1 Empirical Adherence Rate",
+            "metric": "tv_bound_adherence_rate",
+            "comparison": "adherence_rate vs 0.90",
+            "n_instances": total_evals,
+            "mean_aca": round(float(adhered / max(1, total_evals)), 4),
+            "mean_comparator": 0.90,
+            "mean_diff": round(float(adhered / max(1, total_evals) - 0.90), 4),
+            "hl_median_diff": round(float(adhered / max(1, total_evals)), 4),
+            "hl_ci_95": f"[{round(ci.low, 4)}, {round(ci.high, 4)}]",
+            "cliffs_delta": 0.0,
+            "cliffs_ci_95": "N/A",
+            "cohens_dz": 0.0,
+            "raw_p_value": b_res.pvalue,
+            "test_type": "exact_binomial_greater",
+            "tier": "secondary",
+        })
+
+    # H8: Out-of-Model Adversary Robustness (theta_4 Cyclic Patrol)
+    t4_df = raw_df[raw_df["adversary"] == "theta_4_cyclic_patrol"]
+    if not t4_df.empty:
+        t4_inst = t4_df.groupby(["graph_family", "seed", "method"])["completion_rate_pct"].mean().reset_index()
+        t4_piv = t4_inst.pivot(index=["graph_family", "seed"], columns="method", values="completion_rate_pct")
+        if "aca" in t4_piv:
+            other_m = [c for c in t4_piv.columns if c != "aca"]
+            best_t4 = max(other_m, key=lambda c: t4_piv[c].mean()) if other_m else None
+            if best_t4:
+                x_c = t4_piv["aca"].dropna()
+                y_c = t4_piv[best_t4].dropna()
+                common = x_c.index.intersection(y_c.index)
+                stat, p_val = paired_wilcoxon_test(list(x_c.loc[common]), list(y_c.loc[common]), alternative="two-sided")
+                hl, hl_low, hl_high = hodges_lehmann_difference(list(x_c.loc[common]), list(y_c.loc[common]))
+
+                results.append({
+                    "hypothesis_id": "H8",
+                    "title": f"Robustness on theta_4 (ACA vs best {best_t4})",
+                    "metric": "completion_rate_pct",
+                    "comparison": f"aca - {best_t4}",
+                    "n_instances": len(common),
+                    "mean_aca": round(float(x_c.loc[common].mean()), 2),
+                    "mean_comparator": round(float(y_c.loc[common].mean()), 2),
+                    "mean_diff": round(float((x_c.loc[common] - y_c.loc[common]).mean()), 2),
+                    "hl_median_diff": round(hl, 2),
+                    "hl_ci_95": f"[{round(hl_low, 2)}, {round(hl_high, 2)}]",
+                    "cliffs_delta": round(cliffs_delta(list(x_c.loc[common]), list(y_c.loc[common]))[0], 3),
+                    "cliffs_ci_95": "N/A",
+                    "cohens_dz": round(paired_cohens_dz(list(x_c.loc[common]), list(y_c.loc[common])), 3),
+                    "raw_p_value": p_val,
+                    "test_type": "paired_wilcoxon_two_sided",
+                    "tier": "secondary",
+                })
+
+    # Apply Multiple-Comparison Corrections (Holm for primary, BH for secondary)
     res_df = pd.DataFrame(results)
     if not res_df.empty:
         primary_mask = res_df["tier"] == "primary"
-        primary_p = res_df.loc[primary_mask, "raw_p_value"].tolist()
-        holm_res = holm_bonferroni_correction(primary_p, alpha=0.05)
-        
-        res_df.loc[primary_mask, "adj_p_value"] = [r[0] for r in holm_res]
-        res_df.loc[primary_mask, "significant"] = [r[1] for r in holm_res]
+        if primary_mask.any():
+            primary_p = res_df.loc[primary_mask, "raw_p_value"].tolist()
+            holm_res = holm_bonferroni_correction(primary_p, alpha=0.05)
+            res_df.loc[primary_mask, "adj_p_value"] = [r[0] for r in holm_res]
+            res_df.loc[primary_mask, "significant"] = [r[1] for r in holm_res]
+
+        secondary_mask = res_df["tier"] == "secondary"
+        if secondary_mask.any():
+            sec_p = res_df.loc[secondary_mask, "raw_p_value"].tolist()
+            bh_res = benjamini_hochberg_correction(sec_p, q=0.05)
+            res_df.loc[secondary_mask, "adj_p_value"] = [r[0] for r in bh_res]
+            res_df.loc[secondary_mask, "significant"] = [r[1] for r in bh_res]
 
     return res_df
 
@@ -217,22 +341,30 @@ def generate_verdict_markdown(res_df: pd.DataFrame, output_path: str = "RESULTS_
         p_raw = f"{row['raw_p_value']:.4e}" if row['raw_p_value'] < 0.001 else f"{row['raw_p_value']:.4f}"
         p_adj = f"{row.get('adj_p_value', row['raw_p_value']):.4e}" if row.get('adj_p_value', 1.0) < 0.001 else f"{row.get('adj_p_value', 1.0):.4f}"
         
-        # Decide verdict
-        if row["hypothesis_id"] == "H1":
-            verdict = "**SUPPORTED**" if row.get("significant", False) and row["hl_median_diff"] > 0 else "**NOT SUPPORTED**"
-        elif row["hypothesis_id"] == "H2":
-            if row.get("significant", False) and row["hl_median_diff"] > 0:
-                verdict = "**ACA SUPERIOR**"
-            elif row.get("significant", False) and row["hl_median_diff"] < 0:
-                verdict = "**BASELINE WINS**"
+        # Dynamically determine verdict based on statistical test type and results
+        sig = row.get("significant", False)
+        hl_diff = row.get("hl_median_diff", 0.0)
+        test_type = row.get("test_type", "")
+        p_raw_val = row.get("raw_p_value", 1.0)
+
+        if "tost" in test_type or row["hypothesis_id"] == "H3":
+            if p_raw_val <= 0.05:
+                verdict = "**NON-INFERIOR (SUPPORTED)**"
             else:
-                verdict = "**INCONCLUSIVE / PARITY**"
-        elif row["hypothesis_id"] == "H3":
-            verdict = "**NON-INFERIOR**" if row["raw_p_value"] <= 0.05 else "**NOT EQUIVALENT**"
-        elif row["hypothesis_id"] == "H4":
-            verdict = "**PARITY / SLIGHT DROP**"
-        else:
-            verdict = "INCONCLUSIVE"
+                verdict = "**NOT EQUIVALENT / INCONCLUSIVE**"
+        elif "two_sided" in test_type:
+            if sig:
+                direction = "ACA HIGHER" if hl_diff > 0 else "COMPARATOR HIGHER"
+                verdict = f"**SIGNIFICANT DIFFERENCE ({direction})**"
+            else:
+                verdict = "**PARITY (NO SIGNIFICANT DIFFERENCE)**"
+        else: # One-sided / superiority test
+            if sig and hl_diff > 0:
+                verdict = "**SUPPORTED (ACA SUPERIOR)**"
+            elif sig and hl_diff < 0:
+                verdict = "**REJECTED (BASELINE SUPERIOR)**"
+            else:
+                verdict = "**NOT SUPPORTED / PARITY**"
 
         lines.append(
             f"| {row['hypothesis_id']} | {row['title']} | {row['metric']} | {row['mean_diff']} | "
@@ -243,14 +375,24 @@ def generate_verdict_markdown(res_df: pd.DataFrame, output_path: str = "RESULTS_
         "",
         "## Key Scientific Findings & Narrative Decision Rule",
         "",
-        "1. **Recourse isolates the true gain (H1)**: Depth-1 local recourse significantly improves completion over depth-0. This confirms that the previously claimed '+13 pp gain over CBBA' was driven by detour capability.",
-        "2. **Level Execution Reality (H2)**: Against literature baselines equipped with identical local recourse (CBBA+LR, SSI+LR), ACA does not dominate in unconstrained settings. Under high-connectivity, sequential auctions (SSI) remain competitive.",
-        "3. **Belief Divergence Niche**: ACA's advantage emerges specifically under range-limited, partitioned, or lossy communication networks where centralized/global auctions cannot reliably coordinate.",
-        "4. **Honest Paper Framing**: The revised manuscript must focus honestly on the constrained communication regime, presenting the crossover boundaries transparently.",
     ])
 
+    for _, row in res_df.iterrows():
+        h_id = row['hypothesis_id']
+        title = row['title']
+        p_adj_str = f"{row.get('adj_p_value', row['raw_p_value']):.4e}" if row.get('adj_p_value', 1.0) < 0.001 else f"{row.get('adj_p_value', 1.0):.4f}"
+        sig_str = "statistically significant" if row.get("significant", False) else "not statistically significant"
+        n_inst = row.get("n_instances", "N/A")
+        
+        lines.append(
+            f"- **{h_id} ({title})** [n={n_inst}]: {row['metric']} mean difference = {row['mean_diff']:+.2f} "
+            f"(HL median diff = {row['hl_median_diff']:+.2f}, 95% CI {row['hl_ci_95']}, "
+            f"Cliff's delta = {row['cliffs_delta']:.3f}, adjusted p = {p_adj_str}). "
+            f"Result is {sig_str} at alpha=0.05."
+        )
+
     with open(output_path, "w", encoding="utf-8") as f:
-        f.write("\n".join(lines))
+        f.write("\n".join(lines) + "\n")
     print(f"Generated verdict report: {output_path}")
 
 

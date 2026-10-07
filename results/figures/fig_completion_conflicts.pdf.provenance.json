@@ -1,6 +1,6 @@
 {
   "figure_file": "results/figures\\fig_completion_conflicts.pdf",
-  "git_commit": "9443b0e0573d2f3894698f13ae7f5cecdf7054a0",
+  "git_commit": "b0e125420e409d82b1cc39d175a18f1cfe9596dc",
   "source_files": [
     "results/stats/instance_aggregated_results.csv"
   ],

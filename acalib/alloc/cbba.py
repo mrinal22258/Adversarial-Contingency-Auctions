@@ -129,97 +129,32 @@ class CBBAAllocator(BaseAllocator):
     ) -> bool:
         """
         Phase 2: Consensus communication and conflict resolution.
-        Returns True if tables changed.
+        Uses shared execute_consensus_exchange (Choi 2009 compliant).
         """
-        # Step 1: Each robot broadcasts its tables (y_i, z_i, s_i)
-        for rid in self.fleet_ids:
-            self.s[rid][rid] = current_step
-            payload = {
-                "y": dict(self.y[rid]),
-                "z": dict(self.z[rid]),
-                "s": dict(self.s[rid]),
-                "belief": list(self.robots[rid].type_filter.get_belief_vector()),
-            }
-            # Byte size: ~8 bytes per task in table + header + belief floats
-            byte_size = 32 + len(self.y[rid]) * 16 + len(payload["belief"]) * 8
-            msg = Message(
-                sender_id=rid,
-                recipient_id=-1,
-                msg_type="CBBA_CONSENSUS",
-                payload=payload,
-                timestamp=current_step,
-                size_bytes=byte_size,
-            )
-            self.comm_net.send(msg, robot_positions)
+        from .consensus import execute_consensus_exchange
 
-        # Step 2: Receive and apply consensus resolution rules
-        changed = False
-        for rid in self.fleet_ids:
-            inbox = self.comm_net.receive(rid)
-            for msg in inbox:
-                if msg.msg_type != "CBBA_CONSENSUS" or not isinstance(msg.payload, dict) or "y" not in msg.payload:
-                    continue
-                sender_k = msg.sender_id
-                k_data = msg.payload
-                y_k = k_data["y"]
-                z_k = k_data["z"]
-                s_k = k_data["s"]
+        def extra_payload(rid: int) -> Dict[str, Any]:
+            return {"belief": list(self.robots[rid].type_filter.get_belief_vector())}
 
-                # Update recipient's Theory of Mind peer belief estimate
-                if "belief" in k_data and hasattr(self.robots[rid], "tom_tracker"):
-                    self.robots[rid].tom_tracker.update_peer_belief(
-                        sender_k, np.array(k_data["belief"], dtype=float), current_step
-                    )
+        def handle_extra(rid: int, sender_k: int, k_data: Dict[str, Any]) -> None:
+            if "belief" in k_data and hasattr(self.robots[rid], "tom_tracker"):
+                self.robots[rid].tom_tracker.update_peer_belief(
+                    sender_k, np.array(k_data["belief"], dtype=float), current_step
+                )
 
-                # Update timestamp vector
-                for k_id, t_val in s_k.items():
-                    if t_val > self.s[rid].get(k_id, 0):
-                        self.s[rid][k_id] = t_val
-
-                # Process all task bids
-                all_tasks = set(self.y[rid].keys()).union(set(y_k.keys()))
-                first_outbid_idx = -1
-
-                for tid in all_tasks:
-                    y_i_j = self.y[rid].get(tid, 0.0)
-                    z_i_j = self.z[rid].get(tid, -1)
-                    y_k_j = y_k.get(tid, 0.0)
-                    z_k_j = z_k.get(tid, -1)
-
-                    # Consensus update rules (Choi 2009)
-                    if z_k_j == -1:
-                        continue
-                    elif z_i_j == rid:
-                        if z_k_j != rid and y_k_j > y_i_j:
-                            # Outbid!
-                            self.y[rid][tid] = y_k_j
-                            self.z[rid][tid] = z_k_j
-                            changed = True
-                            if tid in self.robots[rid].bundle:
-                                idx = self.robots[rid].bundle.index(tid)
-                                if first_outbid_idx == -1 or idx < first_outbid_idx:
-                                    first_outbid_idx = idx
-                    elif z_i_j == -1:
-                        self.y[rid][tid] = y_k_j
-                        self.z[rid][tid] = z_k_j
-                        changed = True
-                    else:
-                        # Third-party comparisons
-                        if y_k_j > y_i_j or (y_k_j == y_i_j and z_k_j < z_i_j):
-                            self.y[rid][tid] = y_k_j
-                            self.z[rid][tid] = z_k_j
-                            changed = True
-
-                # Bundle truncation rule: if lost task at index idx, release all subsequent tasks
-                if first_outbid_idx != -1:
-                    released = self.robots[rid].bundle[first_outbid_idx:]
-                    self.robots[rid].bundle = self.robots[rid].bundle[:first_outbid_idx]
-                    for r_tid in released:
-                        if self.z[rid].get(r_tid) == rid:
-                            self.z[rid][r_tid] = -1
-                            self.y[rid][r_tid] = 0.0
-
-        return changed
+        return execute_consensus_exchange(
+            fleet_ids=self.fleet_ids,
+            robots=self.robots,
+            comm_net=self.comm_net,
+            y=self.y,
+            z=self.z,
+            s=self.s,
+            current_step=current_step,
+            robot_positions=robot_positions,
+            msg_type="CBBA_CONSENSUS",
+            extra_payload_fn=extra_payload,
+            handle_extra_payload_fn=handle_extra,
+        )
 
     def handle_replan_requests(self, tasks: Dict[int, Task], current_step: int, robot_positions: Dict[int, Tuple[float, float]]) -> int:
         """Standard CBBA: encountering blockage triggers full bundle release and global re-auction."""

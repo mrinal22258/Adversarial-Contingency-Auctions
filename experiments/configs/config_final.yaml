@@ -15,9 +15,9 @@ max_steps: 80
 environments:
   # Real environments (Required: MovingAI warehouse MAPF benchmark & OSMnx Boston road network)
   - family: "warehouse_movingai"
-    n_nodes: 36
+    n_nodes: 38
   - family: "road_osmnx"
-    n_nodes: 40
+    n_nodes: 216
   # Synthetic families (labeled stress tests)
   - family: "rgg"
     n_nodes: 35

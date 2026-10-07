@@ -52,6 +52,22 @@ def get_git_commit_hash() -> str:
     return "unknown"
 
 
+def check_git_clean() -> bool:
+    """Check if git working tree is clean (Rule R1: reproducible commit)."""
+    git_bins = ["git", r"C:\Program Files\Git\cmd\git.exe"]
+    for git_bin in git_bins:
+        try:
+            status = (
+                subprocess.check_output([git_bin, "status", "--porcelain"], stderr=subprocess.DEVNULL)
+                .decode("utf-8")
+                .strip()
+            )
+            return len(status) == 0
+        except Exception:
+            pass
+    return True
+
+
 def compute_trial_hash(condition_dict: Dict[str, Any]) -> str:
     """Compute deterministic MD5 hash of trial experimental condition."""
     sorted_items = sorted((k, str(v)) for k, v in condition_dict.items())
@@ -233,9 +249,12 @@ def run_single_trial(
     t_end = time.time()
     wall_clock_ms = (t_end - t_start) * 1000.0
 
+    actual_n_nodes = len(env_components["graph"].nodes())
+    actual_n_edges = len(env_components["graph"].edges())
     condition_info = {
         "graph_family": graph_family,
-        "n_nodes": n_nodes,
+        "n_nodes": actual_n_nodes,
+        "n_edges": actual_n_edges,
         "adversary": adversary_type_str,
         "method": allocator_name,
         "comm_regime": comm_regime,
@@ -287,7 +306,15 @@ def main():
     parser.add_argument("--output", type=str, default="results/raw_results.csv", help="Output summary CSV")
     parser.add_argument("--workers", type=int, default=8, help="Number of parallel worker processes")
     parser.add_argument("--dry-run", action="store_true", help="Print total run count and ETA estimate without running")
+    parser.add_argument("--allow-dirty", action="store_true", help="Allow running sweep with uncommitted working tree")
     args = parser.parse_args()
+
+    # Rule R1: fail if working tree is dirty unless explicitly allowed or dry-run
+    if not args.dry_run and not args.allow_dirty:
+        if not check_git_clean():
+            print("ERROR (Rule R1): Git working tree is dirty. Sweep requires a clean git commit for reproducibility.")
+            print("Commit all changes or use --allow-dirty for local debugging.")
+            sys.exit(1)
 
     os.makedirs(os.path.dirname(args.output), exist_ok=True)
     traces_dir = "results/traces"
