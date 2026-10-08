@@ -1,5 +1,5 @@
 {
-  "commit": "2e4b8b113143497e3ee9de542c9257a1f84840ab",
+  "commit": "8bbe703c6747811aefe07bc71bad3e1b89e5ea81",
   "disclaimer": "SIMULATION ONLY -- Physics-Based Software-in-the-Loop Evaluation",
   "total_trials_analyzed": 1440,
   "successful_trials": 1440,
@@ -84,8 +84,8 @@
     "ranking_graph_sim": [
       "ctp_replan",
       "implicit",
-      "aca",
       "aca_no_margin",
+      "aca",
       "cbba_partial_lr",
       "ssi_lr"
     ],
@@ -97,18 +97,55 @@
       "ctp_replan",
       "ssi_lr"
     ],
-    "spearman_rho": 0.2571428571428572,
-    "spearman_pvalue": 0.6227871720116618,
-    "kendall_tau": 0.2,
-    "kendall_pvalue": 0.7194444444444444,
-    "ranking_preserved": false
+    "spearman_rho": 0.3714285714285715,
+    "spearman_pvalue": 0.46847813411078715,
+    "kendall_tau": 0.3333333333333333,
+    "kendall_pvalue": 0.46944444444444444,
+    "ranking_preserved": false,
+    "paired_tests_vs_aca": {
+      "aca_vs_aca_no_margin": {
+        "mean_diff_pp": -1.9270833333333333,
+        "median_diff_pp": 0.0,
+        "wilcoxon_stat": 7225.0,
+        "wilcoxon_pvalue": 0.18325947946940102,
+        "n_pairs": 240
+      },
+      "aca_vs_cbba_partial_lr": {
+        "mean_diff_pp": -0.8854166666666666,
+        "median_diff_pp": 0.0,
+        "wilcoxon_stat": 8011.0,
+        "wilcoxon_pvalue": 0.6536014633474454,
+        "n_pairs": 240
+      },
+      "aca_vs_ctp_replan": {
+        "mean_diff_pp": 6.145833333333333,
+        "median_diff_pp": 12.5,
+        "wilcoxon_stat": 8294.0,
+        "wilcoxon_pvalue": 0.0020151475754834514,
+        "n_pairs": 240
+      },
+      "aca_vs_implicit": {
+        "mean_diff_pp": -4.166666666666667,
+        "median_diff_pp": 0.0,
+        "wilcoxon_stat": 8097.5,
+        "wilcoxon_pvalue": 0.011808312535305133,
+        "n_pairs": 240
+      },
+      "aca_vs_ssi_lr": {
+        "mean_diff_pp": 35.3125,
+        "median_diff_pp": 37.5,
+        "wilcoxon_stat": 1616.5,
+        "wilcoxon_pvalue": 4.452597983885732e-31,
+        "n_pairs": 240
+      }
+    }
   },
   "bland_altman": {
     "metric": "completion_rate_pct",
-    "bias_mean_difference": -14.248611111111112,
-    "sd_difference": 10.98249685948139,
-    "loa_upper_95": 7.2770827334724135,
-    "loa_lower_95": -35.77430495569464,
-    "interpretation": "Physical SITL simulation exhibits a mean bias of -14.25% relative to abstract graph simulation (95% Limits of Agreement: [-35.77%, 7.28%]). Performance differences reflect continuous physical execution, sensor/odometry drift, and dynamic obstacle avoidance."
+    "bias_mean_difference": -26.00089719029374,
+    "sd_difference": 13.33158421171017,
+    "loa_upper_95": 0.12900786465819536,
+    "loa_lower_95": -52.130802245245675,
+    "interpretation": "Physical SITL simulation exhibits a mean bias of -26.00% relative to abstract graph simulation (95% Limits of Agreement: [-52.13%, 0.13%]). Performance differences reflect continuous physical execution, sensor/odometry drift, and dynamic obstacle avoidance."
   }
 }

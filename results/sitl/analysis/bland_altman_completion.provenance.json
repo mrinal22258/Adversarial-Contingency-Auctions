@@ -1,9 +1,9 @@
 {
   "figure_path": "C:\\Users\\krmri\\Downloads\\Adversarial-Contingency-Auctions-main\\Adversarial-Contingency-Auctions-main\\results\\sitl\\analysis\\bland_altman_completion.pdf",
-  "commit": "2e4b8b113143497e3ee9de542c9257a1f84840ab",
+  "commit": "8bbe703c6747811aefe07bc71bad3e1b89e5ea81",
   "disclaimer": "SIMULATION -- PyBullet SITL vs Graph Discrete-Event Simulation",
   "sample_size": 6,
-  "bias": -14.248611111111112,
-  "loa_upper": 7.2770827334724135,
-  "loa_lower": -35.77430495569464
+  "bias": -26.00089719029374,
+  "loa_upper": 0.12900786465819536,
+  "loa_lower": -52.130802245245675
 }
