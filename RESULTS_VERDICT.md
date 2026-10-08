@@ -5,20 +5,21 @@ Generated directly from executed raw runs, independent instance-level tests, and
 
 | ID | Title | Metric | Mean Diff | HL Median [95% CI] | Cliff's Delta | Raw p | Adj p (Holm/BH) | Bonferroni p | Verdict |
 |---|---|---|---|---|---|---|---|---|---|
-| H1 | Recourse Efficacy (ACA vs ACA-d0) | completion_rate_pct | 3.62 | 3.33 [1.94, 4.72] | 0.238 | 4.4433e-06 | 2.2216e-05 | 0.0000 | **SUPPORTED (ACA SUPERIOR)** |
-| H2 | Level Execution (ACA vs cbba_lr) | completion_rate_pct | 3.67 | 3.61 [1.94, 5.28] | 0.194 | 8.9400e-05 | 3.5760e-04 | 0.0008 | **SIGNIFICANT DIFFERENCE (ACA HIGHER)** |
-| H2 | Level Execution (ACA vs cbba_partial_lr) | completion_rate_pct | 1.93 | 1.94 [0.28, 3.61] | 0.11 | 0.0231 | 0.0463 | 0.2082 | **SIGNIFICANT DIFFERENCE (ACA HIGHER)** |
-| H2 | Level Execution (ACA vs ssi_lr) | completion_rate_pct | 9.02 | 8.06 [3.89, 12.22] | 0.246 | 1.2571e-04 | 3.7713e-04 | 0.0011 | **SIGNIFICANT DIFFERENCE (ACA HIGHER)** |
-| H2_CTP | Comparator Evaluation (ACA vs CTP Replan) | completion_rate_pct | -7.0 | -5.83 [-8.06, -3.89] | -0.535 | 3.7068e-10 | 2.9655e-09 | 0.0000 | **SIGNIFICANT DIFFERENCE (COMPARATOR HIGHER)** |
-| H2_IMPLICIT | Comparator Evaluation (ACA vs Implicit) | completion_rate_pct | -4.89 | -4.17 [-6.11, -2.5] | -0.406 | 2.3537e-06 | 1.4122e-05 | 0.0000 | **SIGNIFICANT DIFFERENCE (COMPARATOR HIGHER)** |
-| H3 | Welfare Non-Inferiority (ACA vs best baseline: cbba_partial) | net_welfare | -65.44 | -65.44 [-92.7, -38.18] | -0.113 | 0.8684 | 0.8684 | 1.0000 | **INCONCLUSIVE / NOT EQUIVALENT** |
-| H4 | Pinsker Margin Safe Conflict Reduction | safe_claim_conflicts | -5.074 | -5.125 [-5.375, -4.792] | -1.0 | 2.6075e-14 | 2.3468e-13 | 0.0000 | **SUPPORTED (SIGNIFICANT REDUCTION)** |
-| H4_COMPLETION | Pinsker Margin Completion Equivalence (TOST 5pp) | completion_rate_pct | -1.53 | -1.53 [-2.62, -0.45] | -0.088 | 5.2904e-07 | 3.7032e-06 | 0.0000 | **NON-INFERIOR / EQUIVALENT (SUPPORTED)** |
-| H5 | Bayesian Inference Advantage (ACA vs ACA-NoInference) | completion_rate_pct | -0.47 | -0.28 [-1.11, 0.56] | 0.015 | 0.7861 | 0.9826 | nan | **NOT SUPPORTED / PARITY** |
-| H6 | Communication Efficiency (ACA vs CBBA) | total_messages | -82.81 | -82.67 [-99.33, -66.0] | -0.474 | 5.4738e-12 | 1.3684e-11 | nan | **SUPPORTED (SIGNIFICANT REDUCTION)** |
-| H7 | Assumption 1 Empirical TV Adherence (TV <= eta_eff vs 0.90) | tv_bound_adherence_rate | -0.2563 | 0.6437 [0.6431, 1.0] | 0.0 | 1.0000 | 1.0000 | nan | **NOT SUPPORTED (BELOW THRESHOLD)** |
-| H7_CONFLICT_FREE_RATE | Conflict-Free-Run Rate (0 Safe-Claim Conflicts) | conflict_free_run_rate | 0.0822 | 0.9822 [0.9731, 1.0] | 0.0 | 3.2773e-23 | 1.6386e-22 | nan | **SUPPORTED (ADHERES TO BOUND)** |
-| H8 | Robustness on theta_4 (ACA vs best clairvoyant_greedy) | completion_rate_pct | -7.47 | -5.56 [-7.78, -4.44] | -0.631 | 3.6923e-10 | 6.1539e-10 | nan | **SIGNIFICANT DIFFERENCE (COMPARATOR HIGHER)** |
+| H1 | Recourse Efficacy (ACA vs ACA-d0) | completion_rate_pct | 3.45 | 2.78 [1.94, 3.68] | 0.181 | 9.7756e-10 | 5.8654e-09 | 0.0000 | **SUPPORTED (ACA SUPERIOR)** |
+| H2 | Level Execution (ACA vs cbba_lr) | completion_rate_pct | 1.92 | 1.46 [0.62, 2.38] | 0.079 | 9.5057e-04 | 0.0038 | 0.0057 | **SIGNIFICANT DIFFERENCE (ACA HIGHER)** |
+| H2 | Level Execution (ACA vs cbba_partial_lr) | completion_rate_pct | 0.28 | 0.0 [-0.83, 0.83] | -0.012 | 0.8650 | 1.0000 | 1.0000 | **PARITY (NO SIGNIFICANT DIFFERENCE)** |
+| H2 | Level Execution (ACA vs ssi_lr) | completion_rate_pct | 6.08 | 4.44 [2.22, 6.67] | 0.094 | 1.7388e-05 | 8.6941e-05 | 0.0001 | **SIGNIFICANT DIFFERENCE (ACA HIGHER)** |
+| H2_REGIME | Lossy Regime Resilience (p_drop in [0.2, 0.4]) | completion_rate_pct | 1.73 | 0.0 [-1.67, 5.0] | 0.089 | 0.2536 | 0.7609 | 1.0000 | **NOT SUPPORTED / PARITY** |
+| H2_CTP | Comparator Evaluation (ACA vs CTP Replan) | completion_rate_pct | -4.83 | -3.61 [-4.72, -2.54] | -0.302 | 2.2048e-15 | 3.9687e-15 | nan | **SIGNIFICANT DIFFERENCE (COMPARATOR HIGHER)** |
+| H2_IMPLICIT | Comparator Evaluation (ACA vs Implicit) | completion_rate_pct | -4.24 | -3.4 [-4.58, -2.64] | -0.34 | 8.6403e-14 | 1.2960e-13 | nan | **SIGNIFICANT DIFFERENCE (COMPARATOR HIGHER)** |
+| H3 | Welfare Non-Inferiority (ACA vs best baseline: aca_kappa_0.25) | net_welfare | 556.13 | 556.13 [525.72, 586.54] | 1.0 | 1.0000 | 1.0000 | 1.0000 | **INCONCLUSIVE / NOT EQUIVALENT** |
+| H4 | Pinsker Margin Safe Conflict Reduction | safe_claim_conflicts | -4.843 | -4.833 [-5.0, -4.667] | -0.995 | 5.6985e-43 | 5.1287e-42 | nan | **SUPPORTED (SIGNIFICANT REDUCTION)** |
+| H4_COMPLETION | Pinsker Margin Completion Equivalence (TOST 5pp) | completion_rate_pct | -0.47 | -0.47 [-1.26, 0.33] | -0.079 | 1.0469e-24 | 3.1407e-24 | nan | **NON-INFERIOR / EQUIVALENT (SUPPORTED)** |
+| H5 | Bayesian Inference Advantage (ACA vs ACA-NoInference) | completion_rate_pct | -0.71 | -0.56 [-1.11, 0.0] | -0.085 | 0.9669 | 1.0000 | nan | **NOT SUPPORTED / PARITY** |
+| H6 | Communication Efficiency (ACA vs CBBA) | total_messages | -28.03 | -38.0 [-55.33, -20.0] | -0.173 | 1.6944e-05 | 2.1785e-05 | nan | **SUPPORTED (SIGNIFICANT REDUCTION)** |
+| H7 | Assumption 1 Empirical TV Adherence (TV <= eta_eff vs 0.90) | tv_bound_adherence_rate | -0.2629 | 0.6371 [0.6367, 1.0] | 0.0 | 1.0000 | 1.0000 | nan | **NOT SUPPORTED (BELOW THRESHOLD)** |
+| H7_CONFLICT_FREE_RATE | Conflict-Free-Run Rate (0 Safe-Claim Conflicts) | conflict_free_run_rate | 0.0824 | 0.9824 [0.9761, 1.0] | 0.0 | 1.4314e-41 | 6.4413e-41 | nan | **SUPPORTED (ADHERES TO BOUND)** |
+| H8 | Robustness on theta_4 (ACA vs best clairvoyant_greedy) | completion_rate_pct | -7.07 | -3.33 [-6.67, -3.33] | -0.373 | 6.6058e-20 | 1.4863e-19 | nan | **SIGNIFICANT DIFFERENCE (COMPARATOR HIGHER)** |
 
 ## Pre-Registered Sample Sizes (n per family)
 
@@ -32,20 +33,21 @@ Generated directly from executed raw runs, independent instance-level tests, and
 
 ## Key Scientific Findings & Narrative Decision Rules
 
-- **H1 (Recourse Efficacy (ACA vs ACA-d0))** [N=75 instances; n=50 per family]: completion_rate_pct mean difference = +3.62 (HL median diff = +3.33, 95% CI [1.94, 4.72], Cliff's delta = 0.238, adjusted p = 2.2216e-05). Verdict: **SUPPORTED (ACA SUPERIOR)**.
-- **H2 (Level Execution (ACA vs cbba_lr))** [N=75 instances; n=50 per family]: completion_rate_pct mean difference = +3.67 (HL median diff = +3.61, 95% CI [1.94, 5.28], Cliff's delta = 0.194, adjusted p = 3.5760e-04). Verdict: **SIGNIFICANT DIFFERENCE (ACA HIGHER)**.
-- **H2 (Level Execution (ACA vs cbba_partial_lr))** [N=75 instances; n=50 per family]: completion_rate_pct mean difference = +1.93 (HL median diff = +1.94, 95% CI [0.28, 3.61], Cliff's delta = 0.110, adjusted p = 0.0463). Verdict: **SIGNIFICANT DIFFERENCE (ACA HIGHER)**.
-- **H2 (Level Execution (ACA vs ssi_lr))** [N=75 instances; n=50 per family]: completion_rate_pct mean difference = +9.02 (HL median diff = +8.06, 95% CI [3.89, 12.22], Cliff's delta = 0.246, adjusted p = 3.7713e-04). Verdict: **SIGNIFICANT DIFFERENCE (ACA HIGHER)**.
-- **H2_CTP (Comparator Evaluation (ACA vs CTP Replan))** [N=75 instances; n=50 per family]: completion_rate_pct mean difference = -7.00 (HL median diff = -5.83, 95% CI [-8.06, -3.89], Cliff's delta = -0.535, adjusted p = 2.9655e-09). Verdict: **SIGNIFICANT DIFFERENCE (COMPARATOR HIGHER)**.
-- **H2_IMPLICIT (Comparator Evaluation (ACA vs Implicit))** [N=75 instances; n=50 per family]: completion_rate_pct mean difference = -4.89 (HL median diff = -4.17, 95% CI [-6.11, -2.5], Cliff's delta = -0.406, adjusted p = 1.4122e-05). Verdict: **SIGNIFICANT DIFFERENCE (COMPARATOR HIGHER)**.
-- **H3 (Welfare Non-Inferiority (ACA vs best baseline: cbba_partial))** [N=75 instances; n=50 per family]: net_welfare mean difference = -65.44 (HL median diff = -65.44, 95% CI [-92.7, -38.18], Cliff's delta = -0.113, adjusted p = 0.8684). Verdict: **INCONCLUSIVE / NOT EQUIVALENT**.
-- **H4 (Pinsker Margin Safe Conflict Reduction)** [N=75 instances; n=50 per family]: safe_claim_conflicts mean difference = -5.07 (HL median diff = -5.12, 95% CI [-5.375, -4.792], Cliff's delta = -1.000, adjusted p = 2.3468e-13). Verdict: **SUPPORTED (SIGNIFICANT REDUCTION)**.
-- **H4_COMPLETION (Pinsker Margin Completion Equivalence (TOST 5pp))** [N=75 instances; n=50 per family]: completion_rate_pct mean difference = -1.53 (HL median diff = -1.53, 95% CI [-2.62, -0.45], Cliff's delta = -0.088, adjusted p = 3.7032e-06). Verdict: **NON-INFERIOR / EQUIVALENT (SUPPORTED)**.
-- **H5 (Bayesian Inference Advantage (ACA vs ACA-NoInference))** [N=75 instances; n=50 per family]: completion_rate_pct mean difference = -0.47 (HL median diff = -0.28, 95% CI [-1.11, 0.56], Cliff's delta = 0.015, adjusted p = 0.9826). Verdict: **NOT SUPPORTED / PARITY**.
-- **H6 (Communication Efficiency (ACA vs CBBA))** [N=75 instances; n=50 per family]: total_messages mean difference = -82.81 (HL median diff = -82.67, 95% CI [-99.33, -66.0], Cliff's delta = -0.474, adjusted p = 1.3684e-11). Verdict: **SUPPORTED (SIGNIFICANT REDUCTION)**.
-- **H7 (Assumption 1 Empirical TV Adherence (TV <= eta_eff vs 0.90))** [N=1658069 instances; n=50 per family]: tv_bound_adherence_rate mean difference = -0.26 (HL median diff = +0.64, 95% CI [0.6431, 1.0], Cliff's delta = 0.000, adjusted p = 1.0000). Verdict: **NOT SUPPORTED (BELOW THRESHOLD)**.
-- **H7_CONFLICT_FREE_RATE (Conflict-Free-Run Rate (0 Safe-Claim Conflicts))** [N=900 instances; n=50 per family]: conflict_free_run_rate mean difference = +0.08 (HL median diff = +0.98, 95% CI [0.9731, 1.0], Cliff's delta = 0.000, adjusted p = 1.6386e-22). Verdict: **SUPPORTED (ADHERES TO BOUND)**.
-- **H8 (Robustness on theta_4 (ACA vs best clairvoyant_greedy))** [N=75 instances; n=50 per family]: completion_rate_pct mean difference = -7.47 (HL median diff = -5.56, 95% CI [-7.78, -4.44], Cliff's delta = -0.631, adjusted p = 6.1539e-10). Verdict: **SIGNIFICANT DIFFERENCE (COMPARATOR HIGHER)**.
+- **H1 (Recourse Efficacy (ACA vs ACA-d0))** [N=250 instances; n=50 per family]: completion_rate_pct mean difference = +3.45 (HL median diff = +2.78, 95% CI [1.94, 3.68], Cliff's delta = 0.181, adjusted p = 5.8654e-09). Verdict: **SUPPORTED (ACA SUPERIOR)**.
+- **H2 (Level Execution (ACA vs cbba_lr))** [N=250 instances; n=50 per family]: completion_rate_pct mean difference = +1.92 (HL median diff = +1.46, 95% CI [0.62, 2.38], Cliff's delta = 0.079, adjusted p = 0.0038). Verdict: **SIGNIFICANT DIFFERENCE (ACA HIGHER)**.
+- **H2 (Level Execution (ACA vs cbba_partial_lr))** [N=250 instances; n=50 per family]: completion_rate_pct mean difference = +0.28 (HL median diff = +0.00, 95% CI [-0.83, 0.83], Cliff's delta = -0.012, adjusted p = 1.0000). Verdict: **PARITY (NO SIGNIFICANT DIFFERENCE)**.
+- **H2 (Level Execution (ACA vs ssi_lr))** [N=250 instances; n=50 per family]: completion_rate_pct mean difference = +6.08 (HL median diff = +4.44, 95% CI [2.22, 6.67], Cliff's delta = 0.094, adjusted p = 8.6941e-05). Verdict: **SIGNIFICANT DIFFERENCE (ACA HIGHER)**.
+- **H2_REGIME (Lossy Regime Resilience (p_drop in [0.2, 0.4]))** [N=50 instances; n=50 per family]: completion_rate_pct mean difference = +1.73 (HL median diff = +0.00, 95% CI [-1.67, 5.0], Cliff's delta = 0.089, adjusted p = 0.7609). Verdict: **NOT SUPPORTED / PARITY**.
+- **H2_CTP (Comparator Evaluation (ACA vs CTP Replan))** [N=250 instances; n=50 per family]: completion_rate_pct mean difference = -4.83 (HL median diff = -3.61, 95% CI [-4.72, -2.54], Cliff's delta = -0.302, adjusted p = 3.9687e-15). Verdict: **SIGNIFICANT DIFFERENCE (COMPARATOR HIGHER)**.
+- **H2_IMPLICIT (Comparator Evaluation (ACA vs Implicit))** [N=250 instances; n=50 per family]: completion_rate_pct mean difference = -4.24 (HL median diff = -3.40, 95% CI [-4.58, -2.64], Cliff's delta = -0.340, adjusted p = 1.2960e-13). Verdict: **SIGNIFICANT DIFFERENCE (COMPARATOR HIGHER)**.
+- **H3 (Welfare Non-Inferiority (ACA vs best baseline: aca_kappa_0.25))** [N=50 instances; n=50 per family]: net_welfare mean difference = +556.13 (HL median diff = +556.13, 95% CI [525.72, 586.54], Cliff's delta = 1.000, adjusted p = 1.0000). Verdict: **INCONCLUSIVE / NOT EQUIVALENT**.
+- **H4 (Pinsker Margin Safe Conflict Reduction)** [N=250 instances; n=50 per family]: safe_claim_conflicts mean difference = -4.84 (HL median diff = -4.83, 95% CI [-5.0, -4.667], Cliff's delta = -0.995, adjusted p = 5.1287e-42). Verdict: **SUPPORTED (SIGNIFICANT REDUCTION)**.
+- **H4_COMPLETION (Pinsker Margin Completion Equivalence (TOST 5pp))** [N=250 instances; n=50 per family]: completion_rate_pct mean difference = -0.47 (HL median diff = -0.47, 95% CI [-1.26, 0.33], Cliff's delta = -0.079, adjusted p = 3.1407e-24). Verdict: **NON-INFERIOR / EQUIVALENT (SUPPORTED)**.
+- **H5 (Bayesian Inference Advantage (ACA vs ACA-NoInference))** [N=250 instances; n=50 per family]: completion_rate_pct mean difference = -0.71 (HL median diff = -0.56, 95% CI [-1.11, 0.0], Cliff's delta = -0.085, adjusted p = 1.0000). Verdict: **NOT SUPPORTED / PARITY**.
+- **H6 (Communication Efficiency (ACA vs CBBA))** [N=250 instances; n=50 per family]: total_messages mean difference = -28.03 (HL median diff = -38.00, 95% CI [-55.33, -20.0], Cliff's delta = -0.173, adjusted p = 2.1785e-05). Verdict: **SUPPORTED (SIGNIFICANT REDUCTION)**.
+- **H7 (Assumption 1 Empirical TV Adherence (TV <= eta_eff vs 0.90))** [N=3481181 instances; n=50 per family]: tv_bound_adherence_rate mean difference = -0.26 (HL median diff = +0.64, 95% CI [0.6367, 1.0], Cliff's delta = 0.000, adjusted p = 1.0000). Verdict: **NOT SUPPORTED (BELOW THRESHOLD)**.
+- **H7_CONFLICT_FREE_RATE (Conflict-Free-Run Rate (0 Safe-Claim Conflicts))** [N=1650 instances; n=50 per family]: conflict_free_run_rate mean difference = +0.08 (HL median diff = +0.98, 95% CI [0.9761, 1.0], Cliff's delta = 0.000, adjusted p = 6.4413e-41). Verdict: **SUPPORTED (ADHERES TO BOUND)**.
+- **H8 (Robustness on theta_4 (ACA vs best clairvoyant_greedy))** [N=250 instances; n=50 per family]: completion_rate_pct mean difference = -7.07 (HL median diff = -3.33, 95% CI [-6.67, -3.33], Cliff's delta = -0.373, adjusted p = 1.4863e-19). Verdict: **SIGNIFICANT DIFFERENCE (COMPARATOR HIGHER)**.
 
 ### Step 4B Dedicated Methodological Analyses
 

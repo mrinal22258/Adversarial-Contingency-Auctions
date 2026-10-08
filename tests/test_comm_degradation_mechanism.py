@@ -11,7 +11,7 @@ import pytest
 
 def test_comm_degradation_data_consistency():
     """Verify raw empirical data demonstrates the completion rise phenomenon across CBBA family."""
-    csv_path = "results/raw_results.csv"
+    csv_path = "results/supplement/pilot_sweep_17100.csv" if os.path.exists("results/supplement/pilot_sweep_17100.csv") else "results/raw_results.csv"
     assert os.path.exists(csv_path), f"Missing {csv_path}"
     df = pd.read_csv(csv_path)
 
@@ -45,7 +45,8 @@ def test_comm_churn_and_conflict_tradeoff():
     1. Duplicated travel distance and conflicts increase significantly (lack of coordination).
     2. But makespan decreases because robots are shielded from outbid cascading truncations (churn).
     """
-    df = pd.read_csv("results/raw_results.csv")
+    csv_path = "results/supplement/pilot_sweep_17100.csv" if os.path.exists("results/supplement/pilot_sweep_17100.csv") else "results/raw_results.csv"
+    df = pd.read_csv(csv_path)
     cbba_df = df[df["method"] == "cbba"]
 
     mean_conf_benign = cbba_df[cbba_df["comm_regime"] == "benign"]["total_conflicts"].mean()

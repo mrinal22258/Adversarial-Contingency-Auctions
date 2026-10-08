@@ -543,6 +543,7 @@ def run_extended_sweep():
     inst_df, raw_df = load_and_aggregate_instances(args.output_csv)
     inst_df.to_csv(os.path.join(STATS_DIR, "instance_aggregated_extended.csv"), index=False)
     inst_df.to_csv(os.path.join(STATS_DIR, "instance_aggregated.csv"), index=False)
+    inst_df.to_csv(os.path.join(STATS_DIR, "instance_aggregated_results.csv"), index=False)
 
     hypo_path = os.path.join(REPO_ROOT, "experiments", "hypotheses.yaml")
     hypo_config = yaml.safe_load(open(hypo_path, "r", encoding="utf-8")) if os.path.exists(hypo_path) else {}
@@ -550,6 +551,7 @@ def run_extended_sweep():
     res_df = evaluate_hypotheses_prereg_v3(inst_df, raw_df, hypo_config)
     res_df.to_csv(os.path.join(STATS_DIR, "hypothesis_results_extended.csv"), index=False)
     res_df.to_csv(os.path.join(STATS_DIR, "hypothesis_results.csv"), index=False)
+    res_df.to_csv(os.path.join(STATS_DIR, "hypothesis_test_results.csv"), index=False)
     generate_verdict_markdown(res_df, output_path=os.path.join(REPO_ROOT, "RESULTS_VERDICT.md"))
     run_advanced_statistical_suite(inst_df, raw_df)
     print("Primary grid evaluation and statistical verification complete!")
