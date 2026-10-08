@@ -37,7 +37,8 @@ dx = np.array([v * np.cos(theta), v * np.sin(theta)])
 - [ ] Emergency stop: Script terminates if tracking error exceeds $0.10$ m or timeout reached.
 
 ## 4. Execution Plan (Future Work Only)
-1. Submit Python script via Robotarium web interface.
-2. Verify simulator pre-check passes without barrier violations.
-3. Fetch overhead camera logs and raw telemetry.
-4. Compute empirical reality gap vs PyBullet SITL simulation.
+1. Complete formal application proposal in `APPLICATION.md`.
+2. Submit Python script via Robotarium web interface.
+3. Verify simulator pre-check passes without barrier violations.
+4. Fetch overhead camera logs and raw telemetry.
+5. Compute empirical reality gap vs PyBullet SITL simulation.
