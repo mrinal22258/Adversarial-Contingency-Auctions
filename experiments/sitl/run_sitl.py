@@ -51,6 +51,7 @@ os.makedirs(RESULTS_RAW_DIR, exist_ok=True)
 
 
 COMM_REGIME_PARAMS = {
+    "nominal": {"comm_range": 45.0, "p_drop": 0.0, "latency": 0},
     "benign": {"comm_range": 45.0, "p_drop": 0.0, "latency": 0},
     "constrained": {"comm_range": 25.0, "p_drop": 0.05, "latency": 1},
     "lossy": {"comm_range": 15.0, "p_drop": 0.20, "latency": 2},
@@ -383,11 +384,222 @@ def run_pilot_benchmark():
     return mean_trial_time
 
 
-def _sitl_worker_task(task_args: Tuple[str, str, str, str, int]) -> Dict[str, Any]:
-    """Top-level worker function for parallel execution."""
+def load_sitl_graph(map_type: str) -> nx.Graph:
+    """Load graph topology identical to PhysicsWorld."""
+    from acalib.env.real_maps import generate_movingai_warehouse, generate_real_road_network, DATA_MAPS_DIR
+    if map_type == "warehouse_movingai":
+        filepath = os.path.join(DATA_MAPS_DIR, "warehouse-10-20-10-2-1.map")
+        return generate_movingai_warehouse(n_nodes=38, filepath=filepath)
+    elif map_type == "road_osmnx":
+        filepath = os.path.join(DATA_MAPS_DIR, "boston_downtown_drive.graphml")
+        return generate_real_road_network(filepath=filepath)
+    else:
+        filepath = os.path.join(DATA_MAPS_DIR, "warehouse-10-20-10-2-1.map")
+        return generate_movingai_warehouse(n_nodes=38, filepath=filepath)
+
+
+def run_single_graph_sim_trial(
+    map_type: str,
+    method: str,
+    adversary_name: str,
+    comm_regime: str,
+    seed: int,
+    n_robots: int = 4,
+    n_tasks: int = 8,
+    max_steps: int = 20,
+    adv_budget_k: int = 4,
+) -> Dict[str, Any]:
+    """Execute matched discrete graph simulation on identical instance and random seed."""
+    trial_start_wall = time.perf_counter()
+    rng = np.random.default_rng(seed)
+
+    # 1. Graph topology (exact match to SITL)
+    graph = load_sitl_graph(map_type)
+    nodes = sorted(list(graph.nodes()))
+    pos_dict = nx.get_node_attributes(graph, "pos")
+
+    # 2. Communication layer
+    comm_params = COMM_REGIME_PARAMS[comm_regime]
+    comm_layer = SITLCommunicationLayer(
+        comm_range=comm_params["comm_range"],
+        p_drop=comm_params["p_drop"],
+        latency_steps=comm_params["latency"],
+        seed=int(rng.integers(0, 1000000)),
+    )
+
+    # 3. Tasks and Starts (exact match to SITL)
+    starts = rng.choice(nodes, size=n_robots, replace=False).tolist()
+    avail = [n for n in nodes if n not in starts]
+    task_nodes = rng.choice(avail, size=n_tasks, replace=False).tolist()
+
+    tasks: Dict[int, Task] = {}
+    for tid in range(n_tasks):
+        tasks[tid] = Task(
+            task_id=tid,
+            node=task_nodes[tid],
+            reward=100.0,
+            deadline=max_steps + 10,
+            arrival_step=0,
+        )
+
+    # 4. Adversary and blockage process (exact match to SITL)
+    if adversary_name == "stochastic":
+        adv_type = AdversaryType.STOCHASTIC
+    elif adversary_name == "reactive":
+        adv_type = AdversaryType.REACTIVE
+    elif adversary_name == "budgeted":
+        adv_type = AdversaryType.BUDGETED
+    elif adversary_name == "cyclic":
+        adv_type = AdversaryType.CYCLIC_PATROL
+    elif adversary_name in ["real_trace", "real_trace_replay"]:
+        adv_type = AdversaryType.REAL_TRACE_REPLAY
+    else:
+        adv_type = AdversaryType.STOCHASTIC
+
+    adversary = create_adversary(adv_type, budget_k=adv_budget_k, clearance_rate=0.15)
+    edge_bc = nx.edge_betweenness_centrality(graph)
+    sorted_edges = sorted(edge_bc.items(), key=lambda x: x[1], reverse=True)
+    risky_edges = {canonical_edge(u, v) for (u, v), _ in sorted_edges[:6]}
+
+    blockage_proc = PersistentBlockageProcess(
+        graph=graph,
+        adversary=adversary,
+        risk_fraction=0.25,
+        clearance_rate=0.15,
+        custom_risky_edges=risky_edges,
+        seed=int(rng.integers(0, 1000000)),
+    )
+
+    # 5. Allocator & Adapter
+    r_depth = 1 if (method.startswith("aca") or method.endswith("_lr") or method == "implicit") else 0
+    adapter = SITLAllocatorAdapter(
+        method_name=method,
+        graph=graph,
+        n_robots=n_robots,
+        tasks=tasks,
+        comm_net=comm_layer,
+        contingency_depth=r_depth,
+    )
+
+    robot_nodes = {rid: starts[rid] for rid in range(n_robots)}
+    completed_tasks = set()
+    total_conflicts = 0
+    recourse_detours = 0
+    total_distance_m = 0.0
+    known_blocked_edges: Set[Tuple[int, int]] = set()
+
+    for step in range(max_steps):
+        fleet_states = {rid: {"current_node": robot_nodes[rid]} for rid in range(n_robots)}
+        blockage_proc.step(fleet_states, step)
+        curr_blocked = blockage_proc.get_blocked_edges()
+
+        # Comm exchange
+        est_poses = {rid: (pos_dict[robot_nodes[rid]][0], pos_dict[robot_nodes[rid]][1], 0.0) for rid in range(n_robots)}
+        for r_i in range(n_robots):
+            for r_j in range(n_robots):
+                if r_i != r_j:
+                    comm_layer.send_message(
+                        sender_id=r_i,
+                        receiver_id=r_j,
+                        payload={"step": step, "blocked": list(known_blocked_edges)},
+                        sender_pos=est_poses[r_i][:2],
+                        receiver_pos=est_poses[r_j][:2],
+                        current_step=step,
+                    )
+        comm_layer.step_network(step)
+
+        # Plan round
+        bundles = adapter.plan_round(step, est_poses, known_blocked_edges)
+
+        all_claimed = []
+        for rid, b in bundles.items():
+            all_claimed.extend(b)
+        conflicts_step = len(all_claimed) - len(set(all_claimed))
+        total_conflicts += max(0, conflicts_step)
+
+        # Step robots along graph shortest paths toward target task
+        for rid in range(n_robots):
+            assigned_b = bundles.get(rid, [])
+            rem_b = [t for t in assigned_b if t not in completed_tasks]
+            if not rem_b:
+                continue
+            target_t = rem_b[0]
+            target_node = tasks[target_t].node
+
+            if robot_nodes[rid] == target_node:
+                completed_tasks.add(target_t)
+                tasks[target_t].completed = True
+                continue
+
+            sub_g = graph.copy()
+            for u, v in known_blocked_edges:
+                if sub_g.has_edge(u, v):
+                    sub_g.remove_edge(u, v)
+
+            try:
+                if nx.has_path(sub_g, robot_nodes[rid], target_node):
+                    path = nx.shortest_path(sub_g, robot_nodes[rid], target_node, weight="weight")
+                else:
+                    path = nx.shortest_path(graph, robot_nodes[rid], target_node, weight="weight")
+            except Exception:
+                path = [robot_nodes[rid], target_node]
+
+            if len(path) > 1:
+                next_node = path[1]
+                edge_cand = canonical_edge(robot_nodes[rid], next_node)
+                if edge_cand in curr_blocked:
+                    known_blocked_edges.add(edge_cand)
+                    if method in ["aca", "aca_no_margin", "cbba_partial_lr", "ssi_lr"]:
+                        recourse_detours += 1
+                else:
+                    d_step = float(np.hypot(
+                        pos_dict[next_node][0] - pos_dict[robot_nodes[rid]][0],
+                        pos_dict[next_node][1] - pos_dict[robot_nodes[rid]][1]
+                    ))
+                    total_distance_m += d_step
+                    robot_nodes[rid] = next_node
+                    if robot_nodes[rid] == target_node:
+                        completed_tasks.add(target_t)
+                        tasks[target_t].completed = True
+
+        if len(completed_tasks) == n_tasks:
+            break
+
+    trial_wall = time.perf_counter() - trial_start_wall
+    comm_telem = comm_layer.get_telemetry()
+    completion_rate = float(len(completed_tasks) / n_tasks) * 100.0
+    net_welfare = float(len(completed_tasks) * 100.0 - total_distance_m * 2.0)
+
+    return {
+        "commit": get_git_commit(),
+        "disclaimer": "SIMULATION -- Discrete Graph Simulation",
+        "seed": seed,
+        "map_type": map_type,
+        "method": method,
+        "adversary": adversary_name,
+        "comm_regime": comm_regime,
+        "n_robots": n_robots,
+        "n_tasks": n_tasks,
+        "completed_tasks": len(completed_tasks),
+        "completion_rate_pct": completion_rate,
+        "total_conflicts": total_conflicts,
+        "recourse_detours": recourse_detours,
+        "physical_collisions": 0,
+        "total_distance_meters": float(total_distance_m),
+        "net_welfare": net_welfare,
+        "messages_transmitted": comm_telem["messages_transmitted"],
+        "messages_delivered": comm_telem["messages_delivered"],
+        "messages_dropped": comm_telem["total_messages_dropped"],
+        "runtime_seconds": float(trial_wall),
+        "status": "COMPLETED",
+    }
+
+
+def _sitl_worker_task(task_args: Tuple[str, str, str, str, int]) -> Tuple[Dict[str, Any], Dict[str, Any]]:
+    """Top-level worker function executing both physical SITL and matched graph simulation."""
     mp, m, adv, cr, seed = task_args
     try:
-        return run_single_sitl_trial(
+        sitl_rec = run_single_sitl_trial(
             map_type=mp,
             method=m,
             adversary_name=adv,
@@ -396,7 +608,7 @@ def _sitl_worker_task(task_args: Tuple[str, str, str, str, int]) -> Dict[str, An
             save_raw_log=True,
         )
     except Exception as e:
-        return {
+        sitl_rec = {
             "commit": get_git_commit(),
             "disclaimer": "SIMULATION -- PyBullet SITL",
             "seed": seed,
@@ -407,14 +619,36 @@ def _sitl_worker_task(task_args: Tuple[str, str, str, str, int]) -> Dict[str, An
             "status": f"FAILED: {str(e)}",
         }
 
+    try:
+        graph_rec = run_single_graph_sim_trial(
+            map_type=mp,
+            method=m,
+            adversary_name=adv,
+            comm_regime=cr,
+            seed=seed,
+        )
+    except Exception as e:
+        graph_rec = {
+            "commit": get_git_commit(),
+            "disclaimer": "SIMULATION -- Discrete Graph Simulation",
+            "seed": seed,
+            "map_type": mp,
+            "method": m,
+            "adversary": adv,
+            "comm_regime": cr,
+            "status": f"FAILED: {str(e)}",
+        }
+
+    return sitl_rec, graph_rec
+
 
 def main():
     from concurrent.futures import ProcessPoolExecutor, as_completed
     parser = argparse.ArgumentParser(description="PyBullet SITL Benchmark Sweep Runner")
     parser.add_argument("--trials-per-cell", type=int, default=20, help="Number of trials per cell (>= 20)")
-    parser.add_argument("--cells-subset", type=str, default="core", choices=["core", "full"], help="Cell configuration")
     parser.add_argument("--workers", type=int, default=min(8, os.cpu_count() or 4), help="Number of parallel worker processes")
     parser.add_argument("--output-jsonl", type=str, default=os.path.join(RESULTS_SITL_DIR, "sitl_results.jsonl"))
+    parser.add_argument("--output-graph-jsonl", type=str, default=os.path.join(RESULTS_SITL_DIR, "graph_results.jsonl"))
     args = parser.parse_args()
 
     # Pre-registered methods
@@ -427,25 +661,22 @@ def main():
         "ssi_lr",
     ]
     maps = ["warehouse_movingai", "road_osmnx"]
-    # Adversaries
-    if args.cells_subset == "core":
-        adversaries = ["reactive", "stochastic", "real_trace"]
-        comm_regimes = ["constrained", "lossy"]
-    else:
-        adversaries = ["stochastic", "reactive", "budgeted", "cyclic", "real_trace"]
-        comm_regimes = ["benign", "constrained", "lossy"]
+    adversaries = ["reactive", "stochastic", "real_trace"]
+    comm_regimes = ["nominal", "constrained", "lossy"]
 
-    total_cells = len(methods) * len(maps) * len(adversaries) * len(comm_regimes)
-    total_planned_runs = total_cells * args.trials_per_cell
+    total_cells = len(maps) * len(adversaries) * len(comm_regimes)
+    total_matched_instances = total_cells * args.trials_per_cell
+    total_planned_runs = total_matched_instances * len(methods)
 
-    print(f"SITL Experiment Configuration:")
+    print(f"SITL Experiment Configuration (Matched Seeds & Discrete Graph Comparison):")
     print(f"  Methods ({len(methods)}): {methods}")
     print(f"  Maps ({len(maps)}): {maps}")
     print(f"  Adversaries ({len(adversaries)}): {adversaries}")
     print(f"  Comm Regimes ({len(comm_regimes)}): {comm_regimes}")
     print(f"  Total Cells: {total_cells}")
-    print(f"  Trials per cell: {args.trials_per_cell}")
-    print(f"  Total Planned Runs: {total_planned_runs}")
+    print(f"  Matched Instances per Cell: {args.trials_per_cell}")
+    print(f"  Total Matched Instances: {total_matched_instances}")
+    print(f"  Total Planned Runs (SITL + Graph-Sim): {total_planned_runs} each")
     print(f"  Parallel Workers: {args.workers}")
 
     # Measure pilot
@@ -454,34 +685,43 @@ def main():
     print(f"Estimated Total Walltime: {est_total_seconds:.1f} s ({est_total_seconds / 60.0:.2f} minutes) across {args.workers} workers.")
     print("=" * 70)
 
-    # Disjoint seeds starting at 2000
-    base_seed = 2000
-    task_list = []
-    trial_counter = 0
-    for m in methods:
-        for mp in maps:
-            for adv in adversaries:
-                for cr in comm_regimes:
-                    for rep in range(args.trials_per_cell):
-                        seed = base_seed + rep * 100 + trial_counter % 97
-                        task_list.append((mp, m, adv, cr, seed))
-                        trial_counter += 1
+    # Disjoint seeds starting at 20000, perfectly matched across all methods
+    base_seed = 20000
+    instances = []
+    for mp in maps:
+        for adv in adversaries:
+            for cr in comm_regimes:
+                for rep in range(args.trials_per_cell):
+                    seed = base_seed + len(instances)
+                    instances.append({
+                        "map_type": mp,
+                        "adversary": adv,
+                        "comm_regime": cr,
+                        "seed": seed,
+                    })
 
-    out_file = args.output_jsonl
-    completed_records = []
+    task_list = []
+    for inst in instances:
+        for m in methods:
+            task_list.append((inst["map_type"], m, inst["adversary"], inst["comm_regime"], inst["seed"]))
+
+    out_file_sitl = args.output_jsonl
+    out_file_graph = args.output_graph_jsonl
+    completed_sitl = []
+    completed_graph = []
 
     # Write results incrementally as tasks complete
-    with open(out_file, "w", encoding="utf-8") as f_out:
+    with open(out_file_sitl, "w", encoding="utf-8") as f_sitl, open(out_file_graph, "w", encoding="utf-8") as f_graph:
         with ProcessPoolExecutor(max_workers=args.workers) as executor:
             future_to_task = {executor.submit(_sitl_worker_task, t): t for t in task_list}
             done_count = 0
             for future in as_completed(future_to_task):
                 done_count += 1
                 try:
-                    rec = future.result()
+                    s_rec, g_rec = future.result()
                 except Exception as exc:
                     t = future_to_task[future]
-                    rec = {
+                    s_rec = {
                         "commit": get_git_commit(),
                         "disclaimer": "SIMULATION -- PyBullet SITL",
                         "seed": t[4],
@@ -491,16 +731,30 @@ def main():
                         "comm_regime": t[3],
                         "status": f"FAILED: {str(exc)}",
                     }
-                f_out.write(json.dumps(rec) + "\n")
-                f_out.flush()
-                completed_records.append(rec)
+                    g_rec = {
+                        "commit": get_git_commit(),
+                        "disclaimer": "SIMULATION -- Discrete Graph Simulation",
+                        "seed": t[4],
+                        "map_type": t[0],
+                        "method": t[1],
+                        "adversary": t[2],
+                        "comm_regime": t[3],
+                        "status": f"FAILED: {str(exc)}",
+                    }
+                f_sitl.write(json.dumps(s_rec) + "\n")
+                f_sitl.flush()
+                f_graph.write(json.dumps(g_rec) + "\n")
+                f_graph.flush()
+                completed_sitl.append(s_rec)
+                completed_graph.append(g_rec)
 
-                if done_count % 50 == 0 or done_count == total_planned_runs:
-                    n_succ = len([r for r in completed_records if r.get("status") == "COMPLETED"])
-                    print(f"  Progress: {done_count}/{total_planned_runs} trials completed ({n_succ} successful).")
+                if done_count % 100 == 0 or done_count == total_planned_runs:
+                    n_succ = len([r for r in completed_sitl if r.get("status") == "COMPLETED"])
+                    print(f"  Progress: {done_count}/{total_planned_runs} paired trials completed ({n_succ} successful).")
 
-    print(f"SITL evaluation sweep finished: {len(completed_records)} records saved to {out_file}.")
+    print(f"SITL evaluation sweep finished: {len(completed_sitl)} SITL records saved to {out_file_sitl}, {len(completed_graph)} Graph records saved to {out_file_graph}.")
 
 
 if __name__ == "__main__":
     main()
+

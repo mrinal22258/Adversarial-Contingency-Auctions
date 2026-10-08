@@ -1,0 +1,51 @@
+{
+  "result": {
+    "commit": "8a5494361fd48022c6be36672d1eaf35c769e2f2",
+    "disclaimer": "SIMULATION -- PyBullet SITL -- No Physical Robot",
+    "seed": 20229,
+    "map_type": "road_osmnx",
+    "method": "aca",
+    "adversary": "reactive",
+    "comm_regime": "lossy",
+    "n_robots": 4,
+    "n_tasks": 8,
+    "completed_tasks": 4,
+    "completion_rate_pct": 50.0,
+    "total_conflicts": 52,
+    "recourse_detours": 140,
+    "physical_collisions": 140,
+    "total_distance_meters": 205.46618924232462,
+    "net_welfare": -10.932378484649234,
+    "messages_transmitted": 4,
+    "messages_delivered": 4,
+    "messages_dropped": 236,
+    "runtime_seconds": 10.52849339999375,
+    "status": "COMPLETED"
+  },
+  "events": [
+    {
+      "step": 2,
+      "event": "task_completed",
+      "task_id": 2,
+      "robot_id": 1
+    },
+    {
+      "step": 8,
+      "event": "task_completed",
+      "task_id": 1,
+      "robot_id": 1
+    },
+    {
+      "step": 14,
+      "event": "task_completed",
+      "task_id": 3,
+      "robot_id": 3
+    },
+    {
+      "step": 19,
+      "event": "task_completed",
+      "task_id": 4,
+      "robot_id": 3
+    }
+  ]
+}

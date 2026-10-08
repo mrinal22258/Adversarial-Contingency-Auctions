@@ -1,75 +1,268 @@
 {
-  "commit": "8bbe703c6747811aefe07bc71bad3e1b89e5ea81",
+  "commit": "8a5494361fd48022c6be36672d1eaf35c769e2f2",
   "disclaimer": "SIMULATION ONLY -- Physics-Based Software-in-the-Loop Evaluation",
-  "total_trials_analyzed": 1440,
-  "successful_trials": 1440,
-  "failed_trials": 0,
+  "total_sitl_trials": 2160,
+  "successful_sitl_trials": 2160,
+  "failed_sitl_trials": 0,
+  "total_graph_trials": 2160,
+  "successful_graph_trials": 2160,
+  "n_matched_pairs": 2160,
   "sitl_method_summary": {
     "aca": {
-      "n_trials": 240,
-      "completion_mean": 71.61458333333333,
-      "completion_std": 20.05803285055716,
-      "welfare_mean": 261.1222249195173,
-      "messages_mean": 38.49583333333333,
-      "recourse_mean": 185.97083333333333,
-      "distance_mean": 155.8972208735747,
-      "collisions_mean": 185.97083333333333,
-      "conflicts_mean": 49.825
+      "n_trials": 360,
+      "completion_mean": 69.44444444444444,
+      "completion_std": 20.279309329391072,
+      "completion_ci_95": [
+        67.39583333333333,
+        71.5625
+      ],
+      "welfare_mean": 260.83371956416255,
+      "messages_mean": 73.68888888888888,
+      "recourse_mean": 158.5638888888889,
+      "distance_mean": 147.3609179956965,
+      "collisions_mean": 158.5638888888889,
+      "conflicts_mean": 37.53055555555556
     },
     "aca_no_margin": {
-      "n_trials": 240,
-      "completion_mean": 73.54166666666667,
-      "completion_std": 17.01304979477185,
-      "welfare_mean": 221.48620827017155,
-      "messages_mean": 38.5625,
-      "recourse_mean": 175.7625,
-      "distance_mean": 183.42356253158087,
-      "collisions_mean": 175.7625,
-      "conflicts_mean": 87.40833333333333
+      "n_trials": 360,
+      "completion_mean": 68.57638888888889,
+      "completion_std": 20.41878056439521,
+      "completion_ci_95": [
+        66.49305555555556,
+        70.69444444444444
+      ],
+      "welfare_mean": 224.04914295407485,
+      "messages_mean": 76.81388888888888,
+      "recourse_mean": 171.6611111111111,
+      "distance_mean": 162.28098407851812,
+      "collisions_mean": 171.6611111111111,
+      "conflicts_mean": 66.54722222222222
     },
     "cbba_partial_lr": {
-      "n_trials": 240,
-      "completion_mean": 72.5,
-      "completion_std": 19.44577268492583,
-      "welfare_mean": 225.65026627335726,
-      "messages_mean": 42.795833333333334,
-      "recourse_mean": 178.75,
-      "distance_mean": 177.17486686332134,
-      "collisions_mean": 178.75,
-      "conflicts_mean": 89.87083333333334
+      "n_trials": 360,
+      "completion_mean": 68.81944444444444,
+      "completion_std": 19.369286479977085,
+      "completion_ci_95": [
+        66.80555555555556,
+        70.79861111111111
+      ],
+      "welfare_mean": 221.95134934602729,
+      "messages_mean": 75.32222222222222,
+      "recourse_mean": 194.65,
+      "distance_mean": 164.30210310476417,
+      "collisions_mean": 194.65,
+      "conflicts_mean": 69.97222222222223
     },
     "ctp_replan": {
-      "n_trials": 240,
-      "completion_mean": 65.46875,
-      "completion_std": 20.026500813488013,
-      "welfare_mean": 244.3311094717872,
-      "messages_mean": 25.5125,
+      "n_trials": 360,
+      "completion_mean": 68.40277777777777,
+      "completion_std": 20.754842856831296,
+      "completion_ci_95": [
+        66.25,
+        70.52083333333333
+      ],
+      "welfare_mean": 263.1169728881262,
+      "messages_mean": 56.077777777777776,
       "recourse_mean": 0.0,
-      "distance_mean": 139.70944526410642,
-      "collisions_mean": 152.90833333333333,
+      "distance_mean": 142.052624667048,
+      "collisions_mean": 142.25833333333333,
       "conflicts_mean": 0.0
     },
     "implicit": {
-      "n_trials": 240,
-      "completion_mean": 75.78125,
-      "completion_std": 18.755447256150482,
-      "welfare_mean": 172.48131513039795,
-      "messages_mean": 50.12083333333333,
+      "n_trials": 360,
+      "completion_mean": 74.86111111111111,
+      "completion_std": 19.503271317313832,
+      "completion_ci_95": [
+        72.88194444444444,
+        76.84027777777777
+      ],
+      "welfare_mean": 159.18751109696763,
+      "messages_mean": 84.8861111111111,
       "recourse_mean": 0.0,
-      "distance_mean": 216.88434243480103,
-      "collisions_mean": 235.15,
-      "conflicts_mean": 165.79166666666666
+      "distance_mean": 219.85068889596062,
+      "collisions_mean": 199.775,
+      "conflicts_mean": 168.58333333333334
     },
     "ssi_lr": {
-      "n_trials": 240,
-      "completion_mean": 36.302083333333336,
-      "completion_std": 22.909394846014568,
-      "welfare_mean": 95.24972576264554,
-      "messages_mean": 41.983333333333334,
-      "recourse_mean": 121.7125,
-      "distance_mean": 97.58347045201056,
-      "collisions_mean": 121.7125,
+      "n_trials": 360,
+      "completion_mean": 42.15277777777778,
+      "completion_std": 25.39830874231547,
+      "completion_ci_95": [
+        39.513888888888886,
+        44.75694444444444
+      ],
+      "welfare_mean": 132.59558922324055,
+      "messages_mean": 67.62777777777778,
+      "recourse_mean": 143.57222222222222,
+      "distance_mean": 102.31331649949084,
+      "collisions_mean": 143.57222222222222,
       "conflicts_mean": 0.0
+    }
+  },
+  "graph_method_summary": {
+    "aca": {
+      "n_trials": 360,
+      "completion_mean": 88.36805555555556,
+      "completion_std": 16.680262270478444,
+      "completion_ci_95": [
+        86.63194444444444,
+        90.06944444444444
+      ],
+      "welfare_mean": 291.7427248364069,
+      "messages_mean": 59.95,
+      "recourse_mean": 0.7083333333333334,
+      "conflicts_mean": 22.71388888888889
+    },
+    "aca_no_margin": {
+      "n_trials": 360,
+      "completion_mean": 88.64583333333333,
+      "completion_std": 14.869075211065145,
+      "completion_ci_95": [
+        87.04861111111111,
+        90.17361111111111
+      ],
+      "welfare_mean": 253.7231754275212,
+      "messages_mean": 62.022222222222226,
+      "recourse_mean": 0.7583333333333333,
+      "conflicts_mean": 40.15555555555556
+    },
+    "cbba_partial_lr": {
+      "n_trials": 360,
+      "completion_mean": 90.27777777777777,
+      "completion_std": 13.652034878702509,
+      "completion_ci_95": [
+        88.85416666666667,
+        91.66666666666667
+      ],
+      "welfare_mean": 258.8662111388825,
+      "messages_mean": 61.09166666666667,
+      "recourse_mean": 0.7611111111111111,
+      "conflicts_mean": 40.272222222222226
+    },
+    "ctp_replan": {
+      "n_trials": 360,
+      "completion_mean": 91.31944444444444,
+      "completion_std": 15.672995768131884,
+      "completion_ci_95": [
+        89.65277777777777,
+        92.88194444444444
+      ],
+      "welfare_mean": 309.789876054594,
+      "messages_mean": 37.93888888888889,
+      "recourse_mean": 0.0,
+      "conflicts_mean": 0.0
+    },
+    "implicit": {
+      "n_trials": 360,
+      "completion_mean": 92.08333333333333,
+      "completion_std": 13.73749114477044,
+      "completion_ci_95": [
+        90.65972222222223,
+        93.4375
+      ],
+      "welfare_mean": 63.54535023878074,
+      "messages_mean": 63.975,
+      "recourse_mean": 0.0,
+      "conflicts_mean": 106.18611111111112
+    },
+    "ssi_lr": {
+      "n_trials": 360,
+      "completion_mean": 72.22222222222223,
+      "completion_std": 30.07521778562853,
+      "completion_ci_95": [
+        69.13194444444444,
+        75.3125
+      ],
+      "welfare_mean": 176.94287334321473,
+      "messages_mean": 58.07222222222222,
+      "recourse_mean": 0.8638888888888889,
+      "conflicts_mean": 0.0
+    }
+  },
+  "domain_gap_summary": {
+    "aca": {
+      "n_matched_pairs": 360,
+      "gap_mean_pp": -18.92361111111111,
+      "gap_std_pp": 17.775029377607414,
+      "wilcoxon_stat": 980.0,
+      "wilcoxon_raw_pvalue": 1.0233039043982178e-44,
+      "hodges_lehmann_median_pp": -18.75,
+      "hodges_lehmann_ci_95": [
+        -18.75,
+        -18.75
+      ],
+      "wilcoxon_holm_pvalue": 2.0466078087964355e-44,
+      "holm_significant": true
+    },
+    "aca_no_margin": {
+      "n_matched_pairs": 360,
+      "gap_mean_pp": -20.069444444444443,
+      "gap_std_pp": 17.994758126320015,
+      "wilcoxon_stat": 517.0,
+      "wilcoxon_raw_pvalue": 8.84987069501797e-46,
+      "hodges_lehmann_median_pp": -18.75,
+      "hodges_lehmann_ci_95": [
+        -18.75,
+        -18.75
+      ],
+      "wilcoxon_holm_pvalue": 2.6549612085053908e-45,
+      "holm_significant": true
+    },
+    "cbba_partial_lr": {
+      "n_matched_pairs": 360,
+      "gap_mean_pp": -21.458333333333332,
+      "gap_std_pp": 18.272113324631867,
+      "wilcoxon_stat": 394.5,
+      "wilcoxon_raw_pvalue": 8.438411854212389e-48,
+      "hodges_lehmann_median_pp": -18.75,
+      "hodges_lehmann_ci_95": [
+        -25.0,
+        -18.75
+      ],
+      "wilcoxon_holm_pvalue": 4.2192059271061944e-47,
+      "holm_significant": true
+    },
+    "ctp_replan": {
+      "n_matched_pairs": 360,
+      "gap_mean_pp": -22.916666666666668,
+      "gap_std_pp": 19.791743023847232,
+      "wilcoxon_stat": 488.0,
+      "wilcoxon_raw_pvalue": 1.3584420995756325e-47,
+      "hodges_lehmann_median_pp": -18.75,
+      "hodges_lehmann_ci_95": [
+        -25.0,
+        -18.75
+      ],
+      "wilcoxon_holm_pvalue": 5.43376839830253e-47,
+      "holm_significant": true
+    },
+    "implicit": {
+      "n_matched_pairs": 360,
+      "gap_mean_pp": -17.22222222222222,
+      "gap_std_pp": 16.956623525895353,
+      "wilcoxon_stat": 295.0,
+      "wilcoxon_raw_pvalue": 1.109737484124844e-43,
+      "hodges_lehmann_median_pp": -18.75,
+      "hodges_lehmann_ci_95": [
+        -18.75,
+        -12.5
+      ],
+      "wilcoxon_holm_pvalue": 1.109737484124844e-43,
+      "holm_significant": true
+    },
+    "ssi_lr": {
+      "n_matched_pairs": 360,
+      "gap_mean_pp": -30.069444444444443,
+      "gap_std_pp": 25.557748466057934,
+      "wilcoxon_stat": 501.5,
+      "wilcoxon_raw_pvalue": 2.0150868208479945e-49,
+      "hodges_lehmann_median_pp": -31.25,
+      "hodges_lehmann_ci_95": [
+        -31.25,
+        -25.0
+      ],
+      "wilcoxon_holm_pvalue": 1.2090520925087968e-48,
+      "holm_significant": true
     }
   },
   "ranking_preservation": {
@@ -82,70 +275,121 @@
       "ssi_lr"
     ],
     "ranking_graph_sim": [
-      "ctp_replan",
       "implicit",
+      "ctp_replan",
+      "cbba_partial_lr",
       "aca_no_margin",
       "aca",
-      "cbba_partial_lr",
       "ssi_lr"
     ],
     "ranking_sitl_physics": [
       "implicit",
-      "aca_no_margin",
-      "cbba_partial_lr",
       "aca",
+      "cbba_partial_lr",
+      "aca_no_margin",
       "ctp_replan",
       "ssi_lr"
     ],
-    "spearman_rho": 0.3714285714285715,
-    "spearman_pvalue": 0.46847813411078715,
+    "spearman_rho": 0.48571428571428577,
+    "spearman_pvalue": 0.3287230320699709,
     "kendall_tau": 0.3333333333333333,
     "kendall_pvalue": 0.46944444444444444,
     "ranking_preserved": false,
     "paired_tests_vs_aca": {
       "aca_vs_aca_no_margin": {
-        "mean_diff_pp": -1.9270833333333333,
+        "n_pairs": 360,
+        "mean_diff_pp": 0.8680555555555556,
         "median_diff_pp": 0.0,
-        "wilcoxon_stat": 7225.0,
-        "wilcoxon_pvalue": 0.18325947946940102,
-        "n_pairs": 240
+        "wilcoxon_stat": 7491.5,
+        "wilcoxon_pvalue": 0.27860355632175915,
+        "hodges_lehmann_diff_pp": 0.0,
+        "hodges_lehmann_ci_95": [
+          0.0,
+          0.0
+        ],
+        "holm_adj_pvalue": 0.8358106689652774,
+        "holm_significant": false
       },
       "aca_vs_cbba_partial_lr": {
-        "mean_diff_pp": -0.8854166666666666,
+        "n_pairs": 360,
+        "mean_diff_pp": 0.625,
         "median_diff_pp": 0.0,
-        "wilcoxon_stat": 8011.0,
-        "wilcoxon_pvalue": 0.6536014633474454,
-        "n_pairs": 240
+        "wilcoxon_stat": 11239.5,
+        "wilcoxon_pvalue": 0.5150759573870847,
+        "hodges_lehmann_diff_pp": 0.0,
+        "hodges_lehmann_ci_95": [
+          0.0,
+          0.0
+        ],
+        "holm_adj_pvalue": 0.8358106689652774,
+        "holm_significant": false
       },
       "aca_vs_ctp_replan": {
-        "mean_diff_pp": 6.145833333333333,
-        "median_diff_pp": 12.5,
-        "wilcoxon_stat": 8294.0,
-        "wilcoxon_pvalue": 0.0020151475754834514,
-        "n_pairs": 240
+        "n_pairs": 360,
+        "mean_diff_pp": 1.0416666666666667,
+        "median_diff_pp": 0.0,
+        "wilcoxon_stat": 16836.5,
+        "wilcoxon_pvalue": 0.2897967536680457,
+        "hodges_lehmann_diff_pp": 0.0,
+        "hodges_lehmann_ci_95": [
+          0.0,
+          6.25
+        ],
+        "holm_adj_pvalue": 0.8358106689652774,
+        "holm_significant": false
       },
       "aca_vs_implicit": {
-        "mean_diff_pp": -4.166666666666667,
+        "n_pairs": 360,
+        "mean_diff_pp": -5.416666666666667,
         "median_diff_pp": 0.0,
-        "wilcoxon_stat": 8097.5,
-        "wilcoxon_pvalue": 0.011808312535305133,
-        "n_pairs": 240
+        "wilcoxon_stat": 7624.0,
+        "wilcoxon_pvalue": 5.997502180756832e-08,
+        "hodges_lehmann_diff_pp": -6.25,
+        "hodges_lehmann_ci_95": [
+          -6.25,
+          0.0
+        ],
+        "holm_adj_pvalue": 2.399000872302733e-07,
+        "holm_significant": true
       },
       "aca_vs_ssi_lr": {
-        "mean_diff_pp": 35.3125,
-        "median_diff_pp": 37.5,
-        "wilcoxon_stat": 1616.5,
-        "wilcoxon_pvalue": 4.452597983885732e-31,
-        "n_pairs": 240
+        "n_pairs": 360,
+        "mean_diff_pp": 27.291666666666668,
+        "median_diff_pp": 25.0,
+        "wilcoxon_stat": 4487.0,
+        "wilcoxon_pvalue": 7.36033222603575e-39,
+        "hodges_lehmann_diff_pp": 31.25,
+        "hodges_lehmann_ci_95": [
+          25.0,
+          31.25
+        ],
+        "holm_adj_pvalue": 3.680166113017875e-38,
+        "holm_significant": true
       }
     }
   },
   "bland_altman": {
     "metric": "completion_rate_pct",
-    "bias_mean_difference": -26.00089719029374,
-    "sd_difference": 13.33158421171017,
-    "loa_upper_95": 0.12900786465819536,
-    "loa_lower_95": -52.130802245245675,
-    "interpretation": "Physical SITL simulation exhibits a mean bias of -26.00% relative to abstract graph simulation (95% Limits of Agreement: [-52.13%, 0.13%]). Performance differences reflect continuous physical execution, sensor/odometry drift, and dynamic obstacle avoidance."
+    "n_matched_trials": 2160,
+    "bias_mean_difference_pp": -21.77662037037037,
+    "sd_difference_pp": 20.011442642913757,
+    "loa_upper_95": 17.44580720974059,
+    "loa_lower_95": -60.99904795048133,
+    "interpretation": "Physical SITL simulation exhibits a mean bias of -21.78 pp relative to matched discrete graph simulation (95% Limits of Agreement: [-61.00 pp, 17.45 pp]). Differences reflect continuous unicycle kinematics, barrier obstacle interactions, and odometric drift."
+  },
+  "collisions_analysis": {
+    "metric_name": "physical_collisions",
+    "definition": "Rigid-body continuous surface contact events detected in PyBullet simulation (p.getContactPoints > 0) between robot chassis/wheels and static boundary or dynamic blockage barriers.",
+    "units": "contact events per trial",
+    "distinction_from_conflicts": "Physical collisions measure spatial barrier contacts in continuous physics. Abstract conflicts measure combinatorial double-claims in the decentralized task allocation market.",
+    "total_events_observed": 363773,
+    "mean_events_per_trial": 168.41342592592594,
+    "correlation_with_recourse_detours": {
+      "pearson_r": 0.7753226879794195,
+      "pearson_pvalue": 0.0,
+      "spearman_rho": 0.7465697081126581,
+      "spearman_pvalue": 0.0,
+      "interpretation": "Physical collision contacts correlate with recourse detours (r = 0.775, p = 0.0000e+00; rho = 0.747, p = 0.0000e+00), confirming that barrier contacts correspond to detected blockage events that trigger contingency branch executions."
+    }
   }
 }

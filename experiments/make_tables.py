@@ -580,7 +580,7 @@ def generate_sitl_table(
 ) -> str:
     """
     Generate Table IV: Software-in-the-Loop (SITL) Physics-Based Simulation vs Discrete Graph Simulation
-    (N = 240 paired trials per method on real maps).
+    (Matched paired trials per method on real maps).
     """
     if not os.path.exists(sitl_json_path):
         print(f"Warning: {sitl_json_path} not found for Table IV.")
@@ -590,24 +590,19 @@ def generate_sitl_table(
         sitl_data = json.load(f)
 
     method_summary = sitl_data.get("sitl_method_summary", {})
+    graph_method_summary = sitl_data.get("graph_method_summary", {})
+    domain_gap_summary = sitl_data.get("domain_gap_summary", {})
     paired_vs_aca = sitl_data.get("ranking_preservation", {}).get("paired_tests_vs_aca", {})
 
-    # Calculate graph-sim reference for these methods on real maps
-    graph_comp = {}
-    if os.path.exists(raw_csv_path):
-        df_raw = pd.read_csv(raw_csv_path)
-        real_df = df_raw[df_raw["graph_family"].isin(["warehouse_movingai", "road_osmnx"])]
-        for m in method_summary.keys():
-            sub = real_df[real_df["method"] == m]
-            if len(sub) > 0:
-                vals = sub["completion_rate_pct"].dropna().astype(float).values.tolist()
-                mean, low, high = bootstrap_ci(vals)
-                graph_comp[m] = (mean, 0.5 * (high - low))
+    n_trials_per_m = 360
+    if method_summary:
+        first_m = next(iter(method_summary.values()))
+        n_trials_per_m = first_m.get("n_trials", 360)
 
     latex_lines = [
         "\\begin{table*}[t]",
         "\\centering",
-        "\\caption{Software-in-the-Loop (SITL) Physics Simulation vs.\\ Discrete Graph Simulation ($N = 240$ Paired Trials per Method on Real Maps).}",
+        f"\\caption{{Software-in-the-Loop (SITL) Physics Simulation vs.\\ Discrete Graph Simulation ($N = {n_trials_per_m}$ Paired Trials per Method on Real Maps).}}",
         "\\label{tab:sitl_results}",
         "\\begin{tabular}{lcccccc}",
         "\\toprule",
@@ -616,7 +611,7 @@ def generate_sitl_table(
     ]
 
     md_lines = [
-        "### SITL Physics Simulation vs. Discrete Graph Simulation ($N = 240$ Paired Trials per Method)",
+        f"### SITL Physics Simulation vs. Discrete Graph Simulation ($N = {n_trials_per_m}$ Paired Trials per Method)",
         "",
         "| Method | SITL Comp. (%) | Graph Comp. (%) | Domain Gap (pp) | vs. ACA ($p$) | Phys. Collisions | Abstract Conf. |",
         "|:-------|:--------------:|:---------------:|:---------------:|:-------------:|:----------------:|:--------------:|",
@@ -637,14 +632,22 @@ def generate_sitl_table(
         sitl_mean = stats.get("completion_mean", 0.0)
         sitl_std = stats.get("completion_std", 0.0)
 
-        g_mean, g_ci = graph_comp.get(m, (0.0, 0.0))
-        gap = sitl_mean - g_mean
+        if m in graph_method_summary:
+            g_mean = graph_method_summary[m].get("completion_mean", 0.0)
+            g_std = graph_method_summary[m].get("completion_std", 0.0)
+        else:
+            g_mean, g_std = 0.0, 0.0
+
+        if m in domain_gap_summary:
+            gap = domain_gap_summary[m].get("gap_mean_pp", sitl_mean - g_mean)
+        else:
+            gap = sitl_mean - g_mean
 
         if m == "aca":
             p_val_str = "--"
         else:
             pair_info = paired_vs_aca.get(f"aca_vs_{m}", {})
-            pval = pair_info.get("wilcoxon_pvalue", 1.0)
+            pval = pair_info.get("holm_adj_pvalue", pair_info.get("wilcoxon_pvalue", 1.0))
             p_val_str = f"{pval:.4f}" if pval >= 0.0001 else "$< 10^{-4}$"
 
         phys_col = stats.get("collisions_mean", 0.0)
@@ -653,7 +656,7 @@ def generate_sitl_table(
         tex_row = [
             label,
             f"{sitl_mean:.1f} $\\pm$ {sitl_std:.1f}",
-            f"{g_mean:.1f} $\\pm$ {g_ci:.1f}",
+            f"{g_mean:.1f} $\\pm$ {g_std:.1f}",
             f"{gap:+.1f}",
             p_val_str,
             f"{phys_col:.1f}",
@@ -662,7 +665,7 @@ def generate_sitl_table(
         md_row = [
             clean_label,
             f"{sitl_mean:.1f} ± {sitl_std:.1f}",
-            f"{g_mean:.1f} ± {g_ci:.1f}",
+            f"{g_mean:.1f} ± {g_std:.1f}",
             f"{gap:+.1f}",
             p_val_str.replace("$", "").replace("\\", ""),
             f"{phys_col:.1f}",
