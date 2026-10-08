@@ -265,7 +265,9 @@ class SyntheticVisionSystem:
         return ready_poses, annotated_frame
 
     def get_metrics_summary(self) -> Dict[str, Any]:
-        """Compute final synthetic vision localization error telemetry."""
+        """Compute final synthetic vision localization error telemetry with bootstrap CIs."""
+        from experiments.stats import bootstrap_ci
+
         pos_errs = np.array(self.position_errors) if self.position_errors else np.array([0.0])
         yaw_errs = np.array(self.orientation_errors) if self.orientation_errors else np.array([0.0])
 
@@ -276,6 +278,30 @@ class SyntheticVisionSystem:
         )
         miss_rate = 1.0 - det_rate
 
+        # Bootstrap CIs
+        if self.marker_opportunities > 0:
+            det_binary = [1.0] * self.successful_detections + [0.0] * (self.marker_opportunities - self.successful_detections)
+            _, d_low, d_high = bootstrap_ci(det_binary, ci=0.95, n_resamples=1000)
+            det_ci = [float(d_low * 100.0), float(d_high * 100.0)]
+        else:
+            det_ci = [0.0, 0.0]
+
+        if len(pos_errs) > 2:
+            _, p_low, p_high = bootstrap_ci(pos_errs.tolist(), ci=0.95, n_resamples=1000)
+            pos_ci = [float(p_low), float(p_high)]
+        else:
+            pos_ci = [float(np.mean(pos_errs)), float(np.mean(pos_errs))]
+
+        if len(yaw_errs) > 2:
+            _, y_low, y_high = bootstrap_ci(yaw_errs.tolist(), ci=0.95, n_resamples=1000)
+            yaw_ci_rad = [float(y_low), float(y_high)]
+            yaw_ci_deg = [float(math.degrees(y_low)), float(math.degrees(y_high))]
+        else:
+            yaw_ci_rad = [float(np.mean(yaw_errs)), float(np.mean(yaw_errs))]
+            yaw_ci_deg = [float(math.degrees(np.mean(yaw_errs))), float(math.degrees(np.mean(yaw_errs)))]
+
+        mean_yaw_rad = float(np.mean(yaw_errs))
+
         return {
             "disclaimer": "SYNTHETIC-VISION SIMULATION ONLY -- No physical cameras or robots used.",
             "git_commit": get_git_commit(),
@@ -283,25 +309,47 @@ class SyntheticVisionSystem:
             "total_marker_opportunities": self.marker_opportunities,
             "successful_detections": self.successful_detections,
             "detection_rate_pct": float(det_rate * 100.0),
+            "detection_rate_ci_95": det_ci,
             "missed_marker_rate_pct": float(miss_rate * 100.0),
             "occlusion_events": self.occlusion_events,
             "latency_ticks": self.latency_ticks,
             "position_error_mean_meters": float(np.mean(pos_errs)),
+            "position_error_ci_95": pos_ci,
             "position_error_rmse_meters": float(np.sqrt(np.mean(pos_errs**2))),
             "position_error_max_meters": float(np.max(pos_errs)),
-            "orientation_error_mean_rad": float(np.mean(yaw_errs)),
-            "orientation_error_mean_deg": float(math.degrees(np.mean(yaw_errs))),
+            "orientation_error_mean_rad": mean_yaw_rad,
+            "orientation_error_ci_95_rad": yaw_ci_rad,
+            "orientation_error_mean_deg": float(math.degrees(mean_yaw_rad)),
+            "orientation_error_ci_95_deg": yaw_ci_deg,
             "orientation_error_rmse_rad": float(np.sqrt(np.mean(yaw_errs**2))),
+            "orientation_threshold_passed": bool(mean_yaw_rad < 0.10),
         }
 
 
 def run_synthetic_vision_experiment(
-    graph: nx.Graph,
-    n_frames: int = 30,
-    seed: int = 42,
+    graphs: Optional[Dict[str, nx.Graph]] = None,
+    frames_per_run: int = 80,
+    seeds: Optional[List[int]] = None,
     output_video_path: Optional[str] = None,
 ) -> Dict[str, Any]:
-    """Execute synthetic-vision experiment, recording video and metrics."""
+    """
+    Execute synthetic-vision experiment across multiple maps and seeds (>= 300 frames total).
+    Renders camera frames, applies lens noise/occlusions, runs OpenCV ArUco detection,
+    and logs position and orientation error telemetry with bootstrap CIs.
+    """
+    from acalib.env.real_maps import generate_movingai_warehouse, generate_real_road_network, DATA_MAPS_DIR
+
+    if graphs is None:
+        g_wh = generate_movingai_warehouse(n_nodes=38, filepath=os.path.join(DATA_MAPS_DIR, "warehouse-10-20-10-2-1.map"))
+        g_road = generate_real_road_network(filepath=os.path.join(DATA_MAPS_DIR, "boston_downtown_drive.graphml"))
+        graphs = {
+            "warehouse_movingai": g_wh,
+            "road_osmnx": g_road,
+        }
+
+    if seeds is None:
+        seeds = [20001, 20002]
+
     if output_video_path is None:
         output_video_path = os.path.join(VISION_OUT_DIR, "vision_sim.mp4")
 
@@ -313,64 +361,72 @@ def run_synthetic_vision_experiment(
         occlusion_prob=0.05,
         detection_drop_prob=0.03,
         latency_ticks=1,
-        seed=seed,
+        seed=seeds[0],
     )
 
-    # Initialize 4 robot trajectories from graph nodes
-    rng = np.random.default_rng(seed)
-    nodes = list(graph.nodes())
-    pos_dict = nx.get_node_attributes(graph, "pos")
-    starts = rng.choice(nodes, size=4, replace=False)
-    targets = rng.choice([n for n in nodes if n not in starts], size=4, replace=False)
-
     fourcc = cv2.VideoWriter_fourcc(*"mp4v")
-    vw = cv2.VideoWriter(output_video_path, fourcc, 5.0, (640, 640))
-
-    # Pre-render background map
-    bg = np.ones((640, 640, 3), dtype=np.uint8) * 240
-    for u, v in graph.edges():
-        pu = vision_sys.world_to_pixel(*pos_dict[u])
-        pv = vision_sys.world_to_pixel(*pos_dict[v])
-        cv2.line(bg, pu, pv, (180, 180, 180), 1)
-
-    curr_poses = {
-        i: (float(pos_dict[starts[i]][0]), float(pos_dict[starts[i]][1]), 0.0)
-        for i in range(4)
-    }
+    vw = cv2.VideoWriter(output_video_path, fourcc, 10.0, (640, 640))
 
     raw_frame_sample = None
     annotated_sample = None
 
-    for tick in range(n_frames):
-        # Move robots slightly toward target
-        for i in range(4):
-            tgt_pos = pos_dict[targets[i]]
-            cx, cy, cyaw = curr_poses[i]
-            dx = tgt_pos[0] - cx
-            dy = tgt_pos[1] - cy
-            dist = math.hypot(dx, dy)
-            if dist > 0.5:
-                heading = math.atan2(dy, dx)
-                step_size = min(1.2, dist)
-                nx_pt = cx + step_size * math.cos(heading)
-                ny_pt = cy + step_size * math.sin(heading)
-                curr_poses[i] = (nx_pt, ny_pt, heading)
+    evaluated_runs = []
 
-        # 1. Synthesize camera frame
-        raw_frame, is_occ = vision_sys.render_overhead_frame(curr_poses, map_background=bg)
-        if tick == 0:
-            raw_frame_sample = raw_frame.copy()
+    for map_name, graph in graphs.items():
+        pos_dict = nx.get_node_attributes(graph, "pos")
+        nodes = list(graph.nodes())
 
-        # 2. Detect markers & estimate poses
-        est_poses, annot_frame = vision_sys.detect_and_estimate_poses(raw_frame, curr_poses, tick)
-        if tick == 0:
-            annotated_sample = annot_frame.copy()
+        # Pre-render background map
+        bg = np.ones((640, 640, 3), dtype=np.uint8) * 240
+        for u, v in graph.edges():
+            pu = vision_sys.world_to_pixel(*pos_dict[u])
+            pv = vision_sys.world_to_pixel(*pos_dict[v])
+            cv2.line(bg, pu, pv, (180, 180, 180), 1)
 
-        vw.write(annot_frame)
+        for s in seeds:
+            evaluated_runs.append((map_name, s))
+            rng = np.random.default_rng(s)
+            starts = rng.choice(nodes, size=4, replace=False)
+            targets = rng.choice([n for n in nodes if n not in starts], size=4, replace=False)
+
+            curr_poses = {
+                i: (float(pos_dict[starts[i]][0]), float(pos_dict[starts[i]][1]), 0.0)
+                for i in range(4)
+            }
+
+            for tick in range(frames_per_run):
+                # Step robots toward target nodes
+                for i in range(4):
+                    tgt_pos = pos_dict[targets[i]]
+                    cx, cy, cyaw = curr_poses[i]
+                    dx = tgt_pos[0] - cx
+                    dy = tgt_pos[1] - cy
+                    dist = math.hypot(dx, dy)
+                    if dist > 0.5:
+                        heading = math.atan2(dy, dx)
+                        step_size = min(1.2, dist)
+                        nx_pt = cx + step_size * math.cos(heading)
+                        ny_pt = cy + step_size * math.sin(heading)
+                        curr_poses[i] = (nx_pt, ny_pt, heading)
+
+                # 1. Synthesize camera frame
+                raw_frame, is_occ = vision_sys.render_overhead_frame(curr_poses, map_background=bg)
+                if raw_frame_sample is None:
+                    raw_frame_sample = raw_frame.copy()
+
+                # 2. Detect markers & estimate poses
+                est_poses, annot_frame = vision_sys.detect_and_estimate_poses(raw_frame, curr_poses, tick)
+                if annotated_sample is None:
+                    annotated_sample = annot_frame.copy()
+
+                vw.write(annot_frame)
 
     vw.release()
 
     metrics = vision_sys.get_metrics_summary()
+    metrics["maps_evaluated"] = list(graphs.keys())
+    metrics["seeds_evaluated"] = seeds
+    metrics["total_runs_evaluated"] = len(evaluated_runs)
 
     # Save metrics JSON
     json_path = os.path.join(VISION_OUT_DIR, "vision_metrics.json")
@@ -384,11 +440,14 @@ def run_synthetic_vision_experiment(
         cv2.imwrite(os.path.join(VISION_OUT_DIR, "sample_annotated_frame.png"), annotated_sample)
 
     print(f"Synthetic-vision simulation complete. Video saved to {output_video_path}.")
-    print(f"Vision metrics: Detection Rate = {metrics['detection_rate_pct']:.1f}%, Pos RMSE = {metrics['position_error_rmse_meters']:.3f}m")
+    print(f"Total Frames Analyzed: {metrics['total_frames_analyzed']}")
+    print(f"Detection Rate: {metrics['detection_rate_pct']:.2f}% (95% CI: [{metrics['detection_rate_ci_95'][0]:.2f}%, {metrics['detection_rate_ci_95'][1]:.2f}%])")
+    print(f"Position Error: {metrics['position_error_mean_meters']:.3f} m (95% CI: [{metrics['position_error_ci_95'][0]:.3f} m, {metrics['position_error_ci_95'][1]:.3f} m]), RMSE: {metrics['position_error_rmse_meters']:.3f} m")
+    print(f"Orientation Error: {metrics['orientation_error_mean_rad']:.4f} rad ({metrics['orientation_error_mean_deg']:.2f} deg) (95% CI: [{metrics['orientation_error_ci_95_rad'][0]:.4f}, {metrics['orientation_error_ci_95_rad'][1]:.4f}] rad)")
+    print(f"Orientation Threshold (< 0.10 rad) Passed: {metrics['orientation_threshold_passed']}")
+
     return metrics
 
 
 if __name__ == "__main__":
-    from acalib.env.real_maps import generate_real_road_network
-    g = generate_real_road_network()
-    run_synthetic_vision_experiment(g)
+    run_synthetic_vision_experiment(frames_per_run=80, seeds=[20001, 20002])

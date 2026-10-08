@@ -1,17 +1,43 @@
 {
   "disclaimer": "SYNTHETIC-VISION SIMULATION ONLY -- No physical cameras or robots used.",
-  "git_commit": "d11295d439a4f3cb73ed98889a395377b71067c6",
-  "total_frames_analyzed": 30,
-  "total_marker_opportunities": 120,
-  "successful_detections": 103,
-  "detection_rate_pct": 85.83333333333333,
-  "missed_marker_rate_pct": 14.166666666666671,
-  "occlusion_events": 5,
+  "git_commit": "d59d1a3693ac54d59f2a3f514d5f0c8b562c61b2",
+  "total_frames_analyzed": 320,
+  "total_marker_opportunities": 1280,
+  "successful_detections": 990,
+  "detection_rate_pct": 77.34375,
+  "detection_rate_ci_95": [
+    74.921875,
+    79.6875
+  ],
+  "missed_marker_rate_pct": 22.65625,
+  "occlusion_events": 60,
   "latency_ticks": 1,
-  "position_error_mean_meters": 0.1544212494051923,
-  "position_error_rmse_meters": 0.16874925874783248,
-  "position_error_max_meters": 0.2743406934934941,
-  "orientation_error_mean_rad": 1.5196001501567769,
-  "orientation_error_mean_deg": 87.06667515142948,
-  "orientation_error_rmse_rad": 1.7491874518580157
+  "position_error_mean_meters": 0.3983256703182615,
+  "position_error_ci_95": [
+    0.3446889989934147,
+    0.45524858665587375
+  ],
+  "position_error_rmse_meters": 0.9692960353636991,
+  "position_error_max_meters": 4.029768842524426,
+  "orientation_error_mean_rad": 0.012476491812275524,
+  "orientation_error_ci_95_rad": [
+    0.011765417601550187,
+    0.013183531175175522
+  ],
+  "orientation_error_mean_deg": 0.7148503239729153,
+  "orientation_error_ci_95_deg": [
+    0.6741087727777574,
+    0.7553606954167038
+  ],
+  "orientation_error_rmse_rad": 0.017066056327305117,
+  "orientation_threshold_passed": true,
+  "maps_evaluated": [
+    "warehouse_movingai",
+    "road_osmnx"
+  ],
+  "seeds_evaluated": [
+    20001,
+    20002
+  ],
+  "total_runs_evaluated": 4
 }
