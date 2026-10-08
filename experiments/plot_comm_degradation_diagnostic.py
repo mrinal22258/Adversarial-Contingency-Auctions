@@ -25,32 +25,44 @@ def plot_diagnostic(csv_path: str = "results/raw_results.csv", out_dir: str = "r
 
     df = pd.read_csv(csv_path)
     regimes = ["benign", "constrained", "lossy"]
-    df_filtered = df[df["comm_regime"].isin(regimes)].copy()
 
-    methods_to_plot = ["aca", "cbba", "cbba_lr", "cbba_partial", "ssi", "ctp_replan"]
+    # Assign regime based on comm parameters if not directly present in comm_regime
+    df["regime"] = np.nan
+    if "comm_regime" in df.columns and any(r in df["comm_regime"].values for r in regimes):
+        df["regime"] = df["comm_regime"]
+    else:
+        df.loc[(df["p_drop"] <= 0.02) & (df["comm_range"] >= 50.0), "regime"] = "benign"
+        df.loc[(df["comm_range"] <= 25.0) & (df["p_drop"] <= 0.05), "regime"] = "constrained"
+        df.loc[df["p_drop"] >= 0.20, "regime"] = "lossy"
+
+    df_filtered = df[df["regime"].isin(regimes)].copy()
+
+    methods_to_plot = [m for m in ["aca", "cbba", "cbba_lr", "cbba_partial_lr", "ssi", "ctp_replan"] if m in df_filtered["method"].values]
 
     fig, axes = plt.subplots(1, 4, figsize=(IEEE_DOUBLE_COL_WIDTH, 2.3), sharex=True)
 
     # 1. Completion Rate
     ax1 = axes[0]
-    # 2. Makespan
+    # 2. Runtime / Steps
     ax2 = axes[1]
     # 3. Conflicts
     ax3 = axes[2]
-    # 4. Duplicated Distance
+    # 4. Travel Distance
     ax4 = axes[3]
 
     x_indices = np.arange(len(regimes))
-    regime_labels = ["Benign\n(R=80, p=0)", "Constrained\n(R=35, p=0.05)", "Lossy\n(R=25, p=0.2)"]
+    regime_labels = ["Benign\n(R=80, p=0)", "Constrained\n(R=25, p=0.05)", "Lossy\n(R=25, p=0.2)"]
 
     for m in methods_to_plot:
         sub = df_filtered[df_filtered["method"] == m]
         style = METHOD_STYLES.get(m, {"label": m, "color": "gray", "marker": "o", "lw": 1.5})
         
-        comp_means = [sub[sub["comm_regime"] == r]["completion_rate_pct"].mean() for r in regimes]
-        make_means = [sub[sub["comm_regime"] == r]["makespan"].mean() for r in regimes]
-        conf_means = [sub[sub["comm_regime"] == r]["total_conflicts"].mean() for r in regimes]
-        dup_means = [sub[sub["comm_regime"] == r]["duplicated_distance"].mean() for r in regimes]
+        comp_means = [sub[sub["regime"] == r]["completion_rate_pct"].mean() for r in regimes]
+        make_col = "mean_tick_runtime_ms" if "mean_tick_runtime_ms" in sub else ("makespan" if "makespan" in sub else "wall_clock_seconds")
+        make_means = [sub[sub["regime"] == r][make_col].mean() for r in regimes]
+        conf_means = [sub[sub["regime"] == r]["total_conflicts"].mean() for r in regimes]
+        dup_col = "total_travel_distance" if "total_travel_distance" in sub else ("duplicated_distance" if "duplicated_distance" in sub else "total_messages")
+        dup_means = [sub[sub["regime"] == r][dup_col].mean() for r in regimes]
 
         ax1.plot(x_indices, comp_means, label=style["label"], color=style["color"], marker=style["marker"], lw=style["lw"])
         ax2.plot(x_indices, make_means, label=style["label"], color=style["color"], marker=style["marker"], lw=style["lw"])
