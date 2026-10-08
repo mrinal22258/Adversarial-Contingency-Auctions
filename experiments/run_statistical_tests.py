@@ -81,35 +81,78 @@ def load_and_aggregate_instances(csv_path: str) -> Tuple[pd.DataFrame, pd.DataFr
     return inst_df, df
 
 
-def evaluate_hypotheses_prereg_v3(
+COND_COLS = [
+    "graph_family",
+    "adversary",
+    "comm_regime",
+    "comm_range",
+    "p_drop",
+    "n_robots",
+    "n_tasks",
+    "arrival_mode",
+    "partition_mode",
+]
+
+
+def get_matched_instances(
+    raw_df: pd.DataFrame,
+    m_aca: str,
+    m_comp: str,
+    metric: str,
+) -> Optional[Tuple[pd.Series, pd.Series, List[Tuple], pd.Index]]:
+    """
+    Extracts strictly matched cell configurations where BOTH methods were executed,
+    then aggregates to independent instance level (graph_family, seed).
+    """
+    active_cond_cols = [c for c in COND_COLS if c in raw_df.columns]
+    d_aca = raw_df[raw_df["method"] == m_aca]
+    d_comp = raw_df[raw_df["method"] == m_comp]
+    if d_aca.empty or d_comp.empty:
+        return None
+
+    c_aca = set(tuple(x) for x in d_aca[active_cond_cols].drop_duplicates().values)
+    c_comp = set(tuple(x) for x in d_comp[active_cond_cols].drop_duplicates().values)
+    common_cells = c_aca.intersection(c_comp)
+    if not common_cells:
+        return None
+
+    d_aca_m = d_aca[d_aca[active_cond_cols].apply(tuple, axis=1).isin(common_cells)]
+    d_comp_m = d_comp[d_comp[active_cond_cols].apply(tuple, axis=1).isin(common_cells)]
+
+    inst_aca = d_aca_m.groupby(["graph_family", "seed"])[metric].mean()
+    inst_comp = d_comp_m.groupby(["graph_family", "seed"])[metric].mean()
+
+    common_inst = inst_aca.index.intersection(inst_comp.index)
+    if len(common_inst) < 3:
+        return None
+
+    return inst_aca.loc[common_inst], inst_comp.loc[common_inst], sorted(list(common_cells)), common_inst
+
+
+def evaluate_hypotheses_prereg_v4(
     inst_df: pd.DataFrame,
     raw_df: pd.DataFrame,
     hypotheses_config: dict,
     map_subset: Optional[str] = None,
 ) -> pd.DataFrame:
-    """Evaluate pre-registered hypotheses H1-H8 (prereg-v3) with directional correctness."""
+    """Evaluate pre-registered hypotheses H1-H8 (prereg-v4) with matched fair tests and directional correctness."""
     df_eval = inst_df if map_subset is None else inst_df[inst_df["map_class"] == map_subset].copy()
     raw_eval = raw_df if map_subset is None else raw_df[raw_df["map_class"] == map_subset].copy()
 
     results = []
 
-    # Pivot instances by method for paired comparisons
-    pivots = {}
-    for metric in ["completion_rate_pct", "net_welfare", "total_messages", "safe_claim_conflicts", "reauction_events"]:
-        if metric in df_eval.columns:
-            pivots[metric] = df_eval.pivot(index=["graph_family", "seed"], columns="method", values=metric)
-
-    # Helper for paired test
-    def _run_paired(h_id, title, metric, comp_pair, alt="two-sided", tier="primary", dir_name="two_sided"):
+    # Helper for matched paired test
+    def _run_matched_paired(h_id, title, metric, comp_pair, alt="two-sided", tier="primary", dir_name="two_sided", raw_subset=None):
         m_aca, m_comp = comp_pair
-        if m_aca not in pivots[metric] or m_comp not in pivots[metric]:
+        src_df = raw_eval if raw_subset is None else raw_subset
+        matched = get_matched_instances(src_df, m_aca, m_comp, metric)
+        if matched is None:
             return None
-        x = pivots[metric][m_aca].dropna()
-        y = pivots[metric][m_comp].dropna()
-        common = x.index.intersection(y.index)
-        if len(common) < 3:
-            return None
-        x_c, y_c = x.loc[common], y.loc[common]
+        x_c, y_c, matched_cells, common = matched
+
+        print(f"[{h_id}] {title} ({m_aca} vs {m_comp}): matched n = {len(common)} instances across {len(matched_cells)} cell configs:")
+        for cell in matched_cells:
+            print(f"    cell: {cell}")
 
         stat, p_val = paired_wilcoxon_test(list(x_c), list(y_c), alternative=alt)
         hl, hl_low, hl_high = hodges_lehmann_difference(list(x_c), list(y_c))
@@ -137,106 +180,91 @@ def evaluate_hypotheses_prereg_v3(
         }
 
     # H1: Recourse Efficacy (ACA vs ACA-d0, direction: greater)
-    res_h1 = _run_paired("H1", "Recourse Efficacy (ACA vs ACA-d0)", "completion_rate_pct", ("aca", "aca_depth_0"), alt="greater", tier="primary", dir_name="greater")
+    res_h1 = _run_matched_paired("H1", "Recourse Efficacy (ACA vs ACA-d0)", "completion_rate_pct", ("aca", "aca_depth_0"), alt="greater", tier="primary", dir_name="greater")
     if res_h1: results.append(res_h1)
 
     # H2: Level Execution Baselines (+LR)
     for b_lr in ["cbba_lr", "cbba_partial_lr", "ssi_lr"]:
-        res_h2 = _run_paired("H2", f"Level Execution (ACA vs {b_lr})", "completion_rate_pct", ("aca", b_lr), alt="two-sided", tier="primary", dir_name="two_sided")
+        res_h2 = _run_matched_paired("H2", f"Level Execution (ACA vs {b_lr})", "completion_rate_pct", ("aca", b_lr), alt="two-sided", tier="primary", dir_name="two_sided")
         if res_h2: results.append(res_h2)
 
     # H2_REGIME: Lossy Regime Resilience (p_drop in [0.2, 0.4])
     lossy_df = raw_eval[(raw_eval["p_drop"] >= 0.20) & (raw_eval["p_drop"] <= 0.40)]
     if not lossy_df.empty:
-        lossy_inst = lossy_df.groupby(["graph_family", "seed", "method"])["completion_rate_pct"].mean().reset_index()
-        lossy_piv = lossy_inst.pivot(index=["graph_family", "seed"], columns="method", values="completion_rate_pct")
-        if "aca" in lossy_piv and "cbba_partial_lr" in lossy_piv:
-            xl = lossy_piv["aca"].dropna()
-            yl = lossy_piv["cbba_partial_lr"].dropna()
-            comm_l = xl.index.intersection(yl.index)
-            if len(comm_l) >= 3:
-                xl_c, yl_c = xl.loc[comm_l], yl.loc[comm_l]
-                stat_l, p_val_l = paired_wilcoxon_test(list(xl_c), list(yl_c), alternative="greater")
-                hl_l, hl_l_low, hl_l_high = hodges_lehmann_difference(list(xl_c), list(yl_c))
-                cd_l, cd_l_low, cd_l_high = cliffs_delta(list(xl_c), list(yl_c))
-                dz_l = paired_cohens_dz(list(xl_c), list(yl_c))
-                results.append({
-                    "hypothesis_id": "H2_REGIME",
-                    "title": "Lossy Regime Resilience (p_drop in [0.2, 0.4])",
-                    "metric": "completion_rate_pct",
-                    "comparison": "aca - cbba_partial_lr",
-                    "direction": "greater",
-                    "n_instances": len(comm_l),
-                    "mean_aca": round(float(xl_c.mean()), 2),
-                    "mean_comparator": round(float(yl_c.mean()), 2),
-                    "mean_diff": round(float((xl_c - yl_c).mean()), 2),
-                    "hl_median_diff": round(hl_l, 2),
-                    "hl_ci_95": f"[{round(hl_l_low, 2)}, {round(hl_l_high, 2)}]",
-                    "cliffs_delta": round(cd_l, 3),
-                    "cliffs_ci_95": f"[{round(cd_l_low, 3)}, {round(cd_l_high, 3)}]",
-                    "cohens_dz": round(dz_l, 3),
-                    "raw_p_value": p_val_l,
-                    "test_type": "paired_wilcoxon_greater",
-                    "tier": "primary",
-                })
+        res_h2_reg = _run_matched_paired("H2_REGIME", "Lossy Regime Resilience (p_drop in [0.2, 0.4])", "completion_rate_pct", ("aca", "cbba_partial_lr"), alt="greater", tier="primary", dir_name="greater", raw_subset=lossy_df)
+        if res_h2_reg: results.append(res_h2_reg)
 
     # H2_CTP: ACA vs CTP Replan (Direction: two_sided, post-hoc/exploratory in v4)
-    res_ctp = _run_paired("H2_CTP", "Comparator Evaluation (ACA vs CTP Replan)", "completion_rate_pct", ("aca", "ctp_replan"), alt="two-sided", tier="exploratory", dir_name="two_sided")
+    res_ctp = _run_matched_paired("H2_CTP", "Comparator Evaluation (ACA vs CTP Replan)", "completion_rate_pct", ("aca", "ctp_replan"), alt="two-sided", tier="exploratory", dir_name="two_sided")
     if res_ctp: results.append(res_ctp)
 
     # H2_IMPLICIT: ACA vs Implicit Coordination (Direction: two_sided, post-hoc/exploratory in v4)
-    res_imp = _run_paired("H2_IMPLICIT", "Comparator Evaluation (ACA vs Implicit)", "completion_rate_pct", ("aca", "implicit"), alt="two-sided", tier="exploratory", dir_name="two_sided")
+    res_imp = _run_matched_paired("H2_IMPLICIT", "Comparator Evaluation (ACA vs Implicit)", "completion_rate_pct", ("aca", "implicit"), alt="two-sided", tier="exploratory", dir_name="two_sided")
     if res_imp: results.append(res_imp)
 
-    # H3: Welfare Non-Inferiority vs Best Baseline (Pre-declared rule: max mean net welfare among baselines)
-    if "aca" in pivots["net_welfare"]:
-        baseline_candidates = [c for c in pivots["net_welfare"].columns if c not in ["aca", "aca_no_margin", "aca_no_inference", "aca_oracle_adv", "clairvoyant_greedy"]]
-        if baseline_candidates:
-            mean_welfares = {c: pivots["net_welfare"][c].mean() for c in baseline_candidates}
-            best_baseline = max(mean_welfares, key=mean_welfares.get)
-            x = pivots["net_welfare"]["aca"].dropna()
-            y = pivots["net_welfare"][best_baseline].dropna()
-            common = x.index.intersection(y.index)
-            if len(common) >= 3:
-                x_c, y_c = x.loc[common], y.loc[common]
-                equiv_margin = float(0.05 * abs(y_c.mean()))
-                tost_res = tost_equivalence_test(list(x_c), list(y_c), margin=equiv_margin, alpha=0.05)
+    # H3: Welfare Non-Inferiority vs Best Literature Baseline (strictly literature baselines, excluding all aca_* and oracles)
+    lit_candidates = [
+        c for c in raw_eval["method"].unique()
+        if not c.startswith("aca_") and c not in ["aca", "clairvoyant_greedy", "foresight_opt"]
+    ]
+    best_baseline = None
+    best_baseline_welfare = -float("inf")
+    best_matched = None
+    for cand in lit_candidates:
+        matched = get_matched_instances(raw_eval, "aca", cand, "net_welfare")
+        if matched is not None:
+            x_m, y_m, cells_m, common_m = matched
+            mean_b = float(y_m.mean())
+            if mean_b > best_baseline_welfare:
+                best_baseline_welfare = mean_b
+                best_baseline = cand
+                best_matched = matched
 
-                results.append({
-                    "hypothesis_id": "H3",
-                    "title": f"Welfare Non-Inferiority (ACA vs best baseline: {best_baseline})",
-                    "metric": "net_welfare",
-                    "comparison": f"aca - {best_baseline}",
-                    "direction": "non_inferiority",
-                    "n_instances": len(common),
-                    "mean_aca": round(float(x_c.mean()), 2),
-                    "mean_comparator": round(float(y_c.mean()), 2),
-                    "mean_diff": round(float((x_c - y_c).mean()), 2),
-                    "hl_median_diff": round(tost_res["mean_diff"], 2),
-                    "hl_ci_95": f"[{round(tost_res['ci_90_lower'], 2)}, {round(tost_res['ci_90_upper'], 2)}]",
-                    "cliffs_delta": round(cliffs_delta(list(x_c), list(y_c))[0], 3),
-                    "cliffs_ci_95": "N/A",
-                    "cohens_dz": round(paired_cohens_dz(list(x_c), list(y_c)), 3),
-                    "raw_p_value": tost_res["p_tost"],
-                    "test_type": "tost_non_inferiority",
-                    "tier": "primary",
-                })
+    if best_matched is not None:
+        x_c, y_c, matched_cells, common = best_matched
+        print(f"[H3] Welfare Non-Inferiority vs best literature baseline ({best_baseline}): matched n = {len(common)} instances across {len(matched_cells)} cell configs:")
+        for cell in matched_cells:
+            print(f"    cell: {cell}")
+        equiv_margin = float(0.05 * abs(y_c.mean()))
+        tost_res = tost_equivalence_test(list(x_c), list(y_c), margin=equiv_margin, alpha=0.05)
+        cd, cd_low, cd_high = cliffs_delta(list(x_c), list(y_c), ci=0.95, n_bootstrap=1000)
+        dz = paired_cohens_dz(list(x_c), list(y_c))
+
+        results.append({
+            "hypothesis_id": "H3",
+            "title": f"Welfare Non-Inferiority (ACA vs best literature baseline: {best_baseline})",
+            "metric": "net_welfare",
+            "comparison": f"aca - {best_baseline}",
+            "direction": "non_inferiority",
+            "n_instances": len(common),
+            "mean_aca": round(float(x_c.mean()), 2),
+            "mean_comparator": round(float(y_c.mean()), 2),
+            "mean_diff": round(float((x_c - y_c).mean()), 2),
+            "hl_median_diff": round(tost_res["mean_diff"], 2),
+            "hl_ci_95": f"[{round(tost_res['ci_90_lower'], 2)}, {round(tost_res['ci_90_upper'], 2)}]",
+            "cliffs_delta": round(cd, 3),
+            "cliffs_ci_95": "N/A",
+            "cohens_dz": round(dz, 3),
+            "raw_p_value": tost_res["p_tost"],
+            "test_type": "tost_non_inferiority",
+            "tier": "primary",
+        })
 
     # H4: Pinsker Margin Dual Test:
     # 1. Conflict reduction: safe_claim_conflicts (direction: less)
     # 2. Completion equivalence: completion_rate_pct TOST within 5.0 pp
-    if "aca" in pivots["safe_claim_conflicts"] and "aca_no_margin" in pivots["safe_claim_conflicts"]:
-        xc_conf = pivots["safe_claim_conflicts"]["aca"].dropna()
-        yc_conf = pivots["safe_claim_conflicts"]["aca_no_margin"].dropna()
-        comm_conf = xc_conf.index.intersection(yc_conf.index)
-        stat_c, p_val_c = paired_wilcoxon_test(list(xc_conf.loc[comm_conf]), list(yc_conf.loc[comm_conf]), alternative="less")
-        hl_c, hl_c_low, hl_c_high = hodges_lehmann_difference(list(xc_conf.loc[comm_conf]), list(yc_conf.loc[comm_conf]))
+    matched_h4_conf = get_matched_instances(raw_eval, "aca", "aca_no_margin", "safe_claim_conflicts")
+    matched_h4_comp = get_matched_instances(raw_eval, "aca", "aca_no_margin", "completion_rate_pct")
+    if matched_h4_conf is not None and matched_h4_comp is not None:
+        xc_conf, yc_conf, cells_conf, comm_conf = matched_h4_conf
+        print(f"[H4] Pinsker Margin Conflict Reduction: matched n = {len(comm_conf)} instances across {len(cells_conf)} cell configs:")
+        for cell in cells_conf:
+            print(f"    cell: {cell}")
+        stat_c, p_val_c = paired_wilcoxon_test(list(xc_conf), list(yc_conf), alternative="less")
+        hl_c, hl_c_low, hl_c_high = hodges_lehmann_difference(list(xc_conf), list(yc_conf))
 
-        # Completion TOST
-        xc_comp = pivots["completion_rate_pct"]["aca"].dropna()
-        yc_comp = pivots["completion_rate_pct"]["aca_no_margin"].dropna()
-        comm_comp = xc_comp.index.intersection(yc_comp.index)
-        tost_h4 = tost_equivalence_test(list(xc_comp.loc[comm_comp]), list(yc_comp.loc[comm_comp]), margin=5.0, alpha=0.05)
+        xc_comp, yc_comp, cells_comp, comm_comp = matched_h4_comp
+        tost_h4 = tost_equivalence_test(list(xc_comp), list(yc_comp), margin=5.0, alpha=0.05)
 
         results.append({
             "hypothesis_id": "H4",
@@ -245,14 +273,14 @@ def evaluate_hypotheses_prereg_v3(
             "comparison": "aca - aca_no_margin",
             "direction": "less",
             "n_instances": len(comm_conf),
-            "mean_aca": round(float(xc_conf.loc[comm_conf].mean()), 3),
-            "mean_comparator": round(float(yc_conf.loc[comm_conf].mean()), 3),
-            "mean_diff": round(float((xc_conf.loc[comm_conf] - yc_conf.loc[comm_conf]).mean()), 3),
+            "mean_aca": round(float(xc_conf.mean()), 3),
+            "mean_comparator": round(float(yc_conf.mean()), 3),
+            "mean_diff": round(float((xc_conf - yc_conf).mean()), 3),
             "hl_median_diff": round(hl_c, 3),
             "hl_ci_95": f"[{round(hl_c_low, 3)}, {round(hl_c_high, 3)}]",
-            "cliffs_delta": round(cliffs_delta(list(xc_conf.loc[comm_conf]), list(yc_conf.loc[comm_conf]))[0], 3),
+            "cliffs_delta": round(cliffs_delta(list(xc_conf), list(yc_conf))[0], 3),
             "cliffs_ci_95": "N/A",
-            "cohens_dz": round(paired_cohens_dz(list(xc_conf.loc[comm_conf]), list(yc_conf.loc[comm_conf])), 3),
+            "cohens_dz": round(paired_cohens_dz(list(xc_conf), list(yc_conf)), 3),
             "raw_p_value": p_val_c,
             "test_type": "paired_wilcoxon_less",
             "tier": "exploratory",
@@ -265,28 +293,27 @@ def evaluate_hypotheses_prereg_v3(
             "comparison": "aca - aca_no_margin",
             "direction": "non_inferiority",
             "n_instances": len(comm_comp),
-            "mean_aca": round(float(xc_comp.loc[comm_comp].mean()), 2),
-            "mean_comparator": round(float(yc_comp.loc[comm_comp].mean()), 2),
-            "mean_diff": round(float((xc_comp.loc[comm_comp] - yc_comp.loc[comm_comp]).mean()), 2),
+            "mean_aca": round(float(xc_comp.mean()), 2),
+            "mean_comparator": round(float(yc_comp.mean()), 2),
+            "mean_diff": round(float((xc_comp - yc_comp).mean()), 2),
             "hl_median_diff": round(tost_h4["mean_diff"], 2),
             "hl_ci_95": f"[{round(tost_h4['ci_90_lower'], 2)}, {round(tost_h4['ci_90_upper'], 2)}]",
-            "cliffs_delta": round(cliffs_delta(list(xc_comp.loc[comm_comp]), list(yc_comp.loc[comm_comp]))[0], 3),
+            "cliffs_delta": round(cliffs_delta(list(xc_comp), list(yc_comp))[0], 3),
             "cliffs_ci_95": "N/A",
-            "cohens_dz": round(paired_cohens_dz(list(xc_comp.loc[comm_comp]), list(yc_comp.loc[comm_comp])), 3),
+            "cohens_dz": round(paired_cohens_dz(list(xc_comp), list(yc_comp)), 3),
             "raw_p_value": tost_h4["p_tost"],
             "test_type": "tost_equivalence",
             "tier": "exploratory",
         })
 
     # H5: Bayesian Inference Advantage (Direction: greater)
-    res_h5 = _run_paired("H5", "Bayesian Inference Advantage (ACA vs ACA-NoInference)", "completion_rate_pct", ("aca", "aca_no_inference"), alt="greater", tier="secondary", dir_name="greater")
+    res_h5 = _run_matched_paired("H5", "Bayesian Inference Advantage (ACA vs ACA-NoInference)", "completion_rate_pct", ("aca", "aca_no_inference"), alt="greater", tier="secondary", dir_name="greater")
     if res_h5: results.append(res_h5)
 
     # H6: Communication Efficiency (Direction: less)
-    res_h6 = _run_paired("H6", "Communication Efficiency (ACA vs CBBA)", "total_messages", ("aca", "cbba"), alt="less", tier="secondary", dir_name="less")
+    res_h6 = _run_matched_paired("H6", "Communication Efficiency (ACA vs CBBA)", "total_messages", ("aca", "cbba"), alt="less", tier="secondary", dir_name="less")
     if res_h6: results.append(res_h6)
 
-    # H7: Assumption 1 Empirical Validity (True TV <= eta_eff margin evaluations vs 0.90)
     # H7: Assumption 1 Empirical Validity (True TV <= eta_eff margin evaluations vs 0.90)
     # Unit of Analysis: Independent benchmark instance (graph_family, seed)
     if "tv_evaluations_count" in raw_eval.columns and "tv_adhered_count" in raw_eval.columns:
@@ -311,7 +338,7 @@ def evaluate_hypotheses_prereg_v3(
                 "mean_aca": round(tv_mean, 4),
                 "mean_comparator": 0.90,
                 "mean_diff": round(tv_mean - 0.90, 4),
-                "hl_median_diff": round(float(valid_tv.median()), 4),
+                "hl_median_diff": round(tv_mean, 4),
                 "hl_ci_95": f"[{round(tv_ci_low, 4)}, {round(tv_ci_high, 4)}]",
                 "cliffs_delta": 0.0,
                 "cliffs_ci_95": "N/A",
@@ -321,7 +348,7 @@ def evaluate_hypotheses_prereg_v3(
                 "tier": "exploratory",
             })
 
-    # Separately report Conflict-Free-Run Rate as a distinct descriptive row
+    # Separately report Conflict-Free-Run Rate as a distinct descriptive row (runs, not instances, no p-value)
     if "safe_claim_conflicts" in raw_eval.columns:
         aca_runs = raw_eval[raw_eval["method"] == "aca"]
         total_runs = len(aca_runs)
@@ -343,50 +370,68 @@ def evaluate_hypotheses_prereg_v3(
             "cliffs_delta": 0.0,
             "cliffs_ci_95": "N/A",
             "cohens_dz": 0.0,
-            "raw_p_value": cf_bin["p_value"],
+            "raw_p_value": np.nan,
             "test_type": "descriptive_binomial_clopper_pearson",
             "tier": "descriptive",
         })
 
-    # H8: Out-of-Model Adversary Robustness (theta_4 Cyclic Patrol)
+    # H8: Out-of-Model Adversary Robustness (theta_4 Cyclic Patrol vs best literature baseline)
     t4_df = raw_eval[raw_eval["adversary"] == "theta_4_cyclic_patrol"]
     if not t4_df.empty:
-        t4_inst = t4_df.groupby(["graph_family", "seed", "method"])["completion_rate_pct"].mean().reset_index()
-        t4_piv = t4_inst.pivot(index=["graph_family", "seed"], columns="method", values="completion_rate_pct")
-        if "aca" in t4_piv:
-            other_m = [c for c in t4_piv.columns if c != "aca"]
-            if other_m:
-                best_t4 = max(other_m, key=lambda c: t4_piv[c].mean())
-                x_c = t4_piv["aca"].dropna()
-                y_c = t4_piv[best_t4].dropna()
-                comm_t4 = x_c.index.intersection(y_c.index)
-                if len(comm_t4) >= 3:
-                    stat_t4, p_val_t4 = paired_wilcoxon_test(list(x_c.loc[comm_t4]), list(y_c.loc[comm_t4]), alternative="two-sided")
-                    hl_t4, hl_t4_low, hl_t4_high = hodges_lehmann_difference(list(x_c.loc[comm_t4]), list(y_c.loc[comm_t4]))
+        t4_candidates = [
+            m for m in t4_df["method"].unique()
+            if not m.startswith("aca_") and m not in ["aca", "clairvoyant_greedy", "foresight_opt"]
+        ]
+        if t4_candidates:
+            best_t4 = None
+            best_t4_comp = -float("inf")
+            best_t4_matched = None
+            for cand in t4_candidates:
+                matched = get_matched_instances(t4_df, "aca", cand, "completion_rate_pct")
+                if matched is not None:
+                    x_m, y_m, cells_m, common_m = matched
+                    mean_c = float(y_m.mean())
+                    if mean_c > best_t4_comp:
+                        best_t4_comp = mean_c
+                        best_t4 = cand
+                        best_t4_matched = matched
+            if best_t4_matched is not None:
+                x_c, y_c, matched_cells, common = best_t4_matched
+                print(f"[H8] Robustness on theta_4 vs best literature baseline ({best_t4}): matched n = {len(common)} instances across {len(matched_cells)} cell configs:")
+                for cell in matched_cells:
+                    print(f"    cell: {cell}")
+                stat_t4, p_val_t4 = paired_wilcoxon_test(list(x_c), list(y_c), alternative="two-sided")
+                hl_t4, hl_t4_low, hl_t4_high = hodges_lehmann_difference(list(x_c), list(y_c))
+                cd_t4, cd_t4_low, cd_t4_high = cliffs_delta(list(x_c), list(y_c), ci=0.95, n_bootstrap=1000)
+                dz_t4 = paired_cohens_dz(list(x_c), list(y_c))
 
-                    results.append({
-                        "hypothesis_id": "H8",
-                        "title": f"Robustness on theta_4 (ACA vs best {best_t4})",
-                        "metric": "completion_rate_pct",
-                        "comparison": f"aca - {best_t4}",
-                        "direction": "two_sided",
-                        "n_instances": len(comm_t4),
-                        "mean_aca": round(float(x_c.loc[comm_t4].mean()), 2),
-                        "mean_comparator": round(float(y_c.loc[comm_t4].mean()), 2),
-                        "mean_diff": round(float((x_c.loc[comm_t4] - y_c.loc[comm_t4]).mean()), 2),
-                        "hl_median_diff": round(hl_t4, 2),
-                        "hl_ci_95": f"[{round(hl_t4_low, 2)}, {round(hl_t4_high, 2)}]",
-                        "cliffs_delta": round(cliffs_delta(list(x_c.loc[comm_t4]), list(y_c.loc[comm_t4]))[0], 3),
-                        "cliffs_ci_95": "N/A",
-                        "cohens_dz": round(paired_cohens_dz(list(x_c.loc[comm_t4]), list(y_c.loc[comm_t4])), 3),
-                        "raw_p_value": p_val_t4,
-                        "test_type": "paired_wilcoxon_two_sided",
-                        "tier": "secondary",
-                    })
+                results.append({
+                    "hypothesis_id": "H8",
+                    "title": f"Robustness on theta_4 (ACA vs best {best_t4})",
+                    "metric": "completion_rate_pct",
+                    "comparison": f"aca - {best_t4}",
+                    "direction": "two_sided",
+                    "n_instances": len(common),
+                    "mean_aca": round(float(x_c.mean()), 2),
+                    "mean_comparator": round(float(y_c.mean()), 2),
+                    "mean_diff": round(float((x_c - y_c).mean()), 2),
+                    "hl_median_diff": round(hl_t4, 2),
+                    "hl_ci_95": f"[{round(hl_t4_low, 2)}, {round(hl_t4_high, 2)}]",
+                    "cliffs_delta": round(cd_t4, 3),
+                    "cliffs_ci_95": "N/A",
+                    "cohens_dz": round(dz_t4, 3),
+                    "raw_p_value": p_val_t4,
+                    "test_type": "paired_wilcoxon_two_sided",
+                    "tier": "exploratory",
+                })
 
     # Multiple comparison corrections
     res_df = pd.DataFrame(results)
     if not res_df.empty:
+        res_df["adj_p_value"] = res_df["raw_p_value"].astype(float)
+        res_df["significant"] = False
+        res_df["bonferroni_p_value"] = np.nan
+
         # Primary: Holm + Bonferroni
         prim_mask = res_df["tier"] == "primary"
         if prim_mask.any():
@@ -396,8 +441,8 @@ def evaluate_hypotheses_prereg_v3(
             res_df.loc[prim_mask, "significant"] = [r[1] for r in holm_res]
             res_df.loc[prim_mask, "bonferroni_p_value"] = [min(1.0, p * len(prim_p)) for p in prim_p]
 
-        # Secondary & Exploratory: Benjamini-Hochberg
-        sec_mask = res_df["tier"].isin(["secondary", "exploratory"])
+        # Secondary & Exploratory: Benjamini-Hochberg (excluding descriptive tier)
+        sec_mask = res_df["tier"].isin(["secondary", "exploratory"]) & res_df["raw_p_value"].notna()
         if sec_mask.any():
             sec_p = res_df.loc[sec_mask, "raw_p_value"].tolist()
             bh_res = benjamini_hochberg_correction(sec_p, q=0.05)
@@ -405,6 +450,10 @@ def evaluate_hypotheses_prereg_v3(
             res_df.loc[sec_mask, "significant"] = [r[1] for r in bh_res]
 
     return res_df
+
+
+# Alias for backward compatibility
+evaluate_hypotheses_prereg_v3 = evaluate_hypotheses_prereg_v4
 
 
 def compute_directional_verdict(row: pd.Series) -> str:
@@ -471,24 +520,35 @@ def generate_verdict_markdown(
             raw_df = pd.read_csv(raw_csv)
 
     lines = [
-        "# RESULTS_VERDICT.md: Empirical Verdict for Hypotheses H1-H8 (prereg-v3)",
+        "# RESULTS_VERDICT.md: Empirical Verdict for Hypotheses H1-H8 (prereg-v4)",
         "",
         "**Strict Rule R5**: Every empirical claim in the paper maps directly to a verified hypothesis ID below.",
-        "Generated directly from executed raw runs, independent instance-level tests, and directional decision rules.",
+        "Generated directly from executed raw runs, matched independent instance-level tests, and directional decision rules.",
         "",
-        "| ID | Title | Metric | Mean Diff | HL Median [95% CI] | Cliff's Delta | Raw p | Adj p (Holm/BH) | Bonferroni p | Verdict |",
-        "|---|---|---|---|---|---|---|---|---|---|",
+        "| ID | Title | Metric | N | Mean Diff | HL Median [95% CI] | Cliff's Delta | Raw p | Adj p (Holm/BH) | Bonferroni p | Verdict |",
+        "|---|---|---|---|---|---|---|---|---|---|---|",
     ]
 
     for _, row in res_df.iterrows():
-        p_raw_str = f"{row['raw_p_value']:.4e}" if row['raw_p_value'] < 0.001 else f"{row['raw_p_value']:.4f}"
-        p_adj_str = f"{row.get('adj_p_value', row['raw_p_value']):.4e}" if row.get('adj_p_value', 1.0) < 0.001 else f"{row.get('adj_p_value', 1.0):.4f}"
-        bonf_val = row.get("bonferroni_p_value", None)
-        bonf_str = f"{bonf_val:.4f}" if bonf_val is not None and not pd.isna(bonf_val) else "N/A"
+        is_cf_row = (row["hypothesis_id"] == "H7_CONFLICT_FREE_RATE")
+        if is_cf_row:
+            n_str = f"{int(row['n_instances']):,} runs"
+            p_raw_str = "N/A"
+            p_adj_str = "N/A"
+            bonf_str = "N/A"
+        else:
+            n_str = f"{int(row['n_instances'])} instances"
+            p_raw = row['raw_p_value']
+            p_raw_str = f"{p_raw:.4e}" if (not pd.isna(p_raw) and p_raw < 0.001) else (f"{p_raw:.4f}" if not pd.isna(p_raw) else "N/A")
+            adj_p = row.get('adj_p_value', row['raw_p_value'])
+            p_adj_str = f"{adj_p:.4e}" if (not pd.isna(adj_p) and adj_p < 0.001) else (f"{adj_p:.4f}" if not pd.isna(adj_p) else "N/A")
+            bonf_val = row.get("bonferroni_p_value", None)
+            bonf_str = f"{bonf_val:.4e}" if (bonf_val is not None and not pd.isna(bonf_val) and bonf_val < 0.001) else (f"{bonf_val:.4f}" if (bonf_val is not None and not pd.isna(bonf_val)) else "N/A")
+
         verdict = compute_directional_verdict(row)
 
         lines.append(
-            f"| {row['hypothesis_id']} | {row['title']} | {row['metric']} | {row['mean_diff']} | "
+            f"| {row['hypothesis_id']} | {row['title']} | {row['metric']} | {n_str} | {row['mean_diff']} | "
             f"{row['hl_median_diff']} {row['hl_ci_95']} | {row['cliffs_delta']} | {p_raw_str} | {p_adj_str} | {bonf_str} | {verdict} |"
         )
 
@@ -538,15 +598,30 @@ def generate_verdict_markdown(
         h_id = row['hypothesis_id']
         title = row['title']
         verdict = compute_directional_verdict(row)
-        p_adj_str = f"{row.get('adj_p_value', row['raw_p_value']):.4e}" if row.get('adj_p_value', 1.0) < 0.001 else f"{row.get('adj_p_value', 1.0):.4f}"
+        adj_p = row.get('adj_p_value', row['raw_p_value'])
+        p_adj_str = f"{adj_p:.4e}" if (not pd.isna(adj_p) and adj_p < 0.001) else (f"{adj_p:.4f}" if not pd.isna(adj_p) else "N/A")
         n_inst = row.get("n_instances", "N/A")
 
-        lines.append(
-            f"- **{h_id} ({title})** [N={n_inst} instances; n={min_seeds} per family]: {row['metric']} mean difference = {row['mean_diff']:+.2f} "
-            f"(HL median diff = {row['hl_median_diff']:+.2f}, 95% CI {row['hl_ci_95']}, "
-            f"Cliff's delta = {row['cliffs_delta']:.3f}, adjusted p = {p_adj_str}). "
-            f"Verdict: {verdict}."
-        )
+        if h_id == "H7_CONFLICT_FREE_RATE":
+            lines.append(
+                f"- **{h_id} ({title})** [N={int(n_inst):,} runs]: {row['metric']} = {row['mean_aca']:.4f} "
+                f"(95% CI {row['hl_ci_95']}, Cliff's delta = {row['cliffs_delta']:.3f}). "
+                f"Verdict: {verdict}."
+            )
+        elif h_id == "H7":
+            lines.append(
+                f"- **{h_id} ({title})** [N={n_inst} instances; n={min_seeds} per family]: {row['metric']} mean difference = {row['mean_diff']:+.4f} "
+                f"(Bootstrap Mean = {row['hl_median_diff']:.4f}, 95% CI {row['hl_ci_95']}, "
+                f"Cliff's delta = {row['cliffs_delta']:.3f}, adjusted p = {p_adj_str}). "
+                f"Verdict: {verdict}."
+            )
+        else:
+            lines.append(
+                f"- **{h_id} ({title})** [N={n_inst} instances; n={min_seeds} per family]: {row['metric']} mean difference = {row['mean_diff']:+.2f} "
+                f"(HL median diff = {row['hl_median_diff']:+.2f}, 95% CI {row['hl_ci_95']}, "
+                f"Cliff's delta = {row['cliffs_delta']:.3f}, adjusted p = {p_adj_str}). "
+                f"Verdict: {verdict}."
+            )
 
     # Step 4B Dedicated Methodological Analyses
     lines.extend([
@@ -675,7 +750,7 @@ def generate_verdict_markdown(
     lines.extend([
         f"- **True TV Adherence vs $\\eta_{{\\text{{eff}}}}$**: Under dynamic blockages and packet drops, empirical total variation between true and estimated peer beliefs satisfies $\\mathrm{{TV}}(B_s, \\hat{{B}}_s) \\le \\eta_{{\\text{{eff}}}}$ with an independent instance-level mean of {tv_adhere_rate:.2f}% (Independent Instance Bootstrap 95% CI: {h7_ci_display}).",
         f"- **Hypothesis Test vs Pre-Declared Threshold {p0_threshold:.2f}**: {h7_verdict_str} ($p = {h7_p_display}$, one-sided Wilcoxon signed-rank test across independent instances). Assumption 1 is an idealized theoretical model that is frequently violated empirically, necessitating the conservative consensus fallback.",
-        f"- **Theorem 1 Empirical Verification**: Across all claims where $\\mathrm{{TV}} \\le \\eta_{{\\text{{eff}}}}$, the empirical conflict rate is strictly 0.0% (0 conflicts), demonstrating that whenever Assumption 1 holds, local claims are provably conflict-free.",
+        f"- **Theorem 1 Empirical Verification**: Across all claims where $\\mathrm{{TV}} \\le \\eta_{{\\text{{eff}}}}$, the empirical conflict rate is strictly 0.0% (0 conflicts), demonstrating that whenever Assumption 1 holds, local claims are empirically conflict-free.",
     ])
 
     if raw_df is not None and not raw_df.empty:
@@ -739,8 +814,8 @@ def run_advanced_statistical_suite(inst_df: pd.DataFrame, raw_df: pd.DataFrame):
     # 4. Stratified Real vs Synthetic Evaluation
     print("Evaluating stratified real-map vs synthetic results...")
     hypo_config = yaml.safe_load(open(os.path.join(REPO_ROOT, "experiments", "hypotheses.yaml"), "r", encoding="utf-8"))
-    real_res = evaluate_hypotheses_prereg_v3(inst_df, raw_df, hypo_config, map_subset="real_maps")
-    synth_res = evaluate_hypotheses_prereg_v3(inst_df, raw_df, hypo_config, map_subset="synthetic")
+    real_res = evaluate_hypotheses_prereg_v4(inst_df, raw_df, hypo_config, map_subset="real_maps")
+    synth_res = evaluate_hypotheses_prereg_v4(inst_df, raw_df, hypo_config, map_subset="synthetic")
     real_res.to_csv(os.path.join(STATS_DIR, "hypothesis_results_real_maps.csv"), index=False)
     synth_res.to_csv(os.path.join(STATS_DIR, "hypothesis_results_synthetic.csv"), index=False)
     print("Stratified CSVs saved to results/stats/.")
@@ -769,9 +844,9 @@ def main():
     hypo_config = yaml.safe_load(open(hypo_path, "r", encoding="utf-8")) if os.path.exists(hypo_path) else {}
 
     # Main pooled evaluation
-    res_df = evaluate_hypotheses_prereg_v3(inst_df, raw_df, hypo_config, map_subset=None)
+    res_df = evaluate_hypotheses_prereg_v4(inst_df, raw_df, hypo_config, map_subset=None)
     res_df.to_csv(os.path.join(STATS_DIR, "hypothesis_test_results.csv"), index=False)
-    print("\nPooled Hypothesis Test Results (prereg-v3):")
+    print("\nPooled Hypothesis Test Results (prereg-v4):")
     print(res_df[["hypothesis_id", "title", "mean_diff", "hl_median_diff", "raw_p_value", "adj_p_value", "significant"]].to_string(index=False))
 
     verdict_path = os.path.join(REPO_ROOT, "RESULTS_VERDICT.md")
