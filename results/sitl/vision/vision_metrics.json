@@ -1,6 +1,6 @@
 {
   "disclaimer": "SYNTHETIC-VISION SIMULATION ONLY -- No physical cameras or robots used.",
-  "git_commit": "d59d1a3693ac54d59f2a3f514d5f0c8b562c61b2",
+  "git_commit": "817520cd7f1cb200e95df8f8eeb639383fceaed3",
   "total_frames_analyzed": 320,
   "total_marker_opportunities": 1280,
   "successful_detections": 990,
