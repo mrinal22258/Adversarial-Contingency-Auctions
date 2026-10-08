@@ -1,10 +1,11 @@
 {
   "figure_file": "results/figures\\fig_comm_degradation_diagnostic.pdf",
-  "git_commit": "b0e125420e409d82b1cc39d175a18f1cfe9596dc",
+  "git_commit": "2e4b8b113143497e3ee9de542c9257a1f84840ab",
   "source_files": [
     "results/raw_results.csv"
   ],
   "n_instances": 75,
+  "generator_script": "plot_comm_degradation_diagnostic.py",
   "metadata": {
     "description": "Diagnostic figure demonstrating churn-shielding mechanism under degraded comms"
   }

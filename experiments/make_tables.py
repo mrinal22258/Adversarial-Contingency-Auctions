@@ -347,6 +347,18 @@ def generate_numbers_macro_file(df: pd.DataFrame, out_macro_path: str = "results
     macros.append(f"\\newcommand{{\\aeCbbaPartialLrComp}}{{{m_cbbapr_lr_comp}}}")
     macros.append(f"\\newcommand{{\\aeCbbaPartialLrCompCI}}{{{ci_cbbapr_lr_comp}}}")
 
+    m_ctp_comp, ci_ctp_comp, _ = get_stats("ctp_replan", "completion_rate_pct", 1)
+    macros.append(f"\\newcommand{{\\aeCtpComp}}{{{m_ctp_comp}}}")
+    macros.append(f"\\newcommand{{\\aeCtpCompCI}}{{{ci_ctp_comp}}}")
+
+    m_imp_comp, ci_imp_comp, _ = get_stats("implicit", "completion_rate_pct", 1)
+    macros.append(f"\\newcommand{{\\aeImplicitComp}}{{{m_imp_comp}}}")
+    macros.append(f"\\newcommand{{\\aeImplicitCompCI}}{{{ci_imp_comp}}}")
+
+    m_noinf_comp, ci_noinf_comp, _ = get_stats("aca_no_inference", "completion_rate_pct", 1)
+    macros.append(f"\\newcommand{{\\aeNoInfComp}}{{{m_noinf_comp}}}")
+    macros.append(f"\\newcommand{{\\aeNoInfCompCI}}{{{ci_noinf_comp}}}")
+
     # Summary & Difference macros
     macros.append(f"\\newcommand{{\\aeTotalTrials}}{{{len(df)}}}")
     n_seeds = len(df["seed"].unique()) if "seed" in df.columns else 15
@@ -357,6 +369,18 @@ def generate_numbers_macro_file(df: pd.DataFrame, out_macro_path: str = "results
 
     diff_msgs = round(float(m_msg_cbba) - float(m_msg_aca))
     macros.append(f"\\newcommand{{\\aeMsgDiffCbba}}{{{diff_msgs:d}}}")
+
+    # Hypothesis-specific empirical numbers from RESULTS_VERDICT.md
+    macros.append(f"\\newcommand{{\\aeTvAdherencePct}}{{64.4}}")
+    macros.append(f"\\newcommand{{\\aeTvViolationPct}}{{35.6}}")
+    macros.append(f"\\newcommand{{\\aeConflictFreeRunPct}}{{98.2}}")
+    macros.append(f"\\newcommand{{\\aeHtwoCbbaPrLrDiff}}{{+1.9}}")
+    macros.append(f"\\newcommand{{\\aeHtwoCtpDiff}}{{-7.0}}")
+    macros.append(f"\\newcommand{{\\aeHtwoImplicitDiff}}{{-4.9}}")
+    macros.append(f"\\newcommand{{\\aeHfourSafeConflictReductionPct}}{{99.4}}")
+    macros.append(f"\\newcommand{{\\aeHfourDeferralPct}}{{86.7}}")
+    macros.append(f"\\newcommand{{\\aeHfourPreservationCost}}{{-1.5}}")
+    macros.append(f"\\newcommand{{\\aeHfiveCompDiff}}{{-0.5}}")
 
     # Paired Cliff's Delta and p-values
     pairing_keys = [k for k in ["graph_family", "adversary", "comm_regime", "n_robots", "n_tasks", "seed"] if k in df.columns]

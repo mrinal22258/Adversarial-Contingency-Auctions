@@ -3,7 +3,7 @@
 > **DISCLAIMER**: Everything reported herein is SOFTWARE SIMULATION in PyBullet. No physical robots were used.
 
 - **Total Independent Trials**: 1440 completed, 0 failed
-- **Git Commit**: `d11295d439a4f3cb73ed98889a395377b71067c6`
+- **Git Commit**: `2e4b8b113143497e3ee9de542c9257a1f84840ab`
 
 ## 1. Method Performance Summary in Physical SITL
 

@@ -334,3 +334,42 @@ For every phase and change:
      - Evaluated overhead camera synthetic-vision pipeline with ArUco marker detection, Gaussian pixel noise, and simulated occlusions.
      - Metrics logged to `results/sitl/vision/vision_metrics.json`: Detection Rate $= 85.83\%$, Position RMSE $= 0.169\text{ m}$, Orientation Error $= 87.07^\circ$, Latency $= 1\text{ tick}$.
      - Video generated: `results/sitl/vision/vision_sim.mp4`, strictly labeled "SYNTHETIC-VISION SIMULATION ONLY -- No physical cameras or robots used."
+
+
+---
+
+### Step 5: Theory vs Data (Mathematical Precision & Empirical Alignment)
+- **Status:** Complete (2026-10-07)
+- **Changes made in `paper.tex` and codebase:**
+  1. **Lipschitz Continuity of Expected Recourse Bids (Proposition 2):**
+     - Formally derived the exact Lipschitz constant of the actual expected recourse bid function $c_r(j \mid B)$:
+       $$L_j = \Delta_j = \max_{\theta \in \Theta} c_r(j \mid \theta) - \min_{\theta \in \Theta} c_r(j \mid \theta)$$
+     - Proved via Kantorovich--Rubinstein duality that $|c_r(j \mid B) - c_r(j \mid B')| \le L_j \cdot \mathrm{TV}(B, B')$, providing the mathematically rigorous foundation for the Pinsker claim margin.
+  2. **Demotion of Lemma 1 (Posterior Concentration):**
+     - Demoted Lemma 1 from an asymptotic mathematical lemma to **Observation 1 (Empirical Posterior Concentration vs. Finite-Horizon Realities)**.
+     - Explicitly documented that while asymptotic martingale concentration holds under stationary infinite-horizon assumptions, real finite-horizon multi-robot deployments ($T = 80$) experience non-stationary adversary behaviors, dynamic strategy switching ($\theta_4$), and partial corridor observability.
+  3. **Conditional Formulation of Theorem 1:**
+     - Restructured Theorem 1 statement to be explicitly conditional on Assumption 1 ($\mathrm{TV}(B_s, \hat{B}_s^{(r)}) \le \eta_{\text{eff}}$ for all peers $s \ne r$) and map discrepancy bound $\delta_{\text{map}}$.
+  4. **Transparent Documentation of Assumption 1 Violation Rate (Rule R2):**
+     - Directly reported in Remark 1 the empirical measured violation rate: under range-limited and lossy comms, $\mathrm{TV}(B_s, \hat{B}_s) \le \eta_{\text{eff}}$ is violated in **35.63%** of margin evaluations (empirical adherence is **64.37%**, Clopper--Pearson 95% CI $[64.29\%, 64.44\%]$, strictly rejecting the pre-registered 90% threshold with $p = 1.000$).
+     - Clarified that ACA's conservative two-phase architecture mitigates this by deferring 86.71% of claims to Phase 2 consensus, preserving a **98.22% conflict-free-run rate** (exact binomial $p = 3.28 \times 10^{-23}$) with only 36 safe conflicts fleet-wide.
+  5. **Honest Reporting of H5 Parity (Rule R2):**
+     - Documented statistical parity between Bayesian adversary inference and static uniform prior ($-0.47\text{ pp}$ completion, $p = 0.7861$, Cliff's $\delta = 0.015$). Explained that precomputed contingency recourse trees structurally hedge against bottleneck failures regardless of fine-grained belief probability tuning.
+
+---
+
+### Step 6: Naming & Paper Overhaul
+- **Status:** Complete (2026-10-07)
+- **Changes made:**
+  1. **Title Preservation:**
+     - Maintained canonical title: **"Adversarial Contingency Auctions (ACA)"** across all files (`paper.tex`, `index.html`, `README.md`, `experiments/hypotheses.yaml`, `hw/robotarium/README.md`, citation block).
+  2. **Rewrite of Abstract, Contributions, and Conclusion from `RESULTS_VERDICT.md`:**
+     - Fully aligned narrative with empirical truth: ACA beats standard CBBA (+10.8 pp to +18.2 pp) and SSI (+12.8 pp), achieves parity/borderline vs CBBA-PR+LR (+1.93 pp, Holm $p_{\text{adj}} = 0.0463$, Bonferroni non-significant $p = 0.2082$), and is outperformed in discrete graph simulation by CTP Replan ($-7.00\text{ pp}$) and Implicit Coordination ($-4.89\text{ pp}$) because reactive single-agent replanning avoids consensus deferral.
+     - Emphasized ACA's true operational contributions: 99.4% safe-claim conflict reduction (0.0008 conflicts/safe claim) and zero-message local contingency recourse.
+  3. **Artifact Regeneration:**
+     - Regenerated `results/numbers.tex`, `results/table_main_results.tex`, and `results/table_per_condition.csv` via `experiments/make_tables.py`.
+     - Regenerated publication figures (`fig_raincloud_performance`, `fig_forest_paired_differences`, `fig_effect_size_heatmap`, `fig_comm_degradation_diagnostic`, `fig_critical_difference_diagram`, `fig_ci_width_scaling`) with valid `.provenance.json` sidecars.
+     - Compiled final publication PDF `paper.pdf` (8 pages) cleanly with `pdflatex`.
+  4. **Verification & Testing:**
+     - Passed complete automated test suite (80 / 80 tests passing in `pytest tests/`).
+     - Verified paper linter (`tools/lint_paper.py`): 0 literal number errors, 0 unverified claims, 0 stale figures/PDFs.

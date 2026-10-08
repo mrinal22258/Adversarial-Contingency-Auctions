@@ -1,9 +1,10 @@
 {
   "figure_file": "results/figures\\fig_welfare_messages.pdf",
-  "git_commit": "b0e125420e409d82b1cc39d175a18f1cfe9596dc",
+  "git_commit": "2e4b8b113143497e3ee9de542c9257a1f84840ab",
   "source_files": [
     "results/stats/instance_aggregated_results.csv"
   ],
   "n_instances": 1425,
+  "generator_script": "make_figures.py",
   "metadata": {}
 }
