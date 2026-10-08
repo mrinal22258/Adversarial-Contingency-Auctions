@@ -1,0 +1,10 @@
+{
+  "figure_file": "static/images\\fig_kappa_sweep.pdf",
+  "git_commit": "413d5a4b5aa71a895206e2fb0f77f2e325e76a98",
+  "source_files": [
+    "results/raw_results.csv"
+  ],
+  "n_instances": 300,
+  "generator_script": "make_figures.py",
+  "metadata": {}
+}

@@ -1,7 +1,9 @@
-\begin{table*}[t]
+\begin{table}[htbp]
 \centering
 \caption{Software-in-the-Loop (SITL) Physics Simulation vs.\ Discrete Graph Simulation ($N = 360$ Paired Trials per Method on Real Maps).}
 \label{tab:sitl_results}
+\renewcommand{\arraystretch}{0.88}
+\resizebox{\columnwidth}{!}{%
 \begin{tabular}{lcccccc}
 \toprule
 \textbf{Method} & \textbf{SITL Comp. (\%)} & \textbf{Graph Comp. (\%)} & \textbf{Domain Gap (pp)} & \textbf{vs. ACA ($p$)} & \textbf{Phys. Collisions} & \textbf{Abstract Conf.} \\
@@ -13,5 +15,6 @@ CTP Replan & 68.4 $\pm$ 20.8 & 91.3 $\pm$ 15.7 & -22.9 & 0.8358 & 142.3 & 0.0 \\
 Implicit (No Consensus) \cite{alighanbari2005implicit} & 74.9 $\pm$ 19.5 & 92.1 $\pm$ 13.7 & -17.2 & $< 10^{-4}$ & 199.8 & 168.6 \\
 SSI (+LR) & 42.2 $\pm$ 25.4 & 72.2 $\pm$ 30.1 & -30.1 & $< 10^{-4}$ & 143.6 & 0.0 \\
 \bottomrule
-\end{tabular}
-\end{table*}
+\end{tabular}%
+}
+\end{table}
