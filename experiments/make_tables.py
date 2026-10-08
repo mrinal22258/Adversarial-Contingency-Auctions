@@ -734,6 +734,34 @@ def generate_per_condition_table(
     return per_cond
 
 
+def update_readme_results_section(
+    readme_path: str = "README.md",
+    md_table_path: str = "results/table_main_results.md",
+) -> None:
+    """Embed auto-generated markdown results table directly into README.md."""
+    if not os.path.exists(readme_path) or not os.path.exists(md_table_path):
+        return
+    with open(md_table_path, "r", encoding="utf-8") as f:
+        table_md = f.read().strip()
+    with open(readme_path, "r", encoding="utf-8") as f:
+        content = f.read()
+
+    pattern = r"<!-- RESULTS_TABLE_START -->.*?<!-- RESULTS_TABLE_END -->"
+    replacement = f"<!-- RESULTS_TABLE_START -->\n\n{table_md}\n\n<!-- RESULTS_TABLE_END -->"
+    if "<!-- RESULTS_TABLE_START -->" in content:
+        new_content = re.sub(pattern, replacement, content, flags=re.DOTALL)
+    else:
+        anchor = "All empirical data is generated automatically with zero hand-typed numbers:\n"
+        if anchor in content:
+            new_content = content.replace(anchor, f"{anchor}\n{replacement}\n\n")
+        else:
+            new_content = content + f"\n\n{replacement}\n"
+
+    with open(readme_path, "w", encoding="utf-8") as f:
+        f.write(new_content)
+    print("Updated README.md results section from script.")
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--csv", type=str, default="results/raw_results.csv")
@@ -751,6 +779,7 @@ def main():
     tex_iv = generate_sitl_table()
     generate_numbers_macro_file(df)
     per_cond = generate_per_condition_table(df)
+    update_readme_results_section()
     print(f"Wrote Table II to {args.out}")
     print(f"Wrote Table III to results/table_stratified.tex")
     print(f"Wrote Table IV to results/table_sitl.tex")

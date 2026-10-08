@@ -44,6 +44,31 @@ This repository implements a rigorous, pre-registered empirical benchmark ($N = 
    - **CTP Replan** and the **Clairvoyant Greedy reference** achieve higher completion via continuous single-robot replanning, trading off decentralized bundle coordination.
 
 All empirical data is generated automatically with zero hand-typed numbers:
+
+<!-- RESULTS_TABLE_START -->
+
+### Benchmark Results ($N = 1650$ Paired Trials per Method)
+
+| Method | Completion (%) | Net Welfare | Distinct Conflicts | Total Conflicts | Messages | Tick RT (ms) |
+|:-------|:--------------:|:-----------:|:------------------:|:---------------:|:--------:|:------------:|
+| **ACA (Ours)** | 89.2 ± 0.7 | 1109 ± 42 | 6.8 ± 0.2 | 41.2 ± 1.7 | 333 ± 22 | 44.36 ± 2.29 |
+| ACA (No Margin Ablation) | 90.7 ± 0.9 | 910 ± 21 | 7.8 ± 0.2 † | 47.4 ± 2.6 † | 238 ± 10 | 24.60 ± 1.59 † |
+| ACA (Depth-0 Ablation) | 86.8 ± 1.0 † | 916 ± 19 | 6.6 ± 0.2 † | 42.0 ± 2.3 † | 301 ± 11 † | 23.43 ± 1.22 † |
+| ACA (Depth-2) | 91.2 ± 0.9 | 925 ± 21 | 6.3 ± 0.2 | 38.5 ± 2.4 | 234 ± 10 | 34.79 ± 2.27 |
+| ACA (No Inference) | 90.9 ± 0.9 | 928 ± 21 | 6.3 ± 0.2 | 38.7 ± 2.4 | 235 ± 10 | 31.98 ± 2.00 † |
+| CBBA [Choi '09] | 82.1 ± 1.2 † | 879 ± 19 † | 8.0 ± 0.2 † | 50.4 ± 2.5 † | 312 ± 10 † | 11.89 ± 0.63 † |
+| CBBA (+LR) | 86.9 ± 0.9 † | 865 ± 17 † | 7.8 ± 0.2 † | 53.4 ± 2.5 † | 280 ± 9 † | 13.47 ± 0.60 † |
+| CBBA-PR (Adapted) [Buckman '19] | 90.4 ± 0.9 | 977 ± 17 † | 8.0 ± 0.2 † | 59.7 ± 3.2 † | 295 ± 12 † | 12.57 ± 0.67 † |
+| CBBA-PR (+LR) | 88.1 ± 0.7 † | 1123 ± 43 | 8.1 ± 0.2 † | 53.1 ± 2.1 † | 353 ± 22 † | 14.78 ± 0.53 † |
+| SSI [Koenig '06] | 84.3 ± 1.4 † | 694 ± 27 † | 0.0 ± 0.0 † | 0.0 ± 0.0 † | 252 ± 11 | 12.33 ± 0.69 † |
+| SSI (+LR) | 84.1 ± 1.4 † | 635 ± 29 † | 0.0 ± 0.0 † | 0.0 ± 0.0 † | 214 ± 10 † | 12.79 ± 0.76 † |
+| CTP Replan | 93.7 ± 0.6 † | 930 ± 30 † | 0.0 ± 0.0 † | 0.0 ± 0.0 † | 101 ± 5 † | 13.38 ± 0.46 † |
+| Implicit (No Consensus) [Alighanbari '05] | 94.5 ± 0.7 † | 781 ± 22 † | 10.6 ± 0.2 † | 107.7 ± 4.4 † | 0 ± 0 † | 19.57 ± 1.09 † |
+| Clairvoyant greedy (reference, not a bound) | 97.1 ± 0.5 † | 917 ± 26 † | 0.0 ± 0.0 † | 0.0 ± 0.0 † | 0 ± 0 † | 15.55 ± 0.81 † |
+| Foresight Optimal (CP-SAT bound) | 94.6 ± 2.8 | 263 ± 62 † | 0.0 ± 0.0 † | 0.0 ± 0.0 † | 0 ± 0 † | 34.56 ± 3.83 † |
+
+<!-- RESULTS_TABLE_END -->
+
 - Auto-generated Markdown Table: [`results/table_main_results.md`](file:///c:/Users/krmri/Downloads/Adversarial-Contingency-Auctions-main/Adversarial-Contingency-Auctions-main/results/table_main_results.md)
 - Auto-generated LaTeX Table: [`results/table_main_results.tex`](file:///c:/Users/krmri/Downloads/Adversarial-Contingency-Auctions-main/Adversarial-Contingency-Auctions-main/results/table_main_results.tex)
 - Stratified Results Table: [`results/table_stratified.tex`](file:///c:/Users/krmri/Downloads/Adversarial-Contingency-Auctions-main/Adversarial-Contingency-Auctions-main/results/table_stratified.tex)
