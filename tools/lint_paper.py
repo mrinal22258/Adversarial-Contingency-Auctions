@@ -269,6 +269,7 @@ def check_staleness(tex_content: str, base_dir: str = REPO_ROOT) -> List[str]:
         pass
 
     if current_commit:
+        git_bin = shutil.which("git") or r"C:\Program Files\Git\cmd\git.exe"
         if os.path.exists(runs_jsonl_path) and os.path.getsize(runs_jsonl_path) > 0:
             with open(runs_jsonl_path, "r", encoding="utf-8") as f:
                 first_line = f.readline().strip()
@@ -277,9 +278,23 @@ def check_staleness(tex_content: str, base_dir: str = REPO_ROOT) -> List[str]:
                         rec = json.loads(first_line)
                         res_commit = rec.get("git_commit", rec.get("commit"))
                         if res_commit and res_commit != current_commit:
-                            errors.append(
-                                f"Stale results: runs.jsonl commit ({res_commit}) != repository HEAD ({current_commit})"
-                            )
+                            # Rule R1: exact ancestor check without execution code diff
+                            is_valid_ancestor = False
+                            try:
+                                res = subprocess.run([git_bin, "merge-base", "--is-ancestor", res_commit, current_commit], check=False)
+                                if res.returncode == 0:
+                                    diff_res = subprocess.run(
+                                        [git_bin, "diff", f"{res_commit}..{current_commit}", "--", "acalib/", "experiments/run_sweep.py", "experiments/configs/"],
+                                        capture_output=True, text=True, check=False
+                                    )
+                                    if diff_res.returncode == 0 and not diff_res.stdout.strip():
+                                        is_valid_ancestor = True
+                            except Exception:
+                                pass
+                            if not is_valid_ancestor:
+                                errors.append(
+                                    f"Stale results: runs.jsonl commit ({res_commit}) != repository HEAD ({current_commit}) and is not an unchanged execution ancestor"
+                                )
                     except Exception:
                         pass
         elif os.path.exists(raw_results_path):
@@ -290,9 +305,22 @@ def check_staleness(tex_content: str, base_dir: str = REPO_ROOT) -> List[str]:
                 if commit_col:
                     res_commit = str(df_head[commit_col].iloc[0])
                     if res_commit and res_commit != current_commit:
-                        errors.append(
-                            f"Stale results: raw_results.csv commit ({res_commit}) != repository HEAD ({current_commit})"
-                        )
+                        is_valid_ancestor = False
+                        try:
+                            res = subprocess.run([git_bin, "merge-base", "--is-ancestor", res_commit, current_commit], check=False)
+                            if res.returncode == 0:
+                                diff_res = subprocess.run(
+                                    [git_bin, "diff", f"{res_commit}..{current_commit}", "--", "acalib/", "experiments/run_sweep.py", "experiments/configs/"],
+                                    capture_output=True, text=True, check=False
+                                )
+                                if diff_res.returncode == 0 and not diff_res.stdout.strip():
+                                    is_valid_ancestor = True
+                        except Exception:
+                            pass
+                        if not is_valid_ancestor:
+                            errors.append(
+                                f"Stale results: raw_results.csv commit ({res_commit}) != repository HEAD ({current_commit}) and is not an unchanged execution ancestor"
+                            )
             except Exception:
                 pass
 
