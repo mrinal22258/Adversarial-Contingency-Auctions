@@ -66,9 +66,18 @@ Generated directly from executed raw runs, matched independent instance-level te
 - **Conservative Deferral Rate**: ACA safely claims 36,024 tasks and conservatively defers 232,102 tasks to consensus negotiation (Deferral Rate: 86.56%).
 - **Completion Preservation & Cost**: ACA completes 89.23% of tasks vs 90.68% for ACA-no-margin (-1.45 pp completion difference, reflecting the cost of conservative deferral). Equivalence confirmed via TOST within 5.0 pp margin ($p_{\text{TOST}} = 6.6663e-20$).
 
-#### 3. Assumption 1 Empirical Total Variation Adherence (H7)
-- **True TV Adherence vs $\eta_{\text{eff}}$**: Under dynamic blockages and packet drops, empirical total variation between true and estimated peer beliefs satisfies $\mathrm{TV}(B_s, \hat{B}_s) \le \eta_{\text{eff}}$ with an independent instance-level mean of 56.05% (Independent Instance Bootstrap 95% CI: [0.5318, 0.589]).
+#### 3. Assumption 1 Empirical Total Variation Adherence (H7) & Theorem 1
+- **Three Hierarchical Adherence Levels**:
+  1. **Level 1 (Per-Evaluation Adherence)**: 65.11% (955,104 of 1,466,999 periodic belief evaluations across all timesteps and tasks satisfy $\mathrm{TV}(B_s, \hat{B}_s) \le \eta_{\text{eff}}$). Definition: Fraction of all periodic belief tracking checks where peer estimation error is bounded.
+  2. **Level 2 (Per-Instance Adherence)**: 56.05% (Independent Instance Bootstrap 95% CI: [0.5318, 0.589], $N = 250$). Definition: Mean across independent benchmark instances $(G, \text{seed})$ of the instance-level adherence proportion.
+  3. **Level 3 (Per-Safe-Claim Adherence)**: 21.08% (12,087 of 57,334 safe claims satisfy $\mathrm{TV} \le \eta_{\text{eff}}$ at the moment of local claiming). Definition: Fraction of executed safe claims where peer belief error at the instant of claiming satisfies Assumption 1. **This is the exact condition that Theorem 1 directly conditions on.**
 - **Hypothesis Test vs Pre-Declared Threshold 0.90**: **NOT SUPPORTED (BELOW THRESHOLD)** ($p = 1.0000$, one-sided Wilcoxon signed-rank test across independent instances). Assumption 1 is an idealized theoretical model that is frequently violated empirically, necessitating the conservative consensus fallback.
-- **Theorem 1 Empirical Verification**: Across all claims where $\mathrm{TV} \le \eta_{\text{eff}}$, the empirical conflict rate is strictly 0.0% (0 conflicts), demonstrating that whenever Assumption 1 holds, local claims are empirically conflict-free.
+- **Theorem 1 Empirical Verification**: Across all 12,087 safe claims where $\mathrm{TV} \le \eta_{\text{eff}}$, exactly **0 double-claim conflicts occurred** (0.0000% conflict rate; exact one-sided 95% Clopper-Pearson upper bound: 0.0248%). Because Assumption 1 holds on 21.1% of safe claims, the evidence supporting conflict-freedom is strictly **empirical**.
+- **Theorem 1 Breakdown by Allocation Time Step**:
+  - Early Claims ($t = 0$, Initial Round): $n = 7,383$, 0 conflicts, exact 95% one-sided upper CI: 0.0406% (4.0568e-04).
+  - Late Claims ($t > 0$, Dynamic Recourse): $n = 4,704$, 0 conflicts, exact 95% one-sided upper CI: 0.0637% (6.3665e-04).
+- **Theorem 1 Breakdown by Communication Regime**:
+  - Nominal Regime: $n = 11,097$, 0 conflicts, exact 95% one-sided upper CI: 0.0270% (2.6992e-04).
+  - Perturbation & Degraded Regimes (OFAT Range, Loss, Partition, Poisson): $n = 990$, 0 conflicts, exact 95% one-sided upper CI: 0.3021% (3.0214e-03).
 - **Conflict-Free-Run Rate (Reported Separately as Distinct Descriptive Metric)**: Despite Assumption 1 violations, ACA achieves a **98.24% conflict-free-run rate** (1,621 of 1,650 ACA runs have 0 safe-claim conflicts; Clopper-Pearson 95% CI: [97.61%, 100.00%]), demonstrating that conservative margin inflation prevents coordination failures even under imperfect state estimation.
 
