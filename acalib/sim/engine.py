@@ -33,6 +33,7 @@ from ..alloc.pessimistic import (
 )
 from ..alloc.ctp_replan import CTPReplanAllocator
 from ..alloc.cbba_gossip import CBBABeliefGossipAllocator
+from ..alloc.foresight_opt import ForesightOptAllocator
 from .metrics import SimulationMetrics
 import pandas as pd
 
@@ -283,6 +284,14 @@ class SimulationEngine:
                 robots=self.robots,
                 comm_net=self.comm_net,
                 blockage_process=self.blockage_process,
+            )
+        elif alloc_type in ("foresight_opt", "foresight_optimal"):
+            return ForesightOptAllocator(
+                graph=self.graph,
+                robots=self.robots,
+                comm_net=self.comm_net,
+                blockage_process=self.blockage_process,
+                bundle_limit=kwargs.get("bundle_limit", 4),
             )
         else:
             raise ValueError(f"Unknown allocator type: {alloc_type}")

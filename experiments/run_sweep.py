@@ -306,14 +306,12 @@ def main():
     parser.add_argument("--output", type=str, default="results/raw_results.csv", help="Output summary CSV")
     parser.add_argument("--workers", type=int, default=8, help="Number of parallel worker processes")
     parser.add_argument("--dry-run", action="store_true", help="Print total run count and ETA estimate without running")
-    parser.add_argument("--allow-dirty", action="store_true", help="Allow running sweep with uncommitted working tree")
     args = parser.parse_args()
 
-    # Rule R1: fail if working tree is dirty unless explicitly allowed or dry-run
-    if not args.dry_run and not args.allow_dirty:
+    # Rule R1: strictly fail if working tree is dirty
+    if not args.dry_run:
         if not check_git_clean():
             print("ERROR (Rule R1): Git working tree is dirty. Sweep requires a clean git commit for reproducibility.")
-            print("Commit all changes or use --allow-dirty for local debugging.")
             sys.exit(1)
 
     os.makedirs(os.path.dirname(args.output), exist_ok=True)

@@ -3,12 +3,12 @@
 all: reproduce
 
 reproduce:
-	python experiments/run_sweep.py
+	python experiments/run_extended_sweep.py
 	python experiments/make_tables.py
 	python experiments/make_figures.py
 
 sweep:
-	python experiments/run_sweep.py
+	python experiments/run_extended_sweep.py
 
 tables:
 	python experiments/make_tables.py

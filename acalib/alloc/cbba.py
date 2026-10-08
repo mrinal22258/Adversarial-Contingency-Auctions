@@ -37,6 +37,9 @@ class CBBAAllocator(BaseAllocator):
         self.s: Dict[int, Dict[int, int]] = {
             i: {k: 0 for k in self.fleet_ids} for i in self.fleet_ids
         }
+        self._dist_cache: Dict[Any, Dict[Any, float]] = dict(
+            nx.all_pairs_dijkstra_path_length(graph, weight="weight")
+        )
 
     def _get_marginal_score(
         self,
@@ -62,9 +65,10 @@ class CBBAAllocator(BaseAllocator):
                 if tid not in tasks:
                     continue
                 t_node = tasks[tid].node
-                try:
-                    tot += nx.shortest_path_length(self.graph, loc, t_node, weight="weight")
-                except (nx.NetworkXNoPath, nx.NodeNotFound):
+                d = self._dist_cache.get(loc, {}).get(t_node)
+                if d is not None:
+                    tot += d
+                else:
                     tot += 500.0
                 loc = t_node
             return tot

@@ -11,6 +11,7 @@ import networkx as nx
 from .base import BaseAllocator, Task
 from .cbba import CBBAAllocator
 from ..agents.robot import RobotAgent
+from ..agents.contingency import RecoursePlan
 from ..env.comm import CommunicationNetwork, Message
 from ..env.adversaries import canonical_edge
 
@@ -49,6 +50,7 @@ class ACAAllocator(CBBAAllocator):
         self.total_safe_claims: int = 0
         self.total_deferred_tasks: int = 0
         self.logged_tv_observations: List[Tuple[float, float]] = []
+        self.per_claim_logs: List[Dict[str, Any]] = []
 
     def _get_peer_edge_marginals(self, robot_id: int, peer_id: int) -> Dict[Tuple[Any, Any], float]:
         """Compute edge blockage marginals under peer s's ToM belief as estimated by robot r."""
@@ -91,19 +93,20 @@ class ACAAllocator(CBBAAllocator):
             return float("inf")
         return recourse_plan.expected_cost
 
-    def _compute_lipschitz_L_j(self, task: Task, robot_id: int) -> float:
+    def _compute_lipschitz_L_j(self, task: Task, robot_id: int, recourse_plan: Optional[RecoursePlan] = None) -> float:
         """
         Theorem 3 Rigorous Lipschitz Constant L_j:
         L_j = sum_{e in path_j} Delta_j^path * Delta_pi(e)
         Derived mathematically from telescoping product inequality over expected recourse valuation.
         """
         robot = self.robots[robot_id]
-        recourse_plan = robot.planner.build_recourse_plan(
-            task_id=task.task_id,
-            start_node=robot.current_node,
-            target_node=task.node,
-            edge_marginals=robot.get_edge_marginals(),
-        )
+        if recourse_plan is None:
+            recourse_plan = robot.planner.build_recourse_plan(
+                task_id=task.task_id,
+                start_node=robot.current_node,
+                target_node=task.node,
+                edge_marginals=robot.get_edge_marginals(),
+            )
         if recourse_plan is None or not recourse_plan.risky_edges:
             return 1.0
 
@@ -138,6 +141,8 @@ class ACAAllocator(CBBAAllocator):
         edge_marginals = robot.get_edge_marginals()
         round_safe = 0
         round_deferred = 0
+        eta_eff = robot.tom_tracker.get_effective_eta(current_step)
+        max_tv = 0.0
 
         while len(bundle) < self.bundle_limit:
             best_task_id = None
@@ -150,6 +155,7 @@ class ACAAllocator(CBBAAllocator):
             eta_eff = robot.tom_tracker.get_effective_eta(current_step)
 
             # Log true TV vs eta_eff for Assumption 1 verification (Hypothesis H7)
+            max_tv = 0.0
             for peer_id in self.fleet_ids:
                 if peer_id == robot_id:
                     continue
@@ -158,6 +164,8 @@ class ACAAllocator(CBBAAllocator):
                     p_true = self.robots[peer_id].type_filter.get_belief_vector()
                     true_tv = float(0.5 * np.sum(np.abs(p_true - p_hat)))
                     self.logged_tv_observations.append((true_tv, eta_eff))
+                    if true_tv > max_tv:
+                        max_tv = true_tv
 
             for tid, task in tasks.items():
                 if tid in bundle or task.completed:
@@ -196,7 +204,7 @@ class ACAAllocator(CBBAAllocator):
                         peer_costs.append(c_peer)
 
                     min_peer_cost = min(peer_costs) if peer_costs else float("inf")
-                    L_j = self._compute_lipschitz_L_j(task, robot_id)
+                    L_j = self._compute_lipschitz_L_j(task, robot_id, recourse_plan=recourse_plan)
 
                     if self.fixed_margin is not None:
                         margin = float(self.fixed_margin)
@@ -225,7 +233,7 @@ class ACAAllocator(CBBAAllocator):
                 break
 
         robot.bundle = bundle
-        return round_safe, round_deferred
+        return round_safe, round_deferred, max_tv, eta_eff
 
     def handle_replan_requests(
         self,
@@ -282,14 +290,16 @@ class ACAAllocator(CBBAAllocator):
 
         # Phase 1: Local claim with Pinsker margin (safe claims committed directly)
         phase1_claims: Dict[int, List[int]] = {}
+        robot_tv_eta: Dict[int, Tuple[float, float]] = {}
         round_safe_claims = 0
         round_deferred_tasks = 0
         for rid in self.fleet_ids:
             prev_bundle = set(self.robots[rid].bundle)
-            r_safe, r_def = self._build_bundle_aca(rid, tasks, robot_positions, current_step=current_step)
+            r_safe, r_def, r_tv, r_eta = self._build_bundle_aca(rid, tasks, robot_positions, current_step=current_step)
             round_safe_claims += r_safe
             round_deferred_tasks += r_def
             phase1_claims[rid] = [tid for tid in self.robots[rid].bundle if tid not in prev_bundle]
+            robot_tv_eta[rid] = (r_tv, r_eta)
 
         # Check safe-claim conflicts strictly among Phase 1 simultaneous safe claims
         safe_claim_holders: Dict[int, List[int]] = {}
@@ -297,6 +307,22 @@ class ACAAllocator(CBBAAllocator):
             for tid in phase1_claims[rid]:
                 safe_claim_holders.setdefault(tid, []).append(rid)
         safe_claim_conflicts = sum(1 for holders in safe_claim_holders.values() if len(holders) > 1)
+
+        # Log per-claim evaluations (Theorem 1 verification)
+        for rid in self.fleet_ids:
+            r_tv, r_eta = robot_tv_eta.get(rid, (0.0, 0.0))
+            for tid in phase1_claims[rid]:
+                is_conflicted = len(safe_claim_holders.get(tid, [])) > 1
+                self.per_claim_logs.append({
+                    "step": current_step,
+                    "robot_id": rid,
+                    "task_id": tid,
+                    "tv_at_claim": r_tv,
+                    "eta_eff": r_eta,
+                    "claimed_safe": bool(self.enable_margin and len(self.fleet_ids) > 1),
+                    "tv_le_eta": bool(r_tv <= r_eta),
+                    "conflicted": bool(is_conflicted),
+                })
 
         # Phase 2: Communication consensus for deferred/unassigned tasks
         rounds = 0

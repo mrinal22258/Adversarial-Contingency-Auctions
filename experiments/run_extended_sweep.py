@@ -16,6 +16,7 @@ import os
 import sys
 import time
 import json
+import shutil
 import hashlib
 import argparse
 from typing import Dict, List, Tuple, Any, Optional
@@ -75,7 +76,14 @@ def execute_extended_trial(trial_params: Tuple[Any, ...]) -> Dict[str, Any]:
     )
 
     adv_enum = AdversaryType(adv_str)
-    c_depth = 1 if (method.startswith("aca") or method.endswith("_lr") or method == "implicit") else 0
+    if method == "aca_depth_0":
+        c_depth = 0
+    elif method == "aca_depth_2":
+        c_depth = 2
+    elif method.startswith("aca") or method.endswith("_lr") or method == "implicit":
+        c_depth = 1
+    else:
+        c_depth = 0
 
     engine = SimulationEngine(
         graph=env_components["graph"],
@@ -109,6 +117,10 @@ def execute_extended_trial(trial_params: Tuple[Any, ...]) -> Dict[str, Any]:
     if hasattr(engine.allocator, "logged_tv_observations"):
         tv_obs = engine.allocator.logged_tv_observations
 
+    per_claims = []
+    if hasattr(engine.allocator, "per_claim_logs"):
+        per_claims = engine.allocator.per_claim_logs
+
     tv_evals_count = len(tv_obs)
     tv_adhered_count = sum(1 for tv, eta in tv_obs if tv <= eta)
     safe_claim_conflicts = summary.get("safe_claim_conflicts", 0)
@@ -118,7 +130,8 @@ def execute_extended_trial(trial_params: Tuple[Any, ...]) -> Dict[str, Any]:
 
     record = {
         "commit": git_commit,
-        "disclaimer": "SIMULATION ONLY -- Extended Grid Sweep",
+        "git_commit": git_commit,
+        "disclaimer": "SIMULATION ONLY -- Primary Grid Sweep",
         "graph_family": graph_family,
         "map_class": map_class,
         "n_nodes": n_nodes,
@@ -155,6 +168,7 @@ def execute_extended_trial(trial_params: Tuple[Any, ...]) -> Dict[str, Any]:
         "wall_clock_seconds": round(t_end - t_start, 4),
         "status": "COMPLETED",
         "logged_tv_observations": tv_obs,
+        "logged_per_claim_logs": per_claims,
     }
     return record
 
@@ -163,7 +177,7 @@ def build_ofat_design(
     config: Dict[str, Any],
     n_seeds_per_family: int = 50,
 ) -> List[Tuple[Any, ...]]:
-    """Construct Latin Hypercube + OFAT parameter sweep design."""
+    """Construct Latin Hypercube + OFAT parameter sweep design covering all hypothesis methods."""
     git_commit = get_git_commit()
     max_steps = config.get("max_steps", 80)
 
@@ -175,17 +189,24 @@ def build_ofat_design(
         ("er", 35),
     ]
 
+    # Core methods needed by hypotheses
     core_methods = [
         "aca",
+        "aca_depth_0",
+        "aca_depth_2",
+        "aca_no_inference",
         "aca_no_margin",
+        "cbba",
+        "cbba_lr",
+        "cbba_partial",
+        "cbba_partial_lr",
+        "ssi",
+        "ssi_lr",
         "ctp_replan",
         "implicit",
-        "cbba_lr",
-        "cbba_partial_lr",
-        "ssi_lr",
+        "clairvoyant_greedy",
     ]
 
-    # Base conditions
     base_R = 4
     base_M = 15
     base_comm_range = 30.0
@@ -198,13 +219,12 @@ def build_ofat_design(
     seeds = list(range(1, n_seeds_per_family + 1))
 
     # OFAT Factor 1: Baseline comparison across all 5 families and core adversaries
-    # (Yields n >= 50 independent instances per family)
+    # (Yields n = 50 independent instances per family)
+    # Covers stochastic, reactive, and out-of-model cyclic patrol (H8)
     core_adversaries = [
         "theta_1_stochastic",
         "theta_2_reactive",
-        "theta_3_budgeted_interdiction",
         "theta_4_cyclic_patrol",
-        "theta_6_switching",
     ]
 
     for fam, n_nodes in environments:
@@ -216,7 +236,43 @@ def build_ofat_design(
                         base_R, base_M, seed, max_steps, base_arrival, base_prior_mis, base_partition, git_commit
                     ))
 
-    # OFAT Factor 2: Fleet Size R in {4, 8, 12} (holding M=30, comm=30)
+    # Also evaluate theta_3 (budgeted interdiction) and theta_6 (switching) on key benchmark topologies
+    for fam, n_nodes in [("warehouse_movingai", 38), ("rgg", 35)]:
+        for seed in seeds[:25]:
+            for adv in ["theta_3_budgeted_interdiction", "theta_6_switching"]:
+                for m in ["aca", "ctp_replan", "cbba_partial_lr", "cbba_lr"]:
+                    tasks.append((
+                        fam, n_nodes, adv, m, "nominal", base_comm_range, base_p_drop,
+                        base_R, base_M, seed, max_steps, base_arrival, base_prior_mis, base_partition, git_commit
+                    ))
+
+    # OFAT Factor 2: Exact Foresight Optimal benchmark (R <= 4, M <= 10)
+    for fam, n_nodes in [("warehouse_movingai", 38), ("rgg", 35)]:
+        for seed in seeds[:25]:
+            for m in ["aca", "clairvoyant_greedy", "foresight_opt"]:
+                tasks.append((
+                    fam, n_nodes, "theta_2_reactive", m, "ofat_foresight", base_comm_range, base_p_drop,
+                    base_R, 10, seed, max_steps, base_arrival, base_prior_mis, base_partition, git_commit
+                ))
+
+    # OFAT Factor 3: Kappa sweep {0, .1, .25, .5, 1, 2}
+    kappa_methods = [
+        "aca_kappa_0",
+        "aca_kappa_0.1",
+        "aca_kappa_0.25",
+        "aca_kappa_0.5",
+        "aca_kappa_1",
+        "aca_kappa_2",
+    ]
+    for fam, n_nodes in [("warehouse_movingai", 38), ("rgg", 35)]:
+        for seed in seeds[:25]:
+            for m in kappa_methods:
+                tasks.append((
+                    fam, n_nodes, "theta_2_reactive", m, "ofat_kappa", base_comm_range, base_p_drop,
+                    base_R, base_M, seed, max_steps, base_arrival, base_prior_mis, base_partition, git_commit
+                ))
+
+    # OFAT Factor 4: Fleet Size R in {8, 12} (holding M=30, comm=30)
     for R in [8, 12]:
         for fam, n_nodes in [("warehouse_movingai", 38), ("rgg", 35)]:
             for seed in seeds[:25]:
@@ -226,7 +282,7 @@ def build_ofat_design(
                         R, 30, seed, max_steps, base_arrival, base_prior_mis, base_partition, git_commit
                     ))
 
-    # OFAT Factor 3: Task Count M in {15, 30, 60} (holding R=4, comm=30)
+    # OFAT Factor 5: Task Count M in {30, 60} (holding R=4, comm=30)
     for M in [30, 60]:
         for fam, n_nodes in [("warehouse_movingai", 38), ("rgg", 35)]:
             for seed in seeds[:25]:
@@ -236,7 +292,7 @@ def build_ofat_design(
                         base_R, M, seed, max_steps, base_arrival, base_prior_mis, base_partition, git_commit
                     ))
 
-    # OFAT Factor 4: Comm range in {15, 25, 35, 50, 80}
+    # OFAT Factor 6: Comm range in {15, 25, 35, 50, 80}
     for cr in [15.0, 25.0, 35.0, 50.0, 80.0]:
         for fam, n_nodes in [("road_osmnx", 216), ("er", 35)]:
             for seed in seeds[:25]:
@@ -246,17 +302,17 @@ def build_ofat_design(
                         base_R, base_M, seed, max_steps, base_arrival, base_prior_mis, base_partition, git_commit
                     ))
 
-    # OFAT Factor 5: Packet drop rate p_drop in {0.0, 0.05, 0.20, 0.40}
+    # OFAT Factor 7: Packet drop rate p_drop in {0.0, 0.05, 0.20, 0.40} (H2_REGIME evaluates p_drop in [0.20, 0.40])
     for pd in [0.0, 0.05, 0.20, 0.40]:
         for fam, n_nodes in [("road_osmnx", 216), ("er", 35)]:
             for seed in seeds[:25]:
-                for m in ["aca", "ctp_replan", "cbba_partial_lr"]:
+                for m in ["aca", "ctp_replan", "cbba_partial_lr", "cbba_lr"]:
                     tasks.append((
                         fam, n_nodes, "theta_2_reactive", m, f"ofat_pdrop_{int(pd*100)}", base_comm_range, pd,
                         base_R, base_M, seed, max_steps, base_arrival, base_prior_mis, base_partition, git_commit
                     ))
 
-    # OFAT Factor 6: Environmental Perturbations (Poisson arrivals, network partitions)
+    # OFAT Factor 8: Environmental Perturbations (Poisson arrivals, network partitions)
     for perturb in ["poisson_arrivals", "network_partitions"]:
         arr_mode = "poisson" if perturb == "poisson_arrivals" else "batch"
         part_mode = (perturb == "network_partitions")
@@ -272,13 +328,19 @@ def build_ofat_design(
 
 
 def run_extended_sweep():
-    parser = argparse.ArgumentParser(description="Extended Grid LHS+OFAT Sweep Runner (prereg-v3)")
+    parser = argparse.ArgumentParser(description="Primary Extended Grid LHS+OFAT Sweep Runner (prereg-v4)")
     parser.add_argument("--config", type=str, default="experiments/configs/config_extended_grid.yaml")
     parser.add_argument("--instances-per-family", type=int, default=50, help="Number of instances per family (>= 50)")
-    parser.add_argument("--workers", type=int, default=min(8, os.cpu_count() or 4))
-    parser.add_argument("--output-jsonl", type=str, default="results/runs_extended.jsonl")
-    parser.add_argument("--output-csv", type=str, default="results/raw_results_extended.csv")
+    parser.add_argument("--workers", type=int, default=min(10, os.cpu_count() or 4))
+    parser.add_argument("--output-jsonl", type=str, default="results/runs.jsonl")
+    parser.add_argument("--output-csv", type=str, default="results/raw_results.csv")
     args = parser.parse_args()
+
+    # Rule R1: Refuse to run on dirty git tree
+    if not check_git_clean():
+        print("ERROR: Git working tree is dirty! Step 3 requires a clean git tree for reproducibility (Rule R1).")
+        print("Please commit all code changes before launching the sweep.")
+        sys.exit(1)
 
     config = yaml.safe_load(open(args.config, "r", encoding="utf-8")) if os.path.exists(args.config) else {}
 
@@ -316,7 +378,7 @@ def run_extended_sweep():
     n_remaining = len(tasks_to_run)
 
     print("=" * 70)
-    print("EXTENDED GRID (LHS + OFAT) SWEEP SUMMARY (prereg-v3)")
+    print("PRIMARY GRID (LHS + OFAT) SWEEP SUMMARY (prereg-v4)")
     print("=" * 70)
     print(f"Git Commit SHA       : {get_git_commit()}")
     print(f"Configuration File   : {args.config}")
@@ -346,7 +408,10 @@ def run_extended_sweep():
     else:
         completed_records = []
         tv_jsonl_path = os.path.join(RESULTS_DIR, "tv_evaluations.jsonl")
-        with open(args.output_jsonl, "a", encoding="utf-8") as f_out, open(tv_jsonl_path, "a", encoding="utf-8") as f_tv:
+        claims_jsonl_path = os.path.join(RESULTS_DIR, "per_claim_evaluations.jsonl")
+        with open(args.output_jsonl, "a", encoding="utf-8") as f_out, \
+             open(tv_jsonl_path, "a", encoding="utf-8") as f_tv, \
+             open(claims_jsonl_path, "a", encoding="utf-8") as f_claims:
             with ProcessPoolExecutor(max_workers=args.workers) as executor:
                 future_to_task = {executor.submit(execute_extended_trial, t): t for t in tasks_to_run}
                 count = 0
@@ -355,6 +420,7 @@ def run_extended_sweep():
                     try:
                         rec = future.result()
                         tv_obs = rec.pop("logged_tv_observations", [])
+                        claim_logs = rec.pop("logged_per_claim_logs", [])
                         if tv_obs:
                             tv_rec = {
                                 "commit": rec.get("commit"),
@@ -370,10 +436,24 @@ def run_extended_sweep():
                             }
                             f_tv.write(json.dumps(tv_rec) + "\n")
                             f_tv.flush()
+                        if claim_logs:
+                            claim_rec = {
+                                "commit": rec.get("commit"),
+                                "graph_family": rec.get("graph_family"),
+                                "seed": rec.get("seed"),
+                                "adversary": rec.get("adversary"),
+                                "comm_regime": rec.get("comm_regime"),
+                                "p_drop": rec.get("p_drop"),
+                                "total_claims": len(claim_logs),
+                                "claims": claim_logs,
+                            }
+                            f_claims.write(json.dumps(claim_rec) + "\n")
+                            f_claims.flush()
                     except Exception as e:
                         t = future_to_task[future]
                         rec = {
                             "commit": get_git_commit(),
+                            "git_commit": get_git_commit(),
                             "disclaimer": "SIMULATION ONLY",
                             "graph_family": t[0],
                             "method": t[3],
@@ -397,11 +477,45 @@ def run_extended_sweep():
             if line.strip():
                 records.append(json.loads(line))
     df = pd.DataFrame(records)
+    # Sort deterministically
+    sort_cols = [c for c in ["graph_family", "adversary", "comm_regime", "seed", "method"] if c in df.columns]
+    if sort_cols:
+        df = df.sort_values(sort_cols).reset_index(drop=True)
     df.to_csv(args.output_csv, index=False)
     print(f"Saved {len(df)} records to {args.output_csv}.")
 
-    # Run statistical evaluation on extended results
-    print("\nTriggering pre-registered statistical analysis suite on extended results...")
+    # Maintain raw_results_extended.csv and runs_extended.jsonl as mirrors
+    if args.output_csv == "results/raw_results.csv":
+        shutil.copyfile("results/raw_results.csv", "results/raw_results_extended.csv")
+    if args.output_jsonl == "results/runs.jsonl":
+        shutil.copyfile("results/runs.jsonl", "results/runs_extended.jsonl")
+
+    # Copy config used alongside results
+    config_copy_path = os.path.join(RESULTS_DIR, "config_used.yaml")
+    if os.path.exists(args.config):
+        shutil.copyfile(args.config, config_copy_path)
+
+    # Save run metadata
+    import scipy
+    meta_path = os.path.join(RESULTS_DIR, "run_metadata.json")
+    metadata = {
+        "commit": get_git_commit(),
+        "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "python_version": sys.version,
+        "numpy_version": np.__version__,
+        "pandas_version": pd.__version__,
+        "scipy_version": scipy.__version__,
+        "networkx_version": nx.__version__,
+        "total_trials": len(df),
+        "instances_per_family": args.instances_per_family,
+        "max_steps": config.get("max_steps", 80),
+    }
+    with open(meta_path, "w", encoding="utf-8") as f_meta:
+        json.dump(metadata, f_meta, indent=2)
+    print(f"Saved run metadata to {meta_path}")
+
+    # Run statistical evaluation on results
+    print("\nTriggering pre-registered statistical analysis suite on results...")
     from experiments.run_statistical_tests import (
         load_and_aggregate_instances,
         evaluate_hypotheses_prereg_v3,
@@ -410,15 +524,17 @@ def run_extended_sweep():
     )
     inst_df, raw_df = load_and_aggregate_instances(args.output_csv)
     inst_df.to_csv(os.path.join(STATS_DIR, "instance_aggregated_extended.csv"), index=False)
+    inst_df.to_csv(os.path.join(STATS_DIR, "instance_aggregated.csv"), index=False)
 
     hypo_path = os.path.join(REPO_ROOT, "experiments", "hypotheses.yaml")
     hypo_config = yaml.safe_load(open(hypo_path, "r", encoding="utf-8")) if os.path.exists(hypo_path) else {}
 
     res_df = evaluate_hypotheses_prereg_v3(inst_df, raw_df, hypo_config)
     res_df.to_csv(os.path.join(STATS_DIR, "hypothesis_results_extended.csv"), index=False)
+    res_df.to_csv(os.path.join(STATS_DIR, "hypothesis_results.csv"), index=False)
     generate_verdict_markdown(res_df, output_path=os.path.join(REPO_ROOT, "RESULTS_VERDICT.md"))
     run_advanced_statistical_suite(inst_df, raw_df)
-    print("Extended grid evaluation and statistical verification complete!")
+    print("Primary grid evaluation and statistical verification complete!")
 
 
 if __name__ == "__main__":

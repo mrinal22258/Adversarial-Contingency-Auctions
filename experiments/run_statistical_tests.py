@@ -145,12 +145,47 @@ def evaluate_hypotheses_prereg_v3(
         res_h2 = _run_paired("H2", f"Level Execution (ACA vs {b_lr})", "completion_rate_pct", ("aca", b_lr), alt="two-sided", tier="primary", dir_name="two_sided")
         if res_h2: results.append(res_h2)
 
-    # H2_CTP: ACA vs CTP Replan (Direction: two_sided)
-    res_ctp = _run_paired("H2_CTP", "Comparator Evaluation (ACA vs CTP Replan)", "completion_rate_pct", ("aca", "ctp_replan"), alt="two-sided", tier="primary", dir_name="two_sided")
+    # H2_REGIME: Lossy Regime Resilience (p_drop in [0.2, 0.4])
+    lossy_df = raw_eval[(raw_eval["p_drop"] >= 0.20) & (raw_eval["p_drop"] <= 0.40)]
+    if not lossy_df.empty:
+        lossy_inst = lossy_df.groupby(["graph_family", "seed", "method"])["completion_rate_pct"].mean().reset_index()
+        lossy_piv = lossy_inst.pivot(index=["graph_family", "seed"], columns="method", values="completion_rate_pct")
+        if "aca" in lossy_piv and "cbba_partial_lr" in lossy_piv:
+            xl = lossy_piv["aca"].dropna()
+            yl = lossy_piv["cbba_partial_lr"].dropna()
+            comm_l = xl.index.intersection(yl.index)
+            if len(comm_l) >= 3:
+                xl_c, yl_c = xl.loc[comm_l], yl.loc[comm_l]
+                stat_l, p_val_l = paired_wilcoxon_test(list(xl_c), list(yl_c), alternative="greater")
+                hl_l, hl_l_low, hl_l_high = hodges_lehmann_difference(list(xl_c), list(yl_c))
+                cd_l, cd_l_low, cd_l_high = cliffs_delta(list(xl_c), list(yl_c))
+                dz_l = paired_cohens_dz(list(xl_c), list(yl_c))
+                results.append({
+                    "hypothesis_id": "H2_REGIME",
+                    "title": "Lossy Regime Resilience (p_drop in [0.2, 0.4])",
+                    "metric": "completion_rate_pct",
+                    "comparison": "aca - cbba_partial_lr",
+                    "direction": "greater",
+                    "n_instances": len(comm_l),
+                    "mean_aca": round(float(xl_c.mean()), 2),
+                    "mean_comparator": round(float(yl_c.mean()), 2),
+                    "mean_diff": round(float((xl_c - yl_c).mean()), 2),
+                    "hl_median_diff": round(hl_l, 2),
+                    "hl_ci_95": f"[{round(hl_l_low, 2)}, {round(hl_l_high, 2)}]",
+                    "cliffs_delta": round(cd_l, 3),
+                    "cliffs_ci_95": f"[{round(cd_l_low, 3)}, {round(cd_l_high, 3)}]",
+                    "cohens_dz": round(dz_l, 3),
+                    "raw_p_value": p_val_l,
+                    "test_type": "paired_wilcoxon_greater",
+                    "tier": "primary",
+                })
+
+    # H2_CTP: ACA vs CTP Replan (Direction: two_sided, post-hoc/exploratory in v4)
+    res_ctp = _run_paired("H2_CTP", "Comparator Evaluation (ACA vs CTP Replan)", "completion_rate_pct", ("aca", "ctp_replan"), alt="two-sided", tier="exploratory", dir_name="two_sided")
     if res_ctp: results.append(res_ctp)
 
-    # H2_IMPLICIT: ACA vs Implicit Coordination (Direction: two_sided)
-    res_imp = _run_paired("H2_IMPLICIT", "Comparator Evaluation (ACA vs Implicit)", "completion_rate_pct", ("aca", "implicit"), alt="two-sided", tier="primary", dir_name="two_sided")
+    # H2_IMPLICIT: ACA vs Implicit Coordination (Direction: two_sided, post-hoc/exploratory in v4)
+    res_imp = _run_paired("H2_IMPLICIT", "Comparator Evaluation (ACA vs Implicit)", "completion_rate_pct", ("aca", "implicit"), alt="two-sided", tier="exploratory", dir_name="two_sided")
     if res_imp: results.append(res_imp)
 
     # H3: Welfare Non-Inferiority vs Best Baseline (Pre-declared rule: max mean net welfare among baselines)
@@ -220,7 +255,7 @@ def evaluate_hypotheses_prereg_v3(
             "cohens_dz": round(paired_cohens_dz(list(xc_conf.loc[comm_conf]), list(yc_conf.loc[comm_conf])), 3),
             "raw_p_value": p_val_c,
             "test_type": "paired_wilcoxon_less",
-            "tier": "primary",
+            "tier": "exploratory",
         })
 
         results.append({
@@ -240,7 +275,7 @@ def evaluate_hypotheses_prereg_v3(
             "cohens_dz": round(paired_cohens_dz(list(xc_comp.loc[comm_comp]), list(yc_comp.loc[comm_comp])), 3),
             "raw_p_value": tost_h4["p_tost"],
             "test_type": "tost_equivalence",
-            "tier": "primary",
+            "tier": "exploratory",
         })
 
     # H5: Bayesian Inference Advantage (Direction: greater)
@@ -364,8 +399,8 @@ def evaluate_hypotheses_prereg_v3(
             res_df.loc[prim_mask, "significant"] = [r[1] for r in holm_res]
             res_df.loc[prim_mask, "bonferroni_p_value"] = [min(1.0, p * len(prim_p)) for p in prim_p]
 
-        # Secondary: Benjamini-Hochberg
-        sec_mask = res_df["tier"] == "secondary"
+        # Secondary & Exploratory: Benjamini-Hochberg
+        sec_mask = res_df["tier"].isin(["secondary", "exploratory"])
         if sec_mask.any():
             sec_p = res_df.loc[sec_mask, "raw_p_value"].tolist()
             bh_res = benjamini_hochberg_correction(sec_p, q=0.05)

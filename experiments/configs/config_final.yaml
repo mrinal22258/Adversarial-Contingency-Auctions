@@ -1,24 +1,23 @@
-# Final Benchmarking Sweep Configuration for Pre-Registration (prereg-v1)
-# Implements level execution layer (+LR), literature baselines, and ablation study.
+# Final Benchmarking Sweep Configuration for Pre-Registration (prereg-v4)
+# One primary dataset: extended grid with ALL methods needed by hypotheses over LHS+OFAT with n=50 per family.
 
-benchmark_name: "aca_final_evaluation"
-preregistration_tag: "prereg-v2"
+benchmark_name: "aca_primary_evaluation"
+preregistration_tag: "prereg-v4"
 
 # Experimental Design:
 # Independent instances are indexed by (family, seed).
-# Disjoint seed allocation:
 pilot_seeds_range: [10000, 10009]
-final_seeds: 15 # 5 families x 15 seeds = 75 independent instances per cell (target >= 50)
+final_seeds: 50 # 5 families x 50 seeds = 250 independent instances
 
 max_steps: 80
 
 environments:
-  # Real environments (Required: MovingAI warehouse MAPF benchmark & OSMnx Boston road network)
+  # Real environments (MovingAI warehouse MAPF benchmark & OSMnx Boston road network)
   - family: "warehouse_movingai"
     n_nodes: 38
   - family: "road_osmnx"
     n_nodes: 216
-  # Synthetic families (labeled stress tests)
+  # Synthetic benchmark stress test families
   - family: "rgg"
     n_nodes: 35
   - family: "warehouse"
@@ -35,30 +34,29 @@ adversaries:
 methods:
   # Proposed method and ablations
   - "aca"
-  - "aca_no_margin"
   - "aca_depth_0"
   - "aca_depth_2"
   - "aca_no_inference"
-  - "aca_oracle_adv"
-  # Literature baselines (published: no detours)
+  - "aca_no_margin"
+  # Literature baselines
   - "cbba"
-  - "cbba_partial"
-  - "cc_cbba"
-  - "ssi"
-  # Level-execution baselines (+LR: same detour capability as ACA)
   - "cbba_lr"
+  - "cbba_partial"
   - "cbba_partial_lr"
-  - "cc_cbba_lr"
+  - "ssi"
   - "ssi_lr"
-  # CTP replan-on-discovery & Belief Gossip baselines
   - "ctp_replan"
-  - "cbba_gossip"
-  # References
   - "implicit"
-  - "pessimistic"
   - "clairvoyant_greedy"
+  - "foresight_opt"
+  # Kappa sweep
+  - "aca_kappa_0"
+  - "aca_kappa_0.1"
+  - "aca_kappa_0.25"
+  - "aca_kappa_0.5"
+  - "aca_kappa_1"
+  - "aca_kappa_2"
 
-# Communication regimes
 comm_regimes:
   benign:
     comm_range: 50.0
