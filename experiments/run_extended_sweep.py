@@ -347,26 +347,46 @@ def run_extended_sweep():
     all_tasks = build_ofat_design(config, n_seeds_per_family=args.instances_per_family)
     total_tasks = len(all_tasks)
 
-    # Resume check
+    # Commit-aware resume check: only reuse records matching the current commit
+    current_commit = get_git_commit()
     completed_keys = set()
+    open_mode = "a"
+    tv_jsonl_path = os.path.join(RESULTS_DIR, "tv_evaluations.jsonl")
+    claims_jsonl_path = os.path.join(RESULTS_DIR, "per_claim_evaluations.jsonl")
+
     if os.path.exists(args.output_jsonl):
         try:
             with open(args.output_jsonl, "r", encoding="utf-8") as f:
-                for line in f:
-                    if line.strip():
-                        rec = json.loads(line)
-                        k = (
-                            rec.get("graph_family"),
-                            rec.get("adversary"),
-                            rec.get("comm_regime"),
-                            rec.get("method"),
-                            rec.get("seed"),
-                            rec.get("n_robots"),
-                            rec.get("n_tasks"),
-                        )
-                        completed_keys.add(k)
+                first_line = f.readline().strip()
+                if first_line:
+                    rec0 = json.loads(first_line)
+                    res_c = rec0.get("git_commit", rec0.get("commit"))
+                    if res_c != current_commit:
+                        # Output belongs to previous commit; start fresh for current commit
+                        open_mode = "w"
+                    else:
+                        f.seek(0)
+                        for line in f:
+                            if line.strip():
+                                rec = json.loads(line)
+                                k = (
+                                    rec.get("graph_family"),
+                                    rec.get("adversary"),
+                                    rec.get("comm_regime"),
+                                    rec.get("method"),
+                                    rec.get("seed"),
+                                    rec.get("n_robots"),
+                                    rec.get("n_tasks"),
+                                )
+                                completed_keys.add(k)
         except Exception:
-            pass
+            open_mode = "w"
+
+    if open_mode == "w":
+        # Clear auxiliary evaluation files for fresh run
+        for p in [tv_jsonl_path, claims_jsonl_path]:
+            if os.path.exists(p):
+                open(p, "w", encoding="utf-8").close()
 
     tasks_to_run = []
     for t in all_tasks:
@@ -380,7 +400,7 @@ def run_extended_sweep():
     print("=" * 70)
     print("PRIMARY GRID (LHS + OFAT) SWEEP SUMMARY (prereg-v4)")
     print("=" * 70)
-    print(f"Git Commit SHA       : {get_git_commit()}")
+    print(f"Git Commit SHA       : {current_commit}")
     print(f"Configuration File   : {args.config}")
     print(f"Total Design Runs    : {total_tasks}")
     print(f"Cached / Completed   : {n_cached}")
@@ -407,11 +427,9 @@ def run_extended_sweep():
         print("All requested extended trials are already completed! Skipping simulation.")
     else:
         completed_records = []
-        tv_jsonl_path = os.path.join(RESULTS_DIR, "tv_evaluations.jsonl")
-        claims_jsonl_path = os.path.join(RESULTS_DIR, "per_claim_evaluations.jsonl")
-        with open(args.output_jsonl, "a", encoding="utf-8") as f_out, \
-             open(tv_jsonl_path, "a", encoding="utf-8") as f_tv, \
-             open(claims_jsonl_path, "a", encoding="utf-8") as f_claims:
+        with open(args.output_jsonl, open_mode, encoding="utf-8") as f_out, \
+             open(tv_jsonl_path, open_mode, encoding="utf-8") as f_tv, \
+             open(claims_jsonl_path, open_mode, encoding="utf-8") as f_claims:
             with ProcessPoolExecutor(max_workers=args.workers) as executor:
                 future_to_task = {executor.submit(execute_extended_trial, t): t for t in tasks_to_run}
                 count = 0
