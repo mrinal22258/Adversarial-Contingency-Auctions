@@ -373,3 +373,14 @@ For every phase and change:
   4. **Verification & Testing:**
      - Passed complete automated test suite (80 / 80 tests passing in `pytest tests/`).
      - Verified paper linter (`tools/lint_paper.py`): 0 literal number errors, 0 unverified claims, 0 stale figures/PDFs.
+
+---
+
+### Step 2: Honest Pre-Registration (prereg-v4)
+- **Status:** Complete (2026-10-08)
+- **Git Tag:** `prereg-v4`
+- **Changes made:**
+  1. **Honest Scientific Disclosure:** Explicitly disclosed in `experiments/hypotheses.yaml` and `paper.tex` (Section IV-A) that pre-registration v3 (tag `prereg-v3` on commit `d11295d`) amended hypotheses after preliminary sweep results were observed in `raw_results_extended.csv`.
+  2. **Exploratory / Post-Hoc Categorization:** Formally re-designated hypotheses `H2_CTP`, `H2_IMPLICIT`, `H4` (dual criteria with TOST completion equivalence), and `H7` (Assumption 1 empirical adherence) as post-hoc / exploratory analyses.
+  3. **Unified Primary Confirmatory Family:** Declared a single family-wise error rate control under Holm step-down correction covering `H1` (Recourse Efficacy), `H2` (Level Execution vs +LR), `H3` (Welfare Non-Inferiority), and `H2_REGIME` (Lossy Regime Resilience $p_{\text{drop}} \in [0.2, 0.4]$).
+  4. **Clean Commit:** Committed `prereg-v4` prior to running any new evaluations, strictly ensuring no result files are modified or introduced in this commit.

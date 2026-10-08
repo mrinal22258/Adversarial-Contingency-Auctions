@@ -1,18 +1,20 @@
 # Pre-Registered Statistical Hypotheses for Adversarial Contingency Auctions (ACA)
-# Protocol: Pre-registered dated amendment (tag prereg-v3, 2026-10-07).
+# Protocol: Pre-registered dated amendment (tag prereg-v4, 2026-10-08).
 # Unit of Analysis: Independent instance (graph_family, seed), averaging internal replicates.
-# Disjoint Seeds: Pilot (10000-10009), Final Evaluation (1-50+).
+# Disjoint Seeds: Pilot (10000-10009), Sweep Evaluation (1-50+), SITL (20000-20050+).
 
-preregistration_version: "prereg-v3"
-amendment_date: "2026-10-07"
-amendment_notes: >
-  Step 4 overhaul:
-  1. Fixed verdict labeling rule for directional hypotheses (H6 direction 'less' -> fewer messages reads SUPPORTED).
-  2. Fixed H7 exact binomial test against pre-declared 0.90 threshold with Clopper-Pearson CI.
-  3. Upgraded H4 to dual-criteria test: safe-claim conflict reduction (direction 'less') + TOST equivalence on completion (margin 5.0 pp).
-  4. Added explicit comparator hypotheses: ACA vs CTP Replan (H2_CTP) and ACA vs Implicit (H2_IMPLICIT), stratified across all regimes and real vs synthetic maps.
-  5. Formalized H3 comparator selection rule: best baseline chosen by highest mean metric across benchmark instances.
-  6. Extended evaluation grid: R in {4,8,12}, M in {15,30,60}, comm_range in {15,25,35,50,80}, p_drop in {0,0.05,0.20,0.40}, n >= 50 instances per family.
+preregistration_version: "prereg-v4"
+amendment_date: "2026-10-08"
+disclosure_and_provenance: >
+  SCIENTIFIC DISCLOSURE: Version 3 of the pre-registration (git tag 'prereg-v3') was tagged
+  on commit d11295d, which already contained preliminary sweep results in 'raw_results_extended.csv'.
+  Therefore, hypotheses formulated or adjusted during v3 (specifically H2_CTP, H2_IMPLICIT,
+  H4 dual-criteria, and H7 empirical adherence threshold) were amended AFTER viewing results
+  and are explicitly classified as POST-HOC / EXPLORATORY.
+  
+  Version 4 ('prereg-v4') establishes the final, immutable analysis plan BEFORE running
+  the clean primary confirmatory sweep (Step 3). Prereg-v4 commits no result files and unifies
+  all confirmatory tests under a single pre-declared Holm family.
 
 hypotheses:
   H1:
@@ -22,7 +24,8 @@ hypotheses:
     metric: "completion_rate_pct"
     comparison: "aca vs aca_depth_0"
     direction: "greater"
-    tier: "primary"
+    tier: "confirmatory"
+    multiplicity_family: "primary_holm"
     alpha: 0.05
     test: "paired_wilcoxon"
     effect_size: "hodges_lehmann_difference"
@@ -39,46 +42,30 @@ hypotheses:
     stratification:
       comm_regimes: ["benign", "constrained", "lossy"]
       map_classes: ["real_maps", "synthetic"]
+      graph_families: ["warehouse_movingai", "road_osmnx", "rgg", "grid", "er"]
     direction: "two_sided"
-    tier: "primary"
+    tier: "confirmatory"
+    multiplicity_family: "primary_holm"
     alpha: 0.05
     test: "paired_wilcoxon"
     effect_size: "cliffs_delta"
     correction: "holm"
     minimum_effect: 0.0
 
-  H2_CTP:
-    id: "H2_CTP"
-    title: "Comparator Evaluation: ACA vs CTP Replan"
-    description: "Evaluates task completion and net welfare between ACA and CTP Replan (replan-on-discovery) across all communication regimes and map types (real MovingAI/Boston vs synthetic)."
+  H2_REGIME:
+    id: "H2_REGIME"
+    title: "Lossy Regime Resilience (p_drop in [0.2, 0.4])"
+    description: "In lossy communication regimes with packet drop rate p_drop in [0.2, 0.4], ACA achieves higher task completion percentage than CBBA-PR+LR due to consensus-free local recourse execution."
     metric: "completion_rate_pct"
-    secondary_metric: "net_welfare"
-    comparison: "aca vs ctp_replan"
-    stratification:
-      comm_regimes: ["benign", "constrained", "lossy"]
-      map_classes: ["real_maps", "synthetic"]
-    direction: "two_sided"
-    tier: "primary"
+    comparison: "aca vs cbba_partial_lr"
+    condition: "p_drop in [0.20, 0.40]"
+    direction: "greater"
+    tier: "confirmatory"
+    multiplicity_family: "primary_holm"
     alpha: 0.05
     test: "paired_wilcoxon"
-    effect_size: "cliffs_delta"
-    correction: "holm"
-
-  H2_IMPLICIT:
-    id: "H2_IMPLICIT"
-    title: "Comparator Evaluation: ACA vs Implicit Coordination"
-    description: "Evaluates task completion and net welfare between ACA and Implicit Coordination baseline across all communication regimes and map types."
-    metric: "completion_rate_pct"
-    secondary_metric: "net_welfare"
-    comparison: "aca vs implicit"
-    stratification:
-      comm_regimes: ["benign", "constrained", "lossy"]
-      map_classes: ["real_maps", "synthetic"]
-    direction: "two_sided"
-    tier: "primary"
-    alpha: 0.05
-    test: "paired_wilcoxon"
-    effect_size: "cliffs_delta"
+    effect_size: "hodges_lehmann_difference"
+    confidence_interval: "bootstrap_bca_95"
     correction: "holm"
 
   H3:
@@ -89,25 +76,63 @@ hypotheses:
     comparison: "aca vs best_baseline"
     comparator_selection_rule: "max_mean_net_welfare_among_baselines"
     direction: "non_inferiority"
-    tier: "primary"
+    tier: "confirmatory"
+    multiplicity_family: "primary_holm"
     alpha: 0.05
     test: "two_one_sided_tests_tost"
     equivalence_margin: 0.05 # 5% of baseline welfare
     correction: "holm"
 
+  H2_CTP:
+    id: "H2_CTP"
+    title: "Comparator Evaluation: ACA vs CTP Replan"
+    description: "Evaluates task completion and net welfare between ACA and CTP Replan (replan-on-discovery) across all communication regimes and map types (real MovingAI/Boston vs synthetic). Classified as post-hoc/exploratory."
+    metric: "completion_rate_pct"
+    secondary_metric: "net_welfare"
+    comparison: "aca vs ctp_replan"
+    stratification:
+      comm_regimes: ["benign", "constrained", "lossy"]
+      map_classes: ["real_maps", "synthetic"]
+    direction: "two_sided"
+    tier: "exploratory"
+    status: "post_hoc"
+    alpha: 0.05
+    test: "paired_wilcoxon"
+    effect_size: "cliffs_delta"
+    correction: "benjamini_hochberg"
+
+  H2_IMPLICIT:
+    id: "H2_IMPLICIT"
+    title: "Comparator Evaluation: ACA vs Implicit Coordination"
+    description: "Evaluates task completion, net welfare, and collision/conflict counts between ACA and Implicit Coordination. Classified as post-hoc/exploratory."
+    metric: "completion_rate_pct"
+    secondary_metric: "total_conflicts"
+    comparison: "aca vs implicit"
+    stratification:
+      comm_regimes: ["benign", "constrained", "lossy"]
+      map_classes: ["real_maps", "synthetic"]
+    direction: "two_sided"
+    tier: "exploratory"
+    status: "post_hoc"
+    alpha: 0.05
+    test: "paired_wilcoxon"
+    effect_size: "cliffs_delta"
+    correction: "benjamini_hochberg"
+
   H4:
     id: "H4"
     title: "Pinsker Margin Safe-Claim Conflict Reduction and Completion Preservation"
-    description: "The Pinsker divergence claim margin reduces Phase-1 safe-claim conflicts relative to unconstrained ACA (direction: less), while maintaining completion equivalence within a 5.0 pp margin via TOST."
+    description: "The Pinsker divergence claim margin reduces Phase-1 safe-claim conflicts relative to unconstrained ACA (direction: less), while maintaining completion equivalence within a 5.0 pp margin via TOST, documenting the empirical completion preservation cost (~1.3-1.5 pp). Formulated post-hoc in v3."
     metric: "safe_claim_conflicts"
     secondary_metric: "completion_rate_pct"
     comparison: "aca vs aca_no_margin"
     direction: "less"
-    tier: "primary"
+    tier: "exploratory"
+    status: "post_hoc"
     alpha: 0.05
     test: "paired_wilcoxon_and_tost"
     equivalence_margin: 5.0 # percentage points
-    correction: "holm"
+    correction: "benjamini_hochberg"
 
   H5:
     id: "H5"
@@ -138,15 +163,15 @@ hypotheses:
 
   H7:
     id: "H7"
-    title: "Assumption 1 Empirical Validity"
-    description: "Assumption 1 (TV(B_s, B_hat_s) <= eta_eff) holds in at least 90% of evaluations under packet drop rate p_drop <= 0.10, tested via exact binomial test against pre-declared threshold 0.90 with Clopper-Pearson CI."
+    title: "Assumption 1 Empirical Adherence and Conflict-Free Evaluation"
+    description: "Evaluates empirical adherence to Assumption 1 (TV(B_s, B_hat_s) <= eta_eff). Adherence is computed per run and bootstrapped over independent instances. Conflict-free-run rate is reported as a separate descriptive metric. Post-hoc evaluation."
     metric: "tv_bound_adherence_rate"
-    comparison: "empirical_rate vs 0.90"
-    predeclared_threshold: 0.90
-    direction: "greater_or_equal"
-    tier: "secondary"
+    descriptive_metric: "conflict_free_run_rate"
+    unit_of_computation: "per_run_then_instance_bootstrap"
+    tier: "exploratory"
+    status: "post_hoc"
     alpha: 0.05
-    test: "exact_binomial_ci"
+    test: "bootstrap_instance_ci"
     confidence_level: 0.95
 
   H8:
@@ -162,13 +187,18 @@ hypotheses:
     correction: "benjamini_hochberg"
 
 statistical_protocol:
-  unit_of_analysis: "instance"
+  unit_of_analysis: "instance" # (graph_family, seed)
+  primary_family_correction: "holm"
+  secondary_family_correction: "benjamini_hochberg"
   bootstrap_replicates: 10000
   bootstrap_ci_method: "BCa"
-  multiple_comparison_primary: "holm"
-  multiple_comparison_secondary: "benjamini_hochberg"
   mixed_effects_formula: "metric ~ method * comm_regime + (1 | instance)"
   stratified_reporting:
     - "real_maps"
     - "synthetic"
-    - "pooled"
+    - "comm_regimes"
+    - "graph_families"
+  sitl_protocol:
+    simulation_environment: "PyBullet rigid-body physics (simulation only)"
+    disjoint_seeds: "20000-20050"
+    paired_tests: ["wilcoxon", "hodges_lehmann_ci", "bland_altman", "rank_preservation"]

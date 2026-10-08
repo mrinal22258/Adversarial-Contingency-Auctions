@@ -295,6 +295,9 @@ compared to $\sum_j [1 - \prod_i (1 - \pi_i)] \mathcal{O}(|\mathcal{R}| \cdot \m
 \label{fig:empirical_telemetry}
 \end{figure*}
 
+\subsection{Pre-Registration Protocol and Hypothesis Declaration}
+To enforce scientific transparency and guard against post-hoc selection, experimental hypotheses and statistical analysis procedures were formally pre-registered in \texttt{experiments/hypotheses.yaml}. We explicitly disclose that an intermediate revision (v3, git tag \texttt{prereg-v3}) amended hypothesis definitions after preliminary sweep results were observed in \texttt{raw\_results\_extended.csv}. Accordingly, comparisons against Canadian Traveller Problem replanning ($H_{\text{2\_CTP}}$), implicit coordination ($H_{\text{2\_IMPLICIT}}$), the dual-criteria Pinsker claim margin trade-off ($H_4$), and empirical Assumption~\ref{ass:tom} adherence ($H_7$) are designated as post-hoc or exploratory analyses. The definitive confirmatory protocol (\texttt{prereg-v4}) was committed prior to generating the primary confirmatory dataset, declaring a single family-wise error rate control under Holm step-down correction covering recourse efficacy ($H_1$), level-execution comparisons ($H_2$), welfare non-inferiority ($H_3$), and lossy regime resilience ($H_{\text{2\_REGIME}}$). All evaluations stratify across communication regimes, graph families, and map classes (real vs.\ synthetic).
+
 \subsection{Experimental Setup and Baselines}
 All experiments were conducted across five graph topology families, encompassing two real benchmark maps and three synthetic stress-test graph models:
 
