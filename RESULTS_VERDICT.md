@@ -10,26 +10,26 @@ Generated directly from executed raw runs, independent instance-level tests, and
 | H2 | Level Execution (ACA vs cbba_partial_lr) | completion_rate_pct | 0.28 | 0.0 [-0.83, 0.83] | -0.012 | 0.8650 | 1.0000 | 1.0000 | **PARITY (NO SIGNIFICANT DIFFERENCE)** |
 | H2 | Level Execution (ACA vs ssi_lr) | completion_rate_pct | 6.08 | 4.44 [2.22, 6.67] | 0.094 | 1.7388e-05 | 8.6941e-05 | 0.0001 | **SIGNIFICANT DIFFERENCE (ACA HIGHER)** |
 | H2_REGIME | Lossy Regime Resilience (p_drop in [0.2, 0.4]) | completion_rate_pct | 1.73 | 0.0 [-1.67, 5.0] | 0.089 | 0.2536 | 0.7609 | 1.0000 | **NOT SUPPORTED / PARITY** |
-| H2_CTP | Comparator Evaluation (ACA vs CTP Replan) | completion_rate_pct | -4.83 | -3.61 [-4.72, -2.54] | -0.302 | 2.2048e-15 | 3.9687e-15 | nan | **SIGNIFICANT DIFFERENCE (COMPARATOR HIGHER)** |
-| H2_IMPLICIT | Comparator Evaluation (ACA vs Implicit) | completion_rate_pct | -4.24 | -3.4 [-4.58, -2.64] | -0.34 | 8.6403e-14 | 1.2960e-13 | nan | **SIGNIFICANT DIFFERENCE (COMPARATOR HIGHER)** |
+| H2_CTP | Comparator Evaluation (ACA vs CTP Replan) | completion_rate_pct | -4.83 | -3.61 [-4.72, -2.54] | -0.302 | 2.2048e-15 | 3.9687e-15 | N/A | **SIGNIFICANT DIFFERENCE (COMPARATOR HIGHER)** |
+| H2_IMPLICIT | Comparator Evaluation (ACA vs Implicit) | completion_rate_pct | -4.24 | -3.4 [-4.58, -2.64] | -0.34 | 8.6403e-14 | 1.2960e-13 | N/A | **SIGNIFICANT DIFFERENCE (COMPARATOR HIGHER)** |
 | H3 | Welfare Non-Inferiority (ACA vs best baseline: aca_kappa_0.25) | net_welfare | 556.13 | 556.13 [525.72, 586.54] | 1.0 | 1.0000 | 1.0000 | 1.0000 | **INCONCLUSIVE / NOT EQUIVALENT** |
-| H4 | Pinsker Margin Safe Conflict Reduction | safe_claim_conflicts | -4.843 | -4.833 [-5.0, -4.667] | -0.995 | 5.6985e-43 | 5.1287e-42 | nan | **SUPPORTED (SIGNIFICANT REDUCTION)** |
-| H4_COMPLETION | Pinsker Margin Completion Equivalence (TOST 5pp) | completion_rate_pct | -0.47 | -0.47 [-1.26, 0.33] | -0.079 | 1.0469e-24 | 3.1407e-24 | nan | **NON-INFERIOR / EQUIVALENT (SUPPORTED)** |
-| H5 | Bayesian Inference Advantage (ACA vs ACA-NoInference) | completion_rate_pct | -0.71 | -0.56 [-1.11, 0.0] | -0.085 | 0.9669 | 1.0000 | nan | **NOT SUPPORTED / PARITY** |
-| H6 | Communication Efficiency (ACA vs CBBA) | total_messages | -28.03 | -38.0 [-55.33, -20.0] | -0.173 | 1.6944e-05 | 2.1785e-05 | nan | **SUPPORTED (SIGNIFICANT REDUCTION)** |
-| H7 | Assumption 1 Empirical TV Adherence (TV <= eta_eff vs 0.90) | tv_bound_adherence_rate | -0.2629 | 0.6371 [0.6367, 1.0] | 0.0 | 1.0000 | 1.0000 | nan | **NOT SUPPORTED (BELOW THRESHOLD)** |
-| H7_CONFLICT_FREE_RATE | Conflict-Free-Run Rate (0 Safe-Claim Conflicts) | conflict_free_run_rate | 0.0824 | 0.9824 [0.9761, 1.0] | 0.0 | 1.4314e-41 | 6.4413e-41 | nan | **SUPPORTED (ADHERES TO BOUND)** |
-| H8 | Robustness on theta_4 (ACA vs best clairvoyant_greedy) | completion_rate_pct | -7.07 | -3.33 [-6.67, -3.33] | -0.373 | 6.6058e-20 | 1.4863e-19 | nan | **SIGNIFICANT DIFFERENCE (COMPARATOR HIGHER)** |
+| H4 | Pinsker Margin Safe Conflict Reduction | safe_claim_conflicts | -4.843 | -4.833 [-5.0, -4.667] | -0.995 | 5.6985e-43 | 5.1287e-42 | N/A | **SUPPORTED (SIGNIFICANT REDUCTION)** |
+| H4_COMPLETION | Pinsker Margin Completion Equivalence (TOST 5pp) | completion_rate_pct | -0.47 | -0.47 [-1.26, 0.33] | -0.079 | 1.0469e-24 | 3.1407e-24 | N/A | **NON-INFERIOR / EQUIVALENT (SUPPORTED)** |
+| H5 | Bayesian Inference Advantage (ACA vs ACA-NoInference) | completion_rate_pct | -0.71 | -0.56 [-1.11, 0.0] | -0.085 | 0.9669 | 1.0000 | N/A | **NOT SUPPORTED / PARITY** |
+| H6 | Communication Efficiency (ACA vs CBBA) | total_messages | -28.03 | -38.0 [-55.33, -20.0] | -0.173 | 1.6944e-05 | 2.1785e-05 | N/A | **SUPPORTED (SIGNIFICANT REDUCTION)** |
+| H7 | Assumption 1 Empirical TV Adherence (TV <= eta_eff vs 0.90) | tv_bound_adherence_rate | -0.2629 | 0.6371 [0.6367, 1.0] | 0.0 | 1.0000 | 1.0000 | N/A | **NOT SUPPORTED (BELOW THRESHOLD)** |
+| H7_CONFLICT_FREE_RATE | Conflict-Free-Run Rate (0 Safe-Claim Conflicts) | conflict_free_run_rate | 0.0824 | 0.9824 [0.9761, 1.0] | 0.0 | 1.4314e-41 | 6.4413e-41 | N/A | **SUPPORTED (ADHERES TO BOUND)** |
+| H8 | Robustness on theta_4 (ACA vs best clairvoyant_greedy) | completion_rate_pct | -7.07 | -3.33 [-6.67, -3.33] | -0.373 | 6.6058e-20 | 1.4863e-19 | N/A | **SIGNIFICANT DIFFERENCE (COMPARATOR HIGHER)** |
 
 ## Pre-Registered Sample Sizes (n per family)
 
 - **Independent Seeds per Family**: n = 50 per graph family across all 5 families (Total N = 250 independent benchmark instances).
-  - `warehouse_movingai` (MovingAI automated warehouse MAPF benchmark): n = 50
-  - `road_osmnx` (Downtown Boston road network): n = 50
-  - `rgg` (Random Geometric Graph): n = 50
-  - `warehouse` (Synthetic grid warehouse): n = 50
   - `er` (Erdős–Rényi random network): n = 50
-- **Evaluation Trials**: N = 11,000 executed trials in extended LHS + OFAT grid (>= 250 to 475 trials per method).
+  - `rgg` (Random Geometric Graph): n = 50
+  - `road_osmnx` (Downtown Boston road network): n = 50
+  - `warehouse` (Synthetic grid warehouse): n = 50
+  - `warehouse_movingai` (MovingAI automated warehouse MAPF benchmark): n = 50
+- **Evaluation Trials**: N = 13,800 executed trials in extended LHS + OFAT grid (50 to 1,650 trials per method).
 
 ## Key Scientific Findings & Narrative Decision Rules
 
@@ -52,22 +52,22 @@ Generated directly from executed raw runs, independent instance-level tests, and
 ### Step 4B Dedicated Methodological Analyses
 
 #### 1. Baseline Comparator Evaluation: ACA vs CBBA-PR+LR (H2)
-- **Statistical Significance Status**: BORDERLINE under primary Holm step-down ($p_{\text{adj}} = 0.0463$), but NOT statistically significant under Bonferroni ($p_{\text{bonf}} = 0.208$).
-- **Observed Effect**: Completion difference is +0.19 pp (HL median diff 0.00 [-0.71, +0.67]), showing that when CBBA-PR is equipped with identical local recourse execution (+LR), ACA and CBBA-PR+LR achieve approximate performance parity.
+- **Statistical Significance Status**: NOT STATISTICALLY SIGNIFICANT under primary Holm step-down ($p_{\text{adj}} = 1.0000$), and Bonferroni ($p_{\text{bonf}} = 1.0000$).
+- **Observed Effect**: Completion difference is +0.28 pp (HL median diff +0.00 [-0.83, 0.83]), showing that when CBBA-PR is equipped with identical local recourse execution (+LR), ACA and CBBA-PR+LR achieve approximate performance parity.
 - **Per-Regime Breakdown**:
-  - Nominal/Benign Comm: ACA 89.85% vs CBBA-PR+LR 89.66% (+0.19 pp difference)
-  - Range-Constrained Comm (15m - 25m): ACA 88.42% vs CBBA-PR+LR 88.37% (+0.05 pp difference)
-  - Packet Loss Comm (p_drop 0.20 - 0.40): ACA 87.15% vs CBBA-PR+LR 87.03% (+0.12 pp difference)
+  - Nominal/Benign Comm: ACA 91.00% vs CBBA-PR+LR 90.45% (+0.55 pp difference)
+  - Range-Constrained Comm: ACA 89.13% vs CBBA-PR+LR 87.47% (+1.67 pp difference)
+  - Packet Loss Comm: ACA 83.80% vs CBBA-PR+LR 82.07% (+1.73 pp difference)
 
 #### 2. Pinsker Claim Margin Efficacy & Cost Decomposition (H4)
-- **Safe-Claim Conflict Reduction**: 36 total safe-claim conflicts for ACA vs 6,059 for ACA-no-margin (99.4% reduction; Wilcoxon $p < 10^{-15}$).
-- **Conflicts Per Claimed Task**: 0.0008 conflicts/safe claim (ACA) vs 6,059 safe conflicts (ACA-no-margin).
-- **Total Conflicts (All Types)**: 85,619 (ACA) vs 60,263 (ACA-no-margin). ACA incurs negotiation conflicts during fallback consensus but isolates safe claims.
-- **Conservative Deferral Rate**: ACA safely claims 42,532 tasks and conservatively defers 277,424 tasks to consensus negotiation (Deferral Rate: 86.71%).
-- **Completion Preservation & Cost**: ACA completes 88.97% of tasks vs 90.28% for ACA-no-margin (-1.31 pp completion difference, reflecting the ~1.5 pp cost of conservative deferral). Equivalence confirmed via TOST within 5.0 pp margin ($p_{\text{TOST}} < 10^{-10}$).
+- **Safe-Claim Conflict Reduction**: 32 total safe-claim conflicts for ACA vs 3,646 for ACA-no-margin (99.1% reduction; Wilcoxon $p = 5.6985e-43$).
+- **Conflicts Per Claimed Task**: 0.0009 conflicts/safe claim (ACA) vs 3,646 safe conflicts (ACA-no-margin).
+- **Total Conflicts (All Types)**: 67,999 (ACA) vs 35,581 (ACA-no-margin). ACA incurs negotiation conflicts during fallback consensus but isolates safe claims.
+- **Conservative Deferral Rate**: ACA safely claims 36,024 tasks and conservatively defers 232,102 tasks to consensus negotiation (Deferral Rate: 86.56%).
+- **Completion Preservation & Cost**: ACA completes 89.23% of tasks vs 90.68% for ACA-no-margin (-1.45 pp completion difference, reflecting the cost of conservative deferral). Equivalence confirmed via TOST within 5.0 pp margin ($p_{\text{TOST}} = 1.0469e-24$).
 
 #### 3. Assumption 1 Empirical Total Variation Adherence (H7)
-- **True TV Adherence vs $\eta_{\text{eff}}$**: Under dynamic blockages and packet drops, empirical total variation between true and estimated peer beliefs satisfies $\mathrm{TV}(B_s, \hat{B}_s) \le \eta_{\text{eff}}$ in only 4.8% of margin evaluations.
-- **Exact Binomial Test vs Pre-Declared Threshold 0.90**: REJECTED ($p = 1.000$, Clopper-Pearson 95% CI: [0.043, 0.053]). Assumption 1 is an idealized theoretical model that is frequently violated empirically, necessitating the conservative consensus fallback.
-- **Conflict-Free-Run Rate (Reported Separately)**: Despite Assumption 1 violations, ACA achieves a **98.60% conflict-free-run rate** (1,972 of 2,000 ACA runs have 0 safe-claim conflicts; Clopper-Pearson 95% CI: [97.99%, 99.07%]), demonstrating that conservative margin inflation prevents coordination failures even under imperfect state estimation.
+- **True TV Adherence vs $\eta_{\text{eff}}$**: Under dynamic blockages and packet drops, empirical total variation between true and estimated peer beliefs satisfies $\mathrm{TV}(B_s, \hat{B}_s) \le \eta_{\text{eff}}$ in 63.7% of margin evaluations.
+- **Exact Binomial Test vs Pre-Declared Threshold 0.90**: **NOT SUPPORTED (BELOW THRESHOLD)** ($p = 1.0000$, Clopper-Pearson 95% CI: [0.6367, 1.0]). Assumption 1 is an idealized theoretical model that is frequently violated empirically, necessitating the conservative consensus fallback.
+- **Conflict-Free-Run Rate (Reported Separately)**: Despite Assumption 1 violations, ACA achieves a **98.24% conflict-free-run rate** (1,621 of 1,650 ACA runs have 0 safe-claim conflicts; Clopper-Pearson 95% CI: [97.61%, 100.00%]), demonstrating that conservative margin inflation prevents coordination failures even under imperfect state estimation.
 

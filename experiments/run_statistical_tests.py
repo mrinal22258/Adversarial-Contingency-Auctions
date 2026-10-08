@@ -458,8 +458,17 @@ def compute_directional_verdict(row: pd.Series) -> str:
             return "**PARITY (NO SIGNIFICANT DIFFERENCE)**"
 
 
-def generate_verdict_markdown(res_df: pd.DataFrame, output_path: str = "RESULTS_VERDICT.md", raw_df: Optional[pd.DataFrame] = None) -> None:
-    """Generate definitive RESULTS_VERDICT.md strictly mapping claims to hypothesis IDs."""
+def generate_verdict_markdown(
+    res_df: pd.DataFrame,
+    output_path: str = "RESULTS_VERDICT.md",
+    raw_df: Optional[pd.DataFrame] = None,
+) -> None:
+    """Generate definitive RESULTS_VERDICT.md strictly mapping claims to hypothesis IDs dynamically."""
+    if raw_df is None:
+        raw_csv = os.path.join(REPO_ROOT, "results", "raw_results.csv")
+        if os.path.exists(raw_csv):
+            raw_df = pd.read_csv(raw_csv)
+
     lines = [
         "# RESULTS_VERDICT.md: Empirical Verdict for Hypotheses H1-H8 (prereg-v3)",
         "",
@@ -474,7 +483,7 @@ def generate_verdict_markdown(res_df: pd.DataFrame, output_path: str = "RESULTS_
         p_raw_str = f"{row['raw_p_value']:.4e}" if row['raw_p_value'] < 0.001 else f"{row['raw_p_value']:.4f}"
         p_adj_str = f"{row.get('adj_p_value', row['raw_p_value']):.4e}" if row.get('adj_p_value', 1.0) < 0.001 else f"{row.get('adj_p_value', 1.0):.4f}"
         bonf_val = row.get("bonferroni_p_value", None)
-        bonf_str = f"{bonf_val:.4f}" if bonf_val is not None else "N/A"
+        bonf_str = f"{bonf_val:.4f}" if bonf_val is not None and not pd.isna(bonf_val) else "N/A"
         verdict = compute_directional_verdict(row)
 
         lines.append(
@@ -482,17 +491,43 @@ def generate_verdict_markdown(res_df: pd.DataFrame, output_path: str = "RESULTS_
             f"{row['hl_median_diff']} {row['hl_ci_95']} | {row['cliffs_delta']} | {p_raw_str} | {p_adj_str} | {bonf_str} | {verdict} |"
         )
 
+    family_descriptions = {
+        "warehouse_movingai": "MovingAI automated warehouse MAPF benchmark",
+        "road_osmnx": "Downtown Boston road network",
+        "rgg": "Random Geometric Graph",
+        "warehouse": "Synthetic grid warehouse",
+        "er": "Erdős–Rényi random network",
+    }
+    if raw_df is not None and not raw_df.empty:
+        family_counts = raw_df.groupby("graph_family")["seed"].nunique()
+        n_families = len(family_counts)
+        total_instances = int(family_counts.sum())
+        min_seeds = int(family_counts.min()) if not family_counts.empty else 0
+        total_trials = len(raw_df)
+        trials_per_method = raw_df.groupby("method").size()
+        min_trials = int(trials_per_method.min()) if not trials_per_method.empty else 0
+        max_trials = int(trials_per_method.max()) if not trials_per_method.empty else 0
+    else:
+        family_counts = pd.Series(dtype=int)
+        n_families = 0
+        total_instances = 0
+        min_seeds = 0
+        total_trials = 0
+        min_trials = 0
+        max_trials = 0
+
     lines.extend([
         "",
         "## Pre-Registered Sample Sizes (n per family)",
         "",
-        "- **Independent Seeds per Family**: n = 50 per graph family across all 5 families (Total N = 250 independent benchmark instances).",
-        "  - `warehouse_movingai` (MovingAI automated warehouse MAPF benchmark): n = 50",
-        "  - `road_osmnx` (Downtown Boston road network): n = 50",
-        "  - `rgg` (Random Geometric Graph): n = 50",
-        "  - `warehouse` (Synthetic grid warehouse): n = 50",
-        "  - `er` (Erdős–Rényi random network): n = 50",
-        "- **Evaluation Trials**: N = 11,000 executed trials in extended LHS + OFAT grid (>= 250 to 475 trials per method).",
+        f"- **Independent Seeds per Family**: n = {min_seeds} per graph family across all {n_families} families (Total N = {total_instances} independent benchmark instances).",
+    ])
+    for fam, count in family_counts.items():
+        desc = family_descriptions.get(str(fam), str(fam))
+        lines.append(f"  - `{fam}` ({desc}): n = {count}")
+
+    lines.extend([
+        f"- **Evaluation Trials**: N = {total_trials:,} executed trials in extended LHS + OFAT grid ({min_trials:,} to {max_trials:,} trials per method).",
         "",
         "## Key Scientific Findings & Narrative Decision Rules",
         "",
@@ -506,37 +541,154 @@ def generate_verdict_markdown(res_df: pd.DataFrame, output_path: str = "RESULTS_
         n_inst = row.get("n_instances", "N/A")
 
         lines.append(
-            f"- **{h_id} ({title})** [N={n_inst} instances; n=50 per family]: {row['metric']} mean difference = {row['mean_diff']:+.2f} "
+            f"- **{h_id} ({title})** [N={n_inst} instances; n={min_seeds} per family]: {row['metric']} mean difference = {row['mean_diff']:+.2f} "
             f"(HL median diff = {row['hl_median_diff']:+.2f}, 95% CI {row['hl_ci_95']}, "
             f"Cliff's delta = {row['cliffs_delta']:.3f}, adjusted p = {p_adj_str}). "
             f"Verdict: {verdict}."
         )
 
+    # Step 4B Dedicated Methodological Analyses
     lines.extend([
         "",
         "### Step 4B Dedicated Methodological Analyses",
         "",
         "#### 1. Baseline Comparator Evaluation: ACA vs CBBA-PR+LR (H2)",
-        "- **Statistical Significance Status**: BORDERLINE under primary Holm step-down ($p_{\\text{adj}} = 0.0463$), but NOT statistically significant under Bonferroni ($p_{\\text{bonf}} = 0.208$).",
-        "- **Observed Effect**: Completion difference is +0.19 pp (HL median diff 0.00 [-0.71, +0.67]), showing that when CBBA-PR is equipped with identical local recourse execution (+LR), ACA and CBBA-PR+LR achieve approximate performance parity.",
+    ])
+
+    h2_comp_row = res_df[(res_df["hypothesis_id"] == "H2") & (res_df["title"].str.contains("cbba_partial_lr", case=False))]
+    if not h2_comp_row.empty:
+        r_h2 = h2_comp_row.iloc[0]
+        p_adj_h2 = r_h2.get("adj_p_value", r_h2["raw_p_value"])
+        p_bonf_h2 = r_h2.get("bonferroni_p_value", float("nan"))
+        p_adj_h2_str = f"{p_adj_h2:.4e}" if p_adj_h2 < 0.001 else f"{p_adj_h2:.4f}"
+        p_bonf_h2_str = f"{p_bonf_h2:.4e}" if not pd.isna(p_bonf_h2) and p_bonf_h2 < 0.001 else (f"{p_bonf_h2:.4f}" if not pd.isna(p_bonf_h2) else "N/A")
+        sig_adj_h2 = p_adj_h2 < 0.05
+        sig_bonf_h2 = not pd.isna(p_bonf_h2) and p_bonf_h2 < 0.05
+        if sig_bonf_h2:
+            status_h2 = "STATISTICALLY SIGNIFICANT"
+        elif sig_adj_h2:
+            status_h2 = "BORDERLINE / SIGNIFICANT UNDER HOLM ONLY"
+        else:
+            status_h2 = "NOT STATISTICALLY SIGNIFICANT"
+        h2_diff = r_h2["mean_diff"]
+        h2_hl = r_h2["hl_median_diff"]
+        h2_ci = r_h2["hl_ci_95"]
+    else:
+        p_adj_h2_str, p_bonf_h2_str = "N/A", "N/A"
+        status_h2 = "N/A"
+        h2_diff, h2_hl, h2_ci = 0.0, 0.0, "[N/A]"
+
+    lines.extend([
+        f"- **Statistical Significance Status**: {status_h2} under primary Holm step-down ($p_{{\\text{{adj}}}} = {p_adj_h2_str}$), and Bonferroni ($p_{{\\text{{bonf}}}} = {p_bonf_h2_str}$).",
+        f"- **Observed Effect**: Completion difference is {h2_diff:+.2f} pp (HL median diff {h2_hl:+.2f} {h2_ci}), showing that when CBBA-PR is equipped with identical local recourse execution (+LR), ACA and CBBA-PR+LR achieve approximate performance parity.",
         "- **Per-Regime Breakdown**:",
-        "  - Nominal/Benign Comm: ACA 89.85% vs CBBA-PR+LR 89.66% (+0.19 pp difference)",
-        "  - Range-Constrained Comm (15m - 25m): ACA 88.42% vs CBBA-PR+LR 88.37% (+0.05 pp difference)",
-        "  - Packet Loss Comm (p_drop 0.20 - 0.40): ACA 87.15% vs CBBA-PR+LR 87.03% (+0.12 pp difference)",
+    ])
+
+    if raw_df is not None and not raw_df.empty:
+        nom_sub = raw_df[raw_df["comm_regime"] == "nominal"]
+        aca_nom_mean = nom_sub[nom_sub["method"] == "aca"]["completion_rate_pct"].mean() if not nom_sub.empty else 0.0
+        cbba_nom_mean = nom_sub[nom_sub["method"] == "cbba_partial_lr"]["completion_rate_pct"].mean() if not nom_sub.empty else 0.0
+        diff_nom = aca_nom_mean - cbba_nom_mean
+        lines.append(f"  - Nominal/Benign Comm: ACA {aca_nom_mean:.2f}% vs CBBA-PR+LR {cbba_nom_mean:.2f}% ({diff_nom:+.2f} pp difference)")
+
+        constrained_range_thresh = 25.0
+        range_sub = raw_df[raw_df["comm_range"] <= constrained_range_thresh]
+        aca_rng_mean = range_sub[range_sub["method"] == "aca"]["completion_rate_pct"].mean() if not range_sub.empty else 0.0
+        cbba_rng_mean = range_sub[range_sub["method"] == "cbba_partial_lr"]["completion_rate_pct"].mean() if not range_sub.empty else 0.0
+        diff_rng = aca_rng_mean - cbba_rng_mean
+        lines.append(f"  - Range-Constrained Comm: ACA {aca_rng_mean:.2f}% vs CBBA-PR+LR {cbba_rng_mean:.2f}% ({diff_rng:+.2f} pp difference)")
+
+        lossy_drop_thresh = 0.20
+        loss_sub = raw_df[raw_df["p_drop"] >= lossy_drop_thresh]
+        aca_loss_mean = loss_sub[loss_sub["method"] == "aca"]["completion_rate_pct"].mean() if not loss_sub.empty else 0.0
+        cbba_loss_mean = loss_sub[loss_sub["method"] == "cbba_partial_lr"]["completion_rate_pct"].mean() if not loss_sub.empty else 0.0
+        diff_loss = aca_loss_mean - cbba_loss_mean
+        lines.append(f"  - Packet Loss Comm: ACA {aca_loss_mean:.2f}% vs CBBA-PR+LR {cbba_loss_mean:.2f}% ({diff_loss:+.2f} pp difference)")
+    else:
+        lines.append("  - Per-regime data not available.")
+
+    lines.extend([
         "",
         "#### 2. Pinsker Claim Margin Efficacy & Cost Decomposition (H4)",
-        "- **Safe-Claim Conflict Reduction**: 36 total safe-claim conflicts for ACA vs 6,059 for ACA-no-margin (99.4% reduction; Wilcoxon $p < 10^{-15}$).",
-        "- **Conflicts Per Claimed Task**: 0.0008 conflicts/safe claim (ACA) vs 6,059 safe conflicts (ACA-no-margin).",
-        "- **Total Conflicts (All Types)**: 85,619 (ACA) vs 60,263 (ACA-no-margin). ACA incurs negotiation conflicts during fallback consensus but isolates safe claims.",
-        "- **Conservative Deferral Rate**: ACA safely claims 42,532 tasks and conservatively defers 277,424 tasks to consensus negotiation (Deferral Rate: 86.71%).",
-        "- **Completion Preservation & Cost**: ACA completes 88.97% of tasks vs 90.28% for ACA-no-margin (-1.31 pp completion difference, reflecting the ~1.5 pp cost of conservative deferral). Equivalence confirmed via TOST within 5.0 pp margin ($p_{\\text{TOST}} < 10^{-10}$).",
+    ])
+
+    if raw_df is not None and not raw_df.empty:
+        aca_data = raw_df[raw_df["method"] == "aca"]
+        nomargin_data = raw_df[raw_df["method"] == "aca_no_margin"]
+
+        safe_conf_aca = int(aca_data["safe_claim_conflicts"].sum())
+        safe_conf_nomargin = int(nomargin_data["safe_claim_conflicts"].sum())
+        pct_reduc = ((safe_conf_nomargin - safe_conf_aca) / max(1, safe_conf_nomargin)) * 100.0
+
+        safe_claims_aca = int(aca_data["safe_claims"].sum())
+        conf_per_safe = safe_conf_aca / max(1, safe_claims_aca)
+
+        tot_conf_aca = int(aca_data["total_conflicts"].sum())
+        tot_conf_nomargin = int(nomargin_data["total_conflicts"].sum())
+
+        def_claims_aca = int(aca_data["deferred_claims"].sum())
+        tot_claims_aca = int(aca_data["total_claims"].sum())
+        deferral_rate = (def_claims_aca / max(1, tot_claims_aca)) * 100.0
+
+        comp_aca = aca_data["completion_rate_pct"].mean()
+        comp_nomargin = nomargin_data["completion_rate_pct"].mean()
+        comp_cost = comp_aca - comp_nomargin
+
+        h4_stat_row = res_df[res_df["hypothesis_id"] == "H4"]
+        h4_p_val = h4_stat_row.iloc[0]["raw_p_value"] if not h4_stat_row.empty else 1.0
+        h4_p_display = f"{h4_p_val:.4e}" if h4_p_val < 0.001 else f"{h4_p_val:.4f}"
+
+        h4_tost_row = res_df[res_df["hypothesis_id"] == "H4_COMPLETION"]
+        tost_p_val = h4_tost_row.iloc[0]["raw_p_value"] if not h4_tost_row.empty else 1.0
+        tost_p_display = f"{tost_p_val:.4e}" if tost_p_val < 0.001 else f"{tost_p_val:.4f}"
+        tost_margin = 5.0
+
+        lines.extend([
+            f"- **Safe-Claim Conflict Reduction**: {safe_conf_aca:,} total safe-claim conflicts for ACA vs {safe_conf_nomargin:,} for ACA-no-margin ({pct_reduc:.1f}% reduction; Wilcoxon $p = {h4_p_display}$).",
+            f"- **Conflicts Per Claimed Task**: {conf_per_safe:.4f} conflicts/safe claim (ACA) vs {safe_conf_nomargin:,} safe conflicts (ACA-no-margin).",
+            f"- **Total Conflicts (All Types)**: {tot_conf_aca:,} (ACA) vs {tot_conf_nomargin:,} (ACA-no-margin). ACA incurs negotiation conflicts during fallback consensus but isolates safe claims.",
+            f"- **Conservative Deferral Rate**: ACA safely claims {safe_claims_aca:,} tasks and conservatively defers {def_claims_aca:,} tasks to consensus negotiation (Deferral Rate: {deferral_rate:.2f}%).",
+            f"- **Completion Preservation & Cost**: ACA completes {comp_aca:.2f}% of tasks vs {comp_nomargin:.2f}% for ACA-no-margin ({comp_cost:+.2f} pp completion difference, reflecting the cost of conservative deferral). Equivalence confirmed via TOST within {tost_margin:.1f} pp margin ($p_{{\\text{{TOST}}}} = {tost_p_display}$).",
+        ])
+    else:
+        lines.append("- Pinsker margin data not available.")
+
+    lines.extend([
         "",
         "#### 3. Assumption 1 Empirical Total Variation Adherence (H7)",
-        "- **True TV Adherence vs $\\eta_{\\text{eff}}$**: Under dynamic blockages and packet drops, empirical total variation between true and estimated peer beliefs satisfies $\\mathrm{TV}(B_s, \\hat{B}_s) \\le \\eta_{\\text{eff}}$ in only 4.8% of margin evaluations.",
-        "- **Exact Binomial Test vs Pre-Declared Threshold 0.90**: REJECTED ($p = 1.000$, Clopper-Pearson 95% CI: [0.043, 0.053]). Assumption 1 is an idealized theoretical model that is frequently violated empirically, necessitating the conservative consensus fallback.",
-        "- **Conflict-Free-Run Rate (Reported Separately)**: Despite Assumption 1 violations, ACA achieves a **98.60% conflict-free-run rate** (1,972 of 2,000 ACA runs have 0 safe-claim conflicts; Clopper-Pearson 95% CI: [97.99%, 99.07%]), demonstrating that conservative margin inflation prevents coordination failures even under imperfect state estimation.",
-        "",
     ])
+
+    p0_threshold = 0.90
+    zero_conf_target = 0
+    h7_stat_row = res_df[res_df["hypothesis_id"] == "H7"]
+    if not h7_stat_row.empty:
+        r_h7 = h7_stat_row.iloc[0]
+        tv_adhere_rate = r_h7["mean_aca"] * 100.0
+        h7_p_val = r_h7["raw_p_value"]
+        h7_p_display = f"{h7_p_val:.4e}" if h7_p_val < 0.001 else f"{h7_p_val:.4f}"
+        h7_ci_display = r_h7.get("hl_ci_95", "[N/A]")
+        h7_verdict_str = compute_directional_verdict(r_h7)
+    else:
+        tv_adhere_rate, h7_p_display, h7_ci_display, h7_verdict_str = 0.0, "1.000", "[N/A]", "N/A"
+
+    lines.extend([
+        f"- **True TV Adherence vs $\\eta_{{\\text{{eff}}}}$**: Under dynamic blockages and packet drops, empirical total variation between true and estimated peer beliefs satisfies $\\mathrm{{TV}}(B_s, \\hat{{B}}_s) \\le \\eta_{{\\text{{eff}}}}$ in {tv_adhere_rate:.1f}% of margin evaluations.",
+        f"- **Exact Binomial Test vs Pre-Declared Threshold {p0_threshold:.2f}**: {h7_verdict_str} ($p = {h7_p_display}$, Clopper-Pearson 95% CI: {h7_ci_display}). Assumption 1 is an idealized theoretical model that is frequently violated empirically, necessitating the conservative consensus fallback.",
+    ])
+
+    if raw_df is not None and not raw_df.empty:
+        aca_runs = raw_df[raw_df["method"] == "aca"]
+        n_conflict_free = int((aca_runs["safe_claim_conflicts"] == zero_conf_target).sum())
+        n_aca_runs = len(aca_runs)
+        cfr_rate = (n_conflict_free / max(1, n_aca_runs)) * 100.0
+        binom_res = exact_binomial_test(n_conflict_free, n_aca_runs, p0=p0_threshold)
+        ci_lo = binom_res["ci_lower"] * 100.0
+        ci_hi = binom_res["ci_upper"] * 100.0
+        lines.append(
+            f"- **Conflict-Free-Run Rate (Reported Separately)**: Despite Assumption 1 violations, ACA achieves a **{cfr_rate:.2f}% conflict-free-run rate** ({n_conflict_free:,} of {n_aca_runs:,} ACA runs have {zero_conf_target} safe-claim conflicts; Clopper-Pearson 95% CI: [{ci_lo:.2f}%, {ci_hi:.2f}%]), demonstrating that conservative margin inflation prevents coordination failures even under imperfect state estimation."
+        )
+
+    lines.append("")
 
     with open(output_path, "w", encoding="utf-8") as f:
         f.write("\n".join(lines) + "\n")
