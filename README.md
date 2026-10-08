@@ -4,7 +4,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
-[![Tests: 80 Passing](https://img.shields.io/badge/tests-80%20passing-brightgreen.svg)]()
+[![Tests: 88 Passing](https://img.shields.io/badge/tests-88%20passing-brightgreen.svg)]()
 [![Simulation: Pure Software](https://img.shields.io/badge/simulation-pure%20software-informational.svg)]()
 
 ---
@@ -19,22 +19,37 @@ In decentralized multi-robot task allocation, strategic adversarial path blockag
 
 ---
 
+## ⚠️ Simulation Disclaimer & Physical Reality
+> **PURE SOFTWARE SIMULATION ONLY:** All experiments in this repository (including software-in-the-loop physics evaluations) are conducted strictly in **SOFTWARE SIMULATION** (NetworkX graph simulation and PyBullet rigid-body physics). **No physical hardware, physical robots, or physical camera testbeds were used.** All multi-robot trials, sensor measurements (including ArUco marker pose detection and TurtleBot3 differential-drive kinematics), and communication channels are simulated.
+
+### Metric Definitions: Physical Collisions vs. Abstract Conflicts
+To ensure clear evaluation across domains:
+- **Physical Collisions:** Measured in continuous PyBullet simulation (`p.getContactPoints > 0`), representing physical surface contact between robot chassis/wheels and static or dynamic physical barriers.
+- **Abstract Conflicts:** Measured in discrete task allocation rounds, representing combinatorial double-claim inconsistencies where two or more robots concurrently claim the identical discrete task bundle or node without consensus.
+
+### Synthetic Vision & ArUco Pose Tracking
+In the SITL synthetic-vision pipeline, overhead camera observations track ArUco markers atop simulated robot chassis. The 4x4 binary code (`DICT_4X4_50`) provides rotationally asymmetric patterns that eliminate 180-degree planar flip ambiguity. Marker top-edge image vectors map to the world frame via $(dx_{world}, dy_{world}) = (u_1 - u_0, -(v_1 - v_0))$, calculating continuous yaw headings $\psi = \mathrm{atan2}(dy_{world}, dx_{world})$ consistent with the camera projection.
+
+---
+
 ## 🔬 What This Repository Shows (Key Scientific Findings)
 
-This repository implements a rigorous, pre-registered empirical benchmark ($N = 17,100$ total trials across 15 seeds $\times$ 5 graph families $\times$ 4 adversary profiles $\times$ 3 communication regimes) comparing ACA against literature baselines, level-execution variants (+LR), and clean ablations:
+This repository implements a rigorous, pre-registered empirical benchmark ($N = 13,800$ total trials across 5 graph families $\times$ 4 adversary profiles $\times$ 3 communication regimes) comparing ACA against literature baselines, level-execution variants (+LR), and clean ablations:
 
-1. **ACA vs. Standard CBBA:** Under dynamic corridor blockages, standard CBBA achieves only $78.0 \pm 1.3\%$ completion while generating $328 \pm 9$ messages. ACA achieves **$88.8 \pm 1.0\%$ completion** ($+10.8$ percentage points, Cliff's $\delta = 0.36$) while requiring only **$245 \pm 9$ messages** ($-83$ messages, $p = 1.09 \times 10^{-11}$).
-2. **Mechanism Attribution:** Disabling local contingency recourse (ACA Depth-0) drops completion to $85.2 \pm 1.0\%$ ($p = 2.67 \times 10^{-5}$), confirming that local detour evaluation drives ACA's completion advantage.
-3. **Pinsker Safe Claim Behavior:** The Pinsker margin operates conservatively ($11.2\%$ safe claim rate, $88.8\%$ deferred to consensus). Safe claims maintain conflict-freedom under bounded error as predicted by Theorem 1.
+1. **ACA vs. Standard CBBA:** Under dynamic corridor blockages, standard CBBA drops its entire bundle upon a single blockage. ACA leverages type-aware expected recourse cost valuation and zero-message local detour execution, achieving significantly higher completion with lower message volume ($p < 0.05$).
+2. **Mechanism Attribution:** Disabling local contingency recourse (ACA Depth-0) drops completion, confirming that local detour evaluation drives ACA's completion advantage.
+3. **Pinsker Safe Claim Behavior:** The Pinsker margin operates conservatively. Safe claims maintain conflict-freedom under bounded error as predicted by Theorem 1.
 4. **Honest Comparative Trade-offs:** 
-   - **CBBA-PR (Partial Release)** preserves unblocked routes, achieving higher net welfare ($940 \pm 16$ vs $874 \pm 22$).
-   - **CTP Replan** and the **Clairvoyant Greedy reference** achieve higher completion ($95.8\%$ and $96.5\%$) via continuous single-robot replanning, trading off decentralized bundle coordination.
+   - **CBBA-PR (Partial Release)** preserves unblocked routes, achieving higher net welfare.
+   - **CTP Replan** and the **Clairvoyant Greedy reference** achieve higher completion via continuous single-robot replanning, trading off decentralized bundle coordination.
 
 All empirical data is generated automatically with zero hand-typed numbers:
 - Auto-generated Markdown Table: [`results/table_main_results.md`](file:///c:/Users/krmri/Downloads/Adversarial-Contingency-Auctions-main/Adversarial-Contingency-Auctions-main/results/table_main_results.md)
 - Auto-generated LaTeX Table: [`results/table_main_results.tex`](file:///c:/Users/krmri/Downloads/Adversarial-Contingency-Auctions-main/Adversarial-Contingency-Auctions-main/results/table_main_results.tex)
+- Stratified Results Table: [`results/table_stratified.tex`](file:///c:/Users/krmri/Downloads/Adversarial-Contingency-Auctions-main/Adversarial-Contingency-Auctions-main/results/table_stratified.tex)
+- Paired SITL Simulation Table: [`results/table_sitl.tex`](file:///c:/Users/krmri/Downloads/Adversarial-Contingency-Auctions-main/Adversarial-Contingency-Auctions-main/results/table_sitl.tex)
 - Pre-registered Hypothesis Verdict: [`RESULTS_VERDICT.md`](file:///c:/Users/krmri/Downloads/Adversarial-Contingency-Auctions-main/Adversarial-Contingency-Auctions-main/RESULTS_VERDICT.md)
-- Raw Trial Logs: [`results/raw_results.csv`](file:///c:/Users/krmri/Downloads/Adversarial-Contingency-Auctions-main/Adversarial-Contingency-Auctions-main/results/raw_results.csv) (17,100 records)
+- Raw Trial Logs: [`results/raw_results.csv`](file:///c:/Users/krmri/Downloads/Adversarial-Contingency-Auctions-main/Adversarial-Contingency-Auctions-main/results/raw_results.csv) (13,800 records)
 
 ---
 

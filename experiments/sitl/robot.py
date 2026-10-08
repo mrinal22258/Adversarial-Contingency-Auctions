@@ -195,7 +195,16 @@ class DiffDriveRobotSITL:
         self.collision_detected = False
 
     def check_collisions(self, barrier_ids: List[int]) -> bool:
-        """Query PyBullet collision contact points against physical barriers."""
+        """
+        Query PyBullet collision contact points against physical barriers.
+        
+        METRIC DEFINITION:
+        - Physical Collisions: Measures rigid-body continuous surface contact events
+          in PyBullet simulation (p.getContactPoints > 0) between the robot chassis/wheels
+          and static/dynamic physical barriers.
+        - Abstract Conflicts: Distinct metric measuring combinatorial market allocation
+          inconsistencies where multiple agents double-claim the same discrete task node.
+        """
         for b_id in barrier_ids:
             contacts = p.getContactPoints(
                 bodyA=self.body_id,

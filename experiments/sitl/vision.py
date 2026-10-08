@@ -129,8 +129,10 @@ class SyntheticVisionSystem:
             mw, mh = marker_img.shape[1], marker_img.shape[0]
 
             # Rotation matrix for marker
-            # Convert yaw to image degrees (-yaw because image Y is down)
-            angle_deg = -math.degrees(ryaw)
+            # In image space, turning CCW from +u toward -v corresponds to turning CCW
+            # in world space (from +X toward +Y). OpenCV getRotationMatrix2D rotates CCW
+            # for positive angle values, so angle_deg = +math.degrees(ryaw).
+            angle_deg = float(math.degrees(ryaw))
             rot_mat = cv2.getRotationMatrix2D((mw / 2.0, mh / 2.0), angle_deg, 1.0)
             rotated_marker = cv2.warpAffine(
                 marker_img, rot_mat, (mw, mh), borderMode=cv2.BORDER_CONSTANT, borderValue=255
@@ -186,12 +188,32 @@ class SyntheticVisionSystem:
 
                 est_x, est_y = self.pixel_to_world(center_u, center_v)
 
-                # Orientation from top-left to top-right edge in world coordinates
+                # -------------------------------------------------------------
+                # Mathematical Orientation Convention & Flip Ambiguity Resolution:
+                # 1. Marker Canonical Frame:
+                #    OpenCV ArUco detector orders corners clockwise:
+                #      pts[0]: Top-Left,     pts[1]: Top-Right,
+                #      pts[2]: Bottom-Right, pts[3]: Bottom-Left.
+                #    The internal 4x4 binary payload (DICT_4X4_50) is asymmetric
+                #    and rotationally distinct across all four 90-degree rotations.
+                #    This eliminates the 180-degree flip ambiguity inherent in
+                #    unmarked planar squares.
+                # 2. Camera Frame vs World Frame:
+                #    Overhead camera frame: +X_cam points right (+u), +Y_cam points down (+v),
+                #    with optical axis +Z_cam directed normal to the ground plane.
+                #    World frame: +X_world points right, +Y_world points up (+y).
+                # 3. Heading (Yaw) Calculation:
+                #    Forward orientation vector is defined by the top edge:
+                #      v_img = pts[1] - pts[0] = (u_1 - u_0, v_1 - v_0).
+                #    Inverting image Y to map to world coordinates:
+                #      edge_dx = u_1 - u_0
+                #      edge_dy = -(v_1 - v_0)
+                #      est_yaw = atan2(edge_dy, edge_dx) in [-pi, pi].
+                # -------------------------------------------------------------
                 edge_vector_img = pts[1] - pts[0]
-                # Invert Y for world frame
-                edge_dx = edge_vector_img[0]
-                edge_dy = -edge_vector_img[1]
-                est_yaw = math.atan2(edge_dy, edge_dx)
+                edge_dx = float(edge_vector_img[0])
+                edge_dy = -float(edge_vector_img[1])
+                est_yaw = float(math.atan2(edge_dy, edge_dx))
 
                 detected_poses[int(mid)] = (est_x, est_y, est_yaw)
                 self.successful_detections += 1

@@ -5,7 +5,7 @@ Executes multi-robot auction algorithms on real map topologies using PyBullet:
 - Topologies: MovingAI Warehouse (warehouse-10-20-10-2-1), Boston Road Network (OSMnx 2.1.1)
 - Adversaries: Stochastic, Reactive, Budgeted, Cyclic, Real-Trace Work Zone Replay
 - Communication: Benign, Constrained, Lossy
-- Disjoint seeds: seed >= 2000 (disjoint from main 17,100 sweep seeds)
+- Disjoint seeds: seed >= 2000 (disjoint from main 13,800 sweep seeds)
 
 Writes:
 - JSONL records to results/sitl/sitl_results.jsonl
