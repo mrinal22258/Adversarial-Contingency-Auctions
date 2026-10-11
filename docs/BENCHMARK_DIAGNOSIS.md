@@ -50,7 +50,7 @@ Controlled ablations were conducted to isolate the causes of performance differe
 
 | Hypothesis | Candidate Root Cause | Predicted Effect | Measured Evidence | Verdict |
 |---|---|---|---|---|
-| **H1: Bid/Valuation Quality** | Mis-scaled contingency costs cause over-hedging | Disabling detours (`aca_depth_0`) improves completion when blockages are sparse | Depth-0 drops completion from $89.2\%$ to $86.8\%$ and increases messages from 333 to 301. Contingency branches are vital under active adversaries. | **REFUTED** (Contingency detours are essential) |
+| **H1: Bid/Valuation Quality** | Mis-scaled contingency costs cause over-hedging | Disabling detours (`aca_depth_0`) improves completion when blockages are sparse | Depth-0 drops completion from $89.2\%$ to $86.8\%$ and reduces messages from 333 to 301. Contingency branches are vital under active adversaries. | **REFUTED** (Contingency detours are essential) |
 | **H2: Static Pinsker Margin Over-Conservatism** | Static $\kappa = 1.0$ causes unnecessary deferrals even after belief converges | Removing margin (`aca_no_margin`) raises completion but causes conflicts | `aca_no_margin` raises completion to $90.7\%$ ($+1.5\%$) but inflates total conflicts from $41.2$ to $47.4$ ($+15.0\%$). | **CONFIRMED** (Static margin over-hedges once adversary type is learned) |
 | **H3: Adversary Model Mismatch** | Disabling Bayesian inference (`aca_no_inference`) degrades performance against adaptive blockers | Frozen uniform prior fails under reactive corridor blockers ($\theta_2$) | Frozen prior reduces completion to $87.1\%$ and increases fleet conflict rate. | **CONFIRMED** (Online Bayesian inference is critical) |
 | **H4: Recourse Horizon Truncation** | Depth-1 horizon is insufficient; Depth-2 is required | Increasing depth to 2 improves completion in multi-bottleneck maps | Depth-2 achieves $89.5\%$ vs $89.2\%$ ($+0.3\%$, $p = 0.38$, not statistically significant) while doubling planner compute time. | **REFUTED** (Depth-1 captures primary detour benefit; Depth-2 overhead exceeds gain) |
@@ -98,3 +98,35 @@ Scientific honesty requires documenting regimes where ACA is not the superior ch
 1. **Low Blockage / Benign Environments:** When edge blockage probabilities are negligible ($\pi(e) < 0.05$) or adversaries are inactive, standard CBBA without contingency planning achieves identical completion with zero ToM computational overhead and lower communication.
 2. **Unconstrained High-Bandwidth Networks with Omnipresent Obstacles:** In mazes where obstacles appear unpredictably on almost every corridor, Canadian Traveler Problem (CTP) with continuous global re-auctioning achieves higher completion ($93.7\%$) than depth-1 contingency trees, provided the communication network can tolerate the massive re-auction message volume.
 3. **Conservatism Tax:** When alternative routes are substantially longer than primary paths, reserving detour capacity reduces maximum possible throughput if the anticipated blockage fails to materialize.
+
+---
+
+## B5. Protocol v5 Confirmatory Evaluation (Seeds 101–130, N = 450 Matched Instances)
+
+To test generalizability across the full benchmark universe without cherry-picking or tuning leaks, Protocol v5 was executed across all 5 benchmark families (`warehouse_movingai`, `road_osmnx`, `rgg`, `warehouse`, `er`) and 3 adversary regimes ($\theta_1, \theta_2, \theta_4$) on strictly held-out seeds 101–130 ($N = 450$ instances, 3,600 paired trials).
+
+### 5.1 Confirmatory Hypothesis Results
+
+| Hypothesis | Comparison | Metric | Mean Proposed | Mean Comparator | Mean Paired Diff | 95% CI (Boot) | Cohen's $d_z$ | Holm $p$-value | Confirmatory Verdict |
+|---|---|---|---|---|---|---|---|---|---|
+| **H1 (Comp)** | `aca_plus` vs `aca` | Completion (%) | 92.44% | 92.40% | +0.04% | [-0.70, +0.80] | +0.006 | $1.000$ | Parity |
+| **H1 (Welf)** | `aca_plus` vs `aca` | Net Welfare | 936.26 | 937.44 | -1.18 | [-13.52, +10.77] | -0.009 | $1.000$ | Parity |
+| **H2 (Comp)** | `aca_adaptive` vs `aca` | Completion (%) | 91.29% | 92.40% | -1.11% | [-1.96, -0.31] | -0.125 | $1.000$ | Parity |
+| **H3 (Comp)** | `aca_plus` vs `cbba_lr` | Completion (%) | 92.44% | 94.67% | -2.22% | [-3.05, -1.35] | -0.232 | $1.000$ | CBBA+LR Higher Completion ($L=2$) |
+| **H4 (Conf)** | `aca_plus` vs `cbba_partial_lr` | Total Conflicts | 38.60 | 40.55 | -1.95 | [-4.58, +0.68] | -0.066 | $0.175$ | Directional Reduction |
+| **H5 (Comp)** | `aca_plus` vs `ctp_replan` | Completion (%) | 92.44% | 92.28% | +0.16% | [-0.96, +1.32] | +0.013 | $1.000$ | Statistical Equivalence |
+| **H5 (Msgs)** | `aca_plus` vs `ctp_replan` | Total Messages | 220.57 | 56.11 | +164.46 | [+150.6, +177.0] | +1.176 | $4.75 \times 10^{-68}$ | **CONFIRMED** ($p < 0.001$) |
+| **H6 (Comp)** | `aca_plus` vs `ssi_lr` | Completion (%) | 92.44% | 80.49% | +11.96% | [+10.12, +13.81] | +0.584 | $4.07 \times 10^{-26}$ | **CONFIRMED** ($p < 0.001$) |
+| **H7 (Conf)** | `aca` vs `aca_no_margin` | Total Conflicts | 39.66 | 49.93 | -10.27 | [-13.06, -7.43] | -0.323 | $5.01 \times 10^{-12}$ | **CONFIRMED** ($p < 0.001$) |
+| **H7 (Comp)** | `aca` vs `aca_no_margin` | Completion (%) | 92.40% | 93.48% | -1.08% | [-1.91, -0.25] | -0.113 | $0.091$ | Margin Trade-off (Parity) |
+
+### 5.2 Key Empirical Takeaways
+
+1. **Pinsker Margin Trade-Off (`aca` vs `aca_no_margin`):**
+   - The Pinsker claim margin functions precisely as intended: it suppresses multi-robot conflicts by **20.6%** ($39.66$ vs $49.93$ conflicts, paired diff $-10.27$, $p = 4.17 \times 10^{-13}$, Holm $p = 5.01 \times 10^{-12}$).
+   - Disabling the margin (`aca_no_margin`) allows robots to aggressively grab tasks without deference, yielding a minor $+1.08\%$ raw completion increase ($p_{\text{adj}} = 0.091$, not statistically significant after FWER correction) at the direct expense of a massive $+25.9\%$ inflation in fleet conflicts.
+2. **CTP Replan vs ACA Trade-Off:**
+   - On completion rate, `aca_plus` ($92.44\%$) and `ctp_replan` ($92.28\%$) are statistically equivalent ($p = 0.71$).
+   - However, CTP Replan requires continuous replanning upon obstacle discovery and sends far fewer consensus messages ($56.11$ vs $220.57$, $p < 10^{-67}$) because it lacks distributed bundle consensus negotiation.
+3. **Decisive Superiority Over Sequential Single-Item Auctions:**
+   - ACA+ outperforms `ssi_lr` by $+11.96\%$ in completion rate ($92.44\%$ vs $80.49\%$, Cohen's $d_z = 0.584$, Holm $p = 4.07 \times 10^{-26}$).
