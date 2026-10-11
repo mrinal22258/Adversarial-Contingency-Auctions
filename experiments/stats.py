@@ -10,7 +10,7 @@ Provides:
 - Friedman test for multi-method ranking
 """
 
-from typing import List, Tuple, Dict, Any, Optional
+from typing import List, Tuple, Dict, Any
 import numpy as np
 import scipy.stats as stats
 
@@ -263,7 +263,7 @@ def bootstrap_ci(
 
 
 def format_latex_ci(mean: float, low: float, high: float, decimals: int = 1) -> str:
-    """Format mean and symmetric half-width CI as LaTeX $mean \pm half_ci$."""
+    r"""Format mean and symmetric half-width CI as LaTeX $mean \pm half_ci$."""
     half_ci = 0.5 * (high - low)
     return f"${mean:.{decimals}f} \\pm {half_ci:.{decimals}f}$"
 

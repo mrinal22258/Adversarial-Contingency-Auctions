@@ -5,17 +5,14 @@ Verifies that all statistics in generated narrative reports are purely derived f
 
 import ast
 import inspect
-import os
 import re
 import pandas as pd
-import numpy as np
 import pytest
 
 pytest.importorskip("statsmodels")
 
 from experiments.run_statistical_tests import (
     generate_verdict_markdown,
-    compute_directional_verdict,
 )
 
 

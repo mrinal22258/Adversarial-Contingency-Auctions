@@ -3,7 +3,7 @@ Sequential Single-Item (SSI) Auction (Koenig et al. 2006).
 Classic baseline: tasks are auctioned sequentially one by one based on lowest marginal insertion cost.
 """
 
-from typing import Dict, List, Tuple, Optional, Any
+from typing import Dict, List, Tuple, Any
 import networkx as nx
 
 from .base import BaseAllocator, Task

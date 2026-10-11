@@ -19,12 +19,11 @@ Tests:
    - Depth d = 0 (recourse disabled)
 """
 
-import pytest
 import numpy as np
 import networkx as nx
 
 from acalib.env.graph_families import generate_graph
-from acalib.env.adversaries import AdversaryType, CanonicalTypeSet, canonical_edge
+from acalib.env.adversaries import canonical_edge
 from acalib.agents.belief import compute_kl_divergence, compute_tv_distance
 from acalib.agents.contingency import ContingencyPlanner, compute_lipschitz_bound
 

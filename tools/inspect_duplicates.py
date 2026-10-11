@@ -4,7 +4,6 @@ Inspect duplicate keys in raw_results.csv and runs.jsonl.
 
 import os
 import pandas as pd
-from collections import Counter
 
 REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 RAW_CSV = os.path.join(REPO_ROOT, "results", "raw_results.csv")

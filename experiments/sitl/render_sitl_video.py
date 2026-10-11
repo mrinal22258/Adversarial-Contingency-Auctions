@@ -11,14 +11,11 @@ Generates annotated MP4 top-down videos directly from PyBullet SITL simulation:
 import os
 import sys
 import json
-import time
-import hashlib
 import numpy as np
-import networkx as nx
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-from matplotlib.patches import Circle, Rectangle
+from matplotlib.patches import Circle
 import cv2
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))

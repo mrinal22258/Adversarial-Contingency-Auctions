@@ -21,8 +21,6 @@ import pandas as pd
 import pytest
 
 from acalib.data.schema import (
-    REQUIRED_COLUMNS,
-    ALLOWED_STATUSES,
     TrialValidationError,
     validate_trial_row,
     validate_results_dataframe,
@@ -35,7 +33,6 @@ from experiments.stats import (
     bootstrap_ci,
     hodges_lehmann_difference,
     paired_wilcoxon_test,
-    holm_bonferroni_correction,
 )
 from experiments.make_tables import compute_paired_statistics
 
@@ -324,7 +321,6 @@ def test_paired_estimand_consistency():
 # ---------------------------------------------------------------------------
 
 def test_p_value_formatting_no_false_zero():
-    from experiments.make_tables import generate_numbers_macro_file
 
     def format_p_val_test(pval: float) -> str:
         if pval < 0.001:

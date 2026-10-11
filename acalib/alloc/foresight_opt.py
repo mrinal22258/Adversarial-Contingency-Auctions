@@ -5,8 +5,7 @@ Used for small-scale verification (R <= 4, M <= 10) to quantify the optimality g
 decentralized auctions vs. true theoretical maximum welfare.
 """
 
-from typing import Dict, List, Tuple, Optional, Any
-import numpy as np
+from typing import Dict, Tuple, Any
 import networkx as nx
 from ortools.sat.python import cp_model
 

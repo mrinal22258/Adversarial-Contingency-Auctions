@@ -8,17 +8,10 @@ Regression tests for Phase 0.B audit defects:
 0.B.11: Assumption 1 TV distance logging and validation against eta_eff.
 """
 
-import pytest
-import numpy as np
-import networkx as nx
 
 from acalib.env.graph_families import generate_graph
 from acalib.env.adversaries import AdversaryType
-from acalib.env.blockage_process import PersistentBlockageProcess, EdgeState
 from acalib.sim.engine import SimulationEngine
-from acalib.alloc.aca import ACAAllocator
-from acalib.alloc.cbba import CBBAAllocator
-from acalib.alloc.ssi import SSIAllocator
 
 
 def test_aca_clears_replan_requests_and_records_reauctions():

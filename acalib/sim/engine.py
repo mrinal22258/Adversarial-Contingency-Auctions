@@ -9,7 +9,6 @@ from typing import Dict, List, Tuple, Optional, Any, Set
 import numpy as np
 import networkx as nx
 
-from ..env.graph_families import generate_graph
 from ..env.adversaries import (
     AdversaryType,
     create_adversary,
@@ -29,7 +28,6 @@ from ..alloc.implicit import ImplicitCoordinationAllocator
 from ..alloc.pessimistic import (
     PessimisticRobustAllocator,
     ClairvoyantGreedyAllocator,
-    CentralizedOracleAllocator,
 )
 from ..alloc.ctp_replan import CTPReplanAllocator
 from ..alloc.cbba_gossip import CBBABeliefGossipAllocator

@@ -13,7 +13,6 @@ import sys
 import json
 import hashlib
 import pandas as pd
-import networkx as nx
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if REPO_ROOT not in sys.path:

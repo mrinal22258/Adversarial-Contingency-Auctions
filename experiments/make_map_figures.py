@@ -10,8 +10,6 @@ Writes vector PDF, 300 DPI PNG, and cryptographic .provenance.json sidecars to r
 
 import os
 import sys
-import json
-import shutil
 import hashlib
 import numpy as np
 import networkx as nx
@@ -39,7 +37,6 @@ from acalib.env.graph_families import (
     generate_warehouse_grid,
     generate_erdos_renyi,
 )
-from acalib.env.adversaries import canonical_edge
 
 apply_ieee_style()
 

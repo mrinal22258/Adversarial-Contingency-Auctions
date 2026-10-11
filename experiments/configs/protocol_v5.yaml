@@ -1,0 +1,108 @@
+# Pre-Registered Analysis & Evaluation Protocol (Protocol v5)
+# Cryptographic & Procedural Freeze Date: 2026-10-11
+# Venue Target: IEEE Robotics and Automation Letters (RA-L) / NeurIPS
+
+version: "5.0.0"
+date_frozen_utc: "2026-10-11T07:15:00Z"
+git_tag_freeze: "prereg-v5"
+
+evaluation_design:
+  tuning_phase:
+    seeds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30]
+    trial_budget_per_method: 50
+    search_strategy: "random_grid_search"
+    results_path: "results/tuning/trials.csv"
+  
+  heldout_phase:
+    seeds: [101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130]
+    total_seeds: 30
+    run_count_guarantee: "Strictly one execution pass on held-out seeds"
+    results_path: "results/confirmatory/heldout_v5_results.csv"
+
+benchmark_universe:
+  families:
+    - "warehouse_movingai"
+    - "road_osmnx"
+    - "rgg"
+    - "warehouse"
+    - "er"
+  adversaries:
+    - "theta_1_stochastic"
+    - "theta_2_reactive"
+    - "theta_4_cyclic_patrol"
+  comm_regime: "nominal"
+  comm_range: 30.0
+  p_drop: 0.10
+  n_robots: 4
+  n_tasks: 15
+  horizon_ticks: 80
+
+evaluated_methods:
+  - "aca"               # ACA-v1 (Static Pinsker Margin kappa=1.0)
+  - "aca_adaptive"      # ACA with Shannon entropy-adaptive margin
+  - "aca_plus"          # ACA+ (Entropy margin + corridor pruning threshold)
+  - "aca_no_margin"     # Ablation: Zero claim margin (kappa=0.0)
+  - "cbba_lr"           # CBBA Choi '09 with local recourse planner
+  - "cbba_partial_lr"   # CBBA-PR with local recourse planner
+  - "ctp_replan"        # Canadian Traveler Problem continuous re-auction
+  - "ssi_lr"            # Sequential Single-Item auction with local recourse
+
+metrics:
+  primary:
+    - name: "completion_rate_pct"
+      unit: "percentage"
+      direction: "higher_is_better"
+    - name: "net_welfare"
+      unit: "reward_units"
+      direction: "higher_is_better"
+    - name: "total_conflicts"
+      unit: "count"
+      direction: "lower_is_better"
+    - name: "safe_claim_conflicts"
+      unit: "count"
+      direction: "lower_is_better"
+  secondary:
+    - name: "total_messages"
+      unit: "count"
+      direction: "lower_is_better"
+    - name: "total_travel_distance"
+      unit: "distance_units"
+      direction: "lower_is_better"
+    - name: "makespan"
+      unit: "ticks"
+      direction: "lower_is_better"
+
+statistical_testing:
+  pairing_unit: "instance_tuple = (graph_family, adversary, seed, n_robots, n_tasks)"
+  hypothesis_test: "paired_wilcoxon_signed_rank"
+  fwer_correction: "holm_bonferroni_across_all_confirmatory_hypotheses"
+  confidence_intervals: "bootstrap_bca_or_percentile_1000_samples_95pct"
+  effect_size_metric: "cohens_dz"
+  alpha_threshold: 0.05
+
+decision_rules:
+  H1_ACA_PLUS_VS_V1:
+    description: "ACA+ achieves higher task completion than standard ACA-v1 on held-out seeds"
+    comparator: "aca"
+    target: "aca_plus"
+    metric: "completion_rate_pct"
+    verdict_rule: "Holm-corrected p < 0.05 and paired_diff > 0"
+  H2_ACA_ADAPT_VS_V1:
+    description: "ACA-Adaptive achieves higher task completion than standard ACA-v1"
+    comparator: "aca"
+    target: "aca_adaptive"
+    metric: "completion_rate_pct"
+    verdict_rule: "Holm-corrected p < 0.05 and paired_diff > 0"
+  H3_ACA_PLUS_CONFLICT_REDUCTION:
+    description: "ACA+ maintains significant conflict reduction over CBBA-PR+LR"
+    comparator: "cbba_partial_lr"
+    target: "aca_plus"
+    metric: "total_conflicts"
+    verdict_rule: "paired_diff < 0"
+  H4_NO_MARGIN_TRADEOFF:
+    description: "aca_no_margin completion vs conflict trade-off explicitly quantified against ACA+"
+    comparator: "aca_no_margin"
+    target: "aca_plus"
+    metrics: ["completion_rate_pct", "total_conflicts"]
+  CTP_REPORTING_MANDATE:
+    description: "ctp_replan included in every summary table and plot regardless of superiority"

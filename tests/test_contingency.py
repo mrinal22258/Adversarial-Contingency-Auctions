@@ -2,7 +2,6 @@
 
 import networkx as nx
 import numpy as np
-import pytest
 
 from acalib.agents.contingency import ContingencyPlanner
 from acalib.env.adversaries import canonical_edge

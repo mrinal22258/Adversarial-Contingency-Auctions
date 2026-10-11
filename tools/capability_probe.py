@@ -1,5 +1,4 @@
 import sys
-import os
 import multiprocessing
 import urllib.request
 import shutil

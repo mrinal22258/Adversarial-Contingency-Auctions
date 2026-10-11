@@ -5,7 +5,6 @@ Provides principled posterior over adversary types and edge blockage probabiliti
 
 from typing import Dict, List, Tuple, Optional, Any, Set
 import numpy as np
-import networkx as nx
 
 from ..env.adversaries import (
     AdversaryType,

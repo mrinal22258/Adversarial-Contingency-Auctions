@@ -3,9 +3,7 @@ Build complete coverage matrices and analyze primary vs exploratory population.
 """
 
 import os
-import json
 import pandas as pd
-import numpy as np
 
 REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 AUDIT_DIR = os.path.join(REPO_ROOT, "audit")

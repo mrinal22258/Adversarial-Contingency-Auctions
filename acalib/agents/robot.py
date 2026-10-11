@@ -4,12 +4,10 @@ Theory of Mind peer tracking, local contingency recourse pivoting, and task exec
 """
 
 from typing import Dict, List, Tuple, Optional, Any, Set
-import numpy as np
 import networkx as nx
 
 from ..env.adversaries import canonical_edge
 from ..env.blockage_process import EdgeState, PersistentBlockageProcess
-from ..env.comm import Message
 from .belief import BayesianTypeFilter
 from .tom import TheoryOfMindTracker, PinskerMarginCalculator
 from .contingency import ContingencyPlanner, RecoursePlan

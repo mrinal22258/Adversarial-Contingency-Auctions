@@ -29,9 +29,6 @@ from experiments.plot_style import (
 from experiments.stats import (
     hodges_lehmann_difference,
     cliffs_delta,
-    paired_wilcoxon_test,
-    holm_bonferroni_correction,
-    bootstrap_ci,
 )
 
 apply_ieee_style()

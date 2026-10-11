@@ -1,7 +1,6 @@
 """End-to-end integration tests for SimulationEngine across all allocators and adversaries."""
 
 import pytest
-import networkx as nx
 
 from acalib.env.graph_families import generate_graph
 from acalib.env.adversaries import AdversaryType

@@ -15,7 +15,7 @@ No physical robots or hardware testbeds are used.
 import os
 import math
 import hashlib
-from typing import Dict, Tuple, List, Optional, Any, Set
+from typing import Dict, Tuple, List, Optional, Any
 import numpy as np
 import networkx as nx
 import pybullet as p
@@ -25,8 +25,6 @@ from acalib.env.real_maps import (
     generate_movingai_warehouse,
     generate_real_road_network,
     DATA_MAPS_DIR,
-    MOVINGAI_WAREHOUSE_HASH,
-    OSMNX_ROAD_NETWORK_HASH,
 )
 
 

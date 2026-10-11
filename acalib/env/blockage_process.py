@@ -4,7 +4,7 @@ Implements onset hazard h_theta(e, s_t), clearance rate mu, and global budget k.
 """
 
 from enum import IntEnum
-from typing import Dict, Set, Tuple, Optional, Any, List
+from typing import Dict, Set, Tuple, Optional, Any
 import numpy as np
 import networkx as nx
 

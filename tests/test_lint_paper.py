@@ -9,13 +9,11 @@ Verifies that the linter strictly catches:
 """
 
 import os
-import pytest
 from tools.lint_paper import (
     check_strict_claims,
     check_unmacroed_literal_numbers,
     check_figure_provenance,
     check_staleness,
-    lint_paper,
 )
 
 

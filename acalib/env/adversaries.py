@@ -8,7 +8,6 @@ Adversary models for strategic and stochastic edge interdiction:
 
 from enum import Enum
 from typing import Dict, List, Set, Tuple, Optional, Any
-import numpy as np
 import networkx as nx
 
 

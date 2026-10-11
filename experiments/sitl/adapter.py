@@ -21,7 +21,6 @@ import networkx as nx
 
 from acalib.alloc.base import Task, BaseAllocator
 from acalib.alloc.aca import ACAAllocator
-from acalib.alloc.cbba import CBBAAllocator
 from acalib.alloc.cbba_partial import CBBAPartialReplanAllocator
 from acalib.alloc.ctp_replan import CTPReplanAllocator
 from acalib.alloc.implicit import ImplicitCoordinationAllocator
@@ -30,7 +29,6 @@ from acalib.agents.robot import RobotAgent
 from acalib.env.adversaries import canonical_edge
 
 
-from acalib.env.comm import CommunicationNetwork
 
 
 def create_sitl_allocator(

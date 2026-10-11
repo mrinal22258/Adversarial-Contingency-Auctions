@@ -4,9 +4,8 @@ Shared execution module across ALL allocators (ACA, CBBA, SSI, CC-CBBA, etc.).
 Guarantees identical physical kinematics, edge progression, and contingency pivot logic.
 """
 
-from typing import Dict, Any, Tuple, Optional, List
+from typing import Dict, Any
 import numpy as np
-import networkx as nx
 
 from ..env.adversaries import canonical_edge
 from ..env.blockage_process import PersistentBlockageProcess

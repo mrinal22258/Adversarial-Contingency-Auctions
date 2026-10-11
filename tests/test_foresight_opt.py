@@ -1,8 +1,6 @@
 """
 Unit tests for ForesightOptAllocator (CP-SAT Exact Benchmark).
 """
-import pytest
-import networkx as nx
 from acalib.env.graph_families import generate_erdos_renyi
 from acalib.agents.robot import RobotAgent
 from acalib.env.comm import CommunicationNetwork

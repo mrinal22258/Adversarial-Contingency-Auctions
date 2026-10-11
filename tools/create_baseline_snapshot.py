@@ -3,12 +3,10 @@ Create audit/baseline_snapshot/ with all generated artifacts, manifests, and sys
 """
 
 import os
-import sys
 import shutil
 import hashlib
 import json
 import datetime
-import subprocess
 
 REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 AUDIT_DIR = os.path.join(REPO_ROOT, "audit")

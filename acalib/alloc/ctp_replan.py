@@ -6,7 +6,7 @@ Upon discovering an active blockage, the robot updates its local discovered obst
 and immediately computes a new shortest path on the updated topology.
 """
 
-from typing import Dict, List, Tuple, Optional, Any, Set
+from typing import Dict, List, Tuple, Any, Set
 import networkx as nx
 
 from .base import BaseAllocator, Task

@@ -4,8 +4,6 @@ Verification of Stabilization Guarantees (Phase 2.3):
 2. Diminishing Marginal Gains (DMG) / Consensus Termination in bounded iterations.
 """
 
-import pytest
-import numpy as np
 
 from acalib.env.graph_families import generate_graph
 from acalib.env.adversaries import AdversaryType

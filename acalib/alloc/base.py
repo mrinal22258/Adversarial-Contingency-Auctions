@@ -3,7 +3,7 @@ Base classes and data structures for task allocation mechanisms.
 """
 
 from dataclasses import dataclass
-from typing import Dict, List, Tuple, Optional, Any, Set
+from typing import Dict, Tuple, Optional, Any
 import abc
 import networkx as nx
 

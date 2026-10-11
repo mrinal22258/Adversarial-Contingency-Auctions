@@ -6,7 +6,6 @@ results/stats/instance_aggregated.csv empirical archives.
 
 import os
 import json
-import time
 from typing import Dict, List, Tuple, Any, Optional
 import numpy as np
 import pandas as pd

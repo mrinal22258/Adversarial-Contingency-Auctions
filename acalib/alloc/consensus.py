@@ -6,7 +6,6 @@ including task release propagation (preventing orphan tasks) and convergence.
 """
 
 from typing import Dict, List, Tuple, Any, Optional
-import numpy as np
 from ..agents.robot import RobotAgent
 from ..env.comm import CommunicationNetwork, Message
 

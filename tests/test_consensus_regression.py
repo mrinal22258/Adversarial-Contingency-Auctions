@@ -4,9 +4,6 @@ Failing-first regression tests for CBBA Consensus (Choi 2009 compliance):
 2. Consensus Convergence Test: on a static instance, full agreement on winning agents and bids.
 """
 
-import os
-import networkx as nx
-import pytest
 
 from acalib.env.graph_families import generate_erdos_renyi
 from acalib.agents.robot import RobotAgent

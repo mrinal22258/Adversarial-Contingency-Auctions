@@ -5,7 +5,6 @@ strictly from simulation traces and state diffs with zero fabricated text.
 """
 
 from typing import Dict, List, Any, Optional
-import numpy as np
 
 
 def generate_event_log(
@@ -76,7 +75,7 @@ def generate_event_log(
             events.append({
                 "tick": tick,
                 "category": "Conflict",
-                "message": f"Consensus conflict detected on active claim(s); resolution rule applied."
+                "message": "Consensus conflict detected on active claim(s); resolution rule applied."
             })
 
         # 5. Task Completions

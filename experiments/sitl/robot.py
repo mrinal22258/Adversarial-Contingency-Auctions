@@ -17,7 +17,7 @@ Implements:
 """
 
 import math
-from typing import Tuple, List, Optional, Dict, Any
+from typing import Tuple, List, Optional
 import numpy as np
 import pybullet as p
 

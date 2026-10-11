@@ -1,10 +1,9 @@
 """Verification of Theorem 3: Pinsker Claim Margin and Provable Conflict-Freedom."""
 
 import numpy as np
-import pytest
 
 from acalib.agents.belief import compute_kl_divergence, compute_tv_distance
-from acalib.agents.tom import PinskerMarginCalculator, TheoryOfMindTracker
+from acalib.agents.tom import PinskerMarginCalculator
 
 
 def test_pinsker_inequality_holds():

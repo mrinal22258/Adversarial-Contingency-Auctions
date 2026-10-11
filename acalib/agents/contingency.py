@@ -5,7 +5,6 @@ Builds depth-d recourse trees and computes exact expected costs under adversary 
 
 from dataclasses import dataclass, field
 from typing import Dict, List, Tuple, Optional, Any, Set
-import numpy as np
 import networkx as nx
 
 from ..env.adversaries import canonical_edge

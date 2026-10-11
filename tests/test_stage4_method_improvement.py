@@ -3,8 +3,6 @@ Stage 4 Method Improvement Unit & Verification Tests.
 Tests the adaptive entropy-calibrated margin and recourse pruning mechanisms in ACAAllocator.
 """
 
-import pytest
-import numpy as np
 import networkx as nx
 
 from acalib.alloc.aca import ACAAllocator
@@ -12,7 +10,6 @@ from acalib.sim.engine import SimulationEngine
 from acalib.env.adversaries import AdversaryType
 from acalib.agents.robot import RobotAgent
 from acalib.env.comm import CommunicationNetwork
-from acalib.alloc.base import Task
 
 
 def test_aca_adaptive_initialization():

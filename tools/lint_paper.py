@@ -19,7 +19,7 @@ import json
 import hashlib
 import shutil
 import subprocess
-from typing import List, Tuple, Dict, Any, Optional
+from typing import List, Tuple, Optional
 
 REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 DATA_MAPS_DIR = os.path.join(REPO_ROOT, "data", "maps")

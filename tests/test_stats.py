@@ -10,16 +10,13 @@ Verifies:
 - Bootstrap CI coverage
 """
 
-import pytest
 import numpy as np
-import scipy.stats as stats
 
 from experiments.stats import (
     paired_cohens_dz,
     hodges_lehmann_difference,
     cliffs_delta,
     tost_equivalence_test,
-    paired_wilcoxon_test,
     holm_bonferroni_correction,
     benjamini_hochberg_correction,
     bootstrap_ci,

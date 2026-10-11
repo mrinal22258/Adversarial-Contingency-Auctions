@@ -5,8 +5,6 @@ Auction churn, cascading re-assignments, and packet drop shielding.
 
 import os
 import pandas as pd
-import numpy as np
-import pytest
 
 
 def test_comm_degradation_data_consistency():

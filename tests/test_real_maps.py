@@ -6,13 +6,11 @@ and deterministic graph conversion procedures.
 import os
 import hashlib
 import networkx as nx
-import pytest
 
 from acalib.env.real_maps import (
     MOVINGAI_WAREHOUSE_HASH,
     OSMNX_ROAD_NETWORK_HASH,
     DATA_MAPS_DIR,
-    verify_file_sha256,
     generate_movingai_warehouse,
     generate_real_road_network,
 )

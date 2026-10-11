@@ -1,11 +1,9 @@
 """Unit tests for Bayesian filtering, belief convergence, and marginal calculation."""
 
 import numpy as np
-import pytest
 
 from acalib.agents.belief import (
     BayesianTypeFilter,
-    compute_kl_divergence,
     compute_tv_distance,
 )
 from acalib.env.adversaries import AdversaryType, CanonicalTypeSet

@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "acalib"
+version = "2.0.0"
+description = "Adversarial Contingency Auctions: Strategic Multi-Robot Task Allocation under Inconsistent Beliefs and Adversarial Path Blockages"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [
+    {name = "ACA Authors", email = "author@example.com"}
+]
+dependencies = [
+    "numpy>=1.20",
+    "scipy>=1.9.0",
+    "networkx>=3.0",
+    "pandas>=1.3",
+    "pyyaml>=6.0",
+    "matplotlib>=3.5",
+    "seaborn>=0.11.0",
+    "ortools>=9.0",
+    "statsmodels>=0.13.0",
+    "pytest>=7.0",
+]
+
+[project.optional-dependencies]
+sitl = [
+    "pybullet>=3.2.0",
+    "opencv-python-headless>=4.8.0",
+    "imageio>=2.30.0",
+]
+maps = [
+    "osmnx>=1.6.0",
+]
+demo = [
+    "gradio>=5.0.0,<7.0.0",
+    "playwright>=1.40.0",
+]
+dev = [
+    "pytest>=7.0",
+    "ruff>=0.1.0",
+    "vulture>=2.10",
+    "typeguard>=4.0.0",
+]
+all = [
+    "acalib[sitl,maps,demo,dev]",
+]

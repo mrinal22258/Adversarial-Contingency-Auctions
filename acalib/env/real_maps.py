@@ -14,11 +14,10 @@ Provides documented, deterministic graph generation with verified SHA-256 integr
 
 import os
 import hashlib
-from typing import Dict, Tuple, List, Optional, Any
+from typing import Dict, Tuple, Optional
 import numpy as np
 import networkx as nx
 
-from .adversaries import canonical_edge
 
 # Verified SHA-256 hashes of source data files committed in data/maps/
 MOVINGAI_WAREHOUSE_HASH = "c8d1b2f24788ed6bd1ccf45065b96b4ce82d65f88c72de750e03e2758637bff0"

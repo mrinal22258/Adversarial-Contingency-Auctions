@@ -4,14 +4,13 @@ Robots explicitly gossip full belief vectors B_r and edge observation sets over 
 Enables direct empirical comparison of ACA's 'no belief exchange' claim against explicit gossip.
 """
 
-from typing import Dict, List, Tuple, Optional, Any
+from typing import Dict, Tuple, Any
 import numpy as np
 import networkx as nx
 
 from .cbba import CBBAAllocator
-from .base import Task
 from ..agents.robot import RobotAgent
-from ..env.comm import CommunicationNetwork, Message
+from ..env.comm import CommunicationNetwork
 
 
 class CBBABeliefGossipAllocator(CBBAAllocator):

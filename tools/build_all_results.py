@@ -37,9 +37,9 @@ def compute_file_sha256(path: str) -> str:
 
 
 def log_step(name: str):
-    print(f"\n========================================================")
+    print("\n========================================================")
     print(f"[*] {name}")
-    print(f"========================================================")
+    print("========================================================")
 
 
 def run_pipeline() -> bool:
@@ -109,7 +109,7 @@ def run_pipeline() -> bool:
     if not valid:
         print(f"[FAIL] Claim ledger validation errors: {errors}")
         return False
-    print(f"-> Claim ledger verified with 15 material claims.")
+    print("-> Claim ledger verified with 15 material claims.")
     provenance["steps"]["step6_claim_ledger"] = "PASS"
 
     # Step 7: Compiling Manuscript

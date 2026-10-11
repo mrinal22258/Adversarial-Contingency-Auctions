@@ -1,4 +1,3 @@
-import os
 import networkx as nx
 
 graphml_path = "data/maps/boston_downtown_drive.graphml"

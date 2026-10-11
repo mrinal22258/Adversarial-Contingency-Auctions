@@ -1,4 +1,4 @@
-"""
+r"""
 Verification of Theorem 1 and Assumption 1 from per-claim evaluations.
 
 Three Adherence Levels:
@@ -111,17 +111,17 @@ def main():
     print("ASSUMPTION 1 & THEOREM 1 COMPREHENSIVE EMPIRICAL VERIFICATION REPORT")
     print("=" * 75)
     print("\n--- 1. THREE HIERARCHICAL ADHERENCE LEVELS ---")
-    print(f"Level 1: Per-Evaluation Adherence (All Periodic Observations):")
-    print(f"  Definition : Fraction of total periodic peer belief tracking evaluations where TV <= eta_eff.")
+    print("Level 1: Per-Evaluation Adherence (All Periodic Observations):")
+    print("  Definition : Fraction of total periodic peer belief tracking evaluations where TV <= eta_eff.")
     print(f"  Adherence  : {eval_level_rate * 100:.2f}% ({adh_evals:,} / {tot_evals:,} evaluations)")
-    print(f"\nLevel 2: Per-Instance Adherence (Independent Benchmark Instances):")
-    print(f"  Definition : Mean adherence rate across independent benchmark instances (graph_family, seed).")
+    print("\nLevel 2: Per-Instance Adherence (Independent Benchmark Instances):")
+    print("  Definition : Mean adherence rate across independent benchmark instances (graph_family, seed).")
     print(f"  Adherence  : {inst_mean * 100:.2f}% (95% Bootstrap CI: [{ci_low * 100:.2f}%, {ci_high * 100:.2f}%], N = {len(arr_inst)})")
-    print(f"  Test vs 90%: Strictly rejected (p = 1.000, Assumption 1 is an idealized condition)")
-    print(f"\nLevel 3: Per-Safe-Claim Adherence (Claim-Level Commitment - Theorem 1 Antecedent):")
-    print(f"  Definition : Fraction of actual local safe claims where TV <= eta_eff at the moment of claim.")
+    print("  Test vs 90%: Strictly rejected (p = 1.000, Assumption 1 is an idealized condition)")
+    print("\nLevel 3: Per-Safe-Claim Adherence (Claim-Level Commitment - Theorem 1 Antecedent):")
+    print("  Definition : Fraction of actual local safe claims where TV <= eta_eff at the moment of claim.")
     print(f"  Adherence  : {claim_level_rate * 100:.2f}% ({n_adhered_safe:,} / {n_safe_claims:,} safe claims)")
-    print(f"  Significance: THIS is the ~21% condition that Theorem 1 directly conditions on!")
+    print("  Significance: THIS is the ~21% condition that Theorem 1 directly conditions on!")
 
     print("\n--- 2. THEOREM 1 EMPIRICAL CONFLICT-FREEDOM ---")
     print(f"Safe Claims with TV <= eta_eff       : {n_adhered_safe:,}")
@@ -135,9 +135,9 @@ def main():
     late_claims = adhered_safe[adhered_safe["step"] > 0]
     up_early = exact_one_sided_ci_zero_events(len(early_claims))
     up_late = exact_one_sided_ci_zero_events(len(late_claims))
-    print(f"Early Claims (Step = 0, Initial Allocation):")
+    print("Early Claims (Step = 0, Initial Allocation):")
     print(f"  n = {len(early_claims):,}, conflicts = {int(early_claims['conflicted'].sum())}, one-sided 95% upper CI = {up_early * 100:.4f}% ({up_early:.4e})")
-    print(f"Late Claims (Step > 0, Dynamic Online Recourse):")
+    print("Late Claims (Step > 0, Dynamic Online Recourse):")
     print(f"  n = {len(late_claims):,}, conflicts = {int(late_claims['conflicted'].sum())}, one-sided 95% upper CI = {up_late * 100:.4f}% ({up_late:.4e})")
 
     print("\n--- 4. THEOREM 1 BREAKDOWN BY COMMUNICATION REGIME ---")
@@ -145,9 +145,9 @@ def main():
     perturb_claims = adhered_safe[adhered_safe["comm_regime"] != "nominal"]
     up_nom = exact_one_sided_ci_zero_events(len(nom_claims))
     up_perturb = exact_one_sided_ci_zero_events(len(perturb_claims))
-    print(f"Nominal Communication Regime:")
+    print("Nominal Communication Regime:")
     print(f"  n = {len(nom_claims):,}, conflicts = {int(nom_claims['conflicted'].sum())}, one-sided 95% upper CI = {up_nom * 100:.4f}% ({up_nom:.4e})")
-    print(f"Perturbation & Degraded Regimes (OFAT Range, Loss, Partition, Poisson):")
+    print("Perturbation & Degraded Regimes (OFAT Range, Loss, Partition, Poisson):")
     print(f"  n = {len(perturb_claims):,}, conflicts = {int(perturb_claims['conflicted'].sum())}, one-sided 95% upper CI = {up_perturb * 100:.4f}% ({up_perturb:.4e})")
 
     print("\nPer-Regime Detailed Breakdown:")

@@ -9,7 +9,6 @@ import sys
 import time
 import argparse
 import pandas as pd
-import numpy as np
 from scipy import stats
 import concurrent.futures
 

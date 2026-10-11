@@ -5,7 +5,6 @@ Comprehensive analysis of raw_results.csv, runs.jsonl, and coverage matrices.
 import os
 import json
 import pandas as pd
-import numpy as np
 
 REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 RESULTS_DIR = os.path.join(REPO_ROOT, "results")
@@ -93,7 +92,7 @@ def analyze_runs_jsonl():
             except Exception:
                 corrupted_lines += 1
 
-    print(f"\n--- runs.jsonl Analysis ---")
+    print("\n--- runs.jsonl Analysis ---")
     print(f"Total lines in current runs.jsonl: {raw_lines}")
     print(f"Successfully parsed lines: {clean_parsed}")
     print(f"Corrupted lines in current file: {corrupted_lines}")

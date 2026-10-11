@@ -8,22 +8,16 @@ Unit and regression tests verifying fixes for audit items B1-B10 and Theorems 1 
 (f) Theorem 1 Monte-Carlo policy execution vs expected cost formula
 """
 
-import pytest
 import numpy as np
 import networkx as nx
 
 from acalib.env.graph_families import generate_graph
 from acalib.env.adversaries import AdversaryType, canonical_edge
-from acalib.env.blockage_process import PersistentBlockageProcess
 from acalib.env.comm import CommunicationNetwork
 from acalib.agents.robot import RobotAgent
 from acalib.agents.contingency import ContingencyPlanner
-from acalib.agents.tom import TheoryOfMindTracker, PinskerMarginCalculator
 from acalib.alloc.base import Task
 from acalib.alloc.aca import ACAAllocator
-from acalib.alloc.cbba import CBBAAllocator
-from acalib.alloc.cbba_partial import CBBAPartialReplanAllocator
-from acalib.alloc.implicit import ImplicitCoordinationAllocator
 from acalib.sim.engine import SimulationEngine
 
 

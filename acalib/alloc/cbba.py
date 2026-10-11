@@ -3,13 +3,13 @@ Consensus-Based Bundle Algorithm (CBBA - Choi, Brunet, How 2009).
 Rigorous implementation with bundle construction, consensus phase, and release rules.
 """
 
-from typing import Dict, List, Tuple, Optional, Any, Set
+from typing import Dict, List, Tuple, Any
 import numpy as np
 import networkx as nx
 
 from .base import BaseAllocator, Task
 from ..agents.robot import RobotAgent
-from ..env.comm import CommunicationNetwork, Message
+from ..env.comm import CommunicationNetwork
 
 
 class CBBAAllocator(BaseAllocator):

@@ -1,10 +1,23 @@
+# Core dependencies
 numpy>=1.20
 scipy>=1.9.0
 networkx>=3.0
 pandas>=1.3
 pyyaml>=6.0
 matplotlib>=3.5
-pytest>=7.0
-pybullet>=3.2.0
+seaborn>=0.11.0
 ortools>=9.0
 statsmodels>=0.13.0
+pytest>=7.0
+
+# Optional extras: sitl & vision
+pybullet>=3.2.0
+opencv-python-headless>=4.8.0
+imageio>=2.30.0
+
+# Optional extras: real maps
+osmnx>=1.6.0
+
+# Optional extras: demo & web testing
+gradio>=5.0.0,<7.0.0
+playwright>=1.40.0

@@ -8,7 +8,6 @@ Evaluates ACA against its ablations:
 Across 10 seeds and 3 real maps.
 """
 
-import pytest
 from acalib.demo.runner import run_single_simulation, DEFAULT_MAX_STEPS
 
 MAP_CONFIGS = [

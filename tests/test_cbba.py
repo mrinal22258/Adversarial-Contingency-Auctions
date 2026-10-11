@@ -1,7 +1,5 @@
 """Unit tests for CBBA bundle construction and consensus resolution."""
 
-import networkx as nx
-import pytest
 
 from acalib.env.graph_families import generate_erdos_renyi
 from acalib.env.comm import CommunicationNetwork

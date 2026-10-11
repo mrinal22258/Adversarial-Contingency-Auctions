@@ -4,9 +4,7 @@ Enforces type safety, finite numerical values, canonical domain labels,
 and distinct definitions for instance keys and pairing keys.
 """
 
-from dataclasses import dataclass
-from typing import Dict, List, Tuple, Any, Optional, Set
-import math
+from typing import Dict, List, Tuple, Any
 import numpy as np
 import pandas as pd
 

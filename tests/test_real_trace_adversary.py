@@ -1,8 +1,6 @@
 """
 Unit tests for Tier E3 Real-Trace Replay Adversary on the real Boston road network.
 """
-import pytest
-import networkx as nx
 from acalib.env.real_maps import generate_real_road_network
 from acalib.env.adversaries import create_adversary, AdversaryType, RealTraceReplayAdversary
 

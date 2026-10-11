@@ -6,15 +6,11 @@ Verification tests for Phase A:
 4. Decentralized SSI respects auctioneer reachability over lossy/range-limited networks.
 """
 
-import os
-import yaml
-import pytest
 import numpy as np
 import networkx as nx
 
 from acalib.env.graph_families import generate_graph
 from acalib.env.adversaries import AdversaryType
-from acalib.env.blockage_process import PersistentBlockageProcess
 from acalib.sim.engine import SimulationEngine
 from acalib.alloc.ssi import SSIAllocator
 from acalib.alloc.base import Task

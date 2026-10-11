@@ -21,9 +21,8 @@ import sys
 import time
 import json
 import math
-import hashlib
 import argparse
-from typing import Dict, List, Tuple, Optional, Any, Set
+from typing import Dict, Tuple, Optional, Any, Set
 import numpy as np
 import networkx as nx
 
@@ -42,7 +41,7 @@ from acalib.env.blockage_process import PersistentBlockageProcess
 from experiments.sitl.world import PhysicsWorld
 from experiments.sitl.robot import DiffDriveRobotSITL
 from experiments.sitl.comm import SITLCommunicationLayer
-from experiments.sitl.adapter import create_sitl_allocator, SITLAllocatorAdapter
+from experiments.sitl.adapter import SITLAllocatorAdapter
 
 RESULTS_SITL_DIR = os.path.join(REPO_ROOT, "results", "sitl")
 RESULTS_RAW_DIR = os.path.join(RESULTS_SITL_DIR, "raw")
@@ -668,7 +667,7 @@ def main():
     total_matched_instances = total_cells * args.trials_per_cell
     total_planned_runs = total_matched_instances * len(methods)
 
-    print(f"SITL Experiment Configuration (Matched Seeds & Discrete Graph Comparison):")
+    print("SITL Experiment Configuration (Matched Seeds & Discrete Graph Comparison):")
     print(f"  Methods ({len(methods)}): {methods}")
     print(f"  Maps ({len(maps)}): {maps}")
     print(f"  Adversaries ({len(adversaries)}): {adversaries}")

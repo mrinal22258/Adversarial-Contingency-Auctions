@@ -19,7 +19,7 @@ import hashlib
 import subprocess
 import traceback
 import argparse
-from typing import Dict, List, Tuple, Any, Optional
+from typing import Dict, Tuple, Any, Optional
 import concurrent.futures
 import yaml
 import pandas as pd
@@ -31,7 +31,6 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 
 from acalib.env.graph_families import generate_graph
 from acalib.env.adversaries import AdversaryType, canonical_edge
-from acalib.env.comm import CommunicationNetwork
 from acalib.alloc.base import Task
 from acalib.sim.engine import SimulationEngine
 

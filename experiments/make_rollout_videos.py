@@ -18,23 +18,17 @@ Outputs:
 import os
 import sys
 import json
-import hashlib
 import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
-from matplotlib.patches import Circle
-from matplotlib.lines import Line2D
 import cv2
 import imageio
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from experiments.plot_style import (
-    IEEE_SINGLE_COL_WIDTH,
     IEEE_DOUBLE_COL_WIDTH,
-    METHOD_STYLES,
     OKABE_ITO,
-    apply_ieee_style,
     get_git_commit,
     write_figure_provenance,
 )

@@ -4,7 +4,7 @@ Strong literature competitor replacing Greedy DRA.
 Re-auctions only the blocked task locally rather than clearing the entire bundle.
 """
 
-from typing import Dict, List, Tuple, Optional, Any
+from typing import Dict, List, Tuple, Any
 import networkx as nx
 
 from .base import Task

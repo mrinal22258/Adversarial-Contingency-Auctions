@@ -1,24 +1,17 @@
 """Unit tests for environment modules: graphs, blockages, adversaries, comm."""
 
-import pytest
 import networkx as nx
-import numpy as np
 
 from acalib.env.graph_families import (
     generate_graph,
     generate_erdos_renyi,
-    generate_random_geometric,
-    generate_warehouse_grid,
 )
 from acalib.env.adversaries import (
-    AdversaryType,
-    create_adversary,
     StochasticAdversary,
     ReactiveAdversary,
     BudgetedInterdictionAdversary,
-    CyclicPatrolAdversary,
 )
-from acalib.env.blockage_process import PersistentBlockageProcess, EdgeState
+from acalib.env.blockage_process import PersistentBlockageProcess
 from acalib.env.comm import CommunicationNetwork, Message
 
 

@@ -5,7 +5,7 @@ Communication Network model:
 - Accurate message count and byte accounting
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Dict, List, Tuple, Optional, Any
 import numpy as np
 import networkx as nx
