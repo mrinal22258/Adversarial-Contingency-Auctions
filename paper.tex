@@ -1,4 +1,4 @@
-\documentclass[journal]{IEEEtran}
+\documentclass[lettersize,journal]{IEEEtran}
 \usepackage{amsmath,amsfonts,amssymb,amsthm}
 \usepackage{algorithmic}
 \usepackage{algorithm}
@@ -26,11 +26,13 @@
 \hyphenation{op-tical net-works semi-conduc-tor IEEE-Xplore}
 
 % Compact float spacing to maintain standard 8-page budget
-\setlength{\textfloatsep}{5pt plus 1pt minus 1pt}
-\setlength{\floatsep}{4pt plus 1pt minus 1pt}
-\setlength{\intextsep}{4pt plus 1pt minus 1pt}
-\setlength{\dbltextfloatsep}{5pt plus 1pt minus 1pt}
-\setlength{\dblfloatsep}{4pt plus 1pt minus 1pt}
+\setlength{\textfloatsep}{4pt plus 1pt minus 1pt}
+\setlength{\floatsep}{3pt plus 1pt minus 1pt}
+\setlength{\intextsep}{3pt plus 1pt minus 1pt}
+\setlength{\dbltextfloatsep}{4pt plus 1pt minus 1pt}
+\setlength{\dblfloatsep}{3pt plus 1pt minus 1pt}
+\setlength{\abovecaptionskip}{2pt plus 1pt minus 1pt}
+\setlength{\belowcaptionskip}{1pt plus 1pt minus 1pt}
 \setcounter{topnumber}{3}
 \setcounter{bottomnumber}{2}
 \setcounter{totalnumber}{5}
@@ -64,12 +66,20 @@
 
 \title{Adversarial Contingency Auctions for Decentralized Multi-Robot Task Allocation under Strategic Blockages}
 
+\newif\ifanonymous
+\anonymousfalse % Set \anonymoustrue for double-blind review
+
+\ifanonymous
+\author{Anonymous Authors}
+\markboth{IEEE Robotics and Automation Letters (RA-L)}%
+{Anonymous: Adversarial Contingency Auctions}
+\else
 \author{Kumar~Mrinal$^{1}$%
 \thanks{$^{1}$Kumar Mrinal is with the Department of Computer Science and Artificial Intelligence, Indraprastha Institute of Information Technology Delhi (IIIT-Delhi), New Delhi 110020, India (e-mail: {\tt\small mrinal22258@iiitd.ac.in}).}%
 }
-
 \markboth{IEEE Robotics and Automation Letters (RA-L)}%
 {Mrinal: Adversarial Contingency Auctions}
+\fi
 
 \maketitle
 
@@ -82,12 +92,12 @@ Multi-Robot Systems, Decentralized Task Allocation, Auction Algorithms, Continge
 \end{IEEEkeywords}
 
 \section{Introduction}
-\IEEEPARstart{A}{utonomous} multi-robot systems operating in contested, dynamic domains must allocate, sequence, and execute spatial tasks under environmental uncertainty and adversarial disruption~\cite{choi2009cbba, wilde2022online, korsah2013comprehensive}. Examples include search-and-rescue through damaged infrastructure, parcel transport in high-density automated warehouses, and perimeter reconnaissance under active interdiction~\cite{agmon2011multi}. In these settings, decentralized auction mechanisms---particularly the Consensus-Based Bundle Algorithm (CBBA)~\cite{choi2009cbba} and Sequential Single-Item (SSI) auctions~\cite{koenig2006ssi}---are widely adopted due to polynomial communication complexity and submodular efficiency guarantees.
+\IEEEPARstart{A}{utonomous} multi-robot systems operating in contested, dynamic domains must allocate, sequence, and execute spatial tasks under environmental uncertainty and adversarial disruption~\cite{choi2009cbba, wilde2022online, korsah2013comprehensive, gerkey2004formal, dias2006market, nunes2017taxonomy}. Examples include search-and-rescue through damaged infrastructure, parcel transport in high-density automated warehouses, and perimeter reconnaissance under active interdiction~\cite{agmon2011multi, bopardikar2014dynamic, sujit2008unmanned}. In these settings, decentralized auction mechanisms---particularly the Consensus-Based Bundle Algorithm (CBBA)~\cite{choi2009cbba} and Sequential Single-Item (SSI) auctions~\cite{koenig2006ssi}---are widely adopted due to polynomial communication complexity and submodular efficiency guarantees.
 
 However, existing decentralized auction mechanisms rely on two fragile assumptions:
 \begin{enumerate}
-    \item \textbf{Global Re-Auction Overhead:} When a robot encounters an unexpected corridor blockage, its single-path plan is invalidated. Standard CBBA drops the entire task bundle and initiates fleet-wide market re-auctions, inducing high message volume and coordination latency~\cite{buckman2019partial}.
-    \item \textbf{Belief Consistency Assumption:} When communication is range-limited or packet drops occur, robots observe disparate local events and maintain diverging subjective beliefs. Because market bidding rules assume aligned information, inconsistent beliefs cause robots to submit conflicting winning claims on identical tasks, inducing redundant travel and coordination failures~\cite{kundu2024multi, alighanbari2005implicit}.
+    \item \textbf{Global Re-Auction Overhead:} When a robot encounters an unexpected corridor blockage, its single-path plan is invalidated. Standard CBBA drops the entire task bundle and initiates fleet-wide market re-auctions, inducing high message volume and coordination latency~\cite{buckman2019partial, otte2020auctions}.
+    \item \textbf{Belief Consistency Assumption:} When communication is range-limited or packet drops occur, robots observe disparate local events and maintain diverging subjective beliefs. Because market bidding rules assume aligned information, inconsistent beliefs cause robots to submit conflicting winning claims on identical tasks, inducing redundant travel and coordination failures~\cite{kundu2024multi, alighanbari2005implicit, tsiogkas2018decentralized, ghaffarkhah2011communication}.
 \end{enumerate}
 
 To resolve these challenges without continuous, bandwidth-heavy belief synchronization, this paper introduces \textbf{Adversarial Contingency Auctions (ACA)}. Rather than applying ad-hoc bid penalties, ACA couples discrete contingency recourse trees with an information-theoretic \textbf{claim margin} derived from Pinsker's inequality and total variation bounds. 
@@ -127,10 +137,10 @@ The primary contributions of this work are:
 
 \section{Related Work}
 \subsection{Market-Based Task Allocation}
-Decentralized auctions provide polynomial approximations for multi-robot task allocation~\cite{choi2009cbba, koenig2006ssi, bai2023group, johnson2012asynchronous}. Choi et al.~\cite{choi2009cbba} introduced CBBA, guaranteeing \aeCbbaEfficiencyBound\% submodular efficiency under consensus. Buckman et al.~\cite{buckman2019partial} developed CBBA with partial replanning (CBBA-PR) for dynamic task arrivals; we adapt this to persistent blockages as \textbf{CBBA-PR (Adapted)}, releasing solely the blocked task. Ponda et al.~\cite{ponda2012cc} introduced Chance-Constrained CBBA (CC-CBBA) to bound route failure risk. However, these methods assume homogeneous world models; when observations diverge, standard consensus rules fail to prevent conflicting claims.
+Decentralized auctions provide polynomial approximations for multi-robot task allocation~\cite{choi2009cbba, koenig2006ssi, bai2023group, johnson2012asynchronous, tovey2005geometry, luo2014provably, williams2017decentralized}. Choi et al.~\cite{choi2009cbba} introduced CBBA, guaranteeing \aeCbbaEfficiencyBound\% submodular efficiency under consensus. Buckman et al.~\cite{buckman2019partial} developed CBBA with partial replanning (CBBA-PR) for dynamic task arrivals; we adapt this to persistent blockages as \textbf{CBBA-PR (Adapted)}, releasing solely the blocked task. Ponda et al.~\cite{ponda2012cc} and Bandyopadhyay et al.~\cite{bandyopadhyay2017risk} introduced chance-constrained and risk-aware formulations to bound route failure risk. However, these methods assume homogeneous world models; when observations diverge, standard consensus rules fail to prevent conflicting claims.
 
 \subsection{Coordination under Inconsistent World Views}
-Planning under belief inconsistency was pioneered by Alighanbari and How~\cite{alighanbari2005implicit}, where implicit task allocation suffers frequent conflicts under divergent worldviews. Kundu et al.~\cite{kundu2024multi} enforced action-consistency constraints during joint continuous trajectory optimization. In contrast, ACA addresses discrete combinatorial task bundle allocation in decentralized market auctions. By deriving a closed-form Pinsker margin, ACA empirically prevents conflicting discrete task assignments under bounded belief estimation error without communicating continuous trajectory plans or high-dimensional belief vectors~\cite{ghadimi2014multi}.
+Planning under belief inconsistency was pioneered by Alighanbari and How~\cite{alighanbari2005implicit}, where implicit task allocation suffers frequent conflicts under divergent worldviews. Kundu et al.~\cite{kundu2024multi} enforced action-consistency constraints during joint continuous trajectory optimization. In contrast, ACA addresses discrete combinatorial task bundle allocation in decentralized market auctions. By deriving a closed-form Pinsker margin, ACA empirically prevents conflicting discrete task assignments under bounded belief estimation error without communicating continuous trajectory plans or high-dimensional belief vectors~\cite{ghadimi2014multi, olfatisaber2007consensus, albrecht2018reasoning}.
 
 \subsection{Contingency Routing and Adversarial Interdiction}
 Routing under stochastic edge blockages is classical in the Canadian Traveller Problem (CTP)~\cite{papadimitriou1991shortest, eyerich2010high, nikolova2008route} and vehicle routing with recourse~\cite{bertsimas1996new, wood1993deterministic, agmon2011multi}. Peters et al.~\cite{peters2024contingency} formulated contingency games for continuous interactive trajectory planning. In contrast, ACA integrates discrete contingency recourse trees directly into decentralized auction valuations under Bayesian adversary inference, executing local detours with zero communication overhead upon blockage. Table~\ref{tab:related_works} outlines feature differentiation against prior literature.
@@ -145,35 +155,7 @@ We model each risky edge $e \in E_{\text{risk}}$ as a two-state Markov chain $X_
     P(X_e^{t+1} = 1 \mid X_e^t = 0, \theta, s_t) &= h_\theta(e, s_t) \quad \text{(Onset Hazard)} \\
     P(X_e^{t+1} = 0 \mid X_e^t = 1) &= \mu \quad \text{(Clearance Rate)}
 \end{align}
-A global budget $k$ bounds simultaneously blocked edges: $\sum_{e \in E_{\text{risk}}} X_e^t \le k$. Table~\ref{tab:system_params} lists operational parameters across all benchmark environments.
-
-\begin{table}[htbp]
-\centering
-\caption{Benchmark System and Algorithm Parameters}
-\label{tab:system_params}
-\renewcommand{\arraystretch}{0.88}
-\begin{tabular}{@{}llc@{}}
-\toprule
-\textbf{Category} & \textbf{Parameter} & \textbf{Default Value} \\
-\midrule
-\multirow{5}{*}{Blockage Process} & Baseline onset rate ($p_0$) & \aeParamPZeroOne\ ($\theta_1$), \aeParamPZeroTwo\ ($\theta_2$) \\
- & Reactive traffic scaling ($\alpha$) & \aeParamAlphaReactive\ ($\theta_2$) \\
- & Corridor clearance rate ($\mu$) & \aeParamMuClearance \\
- & Interdiction budget ($k$) & \aeParamInterdictionBudget \\
- & Risky edge fraction ($|E_{\text{risk}}|/|E|$) & \aeParamRiskyEdgeFraction \\
-\midrule
-\multirow{5}{*}{Fleet \& Comms} & Fleet size ($R$) & \aeFleetSize \\
- & Tasks per mission ($M$) & \aeTasksCount \\
- & Maximum bundle capacity ($L_b$) & \aeBundleCapacity \\
- & Robot speed / Sensor range & \aeRobotSpeed\ / \aeSensorRange \\
- & Comm range / Packet drop & \aeCommRange\ / $p_{\text{drop}} = \aePacketDropProb$ \\
-\midrule
-\multirow{3}{*}{ACA Algorithm} & Contingency recourse depth ($d$) & \aeRecourseDepth \\
- & ToM estimation error bound ($\eta$) & \aeTomErrorBound \\
- & Age inflation ($\lambda_{\text{age}}$) / $\delta_{\text{map}}$ & \aeAgeInflation\ / \aeDeltaMap \\
-\bottomrule
-\end{tabular}
-\end{table}
+A global budget $k$ bounds simultaneously blocked edges: $\sum_{e \in E_{\text{risk}}} X_e^t \le k$. Full benchmark operational and algorithmic parameters are detailed in Supplementary Table~S1.
 
 \subsection{Adversary Behavioral Type Space}
 The onset hazard $h_\theta(e, s_t)$ is governed by an adversary type $\theta^* \in \Theta$:
@@ -313,9 +295,12 @@ Theorem~\ref{thm:conflict_freedom} is strictly conditional on Assumption~\ref{as
 \end{enumerate}
 \noindent Across all \aeSafeClaimsAdhered\ safe claims satisfying $\mathrm{TV} \leq \eta_{\text{eff}}$, exactly \textbf{\aeTheoremConflicts\ double-claim conflicts occurred}, confirming Theorem~\ref{thm:conflict_freedom} empirically (one-sided \aeConfidenceLevel\% Clopper--Pearson bound \aeTheoremConflictRateUpper\%, Fig.~\ref{fig:theorem1_assumption1}). Mission time $t$ indexes discrete simulation planning ticks ($T = \aeMissionHorizonTicks$ ticks; mean computation $\aeAcaRuntime \pm \aeAcaRuntimeCI$~ms), not wall-clock seconds. Initial allocation at tick $t = \aeInitialTimeStep$ accounts for \aeTheoremStepZeroPct\% of adhered claims ($n = \aeTheoremStepZeroN$ of \aeSafeClaimsAdhered, \aeZeroConflicts\ conflicts, upper bound \aeTheoremStepZeroUpper\%). Across the mission, conflict-freedom holds for early claims ($t < \aeTheoremCutoffTick$: $n = \aeTheoremEarlyN$, \aeZeroConflicts\ conflicts, bound \aeTheoremEarlyUpper\%) and late recourse claims ($t \ge \aeTheoremCutoffTick$: $n = \aeTheoremLateN$, \aeZeroConflicts\ conflicts, bound \aeTheoremLateUpper\%). By communication regime, conflict-freedom holds under nominal comms ($n = \aeTheoremNominalN$, \aeZeroConflicts\ conflicts, bound \aeTheoremNominalUpper\%) and perturbation regimes ($n = \aeTheoremPerturbN$, \aeZeroConflicts\ conflicts, bound \aeTheoremPerturbUpper\%). Because Assumption~\ref{ass:tom} holds for \aeAdherencePerClaim\% of safe claims, safe-claim conflict-freedom is strictly \textbf{empirical}. In practice, belief divergence ($\mathrm{TV} > \eta_{\text{eff}}$) arises along two timelines: early under bursty local discoveries before consensus catches up, and late under lossy comms from cumulative packet drops. In both cases, ACA's margin conservatively defers \aeHfourDeferralPct\% of claims to Phase~2 consensus, maintaining a fleet conflict-free-run rate of \aeConflictFreeRunPct\% (\aeConfidenceLevel\% CI: $[\aeConflictFreeRunRateCILow\%, \aeConflictFreeRunRateCIHigh\%]$).
 
+\noindent\textit{Remark 2 (Entropy-Adaptive Margin and Theoretical Open Problem):}
+Theorem~\ref{thm:conflict_freedom} conditions on static margin factor $\kappa \geq \aeAdaptiveStaticBound$. In practical deployments, an entropy-modulated adaptive margin $\kappa_{\text{adapt}} = \kappa (\aeAdaptiveBaseFactor + \aeAdaptiveWeightFactor \mathcal{H}(B_r) / \log |\Theta|)$ tightens the claim threshold as posterior uncertainty contracts. While this empirical calibration maintains empirical conflict freedom in all evaluated runs, formal mathematical preservation of the safe-claim guarantee under time-varying, agent-asymmetric margin factors remains an open theoretical conjecture.
+
 \begin{figure}[!htbp]
 \centering
-\includegraphics[width=\columnwidth,height=1.85cm,keepaspectratio]{static/images/fig_theorem1_assumption1}
+\includegraphics[width=\columnwidth,height=1.55cm,keepaspectratio]{static/images/fig_theorem1_assumption1}
 \caption{Empirical evaluation of Theorem~1 and Assumption~1 Total Variation ($\mathrm{TV}$) adherence across operational regimes ($n = \aeSafeClaimsTotal$ safe-claim commitments, \aeTotalTvObservations\ total $\mathrm{TV}$ observations, hypothesis $H_7$). (Left) Assumption~1 adherence breakdown across benign, constrained, and lossy communication networks. (Right) Empirical safe-claim conflict rate (\aeZeroConflicts/\aeSafeClaimsAdhered\ conflicts when $\mathrm{TV} \le \eta_{\text{eff}}$, one-sided \aeConfidenceLevel\% Clopper--Pearson exact upper bound \aeTheoremConflictRateUpper\%).}
 \label{fig:theorem1_assumption1}
 \end{figure}
@@ -347,11 +332,11 @@ All experiments were conducted across five graph topology families, encompassing
 
 \begin{figure*}[!t]
 \centering
-\includegraphics[width=0.32\textwidth,height=2.1cm,keepaspectratio]{static/images/fig_map_movingai_warehouse}%
+\includegraphics[width=0.32\textwidth,height=1.65cm,keepaspectratio]{static/images/fig_map_movingai_warehouse}%
 \hfill
-\includegraphics[width=0.32\textwidth,height=2.1cm,keepaspectratio]{static/images/fig_map_boston_road}%
+\includegraphics[width=0.32\textwidth,height=1.65cm,keepaspectratio]{static/images/fig_map_boston_road}%
 \hfill
-\includegraphics[width=0.34\textwidth,height=2.1cm,keepaspectratio]{static/images/fig_map_synthetic_families}
+\includegraphics[width=0.34\textwidth,height=1.65cm,keepaspectratio]{static/images/fig_map_synthetic_families}
 \caption{Benchmark Navigation Topologies: (Left) Real MovingAI warehouse map ($\aeMapMovingAiGridW \times \aeMapMovingAiGridH$ grid, \aeMapMovingAiPassableCells\ passable cells) and coarsened navigation backbone ($n = \aeMapMovingAiNodes, |E| = \aeMapMovingAiBackboneEdges$). (Center) Real Downtown Boston road network ($n = \aeMapBostonNodes, |E| = \aeMapBostonEdges$) displaying risk corridors, robot starts ($R = \aeFleetSize$), task locations ($M = \aeBostonTasks$), and communication range ($r_{\mathrm{comm}} = \aeBostonCommRange$). (Right) Synthetic benchmark families evaluated as stress tests (Random Geometric, Warehouse Grid, Erd\H{o}s--R\'enyi).}
 \label{fig:benchmark_maps}
 \end{figure*}
@@ -383,7 +368,7 @@ Table~\ref{tab:main_results} reports quantitative performance across $N = \aeMat
 
 \begin{figure}[!htbp]
 \centering
-\includegraphics[width=\columnwidth,height=1.95cm,keepaspectratio]{static/images/fig_critical_difference_diagram}
+\includegraphics[width=\columnwidth,height=1.55cm,keepaspectratio]{static/images/fig_critical_difference_diagram}
 \caption{Critical Difference (CD) diagram for algorithm completion rankings across benchmark topologies ($N = \aeMatchedBenchmarkInstances$ matched independent instances, hypothesis $H_2$). Statistical differences evaluated via omnibus Friedman rank-sum test ($\chi^2_F = \aeFriedmanChiSq, p < 10^{-15}$) with post-hoc Nemenyi critical difference analysis at $\alpha = \aeAlphaSignificance$; horizontal bars connect algorithms with statistically indistinguishable performance rankings.}
 \label{fig:critical_difference_diagram}
 \end{figure}
@@ -392,14 +377,7 @@ Table~\ref{tab:main_results} reports quantitative performance across $N = \aeMat
 Under persistent corridor blockages, standard CBBA drops its entire bundle upon a single blockage and initiates fleet-wide market re-auctions. Consequently, standard CBBA achieves only $\aeCbbaComp \pm \aeCbbaCompCI\%$ completion while exchanging $\aeCbbaMsgs \pm \aeCbbaMsgsCI$ messages. By contrast, ACA leverages type-aware expected recourse cost valuation and zero-message local detour execution, achieving $\aeAcaComp \pm \aeAcaCompCI\%$ completion ($\aeCompletionDiffCbba$ percentage points, $p < \aeAlphaSignificance$, Cliff's $\delta = \aeCliffsDeltaCbba$) and exchanging $\aeAcaMsgs \pm \aeAcaMsgsCI$ messages (a significant reduction of $\aeMsgDiffCbba$ messages, $p < \aeAlphaSignificance$).
 
 \subsubsection{Headline Comparison: ACA vs. CBBA+LR}
-To isolate the benefit of ACA's market mechanism beyond raw detour execution, our primary headline comparison evaluates ACA against CBBA equipped with identical local recourse (+LR). As registered in $H_2$ and shown in the paired forest plot (Fig.~\ref{fig:forest_paired_differences}), ACA achieves a statistically significant completion gain of \aeHtwoCbbaLrDiff\ percentage points over CBBA+LR (Hodges--Lehmann median difference \aeHtwoCbbaLrHlMedian~pp, \aeConfidenceLevel\% CI [\aeHtwoCbbaLrCILow, \aeHtwoCbbaLrCIHigh]~pp, $p = \aePvalCbbaLr$). This confirms that contingency-aware bidding and safe-claim margin calculation provide measurable coordination benefits beyond simple reactive detour execution.
-
-\begin{figure}[!htbp]
-\centering
-\includegraphics[width=\columnwidth,height=1.95cm,keepaspectratio]{static/images/fig_forest_paired_differences}
-\caption{Paired differences in task completion rate (\%) vs.~ACA across benchmark algorithms ($N = \aeMatchedBenchmarkInstances$ matched independent instances across \aeBenchmarkMapCount\ graph families, hypotheses $H_1, H_2, H_3$). Markers denote Hodges--Lehmann median paired differences with \aeConfidenceLevel\% bootstrap confidence intervals; $p$-values computed via two-sided paired Wilcoxon signed-rank tests with Holm--Bonferroni correction.}
-\label{fig:forest_paired_differences}
-\end{figure}
+To isolate the benefit of ACA's market mechanism beyond raw detour execution, our primary headline comparison evaluates ACA against CBBA equipped with identical local recourse (+LR). As registered in $H_2$ and detailed in the Supplementary Material (paired forest plot Fig.~S5), ACA achieves a statistically significant completion gain of \aeHtwoCbbaLrDiff\ percentage points over CBBA+LR (Hodges--Lehmann median difference \aeHtwoCbbaLrHlMedian~pp, \aeConfidenceLevel\% CI [\aeHtwoCbbaLrCILow, \aeHtwoCbbaLrCIHigh]~pp, $p = \aePvalCbbaLr$). This confirms that contingency-aware bidding and safe-claim margin calculation provide measurable coordination benefits beyond simple reactive detour execution.
 
 \subsubsection{Ablation Analysis: Recourse, Margin, and Inference}
 To isolate the distinct mechanisms in ACA, we analyzed three clean ablations shown in Fig.~\ref{fig:ablation_suite}:
@@ -411,7 +389,7 @@ To isolate the distinct mechanisms in ACA, we analyzed three clean ablations sho
 
 \begin{figure}[!htbp]
 \centering
-\includegraphics[width=\columnwidth,height=1.95cm,keepaspectratio]{static/images/fig_ablation_suite}
+\includegraphics[width=\columnwidth,height=1.55cm,keepaspectratio]{static/images/fig_ablation_suite}
 \caption{Systematic ablation analysis of ACA core algorithmic mechanisms ($N = \aeMatchedBenchmarkInstances$ matched independent instances per ablation condition). Panels depict: (Left) Recourse depth ablation ($d=\aeRecourseDepthZero$ vs. $d=\aeRecourseDepthOne$, paired Wilcoxon test $p < 10^{-10}$, hypothesis $H_1$); (Center) Margin ablation and conflict impact ($H_4$, TOST equivalence test $p < 10^{-18}$); (Right) Bayesian type inference vs. uniform prior ($H_5$, paired Wilcoxon test $p = \aePvalInferenceNull$).}
 \label{fig:ablation_suite}
 \end{figure}
@@ -421,43 +399,39 @@ To isolate the distinct mechanisms in ACA, we analyzed three clean ablations sho
     \item \textbf{CBBA with Partial Release (+LR):} The adapted partial-release baseline equipped with level recourse (+LR) achieves $\aeCbbaPartialLrComp \pm \aeCbbaPartialLrCompCI\%$ completion. The difference vs.\ ACA is \aeHtwoCbbaPrLrDiff\ percentage points (HL median difference \aeHtwoCbbaPrLrHlMedian~pp, \aeConfidenceLevel\% CI [\aeHtwoCbbaPrLrCILow, \aeHtwoCbbaPrLrCIHigh]~pp, Holm-adjusted $p = \aePvalCbbaPrLr$, Bonferroni $p = \aePvalCbbaPrLrBonf$). This demonstrates statistical parity with CBBA-PR+LR across benchmark topologies. In welfare, ACA achieves non-inferiority within the pre-registered margin ($p_{\text{TOST}} = \aePvalHthreeWelfare$).
     \item \textbf{CTP Replan and Implicit Coordination:} In discrete graph simulation, CTP Replan achieves $\aeCtpComp \pm \aeCtpCompCI\%$ task completion (\aeHtwoCtpDiff~pp difference vs.\ ACA, adjusted $p = \aePvalCtp$), and Implicit Coordination achieves $\aeImplicitComp \pm \aeImplicitCompCI\%$ completion (\aeHtwoImplicitDiff~pp difference vs.\ ACA, adjusted $p = \aePvalImplicit$). Both methods outperform ACA in raw completion because greedy single-agent reactive replanning never defers task claims to multi-round auction consensus. However, this completion advantage comes at high coordination risk: Implicit Coordination incurs $\aeImplicitTotConf \pm \aeImplicitTotConfCI$ total conflicts and $\aeImplicitDistConf \pm \aeImplicitDistConfCI$ distinct double-assigned tasks, whereas ACA isolates safe claims, achieving $\aeHfourSafeConflictReductionPct\%$ safe-conflict reduction.
     \item \textbf{Sequential Single-Item (SSI):} In this static task-set benchmark, SSI achieves high completion ($\aeSsiComp \pm \aeSsiCompCI\%$) and net welfare ($\aeSsiWelfare \pm \aeSsiWelfareCI$) with zero conflicts and low message volume ($\aeSsiMsgs \pm \aeSsiMsgsCI$). When equipped with recourse (SSI+LR), ACA maintains a significant completion advantage of \aeHtwoSsiLrDiff~pp ($p < 10^{-5}$).
-    \item \textbf{Interdiction Budget Sensitivity ($H_6$):} Fig.~\ref{fig:kappa_sweep} illustrates the scaling of completion across simultaneous blockage budgets $\kappa \in \{\aeKappaTwo, \aeKappaFour, \aeKappaSix\}$ ($N = \aeMatchedBenchmarkInstances$ instances, \aeKappaTrials\ trials). Increasing adversary budget monotonically degrades completion across topologies (Jonckheere--Terpstra $p < 10^{-12}$), with ACA maintaining its advantage over CBBA variants.
-    \item \textbf{Null Findings on Regimes and Topologies:} Across communication regimes ($H_{\text{2\_REGIME}}$), ACA demonstrates parity under lossy conditions ($p = \aePvalRegimeNull$). Across topology classes (real vs.\ synthetic), completion differences are statistically non-significant ($p = \aePvalTopologyNull$), confirming consistent behavior across map structures.
+    \item \textbf{Interdiction Budget Sensitivity ($H_6$):} Across simultaneous blockage budgets $\kappa \in \{\aeKappaTwo, \aeKappaFour, \aeKappaSix\}$ ($N = \aeMatchedBenchmarkInstances$ instances, \aeKappaTrials\ trials; Supplementary Fig.~S6), increasing adversary budget monotonically degrades completion across topologies (Jonckheere--Terpstra $p < 10^{-12}$), with ACA maintaining its advantage over CBBA variants.
+    \item \textbf{Null Findings on Regimes and Topologies:} Across communication regimes ($H_{\text{2\_REGIME}}$), ACA demonstrates parity under lossy conditions ($p = \aePvalRegimeNull$). Across topology classes (real vs.\ synthetic), completion differences are statistically non-significant ($p = \aePvalTopologyNull$), confirming consistent behavior across map structures (Supplementary Table~S7).
     \item \textbf{Clairvoyant Greedy (Oracle Reference):} The centralized omniscient Oracle achieves $\aeOracleComp \pm \aeOracleCompCI\%$ completion and $\aeOracleWelfare \pm \aeOracleWelfareCI$ welfare with zero conflicts, serving as an informed empirical reference (not a mathematical bound).
 \end{itemize}
 
-\begin{figure}[!htbp]
-\centering
-\includegraphics[width=\columnwidth,height=1.95cm,keepaspectratio]{static/images/fig_kappa_sweep}
-\caption{Sensitivity of fleet completion to interdiction budget $\kappa \in \{\aeKappaTwo, \aeKappaFour, \aeKappaSix\}$ across \aeBenchmarkMapCount\ benchmark graph families ($N = \aeMatchedBenchmarkInstances$ matched independent instances, \aeKappaTrials\ total trials, hypothesis $H_6$). Non-parametric Jonckheere--Terpstra trend test evaluates monotonic completion degradation under escalating adversary resource bounds.}
-\label{fig:kappa_sweep}
-\end{figure}
+Mean per-tick computation time for ACA is $\aeAcaRuntime \pm \aeAcaRuntimeCI$ ms, operating comfortably within real-time multi-robot planning rates while accounting for contingency tree evaluation and Theory of Mind calculations. Supplementary Table~S7 details performance stratified across map classes and adversarial regimes.
 
-\input{results/table_stratified.tex}
+\subsection{Protocol v5 Confirmatory Evaluation on Held-Out Seeds}
+To eliminate hyperparameter tuning leakage and test out-of-sample generalizability across the entire benchmark universe, Protocol~v5 was executed across all \aeBenchmarkMapCount\ map topologies and \aeAdversaryCount\ adversary profiles on strictly held-out random seeds $\aeHeldoutSeedStart \dots \aeHeldoutSeedEnd$ ($N = \aeHeldoutInstances$ matched independent instances, \aeHeldoutTrials\ total paired trials). Table~\ref{tab:heldout_v5_results} summarizes confirmatory results under family-wide Holm--Bonferroni correction.
 
-Mean per-tick computation time for ACA is $\aeAcaRuntime \pm \aeAcaRuntimeCI$ ms, operating comfortably within real-time multi-robot planning rates while accounting for contingency tree evaluation and Theory of Mind calculations. Table~\ref{tab:stratified_results} details performance stratified across map classes and adversarial regimes.
+\input{results/table_heldout_v5.tex}
+
+In this held-out evaluation, ACA+ achieves $\aeHeldoutAcaPlusComp\%$ completion, demonstrating parity with static ACA ($\aeHeldoutAcaComp\%$, difference $\aeHeldoutDiffAcaPlusAca$~pp, Holm $p = \aeHeldoutHolmPvalParity$) while pruning negligible-risk branches ($\pi(e) < \aeHeldoutPruneThreshold$). Most importantly, evaluating ACA against ACA (No Margin) confirms the Pinsker margin's central coordination mechanism: ACA reduces total conflicts by $\aeHeldoutConflictReductionPct\%$ relative to ACA (No Margin) ($\aeHeldoutAcaConflicts$ vs.\ $\aeHeldoutNoMarginConflicts$, paired difference $-\aeHeldoutConflictReduction$, Holm $p = \aePvalHeldoutNoMargin$). Disabling the margin yields only a modest $\aeHeldoutDiffNoMargin$~pp completion gain ($p = \aePvalHeldoutNoMarginDiff$, not statistically significant after FWER adjustment) at the cost of severe conflict inflation. CTP Replan achieves completion parity ($\aeHeldoutCtpComp\%$) while exchanging significantly fewer messages ($\aeHeldoutCtpMsgs$ vs.\ $\aeHeldoutAcaPlusMsgs$, $p < 10^{-67}$) due to single-agent reactive replanning without consensus. Finally, ACA+ maintains a decisive $\aeHeldoutSsiDiff$~pp completion gain over SSI+LR ($p < 10^{-25}$).
 
 \subsection{Software-in-the-Loop Simulation (Software Simulation Only)}
 To evaluate whether algorithmic conclusions hold under continuous physical execution, we conducted Software-in-the-Loop (SITL) simulations using PyBullet rigid-body physics and OpenCV ArUco marker tracking. \textbf{All experiments in this section represent pure software simulation; no physical robots were deployed.} Evaluations were performed across $N = \aeSitlMatchedTrials$ matched paired trials per method over identical random seeds ($\aeSitlSeedStart \dots \aeSitlSeedEnd$, disjoint from the primary sweep) spanning all \aeSitlConditionCells\ condition cells (\aeSitlRealMaps\ real maps $\times$ \aeSitlAdversaries\ adversaries $\times$ \aeSitlRegimes\ communication regimes). Table~\ref{tab:sitl_results} summarizes the paired results.
 
 \input{results/table_sitl.tex}
 
-\noindent\textbf{1) Sim-to-Sim Domain Gap and Rank Invariance Failure:} Continuous physics introduces velocity limits, acceleration constraints, turning delays, and spatial proximity interactions absent from discrete graph simulation. Consequently, all evaluated methods exhibit a substantial completion drop of $\approx \aeSitlDomainGapAbs$~pp in continuous simulation (ACA: $\aeSitlAcaComp\% \pm \aeSitlAcaCompCIVal\%$ in SITL vs.\ $\aeSitlGraphComp\% \pm \aeSitlGraphCompCIVal\%$ in discrete graph simulation; Hodges--Lehmann median gap $\aeSitlHlMedianGap$~pp, \aeConfidenceLevel\% CI $[\aeSitlHlMedianGapCILow, \aeSitlHlMedianGapCIHigh]$~pp, Holm-adjusted $p = \aePvalSitlHolm$). Crucially, rank invariance fails across simulation fidelities: the Spearman rank-order correlation between discrete and continuous SITL completion rankings across methods is weak and statistically non-significant ($\rho = \aeSitlRankSpearmanRho, p = \aeSitlRankSpearmanPval$). While paired tests vs.~ACA show parity for CBBA-PR+LR (\aeSitlCbbaPrLrDiff~pp, $p = \aePvalSitlCbbaPrLr$), ACA-no-margin (\aeSitlNoMarginDiff~pp, $p = \aePvalSitlNoMargin$), and CTP Replan (\aeSitlCtpDiff~pp, $p = \aePvalSitlCtp$), Implicit Coordination achieves higher raw completion (\aeSitlImplicitDiff~pp, $p < 10^{-4}$) at the expense of severe continuous collisions and coordination conflicts (\aeSitlImplicitConflicts\ conflicts/trial vs.~ACA's \aeSitlAcaConflicts).
+\noindent\textbf{1) Sim-to-Sim Domain Gap and Rank Invariance Failure:} Continuous physics introduces velocity limits, acceleration constraints, and spatial proximity interactions absent from discrete graph simulation. Consequently, all evaluated methods exhibit a completion drop of $\approx \aeSitlDomainGapAbs$~pp (ACA: $\aeSitlAcaComp\% \pm \aeSitlAcaCompCIVal\%$ in SITL vs.\ $\aeSitlGraphComp\% \pm \aeSitlGraphCompCIVal\%$ in graph simulation; HL median gap $\aeSitlHlMedianGap$~pp, $[\aeSitlHlMedianGapCILow, \aeSitlHlMedianGapCIHigh]$~pp, Holm $p = \aePvalSitlHolm$). Crucially, rank invariance fails across simulation fidelities: Spearman rank-order correlation between discrete and continuous rankings is non-significant ($\rho = \aeSitlRankSpearmanRho, p = \aeSitlRankSpearmanPval$). Paired tests show parity for CBBA-PR+LR (\aeSitlCbbaPrLrDiff~pp, $p = \aePvalSitlCbbaPrLr$), ACA-no-margin (\aeSitlNoMarginDiff~pp, $p = \aePvalSitlNoMargin$), and CTP Replan (\aeSitlCtpDiff~pp, $p = \aePvalSitlCtp$), while Implicit Coordination achieves higher raw completion (\aeSitlImplicitDiff~pp, $p < 10^{-4}$) at the cost of severe continuous collisions (\aeSitlImplicitConflicts\ conflicts/trial vs.~ACA's \aeSitlAcaConflicts).
 
-\noindent\textbf{2) Physical Contacts and Bottleneck Congestion:} In Table~\ref{tab:sitl_results}, \textit{physical collisions} denote rigid-body contact events (\texttt{p.getContactPoints > 0}). Although contacts correlate with detour activations ($r = \aeSitlContactDetourCorr$; Spearman $\rho = \aeSitlContactDetourSpearman$), this correlation does not validate recourse detours; spatial corridor blockages simply force bottleneck congestion, elevating collisions around obstructed passages across all methods.
+\noindent\textbf{2) Physical Contacts and Bottleneck Congestion:} In Table~\ref{tab:sitl_results}, \textit{physical collisions} denote rigid-body contact events (\texttt{p.getContactPoints > 0}). Contacts correlate with detour activations ($r = \aeSitlContactDetourCorr$; Spearman $\rho = \aeSitlContactDetourSpearman$) because spatial corridor blockages force bottleneck congestion, elevating collisions around obstructed passages across all methods.
 
-\noindent\textbf{3) Vision Simulation Performance:} Synthetic ArUco fiducial marker tracking was evaluated across \aeVisionTotalRuns\ runs (\aeVisionRunsPerMap\ runs per map across \aeVisionSeedsCount\ seeds, \aeVisionFrames\ total frames, \aeVisionOpportunities\ marker opportunities) in warehouse and road environments. Clustered bootstrap over runs yields a marker detection rate of $\aeVisionDetectionRate\%$ (\aeConfidenceLevel\% bootstrap CI: $[\aeVisionDetectionRateCILow\%, \aeVisionDetectionRateCIHigh\%]$). Mean translational position error was $\aeVisionPositionError$~m (\aeConfidenceLevel\% CI: $[\aeVisionPositionErrorCILow, \aeVisionPositionErrorCIHigh]$~m; RMSE $\aeVisionPositionErrorRmse$~m). Mean orientation tracking error was $\aeVisionOrientationError$~rad ($\aeVisionOrientationDeg^\circ$, \aeConfidenceLevel\% CI: $[\aeVisionOrientationErrorCILow, \aeVisionOrientationErrorCIHigh]$~rad; RMSE $\aeVisionOrientationErrorRmse$~rad), satisfying the tracking threshold ($< \aeVisionOrientationThreshold$~rad).
+\noindent\textbf{3) Vision Simulation Performance:} Synthetic ArUco marker tracking across \aeVisionTotalRuns\ runs (\aeVisionRunsPerMap\ per map, \aeVisionSeedsCount\ seeds, \aeVisionFrames\ frames, \aeVisionOpportunities\ marker opportunities) yields detection rate $\aeVisionDetectionRate\%$ (bootstrap CI: $[\aeVisionDetectionRateCILow\%, \aeVisionDetectionRateCIHigh\%]$). Mean translational position error was $\aeVisionPositionError$~m ($[\aeVisionPositionErrorCILow, \aeVisionPositionErrorCIHigh]$~m; RMSE $\aeVisionPositionErrorRmse$~m). Mean orientation error was $\aeVisionOrientationError$~rad ($\aeVisionOrientationDeg^\circ$, $[\aeVisionOrientationErrorCILow, \aeVisionOrientationErrorCIHigh]$~rad; RMSE $\aeVisionOrientationErrorRmse$~rad), satisfying the tracking threshold ($< \aeVisionOrientationThreshold$~rad).
 
 \section{Limitations and Future Work}
-While ACA demonstrates strong conflict-mitigation and coordination resilience in decentralized simulation, several limitations warrant note:
-(1)~\textit{Software Simulation Scope:} All empirical evaluations in this work are conducted in discrete graph simulations and continuous physics simulations in PyBullet; remote multi-robot trials on physical robotic testbeds remain planned future work.
-(2)~\textit{Estimation Error Bounds:} Theorem~1 guarantees conflict-free safe claiming provided $\mathrm{TV}(B_s, \hat{B}_s) \leq \eta_{\text{eff}}$; under severe packet loss or extended network partitions, this bound may be violated, requiring conservative deferral to consensus.
-(3)~\textit{Contingency Tree Scalability:} Discrete recourse trees grow exponentially with depth $d$; practical deployments must employ depth pruning ($d \in \{\aeDepthOne, \aeDepthTwo\}$).
+While ACA demonstrates coordination resilience in decentralized simulation, several limitations warrant note: (1)~\textit{Software Simulation Scope:} All empirical evaluations are conducted in discrete graph simulations and continuous physics simulations in PyBullet; hardware multi-robot testbed deployments remain planned future work. (2)~\textit{Estimation Error Bounds:} Theorem~1 conditions on $\mathrm{TV}(B_s, \hat{B}_s) \leq \eta_{\text{eff}}$; under severe packet loss or extended network partitions, this bound may be violated, requiring conservative consensus deferral. (3)~\textit{Contingency Scalability:} Discrete recourse trees scale exponentially with depth $d$; practical deployments must employ depth pruning ($d \in \{\aeDepthOne, \aeDepthTwo\}$).
 
 \section{Conclusion}
-We presented Adversarial Contingency Auctions (ACA) for decentralized multi-robot task allocation under strategic corridor blockages and belief inconsistency. By coupling type-aware expected recourse cost valuation with a closed-form Pinsker claim margin and autonomous local detours, ACA mitigates conflicts without continuous belief synchronization. Paired empirical evaluations across diverse graph topologies reveal key trade-offs: ACA significantly outperforms CBBA+LR (\aeHtwoCbbaLrDiff~pp, $p = \aePvalCbbaLr$), achieves approximate parity with CBBA-PR+LR (\aeHtwoCbbaPrLrDiff~pp, $p = \aePvalCbbaPrLr$), while reactive single-agent replanning achieves higher raw completion at the cost of elevated conflict rates. ACA achieves an $\aeHfourSafeConflictReductionPct\%$ reduction in safe-claim conflicts, an $\aeConflictFreeRunPct\%$ conflict-free-run rate, and zero-message local recourse autonomy.
+We presented Adversarial Contingency Auctions (ACA) for decentralized multi-robot task allocation under strategic corridor blockages and belief inconsistency. By coupling type-aware expected recourse cost valuation with a closed-form Pinsker claim margin and autonomous local detours, ACA mitigates conflicts without continuous belief synchronization. Paired evaluations across diverse topologies reveal key trade-offs: ACA significantly outperforms CBBA+LR (\aeHtwoCbbaLrDiff~pp, $p = \aePvalCbbaLr$), achieves parity with CBBA-PR+LR (\aeHtwoCbbaPrLrDiff~pp, $p = \aePvalCbbaPrLr$), reduces safe-claim conflicts by $\aeHfourSafeConflictReductionPct\%$, and maintains an $\aeConflictFreeRunPct\%$ conflict-free-run rate with zero-message local recourse autonomy.
 
-%\IEEEtriggeratref{10}
+\IEEEtriggeratref{10}
+\setlength{\IEEEbibitemsep}{0pt plus 0.5pt}
 \bibliographystyle{IEEEtran}
 \bibliography{references}
 

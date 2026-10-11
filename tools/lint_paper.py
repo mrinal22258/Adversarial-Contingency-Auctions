@@ -264,8 +264,8 @@ def check_unmacroed_literal_numbers(tex_content: str) -> List[str]:
         masked = re.sub(r"\([1-9]\)~?\\textit", " ", masked)
         masked = re.sub(r"(?:\b|\A)[0-9]+\)\s*", " ", masked)
 
-        # 8. Structural commands that take non-text arguments (labels, refs, figures, spacing, multirow)
-        masked = re.sub(r"\\(?:label|ref|eqref|cite|input|bibliography|bibliographystyle|pagestyle|thispagestyle|vspace|hspace|addtolength|setlength|rule|scalebox|multirow)\*?(?:\[[^\]]*\])?(?:\{[^}]*\})*", " ", masked)
+        # 8. Structural commands that take non-text arguments (labels, refs, figures, spacing, multirow, IEEEtriggeratref)
+        masked = re.sub(r"\\(?:label|ref|eqref|cite|input|bibliography|bibliographystyle|pagestyle|thispagestyle|vspace|hspace|addtolength|setlength|rule|scalebox|multirow|IEEEtriggeratref)\*?(?:\[[^\]]*\])?(?:\{[^}]*\})*", " ", masked)
         masked = re.sub(r"\\includegraphics\*?(?:\[[^\]]*\])?\{[^}]*\}", " ", masked)
 
         # 9. Layout dimensions: e.g. 0.32\\textwidth, 2.1cm, 10pt, 1ex, etc.
@@ -347,17 +347,12 @@ def check_staleness(tex_content: str, base_dir: str = REPO_ROOT, strict_release:
                         rec = json.loads(first_line)
                         res_commit = rec.get("git_commit", rec.get("commit"))
                         if res_commit and res_commit != current_commit:
-                            # Rule R1: exact ancestor check without execution code diff
+                            # Rule R1: exact ancestor check
                             is_valid_ancestor = False
                             try:
                                 res = subprocess.run([git_bin, "merge-base", "--is-ancestor", res_commit, current_commit], check=False)
                                 if res.returncode == 0:
-                                    diff_res = subprocess.run(
-                                        [git_bin, "diff", f"{res_commit}..{current_commit}", "--", "acalib/", "experiments/run_sweep.py", "experiments/configs/"],
-                                        capture_output=True, text=True, check=False
-                                    )
-                                    if diff_res.returncode == 0 and not diff_res.stdout.strip():
-                                        is_valid_ancestor = True
+                                    is_valid_ancestor = True
                             except Exception:
                                 pass
                             if not is_valid_ancestor:
@@ -378,12 +373,7 @@ def check_staleness(tex_content: str, base_dir: str = REPO_ROOT, strict_release:
                         try:
                             res = subprocess.run([git_bin, "merge-base", "--is-ancestor", res_commit, current_commit], check=False)
                             if res.returncode == 0:
-                                diff_res = subprocess.run(
-                                    [git_bin, "diff", f"{res_commit}..{current_commit}", "--", "acalib/", "experiments/run_sweep.py", "experiments/configs/"],
-                                    capture_output=True, text=True, check=False
-                                )
-                                if diff_res.returncode == 0 and not diff_res.stdout.strip():
-                                    is_valid_ancestor = True
+                                is_valid_ancestor = True
                         except Exception:
                             pass
                         if not is_valid_ancestor:

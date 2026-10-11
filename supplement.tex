@@ -3,6 +3,7 @@
 \usepackage{graphicx}
 \usepackage{booktabs}
 \usepackage{microtype}
+\usepackage{multirow}
 \usepackage{url}
 
 \title{Supplementary Material: Adversarial Contingency Auctions for Decentralized Multi-Robot Task Allocation under Strategic Blockages}
@@ -10,6 +11,8 @@
 \author{Kumar~Mrinal$^{1}$%
 \thanks{$^{1}$Kumar Mrinal is with the Department of Computer Science and Artificial Intelligence, Indraprastha Institute of Information Technology Delhi (IIIT-Delhi), New Delhi 110020, India (e-mail: {\tt\small mrinal22258@iiitd.ac.in}).}%
 }
+
+\input{results/numbers.tex}
 
 \begin{document}
 \maketitle
@@ -56,5 +59,40 @@ Fig.~\ref{fig:supp_rollout} provides synchronized execution keyframes on the Dow
 \caption{Synchronized Rollout Execution Keyframes on Downtown Boston Road Network ($n = 216, |E| = 323$) under Identical Adversarial Blockage Stream: Columns depict ACA (Ours, Left), CTP Replan (Center), and Standard CBBA (Right) across time steps $t \in \{0, 4, 8, 14\}$. When corridors are blocked (orange markers), standard CBBA drops entire bundles and incurs market re-auction delays, whereas ACA executes zero-message local recourse detours.}
 \label{fig:supp_rollout}
 \end{figure*}
+
+\section{Paired Differences vs. ACA Baseline}
+Fig.~\ref{fig:supp_forest} details Hodges--Lehmann median paired differences with \aeConfidenceLevel\% bootstrap confidence intervals across benchmark algorithms.
+
+\begin{figure}[!htbp]
+\centering
+\includegraphics[width=\columnwidth,height=5.2cm,keepaspectratio]{static/images/fig_forest_paired_differences}
+\caption{Paired differences in task completion rate (\%) vs.~ACA across benchmark algorithms ($N = \aeMatchedBenchmarkInstances$ matched independent instances across \aeBenchmarkMapCount\ graph families, hypotheses $H_1, H_2, H_3$). Markers denote Hodges--Lehmann median paired differences with \aeConfidenceLevel\% bootstrap confidence intervals; $p$-values computed via two-sided paired Wilcoxon signed-rank tests with Holm--Bonferroni correction.}
+\label{fig:supp_forest}
+\end{figure}
+
+\section{Interdiction Budget Sensitivity Analysis}
+Fig.~\ref{fig:supp_kappa} illustrates the scaling of completion across simultaneous blockage budgets $\kappa \in \{\aeKappaTwo, \aeKappaFour, \aeKappaSix\}$ ($N = \aeMatchedBenchmarkInstances$ instances, \aeKappaTrials\ trials, hypothesis $H_6$).
+
+\begin{figure}[!htbp]
+\centering
+\includegraphics[width=\columnwidth,height=5.2cm,keepaspectratio]{static/images/fig_kappa_sweep}
+\caption{Sensitivity of fleet completion to interdiction budget $\kappa \in \{\aeKappaTwo, \aeKappaFour, \aeKappaSix\}$ across \aeBenchmarkMapCount\ benchmark graph families ($N = \aeMatchedBenchmarkInstances$ matched independent instances, \aeKappaTrials\ total trials, hypothesis $H_6$). Non-parametric Jonckheere--Terpstra trend test evaluates monotonic completion degradation under escalating adversary resource bounds.}
+\label{fig:supp_kappa}
+\end{figure}
+
+\section{Stratified Benchmark Performance}
+Table~\ref{tab:stratified_results} details performance stratified across map classes (Real vs. Synthetic) and adversarial regimes (Benign vs. Adversarial).
+
+\input{results/table_stratified.tex}
+
+\section{Protocol v5 Confirmatory Evaluation on Disjoint Held-Out Seeds}
+To eliminate hyperparameter tuning leakage and evaluate generalizability across the full benchmark universe, Protocol~v5 was executed across all \aeBenchmarkMapCount\ map topologies and \aeAdversaryCount\ adversary regimes on strictly held-out seeds $\aeHeldoutSeedStart \dots \aeHeldoutSeedEnd$ ($N = \aeHeldoutInstances$ matched independent instances, \aeHeldoutTrials\ total paired trials). Table~\ref{tab:heldout_v5_results} details the held-out performance metrics.
+
+\input{results/table_heldout_v5.tex}
+
+\section{Benchmark System and Algorithm Parameters}
+Table~\ref{tab:system_params} lists operational parameters across all benchmark environments.
+
+\input{results/table_system_params.tex}
 
 \end{document}
