@@ -1,0 +1,18 @@
+{
+  "figure_file": "C:\\Users\\krmri\\Downloads\\Adversarial-Contingency-Auctions-main\\Adversarial-Contingency-Auctions-main\\results\\figures\\fig_map_boston_road.pdf",
+  "git_commit": "ab18d76df1d3d66cd59ef1799ff54a9d0ec6d92d",
+  "source_files": [
+    "data/maps/boston_downtown_drive.graphml"
+  ],
+  "n_instances": 1,
+  "generator_script": "make_map_figures.py",
+  "metadata": {
+    "map_type": "road_osmnx",
+    "n_nodes": 216,
+    "n_edges": 323,
+    "source_hash": "50fe841b10fec5641736354008baacf5d51a2f9bbd304215f25e33d956d39705",
+    "comm_radius": 25.0,
+    "robots_count": 4,
+    "tasks_count": 8
+  }
+}

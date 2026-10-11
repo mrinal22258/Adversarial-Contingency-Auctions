@@ -1,0 +1,14 @@
+{
+  "figure_file": "C:\\Users\\krmri\\Downloads\\Adversarial-Contingency-Auctions-main\\Adversarial-Contingency-Auctions-main\\results\\figures\\fig_map_movingai_warehouse.png",
+  "git_commit": "ab18d76df1d3d66cd59ef1799ff54a9d0ec6d92d",
+  "source_files": [
+    "data/maps/warehouse-10-20-10-2-1.map"
+  ],
+  "n_instances": 1,
+  "generator_script": "make_map_figures.py",
+  "metadata": {
+    "map_type": "warehouse_movingai",
+    "n_nodes": 38,
+    "n_edges": 59
+  }
+}

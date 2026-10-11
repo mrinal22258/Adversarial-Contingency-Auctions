@@ -1,0 +1,10 @@
+{
+  "figure_file": "results/figures\\fig_forest_paired_differences.pdf",
+  "git_commit": "a284e3044b34e4f307eb90b8eaac58250ac2a982",
+  "source_files": [
+    "results/stats/instance_aggregated_results.csv"
+  ],
+  "n_instances": 3850,
+  "generator_script": "make_figures.py",
+  "metadata": {}
+}

@@ -1,0 +1,5 @@
+comparison,metric,pilot_mean_diff,pilot_std_diff,cohens_dz,min_effect_size,required_n_80pct_power,required_n_90pct_power,recommended_instances
+aca_vs_aca_depth_0,completion_rate_pct,1.67,5.96,0.28,5.0,13,18,50
+aca_vs_cbba_lr,completion_rate_pct,-5.83,21.1,-0.276,5.0,161,216,216
+aca_vs_ssi_lr,completion_rate_pct,1.46,23.09,0.063,5.0,193,258,258
+aca_vs_cbba_lr,net_welfare,35.13,201.1,0.175,25.0,585,782,782
