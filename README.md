@@ -15,7 +15,7 @@ license: mit
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
-[![Tests: 138 Passing](https://img.shields.io/badge/tests-138%20passing-brightgreen.svg)]()
+[![Tests: 145 Passing](https://img.shields.io/badge/tests-145%20passing-brightgreen.svg)]()
 [![Simulation: Pure Software](https://img.shields.io/badge/simulation-pure%20software-informational.svg)]()
 
 ---
@@ -112,7 +112,7 @@ acalib/
   alloc/      # ACA-CBBA, ablations, CBBA (Choi '09), CBBA-PR, CC-CBBA, Implicit, SSI, Foresight Opt (CP-SAT)
   sim/        # Simulation engine, wall-clock metrics, and statistical logging
 experiments/  # Parallel sweep runner, bootstrap CIs, paired Wilcoxon + Holm-Bonferroni tests, figures/tables
-tests/        # 138 automated verification and regression tests
+tests/        # 145 automated verification and regression tests
 results/      # Raw CSV trials, LaTeX tables, numbers macros, and publication PDF/PNG figures
 ```
 
@@ -121,7 +121,7 @@ results/      # Raw CSV trials, LaTeX tables, numbers macros, and publication PD
 ## 🚀 Quickstart & Reproduction
 
 ### 1. Run Verification Test Suite
-Run the 138 automated unit, property-based, and regression tests:
+Run the 145 automated unit, property-based, and regression tests:
 ```powershell
 pytest tests/ -v
 ```

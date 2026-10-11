@@ -42,4 +42,15 @@
 | 2026-10-11 11:48 | `make clean` / cache cleanup | 0 | Removed temporary pycache, pytest_cache, and scratch screenshot artifacts. |
 | 2026-10-11 11:49 | `pdflatex paper.tex` | 0 | Re-compiled 8-page paper.pdf with cross-references resolved (780,542 bytes). |
 | 2026-10-11 11:49 | `pdflatex supplement.tex` | 0 | Re-compiled 3-page supplement.pdf (688,568 bytes). |
-| 2026-10-11 11:50 | `git tag v2.0-submission` | 0 | Successfully tagged final submission checkpoint `v2.0-submission`. |
+| 2026-10-11 13:28 | `git tag -d v2.0-submission` | 0 | Deleted premature tag per Step 0 rules. |
+| 2026-10-11 13:33 | `index.html`, `README.md`, `RESULTS_VERDICT.md` | - | Replaced obsolete 120-trial table with balanced core grid and Protocol v5 held-out results. |
+| 2026-10-11 14:37 | `write_to_file CHANGELOG.md` | - | Consolidated CHANGELOG_APP.md and CHANGELOG_FIX.md into canonical CHANGELOG.md. |
+| 2026-10-11 14:38 | `pytest tests/test_public_surfaces.py` | 0 | Verified 7/7 headline number and conditional guarantee synchronization tests pass. |
+| 2026-10-11 14:44 | `acalib/demo/ui/` | - | Modularized app.py into styles.py, callbacks.py, tabs.py, layout.py, and thin launcher app.py. |
+| 2026-10-11 14:45 | `pytest tests/test_demo.py` | 0 | Verified 26/26 demo wrapper and simulation regression tests pass with modular UI. |
+| 2026-10-11 14:47 | `python tools/test_ui_playwright.py` | 0 | Playwright tests passed across 4 viewports (Desktop, Laptop, Tablet, Mobile). |
+| 2026-10-11 14:49 | `verify_viewports_and_a11y.py` | 0 | Validated 1440, 1024, 390 px viewports; 0 unlabeled buttons; focus outlines verified. |
+| 2026-10-11 14:52 | `pytest -q` | 0 | Ran full verification test suite: 145 / 145 tests passed in 161.56s. |
+| 2026-10-11 14:58 | `python tools/lint_paper.py` | 0 | Paper linter passed: 0 provenance violations, 0 unverified claims, 0 literal numbers. |
+| 2026-10-11 14:59 | `pypdf` page count check | 0 | Verified paper.pdf is strictly 8 pages; supplement.pdf is 3 pages. |
+
