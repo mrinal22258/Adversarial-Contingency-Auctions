@@ -1,0 +1,50 @@
+{
+  "timestamp_utc": "2026-10-11T06:08:55.906430+00:00",
+  "python_version": "3.12.7 | packaged by Anaconda, Inc. | (main, Oct  4 2024, 13:17:27) [MSC v.1929 64 bit (AMD64)]",
+  "repo_root": "C:\\Users\\krmri\\Downloads\\Adversarial-Contingency-Auctions-main\\Adversarial-Contingency-Auctions-main",
+  "steps": {
+    "step1_validation": "PASS",
+    "step2_coverage": "PASS",
+    "step3_stats": "PASS",
+    "step4_tables": "PASS",
+    "step5_figures": "PASS",
+    "step6_claim_ledger": "PASS",
+    "step7_paper_compile": "PASS",
+    "step8_linter": "PASS"
+  },
+  "artifacts": {
+    "results/raw_results.csv": {
+      "sha256": "3a1fc0416ce060f59fdb92ee25dc262a9b7560e7a5984b40fddee7ee392878c4",
+      "bytes": 4709334
+    },
+    "results/numbers.tex": {
+      "sha256": "3f377377bbaf0b1ed6f34e2e57fe6e87d9ed1292f8eb2eeb8fe0dc791d754966",
+      "bytes": 9400
+    },
+    "results/table_main_results.tex": {
+      "sha256": "b4a704039d30158fe39bbe951113ce65de9b47433b1a057bfeefd8ead72068ed",
+      "bytes": 3006
+    },
+    "results/table_stratified.tex": {
+      "sha256": "a65288efd801078e7d7beab06627d500a3e20b7447586c4992037de1005b36fa",
+      "bytes": 2159
+    },
+    "results/table_sitl.tex": {
+      "sha256": "52e4e0dfae086d60a40a5ff3b5a905967bed18a35d6d1b3b3fc81a80507691b7",
+      "bytes": 1108
+    },
+    "results/stats/hypothesis_results.csv": {
+      "sha256": "ddf21692ff83617afd382112cbb11623d0fbab4d4452e3e11789eca63ca6ccf7",
+      "bytes": 4003
+    },
+    "audit/CLAIM_LEDGER.csv": {
+      "sha256": "6764290a7cae5ebd4e70cadb0da60c984568b552053abbfc114cd0225ed85478",
+      "bytes": 7468
+    },
+    "paper.pdf": {
+      "sha256": "22534228f723e06083e45e69c48cf30e5c2e798e610772de109dee02be469210",
+      "bytes": 780542
+    }
+  },
+  "duration_sec": 65.3
+}

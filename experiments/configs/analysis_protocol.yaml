@@ -1,0 +1,85 @@
+# Machine-Readable Primary Analysis Protocol Configuration
+# Version: v1.0-rebuilt (Stage 1 Audit Specification)
+# Date: 2026-10-10
+
+protocol_version: "1.0-rebuilt"
+evaluation_tier: "historical_exploratory"
+unit_of_analysis: "independent_instance" # (graph_family, seed, n_robots, n_tasks)
+pairing_unit: "matched_condition"       # (graph_family, adversary, comm_regime, seed, n_robots, n_tasks)
+
+core_benchmark_population:
+  description: "Balanced nominal grid with 14 methods evaluated under identical conditions"
+  graph_families:
+    - "warehouse_movingai"
+    - "road_osmnx"
+    - "rgg"
+    - "warehouse"
+    - "er"
+  seeds_range: [1, 50]
+  instances_per_family: 50
+  total_independent_instances: 250
+  adversaries:
+    - "theta_1_stochastic"
+    - "theta_2_reactive"
+    - "theta_4_cyclic_patrol"
+  comm_regime: "nominal"
+  scale:
+    fleet_size: 4
+    task_count: 15
+    comm_range: 30.0
+    p_drop: 0.10
+    max_steps: 80
+  expected_trials_per_method: 750
+  total_balanced_trials: 10500
+
+methods:
+  primary: "aca"
+  ablations:
+    - "aca_depth_0"
+    - "aca_depth_2"
+    - "aca_no_inference"
+    - "aca_no_margin"
+  baselines:
+    - "cbba"
+    - "cbba_lr"
+    - "cbba_partial"
+    - "cbba_partial_lr"
+    - "ssi"
+    - "ssi_lr"
+    - "ctp_replan"
+    - "implicit"
+  heuristics_reference:
+    - "clairvoyant_greedy"
+
+metrics:
+  primary_outcome: "completion_rate_pct"
+  secondary_outcomes:
+    - "net_welfare"
+    - "distinct_conflicts"
+    - "total_conflicts"
+    - "total_messages"
+    - "mean_tick_runtime_ms"
+  safety_metric: "safe_claim_conflicts"
+
+estimands:
+  difference_estimator: "paired_mean_difference"
+  nonparametric_location: "hodges_lehmann_difference"
+  effect_size: "cliffs_delta"
+  standardized_effect: "paired_cohens_dz"
+  confidence_interval: "bootstrap_cluster_bca_95"
+  bootstrap_resamples: 10000
+
+hypothesis_testing:
+  nominal_alpha: 0.05
+  two_sided_default: false
+  multiplicity_correction: "holm"
+  multiplicity_family: "primary_confirmatory_holm"
+  p_value_reporting:
+    small_p_threshold: 0.001
+    format: "scientific_or_threshold" # prints p < 0.001 or exact value
+
+exclusions_and_data_guards:
+  duplicate_handling: "error_fail_early"
+  missing_data_rule: "fail_loudly_no_silent_drop"
+  failed_trial_handling: "retained_in_denominator"
+  merge_guard: "assert_exact_single_match_per_key"

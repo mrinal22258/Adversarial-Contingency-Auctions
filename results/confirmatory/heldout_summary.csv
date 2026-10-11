@@ -1,0 +1,7 @@
+test_comparison,metric,N_instances,mean_proposed,mean_comparator,mean_paired_difference,std_paired_difference,cohens_dz,wilcoxon_p_value
+aca_adaptive_vs_aca,completion_rate_pct,60,88.78,86.11,2.67,8.16,0.327,0.0076
+aca_adaptive_vs_aca,net_welfare,60,979.49,955.42,24.07,120.49,0.2,0.0968
+aca_plus_vs_aca,completion_rate_pct,60,89.11,86.11,3.0,10.15,0.295,0.0249
+aca_plus_vs_cbba_lr,completion_rate_pct,60,89.11,90.78,-1.67,22.28,-0.075,0.3438
+aca_plus_vs_cbba_lr,total_conflicts,60,41.7,48.03,-6.33,34.32,-0.185,0.3729
+aca_plus_vs_cbba_lr,total_messages,60,238.93,244.47,-5.53,126.06,-0.044,0.4072
