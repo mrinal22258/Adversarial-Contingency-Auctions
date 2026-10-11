@@ -15,7 +15,7 @@ license: mit
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
-[![Tests: 132 Passing](https://img.shields.io/badge/tests-132%20passing-brightgreen.svg)]()
+[![Tests: 138 Passing](https://img.shields.io/badge/tests-138%20passing-brightgreen.svg)]()
 [![Simulation: Pure Software](https://img.shields.io/badge/simulation-pure%20software-informational.svg)]()
 
 ---
@@ -26,7 +26,7 @@ In decentralized multi-robot task allocation, strategic adversarial path blockag
 **Adversarial Contingency Auctions (ACA)** addresses these vulnerabilities through three mechanisms:
 1. **Expected-Recourse Valuation (Proposition 1):** Robots bid their expected recourse cost over a depth-$d$ contingency branching policy under a Bayesian posterior over adversary types.
 2. **Pinsker Belief-Divergence Claim Margin (Theorem 1):** Tasks are claimed safely via a closed-form margin $m_{r,j} = \Delta_j (\sqrt{\frac{1}{2} D'_{\text{KL}}} + \eta_{\text{eff}}) + \delta_{\text{map}}$ derived from Pinsker's inequality and total variation triangle bounds, guaranteeing conflict-free safe claims under bounded belief estimation error without exchanging belief vectors.
-3. **Local Detour Execution (Section III-D & Proposition 4):** Blockage encounters activate local precomputed detours with zero communication messages, resorting to market re-auctions only upon recourse tree exhaustion.
+3. **Local Detour Execution (Section III-D & Proposition 3):** Blockage encounters activate local precomputed detours with zero communication messages, resorting to market re-auctions only upon recourse tree exhaustion.
 
 ---
 
@@ -45,7 +45,7 @@ In the SITL synthetic-vision pipeline, overhead camera observations track ArUco 
 
 ## 🔬 What This Repository Shows (Key Scientific Findings)
 
-This repository implements a rigorous empirical benchmark ($N = 13,800$ total trials: a balanced nominal core grid of 10,500 trials [$750$ matched trials/method across 250 independent instances], 400 targeted adversary evaluations, and 2,900 OFAT sensitivity sweep trials) comparing ACA against literature baselines, level-execution variants (+LR), and clean ablations:
+This repository implements a rigorous empirical benchmark ($N = 13,800$ total trials: a balanced nominal core grid of 10,500 trials [$750$ matched trials/method across 250 independent instances], 400 targeted adversary evaluations, and 2,900 OFAT sensitivity sweep trials) and a pre-registered Protocol v5 confirmatory held-out evaluation ($N = 450$ instances, 3,600 trials, seeds 101–130) comparing ACA against literature baselines, level-execution variants (+LR), and clean ablations:
 
 1. **ACA vs. Standard CBBA:** Under dynamic corridor blockages, standard CBBA drops its entire bundle upon a single blockage. ACA leverages type-aware expected recourse cost valuation and zero-message local detour execution, achieving significantly higher completion with comparable messages (333 ± 22 vs. 312 ± 10) and 3.7x tick runtime (44.36 ± 2.29 ms vs. 11.89 ± 0.63 ms).
 2. **Mechanism Attribution:** Disabling local contingency recourse (ACA Depth-0) drops completion, confirming that local detour evaluation drives ACA's completion advantage.
@@ -79,12 +79,27 @@ All empirical data is generated automatically with zero hand-typed numbers:
 
 <!-- RESULTS_TABLE_END -->
 
+### Protocol v5 Confirmatory Held-Out Results ($N = 450$ Instances, Seeds 101–130)
+
+| Method | Variant Description | Completion (%) | Net Welfare | Total Conflicts | Messages |
+|:-------|:-------------------|:--------------:|:-----------:|:---------------:|:--------:|
+| **ACA+ (Ours)** | Adaptive Margin + Pruning | 92.4 ± 1.0 | 936 ± 25 | 38.6 ± 2.9 | 221 ± 13 |
+| ACA-Adaptive | Adaptive Margin Only | 91.3 ± 1.1 | 920 ± 25 | 39.0 ± 3.0 | 232 ± 14 |
+| ACA (Static Pinsker) | Constant Margin | 92.4 ± 1.1 | 937 ± 25 | 39.7 ± 3.0 | 218 ± 13 |
+| ACA (No Margin) | Margin Ablation | 93.5 ± 1.0 | 939 ± 23 | 49.9 ± 3.3 | 213 ± 12 |
+| CBBA (+LR) [Choi '09] | Level Execution (+LR) | 94.7 ± 0.9 | 959 ± 22 | 25.5 ± 1.8 | 243 ± 11 |
+| CBBA-PR (+LR) [Buckman '19] | Partial Release (+LR) | 93.4 ± 1.0 | 953 ± 22 | 40.6 ± 2.8 | 239 ± 12 |
+| CTP Replan [Papadimitriou '91] | Continuous Re-solve | 92.3 ± 1.1 | 540 ± 42 | 0.0 ± 0.0 | 56 ± 3 |
+| SSI (+LR) [Koenig '06] | Single-Item Auction (+LR) | 80.5 ± 2.0 | 666 ± 41 | 0.0 ± 0.0 | 146 ± 10 |
+
 - Auto-generated Markdown Table: [`results/table_main_results.md`](results/table_main_results.md)
 - Auto-generated LaTeX Table: [`results/table_main_results.tex`](results/table_main_results.tex)
 - Stratified Results Table: [`results/table_stratified.tex`](results/table_stratified.tex)
+- Confirmatory Held-Out Table: [`results/table_heldout_v5.tex`](results/table_heldout_v5.tex)
 - Paired SITL Simulation Table: [`results/table_sitl.tex`](results/table_sitl.tex)
 - Pre-registered Hypothesis Verdict: [`RESULTS_VERDICT.md`](RESULTS_VERDICT.md)
 - Raw Trial Logs: [`results/raw_results.csv`](results/raw_results.csv) (13,800 records)
+- Confirmatory Trial Logs: [`results/confirmatory/heldout_v5_results.csv`](results/confirmatory/heldout_v5_results.csv) (3,600 records)
 
 ---
 
@@ -97,7 +112,7 @@ acalib/
   alloc/      # ACA-CBBA, ablations, CBBA (Choi '09), CBBA-PR, CC-CBBA, Implicit, SSI, Foresight Opt (CP-SAT)
   sim/        # Simulation engine, wall-clock metrics, and statistical logging
 experiments/  # Parallel sweep runner, bootstrap CIs, paired Wilcoxon + Holm-Bonferroni tests, figures/tables
-tests/        # 115 automated verification and regression tests
+tests/        # 138 automated verification and regression tests
 results/      # Raw CSV trials, LaTeX tables, numbers macros, and publication PDF/PNG figures
 ```
 
@@ -106,7 +121,7 @@ results/      # Raw CSV trials, LaTeX tables, numbers macros, and publication PD
 ## 🚀 Quickstart & Reproduction
 
 ### 1. Run Verification Test Suite
-Run the 115 automated unit, property-based, and regression tests:
+Run the 138 automated unit, property-based, and regression tests:
 ```powershell
 pytest tests/ -v
 ```
