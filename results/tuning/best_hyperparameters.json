@@ -1,0 +1,44 @@
+{
+  "aca_adaptive": {
+    "parameter": "margin_kappa",
+    "best_value": 0.5,
+    "mean_completion_rate_pct": 100.0,
+    "mean_net_welfare": 1144.4701769351589,
+    "budget_trials": 50
+  },
+  "aca_plus": {
+    "parameter": "prune_threshold",
+    "best_value": 0.06,
+    "mean_completion_rate_pct": 98.66666666666666,
+    "mean_net_welfare": 1092.1299374406253,
+    "budget_trials": 50
+  },
+  "cbba_lr": {
+    "parameter": "bundle_limit",
+    "best_value": 2.0,
+    "mean_completion_rate_pct": 98.33333333333333,
+    "mean_net_welfare": 1065.7071859046216,
+    "budget_trials": 50
+  },
+  "cbba_partial_lr": {
+    "parameter": "bundle_limit",
+    "best_value": 3.0,
+    "mean_completion_rate_pct": 94.66666666666666,
+    "mean_net_welfare": 929.7671658493666,
+    "budget_trials": 50
+  },
+  "ctp_replan": {
+    "parameter": "bundle_limit",
+    "best_value": 2.0,
+    "mean_completion_rate_pct": 99.44444444444444,
+    "mean_net_welfare": 790.0330050078729,
+    "budget_trials": 50
+  },
+  "ssi_lr": {
+    "parameter": "bundle_limit",
+    "best_value": 6.0,
+    "mean_completion_rate_pct": 89.74358974358975,
+    "mean_net_welfare": 853.8479706682975,
+    "budget_trials": 50
+  }
+}

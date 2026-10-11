@@ -1,0 +1,15 @@
+Hypothesis,Comparison,Metric,Mean Proposed,Mean Comparator,Mean Paired Diff,95% CI (Boot),Cohen's dz,Raw p,Holm p,Sig (alpha=0.05)
+H1_aca_plus_comp,aca_plus vs aca,completion_rate_pct,92.44,92.4,0.04,"[-0.70, 0.80]",0.006,4.8517e-01,1.0000e+00,False
+H1_aca_plus_welf,aca_plus vs aca,net_welfare,936.26,937.44,-1.18,"[-13.52, 10.77]",-0.009,5.4555e-01,1.0000e+00,False
+H2_aca_adapt_comp,aca_adaptive vs aca,completion_rate_pct,91.29,92.4,-1.11,"[-1.96, -0.31]",-0.125,9.9387e-01,1.0000e+00,False
+H2_aca_adapt_welf,aca_adaptive vs aca,net_welfare,919.67,937.44,-17.77,"[-31.30, -3.68]",-0.123,9.9854e-01,1.0000e+00,False
+H3_aca_plus_vs_cbba_comp,aca_plus vs cbba_lr,completion_rate_pct,92.44,94.67,-2.22,"[-3.05, -1.35]",-0.232,9.9999e-01,1.0000e+00,False
+H3_aca_plus_vs_cbba_conf,aca_plus vs cbba_lr,total_conflicts,38.6,25.48,13.12,"[10.34, 16.17]",0.429,1.0000e+00,1.0000e+00,False
+H4_aca_plus_vs_cbbapr_comp,aca_plus vs cbba_partial_lr,completion_rate_pct,92.44,93.39,-0.95,"[-1.90, 0.07]",-0.089,9.6843e-01,1.0000e+00,False
+H4_aca_plus_vs_cbbapr_conf,aca_plus vs cbba_partial_lr,total_conflicts,38.6,40.55,-1.95,"[-4.58, 0.68]",-0.066,1.7535e-02,1.7535e-01,False
+H5_aca_plus_vs_ctp_comp,aca_plus vs ctp_replan,completion_rate_pct,92.44,92.28,0.16,"[-0.96, 1.32]",0.013,7.1282e-01,1.0000e+00,False
+H5_aca_plus_vs_ctp_msgs,aca_plus vs ctp_replan,total_messages,220.57,56.11,164.46,"[150.61, 177.02]",1.176,3.3904e-69,4.7465e-68,True
+H6_aca_plus_vs_ssi_comp,aca_plus vs ssi_lr,completion_rate_pct,92.44,80.49,11.96,"[10.12, 13.81]",0.584,3.1269e-27,4.0650e-26,True
+H6_aca_plus_vs_ssi_conf,aca_plus vs ssi_lr,total_conflicts,38.6,0.0,38.6,"[35.65, 41.65]",1.218,1.0000e+00,1.0000e+00,False
+H7_aca_nomargin_conf,aca vs aca_no_margin,total_conflicts,39.66,49.93,-10.27,"[-13.06, -7.43]",-0.323,4.1715e-13,5.0058e-12,True
+H7_aca_nomargin_comp,aca vs aca_no_margin,completion_rate_pct,92.4,93.48,-1.08,"[-1.91, -0.25]",-0.113,8.2328e-03,9.0561e-02,False

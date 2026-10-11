@@ -7,6 +7,20 @@ evaluation_tier: "historical_exploratory"
 unit_of_analysis: "independent_instance" # (graph_family, seed, n_robots, n_tasks)
 pairing_unit: "matched_condition"       # (graph_family, adversary, comm_regime, seed, n_robots, n_tasks)
 
+evaluation_tiers:
+  exploratory:
+    description: "Historical discovery and sensitivity sweeps (13,800 raw trials; 10,500 core nominal trials, seeds 1-50)"
+    status: "frozen_exploratory"
+    dataset: "results/raw_results.csv"
+  tuning:
+    description: "Algorithmic hyperparameter tuning on seeds 1-30 with 50 trials per method"
+    status: "frozen_tuning"
+    dataset: "results/tuning/trials.csv"
+  confirmatory:
+    description: "Pre-registered Protocol v5 held-out evaluation on disjoint seeds 101-130 across 5 families and 3 adversaries (N=450 instances, 3,600 paired trials)"
+    status: "preregistered_confirmatory"
+    dataset: "results/confirmatory/heldout_v5_results.csv"
+
 core_benchmark_population:
   description: "Balanced nominal grid with 14 methods evaluated under identical conditions"
   graph_families:

@@ -1,0 +1,27 @@
+\begin{table}[htbp]
+\centering
+\caption{Benchmark System and Algorithm Parameters}
+\label{tab:system_params}
+\renewcommand{\arraystretch}{0.88}
+\begin{tabular}{@{}llc@{}}
+\toprule
+\textbf{Category} & \textbf{Parameter} & \textbf{Default Value} \\
+\midrule
+\multirow{5}{*}{Blockage Process} & Baseline onset rate ($p_0$) & \aeParamPZeroOne\ ($\theta_1$), \aeParamPZeroTwo\ ($\theta_2$) \\
+ & Reactive traffic scaling ($\alpha$) & \aeParamAlphaReactive\ ($\theta_2$) \\
+ & Corridor clearance rate ($\mu$) & \aeParamMuClearance \\
+ & Interdiction budget ($k$) & \aeParamInterdictionBudget \\
+ & Risky edge fraction ($|E_{\text{risk}}|/|E|$) & \aeParamRiskyEdgeFraction \\
+\midrule
+\multirow{5}{*}{Fleet \& Comms} & Fleet size ($R$) & \aeFleetSize \\
+ & Tasks per mission ($M$) & \aeTasksCount \\
+ & Maximum bundle capacity ($L_b$) & \aeBundleCapacity \\
+ & Robot speed / Sensor range & \aeRobotSpeed\ / \aeSensorRange \\
+ & Comm range / Packet drop & \aeCommRange\ / $p_{\text{drop}} = \aePacketDropProb$ \\
+\midrule
+\multirow{3}{*}{ACA Algorithm} & Contingency recourse depth ($d$) & \aeRecourseDepth \\
+ & ToM estimation error bound ($\eta$) & \aeTomErrorBound \\
+ & Age inflation ($\lambda_{\text{age}}$) / $\delta_{\text{map}}$ & \aeAgeInflation\ / \aeDeltaMap \\
+\bottomrule
+\end{tabular}
+\end{table}

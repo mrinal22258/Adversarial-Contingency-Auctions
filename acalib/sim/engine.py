@@ -207,7 +207,9 @@ class SimulationEngine:
                 delta_map=kwargs.get("delta_map", 0.0),
                 enable_margin=True,
                 adaptive_margin=True,
-                prune_threshold=0.0,
+                prune_threshold=kwargs.get("prune_threshold", 0.0),
+                margin_kappa=kwargs.get("margin_kappa", 1.0),
+                bundle_limit=kwargs.get("bundle_limit", 4),
             )
         elif alloc_type in ("aca_plus", "aca_pruned"):
             return ACAAllocator(
@@ -218,7 +220,9 @@ class SimulationEngine:
                 delta_map=kwargs.get("delta_map", 0.0),
                 enable_margin=True,
                 adaptive_margin=True,
-                prune_threshold=0.03,
+                prune_threshold=kwargs.get("prune_threshold", 0.03),
+                margin_kappa=kwargs.get("margin_kappa", 1.0),
+                bundle_limit=kwargs.get("bundle_limit", 4),
             )
         elif alloc_type in ("aca", "aca_cbba"):
             return ACAAllocator(
@@ -228,6 +232,8 @@ class SimulationEngine:
                 contingency_depth=self.contingency_depth,
                 delta_map=kwargs.get("delta_map", 0.0),
                 enable_margin=kwargs.get("enable_margin", True),
+                margin_kappa=kwargs.get("margin_kappa", 1.0),
+                bundle_limit=kwargs.get("bundle_limit", 4),
             )
         elif alloc_type in ("aca_no_margin", "aca_nomargin"):
             return ACAAllocator(
@@ -237,6 +243,7 @@ class SimulationEngine:
                 contingency_depth=self.contingency_depth,
                 delta_map=kwargs.get("delta_map", 0.0),
                 enable_margin=False,
+                bundle_limit=kwargs.get("bundle_limit", 4),
             )
         elif alloc_type in ("aca_depth_0", "aca_d0"):
             return ACAAllocator(
@@ -246,18 +253,22 @@ class SimulationEngine:
                 contingency_depth=0,
                 delta_map=kwargs.get("delta_map", 0.0),
                 enable_margin=kwargs.get("enable_margin", True),
+                margin_kappa=kwargs.get("margin_kappa", 1.0),
+                bundle_limit=kwargs.get("bundle_limit", 4),
             )
         elif alloc_type in ("cbba", "cbba_lr"):
             return CBBAAllocator(
                 graph=self.graph,
                 robots=self.robots,
                 comm_net=self.comm_net,
+                bundle_limit=kwargs.get("bundle_limit", 4),
             )
         elif alloc_type in ("cbba_partial", "partial_replan", "cbba_partial_lr"):
             return CBBAPartialReplanAllocator(
                 graph=self.graph,
                 robots=self.robots,
                 comm_net=self.comm_net,
+                bundle_limit=kwargs.get("bundle_limit", 4),
             )
         elif alloc_type in ("cc_cbba", "chance_constrained", "cc_cbba_lr"):
             alpha_risk = kwargs.get("alpha_risk", 0.30)
@@ -266,24 +277,28 @@ class SimulationEngine:
                 robots=self.robots,
                 comm_net=self.comm_net,
                 alpha_risk=alpha_risk,
+                bundle_limit=kwargs.get("bundle_limit", 4),
             )
         elif alloc_type in ("implicit", "implicit_no_margin", "implicit_lr"):
             return ImplicitCoordinationAllocator(
                 graph=self.graph,
                 robots=self.robots,
                 comm_net=self.comm_net,
+                bundle_limit=kwargs.get("bundle_limit", 4),
             )
         elif alloc_type in ("ssi", "sequential_single_item", "ssi_lr"):
             return SSIAllocator(
                 graph=self.graph,
                 robots=self.robots,
                 comm_net=self.comm_net,
+                bundle_limit=kwargs.get("bundle_limit", 4),
             )
         elif alloc_type in ("ctp_replan", "ctp", "ctp_lr"):
             return CTPReplanAllocator(
                 graph=self.graph,
                 robots=self.robots,
                 comm_net=self.comm_net,
+                bundle_limit=kwargs.get("bundle_limit", 4),
             )
         elif alloc_type in ("cbba_gossip", "gossip", "cbba_gossip_lr"):
             return CBBABeliefGossipAllocator(

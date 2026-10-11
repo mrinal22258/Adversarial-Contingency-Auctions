@@ -198,6 +198,7 @@ def run_single_trial(
     traces_dir: Optional[str] = "results/traces",
     runs_jsonl: Optional[str] = "results/runs.jsonl",
     git_commit: str = "unknown",
+    allocator_kwargs: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     """Execute a single trial with CRN coupling and save trace parquet and JSONL record."""
     t_start = time.time()
@@ -224,6 +225,7 @@ def run_single_trial(
     else:
         c_depth = 0
 
+    engine_kwargs = dict(allocator_kwargs) if allocator_kwargs else {}
     engine = SimulationEngine(
         graph=env_components["graph"],
         adversary_type=adv_enum,
@@ -242,6 +244,7 @@ def run_single_trial(
         custom_risky_edges=env_components["risky_edges"],
         comm_net_seed=env_components["comm_seed"],
         record_traces=True,
+        **engine_kwargs,
     )
 
     metrics = engine.run(max_steps=max_steps)
