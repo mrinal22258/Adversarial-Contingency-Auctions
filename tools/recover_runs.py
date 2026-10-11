@@ -39,7 +39,7 @@ def recover_records(jsonl_path="results/runs.jsonl"):
     print(f"Raw records parsed: {len(records)}")
     print(f"Corrupted lines encountered: {corrupted_count}")
 
-    # Deduplicate by key: (graph_family, adversary, comm_regime, method, seed)
+    # Deduplicate by unique trial key: (graph_family, adversary, comm_regime, method, seed, n_robots, n_tasks)
     unique_map = {}
     for r in records:
         key = (
@@ -47,7 +47,9 @@ def recover_records(jsonl_path="results/runs.jsonl"):
             r.get("adversary"),
             r.get("comm_regime"),
             r.get("method"),
-            r.get("seed")
+            r.get("seed"),
+            int(r.get("n_robots", 4)),
+            int(r.get("n_tasks", 15)),
         )
         # Keep the latest record for each key
         unique_map[key] = r

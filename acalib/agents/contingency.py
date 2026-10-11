@@ -59,8 +59,8 @@ class ContingencyPlanner:
             excluded_edges = set()
 
         def edge_weight_fn(u: Any, v: Any, d: Dict[str, Any]) -> float:
-            c_e = canonical_edge(u, v)
-            if c_e in excluded_edges:
+            c_e = (u, v) if (type(u) is int and type(v) is int and u <= v) else ((v, u) if (type(u) is int and type(v) is int) else canonical_edge(u, v))
+            if excluded_edges and c_e in excluded_edges:
                 return 1e9  # impassable
             base_w = d.get("weight", 1.0)
             pi_e = edge_marginals.get(c_e, 0.05)
@@ -218,3 +218,60 @@ class ExpectedCostValuator:
         if plan is None:
             return float("inf"), None
         return plan.expected_cost, plan
+
+
+def compute_lipschitz_bound(
+    planner: ContingencyPlanner,
+    recourse_plan: Optional[RecoursePlan],
+    hazards_by_type: Dict[Tuple[Any, Any], List[float]],
+    clearance_rate: float = 0.15,
+) -> float:
+    """
+    Computes an analytical Lipschitz upper bound L_j for expected recourse costs
+    with respect to total variation distance on belief space:
+        |E_B[C_j] - E_{B'}[C_j]| <= L_j * TV(B, B')
+    Derived via multivariable mean value theorem over precomputed recourse branches:
+        L_j = sum_{k=1}^K |branch_cost_k - primary_cost| * Delta_pi(e_k)
+    where Delta_pi(e_k) = max_theta pi_theta(e_k) - min_theta pi_theta(e_k).
+    Returns 0.0 if there are no risky edges.
+    """
+    if recourse_plan is None or not recourse_plan.risky_edges or not recourse_plan.primary_path:
+        return 0.0
+
+    primary_path = recourse_plan.primary_path
+    primary_cost = recourse_plan.primary_cost
+    detours = recourse_plan.detours
+
+    cost_so_far = 0.0
+    node_cum_dist = {primary_path[0]: 0.0}
+    for i in range(len(primary_path) - 1):
+        u, v = primary_path[i], primary_path[i + 1]
+        cost_so_far += planner.graph[u][v].get("weight", 1.0)
+        node_cum_dist[v] = cost_so_far
+
+    total_L = 0.0
+    for edge_item in recourse_plan.risky_edges:
+        u, v = edge_item
+        c_e = canonical_edge(u, v)
+        dist_to_u = node_cum_dist.get(u, 0.0)
+
+        if edge_item in detours:
+            branch_cost = dist_to_u + planner.compute_path_length(detours[edge_item])
+        elif c_e in detours:
+            branch_cost = dist_to_u + planner.compute_path_length(detours[c_e])
+        else:
+            branch_cost = dist_to_u + planner.exhaustion_penalty
+
+        cost_delta = abs(branch_cost - primary_cost)
+
+        hazards = hazards_by_type.get(c_e, hazards_by_type.get(edge_item, []))
+        if hazards:
+            marginals = [h / max(1e-5, h + clearance_rate) for h in hazards]
+            delta_pi = max(marginals) - min(marginals)
+        else:
+            delta_pi = 0.0
+
+        total_L += cost_delta * delta_pi
+
+    return float(total_L)
+

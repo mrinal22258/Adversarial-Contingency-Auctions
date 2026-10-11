@@ -188,7 +188,8 @@ def generate_graph(
         return generate_warehouse_grid(rows=rows, cols=cols, aisle_spacing=aisle_spacing, seed=seed, cell_size=cell_size)
     elif fam in {"warehouse_movingai", "movingai"}:
         from .real_maps import generate_movingai_warehouse
-        return generate_movingai_warehouse(seed=seed, scale=scale, n_nodes=n_nodes)
+        variant = kwargs.get("variant", "10-20-10-2-1")
+        return generate_movingai_warehouse(variant=variant, seed=seed, scale=scale, n_nodes=n_nodes)
     elif fam in {"road_osmnx", "osmnx", "road_network"}:
         from .real_maps import generate_real_road_network
         return generate_real_road_network(seed=seed, scale=scale)

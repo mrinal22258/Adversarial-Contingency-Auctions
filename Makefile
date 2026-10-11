@@ -1,11 +1,11 @@
-.PHONY: all reproduce sweep tables figures test clean
+.PHONY: all results reproduce sweep tables figures test lint clean
 
-all: reproduce
+all: results
 
-reproduce:
-	python experiments/run_extended_sweep.py
-	python experiments/make_tables.py
-	python experiments/make_figures.py
+results:
+	python tools/build_all_results.py
+
+reproduce: results
 
 sweep:
 	python experiments/run_extended_sweep.py

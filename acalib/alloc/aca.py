@@ -11,7 +11,7 @@ import networkx as nx
 from .base import BaseAllocator, Task
 from .cbba import CBBAAllocator
 from ..agents.robot import RobotAgent
-from ..agents.contingency import RecoursePlan
+from ..agents.contingency import RecoursePlan, compute_lipschitz_bound
 from ..env.comm import CommunicationNetwork, Message
 from ..env.adversaries import canonical_edge
 
@@ -37,6 +37,8 @@ class ACAAllocator(CBBAAllocator):
         contingency_depth: int = 1,
         margin_kappa: float = 1.0,
         fixed_margin: Optional[float] = None,
+        adaptive_margin: bool = False,
+        prune_threshold: float = 0.0,
     ):
         super().__init__(graph, robots, comm_net, bundle_limit)
         self.delta_map = delta_map
@@ -44,6 +46,8 @@ class ACAAllocator(CBBAAllocator):
         self.contingency_depth = contingency_depth
         self.margin_kappa = margin_kappa
         self.fixed_margin = fixed_margin
+        self.adaptive_margin = adaptive_margin
+        self.prune_threshold = prune_threshold
 
         # Accounting for deferrals and margins
         self.total_claim_evaluations: int = 0
@@ -95,9 +99,10 @@ class ACAAllocator(CBBAAllocator):
 
     def _compute_lipschitz_L_j(self, task: Task, robot_id: int, recourse_plan: Optional[RecoursePlan] = None) -> float:
         """
-        Theorem 3 Rigorous Lipschitz Constant L_j:
-        L_j = sum_{e in path_j} Delta_j^path * Delta_pi(e)
-        Derived mathematically from telescoping product inequality over expected recourse valuation.
+        Proposition 2 Analytical Lipschitz Upper Bound L_j:
+        L_j = sum_{k=1}^K |branch_cost_k - primary_cost| * Delta_pi(e_k)
+        Derived mathematically from multivariable mean value theorem over precomputed recourse branches.
+        Returns 0.0 if there are no risky edges.
         """
         robot = self.robots[robot_id]
         if recourse_plan is None:
@@ -108,22 +113,31 @@ class ACAAllocator(CBBAAllocator):
                 edge_marginals=robot.get_edge_marginals(),
             )
         if recourse_plan is None or not recourse_plan.risky_edges:
-            return 1.0
+            return 0.0
 
-        # Maximum variation of marginals across adversary types for risky edges on path
-        mu = robot.type_filter.clearance_rate
-        total_L = 0.0
-        nominal_cost = max(1.0, recourse_plan.primary_cost)
-        delta_path = max(5.0, nominal_cost * 1.5)
-
+        hazards_by_type = {}
+        marginals = robot.get_edge_marginals()
+        active_risky = []
         for e in recourse_plan.risky_edges:
             c_e = canonical_edge(e[0], e[1])
-            hazards = [robot.type_filter.get_hazard_under_type(t, c_e) for t in robot.type_filter.types]
-            marginals = [h / max(1e-5, h + mu) for h in hazards]
-            delta_pi_e = max(marginals) - min(marginals)
-            total_L += delta_path * delta_pi_e
+            if self.prune_threshold > 0.0 and marginals.get(c_e, 0.0) < self.prune_threshold:
+                continue
+            active_risky.append(e)
+            hazards_by_type[c_e] = [
+                robot.type_filter.get_hazard_under_type(t, c_e)
+                for t in robot.type_filter.types
+            ]
 
-        return float(max(1.0, total_L))
+        if not active_risky:
+            return 0.0
+
+        mu = robot.type_filter.clearance_rate
+        return compute_lipschitz_bound(
+            planner=robot.planner,
+            recourse_plan=recourse_plan,
+            hazards_by_type=hazards_by_type,
+            clearance_rate=mu,
+        )
 
     def _build_bundle_aca(
         self,
@@ -143,6 +157,9 @@ class ACAAllocator(CBBAAllocator):
         round_deferred = 0
         eta_eff = robot.tom_tracker.get_effective_eta(current_step)
         max_tv = 0.0
+
+        robot_plan_cache: Dict[int, Optional[RecoursePlan]] = {}
+        peer_cost_cache: Dict[Tuple[int, int], float] = {}
 
         while len(bundle) < self.bundle_limit:
             best_task_id = None
@@ -172,12 +189,14 @@ class ACAAllocator(CBBAAllocator):
                     continue
 
                 # Expected recourse cost for robot_id
-                recourse_plan = robot.planner.build_recourse_plan(
-                    task_id=tid,
-                    start_node=robot.current_node,
-                    target_node=task.node,
-                    edge_marginals=edge_marginals,
-                )
+                if tid not in robot_plan_cache:
+                    robot_plan_cache[tid] = robot.planner.build_recourse_plan(
+                        task_id=tid,
+                        start_node=robot.current_node,
+                        target_node=task.node,
+                        edge_marginals=edge_marginals,
+                    )
+                recourse_plan = robot_plan_cache[tid]
                 if recourse_plan is None:
                     continue
 
@@ -197,17 +216,29 @@ class ACAAllocator(CBBAAllocator):
                     for peer_id in self.fleet_ids:
                         if peer_id == robot_id:
                             continue
-                        peer_marginals = self._get_peer_edge_marginals(robot_id, peer_id)
-                        c_peer = self._estimate_peer_cost(
-                            peer_id, task, robot_positions, peer_marginals
-                        )
-                        peer_costs.append(c_peer)
+                        pc_key = (peer_id, tid)
+                        if pc_key not in peer_cost_cache:
+                            peer_marginals = self._get_peer_edge_marginals(robot_id, peer_id)
+                            peer_cost_cache[pc_key] = self._estimate_peer_cost(
+                                peer_id, task, robot_positions, peer_marginals
+                            )
+                        peer_costs.append(peer_cost_cache[pc_key])
 
                     min_peer_cost = min(peer_costs) if peer_costs else float("inf")
                     L_j = self._compute_lipschitz_L_j(task, robot_id, recourse_plan=recourse_plan)
 
                     if self.fixed_margin is not None:
                         margin = float(self.fixed_margin)
+                    elif self.adaptive_margin:
+                        b = robot.type_filter.get_belief_vector()
+                        eps = 1e-12
+                        entropy = -float(np.sum(b * np.log(b + eps)))
+                        max_entropy = float(np.log(len(b))) if len(b) > 1 else 1.0
+                        norm_entropy = float(np.clip(entropy / max(eps, max_entropy), 0.0, 1.0))
+                        # Under high belief uncertainty, preserve full conservative margin (kappa * 1.0)
+                        # As posterior converges to true adversary type (low entropy), calibrate margin to 0.75 * kappa
+                        effective_kappa = self.margin_kappa * (0.75 + 0.25 * norm_entropy)
+                        margin = float(effective_kappa * robot.pinsker_calc.compute_margin(L_j, max_kl, eta=eta_eff))
                     else:
                         margin = float(self.margin_kappa * robot.pinsker_calc.compute_margin(L_j, max_kl, eta=eta_eff))
 

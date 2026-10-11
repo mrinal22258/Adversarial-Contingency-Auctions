@@ -30,6 +30,8 @@ CanonicalTypeSet = [
 
 def canonical_edge(u: Any, v: Any) -> Tuple[Any, Any]:
     """Return ordered edge tuple (min(u, v), max(u, v)) for undirected graphs."""
+    if type(u) is int and type(v) is int:
+        return (u, v) if u <= v else (v, u)
     return (u, v) if str(u) <= str(v) else (v, u)
 
 

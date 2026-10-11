@@ -123,13 +123,25 @@ class RobotAgent:
         Scan edges within sensor range and update Bayesian type filter.
         Ensures observations are only updated once per tick.
         """
-        for u, v in self.graph.edges():
-            pos_u = np.array(self.graph.nodes[u].get("pos", (0, 0)))
-            pos_v = np.array(self.graph.nodes[v].get("pos", (0, 0)))
-            midpoint = 0.5 * (pos_u + pos_v)
-            dist_to_edge = float(np.linalg.norm(np.array(self.pos) - midpoint))
+        edge_midpoints = self.graph.graph.get("_cached_edge_midpoints")
+        if edge_midpoints is None:
+            pos_dict = nx.get_node_attributes(self.graph, "pos")
+            edge_midpoints = {
+                (u, v): (
+                    0.5 * (pos_dict.get(u, (0.0, 0.0))[0] + pos_dict.get(v, (0.0, 0.0))[0]),
+                    0.5 * (pos_dict.get(u, (0.0, 0.0))[1] + pos_dict.get(v, (0.0, 0.0))[1]),
+                )
+                for u, v in self.graph.edges()
+            }
+            self.graph.graph["_cached_edge_midpoints"] = edge_midpoints
 
-            if dist_to_edge <= self.sensor_range:
+        rx, ry = self.pos
+        sr_sq = self.sensor_range * self.sensor_range
+
+        for (u, v), (mx, my) in edge_midpoints.items():
+            dx = rx - mx
+            dy = ry - my
+            if dx * dx + dy * dy <= sr_sq:
                 c_e = canonical_edge(u, v)
                 is_blocked = blockage_process.is_blocked(u, v)
                 curr_state = EdgeState.BLOCKED if is_blocked else EdgeState.OPEN
@@ -149,22 +161,37 @@ class RobotAgent:
                     edge_robot_count=edge_robot_count,
                 )
                 self.known_edge_states[c_e] = curr_state
+                self._cached_marginals = None
 
     def get_edge_marginals(self, fleet_states: Optional[Dict[int, Any]] = None) -> Dict[Tuple[Any, Any], float]:
         """Compute all edge blockage marginals under current Bayesian belief."""
+        if fleet_states is None and getattr(self, "_cached_marginals", None) is not None:
+            return self._cached_marginals
+
+        edges = self.graph.graph.get("_canonical_edges")
+        if edges is None:
+            edges = [
+                ((u, v) if (type(u) is int and type(v) is int and u <= v) else ((v, u) if (type(u) is int and type(v) is int) else canonical_edge(u, v)))
+                for u, v in self.graph.edges()
+            ]
+            self.graph.graph["_canonical_edges"] = edges
+
         marginals = {}
-        for u, v in self.graph.edges():
-            c_e = canonical_edge(u, v)
+        for c_e in edges:
             if self.risky_edges is not None and c_e not in self.risky_edges:
                 marginals[c_e] = 0.0
                 continue
             edge_robot_count = 0
             if fleet_states:
+                u, v = c_e
                 edge_robot_count = sum(
                     1 for _, st in fleet_states.items()
                     if st.get("current_node") in (u, v) or st.get("next_node") in (u, v)
                 )
             marginals[c_e] = self.type_filter.compute_edge_marginal(c_e, edge_robot_count=edge_robot_count)
+
+        if fleet_states is None:
+            self._cached_marginals = marginals
         return marginals
 
     def plan_task_bundle(self, tasks_dict: Dict[int, Any]) -> None:

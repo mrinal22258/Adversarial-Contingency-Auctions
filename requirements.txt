@@ -6,3 +6,5 @@ pyyaml>=6.0
 matplotlib>=3.5
 pytest>=7.0
 pybullet>=3.2.0
+ortools>=9.0
+statsmodels>=0.13.0

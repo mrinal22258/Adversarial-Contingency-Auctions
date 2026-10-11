@@ -22,9 +22,13 @@ from .adversaries import canonical_edge
 
 # Verified SHA-256 hashes of source data files committed in data/maps/
 MOVINGAI_WAREHOUSE_HASH = "c8d1b2f24788ed6bd1ccf45065b96b4ce82d65f88c72de750e03e2758637bff0"
+MOVINGAI_WAREHOUSE_20_40_HASH = "bd3bec2d1c20a8bbf900583cb4c2cf9dc16101470fbfae93b272ee0fb575d3ec"
 OSMNX_ROAD_NETWORK_HASH = "50fe841b10fec5641736354008baacf5d51a2f9bbd304215f25e33d956d39705"
 
 DATA_MAPS_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "data", "maps"))
+
+_ROAD_GRAPH_CACHE: Optional[nx.Graph] = None
+_WAREHOUSE_GRAPH_CACHE: Dict[Tuple[str, int], nx.Graph] = {}
 
 
 def verify_file_sha256(filepath: str, expected_hash: str) -> None:
@@ -61,11 +65,18 @@ def generate_movingai_warehouse(
          A block is passable if >= 40% of its cells are passable corridors.
     5. Extracts the largest connected component and normalizes node positions into [0, scale] x [0, scale].
     """
+    global _WAREHOUSE_GRAPH_CACHE
+    cache_key = (variant, n_nodes if n_nodes is not None else -1, scale)
+    if filepath is None and cache_key in _WAREHOUSE_GRAPH_CACHE:
+        return _WAREHOUSE_GRAPH_CACHE[cache_key].copy()
+
     if filepath is None:
         filepath = os.path.join(DATA_MAPS_DIR, f"warehouse-{variant}.map")
     
     if variant == "10-20-10-2-1":
         verify_file_sha256(filepath, MOVINGAI_WAREHOUSE_HASH)
+    elif variant == "20-40-10-2-1":
+        verify_file_sha256(filepath, MOVINGAI_WAREHOUSE_20_40_HASH)
 
     with open(filepath, "r", encoding="utf-8") as f:
         lines = [line.strip() for line in f if line.strip()]
@@ -85,17 +96,27 @@ def generate_movingai_warehouse(
     width = len(grid[0]) if height > 0 else 0
 
     # Determine coarsening factor B
-    if n_nodes is not None and n_nodes <= 100:
-        # Warehouse 63x161 has ~5700 passable cells.
-        # B=10 gives ~56 nodes, B=8 gives ~38 nodes.
-        if n_nodes <= 45:
-            coarsen_factor = 8
+    if variant == "20-40-10-2-1":
+        if n_nodes is not None and n_nodes <= 150:
+            coarsen_factor = 8   # ~125 nodes
+        elif n_nodes is not None and n_nodes <= 300:
+            coarsen_factor = 10  # ~208 nodes
+        elif n_nodes is not None and n_nodes < 2000:
+            coarsen_factor = 4   # ~1,681 nodes
         else:
-            coarsen_factor = 10
-    elif n_nodes is not None and n_nodes < 1000:
-        coarsen_factor = 4  # ~420 nodes
+            coarsen_factor = 1
     else:
-        coarsen_factor = 1  # Full resolution (5,699 nodes)
+        if n_nodes is not None and n_nodes <= 100:
+            # Warehouse 63x161 has ~5700 passable cells.
+            # B=10 gives ~56 nodes, B=8 gives ~38 nodes.
+            if n_nodes <= 45:
+                coarsen_factor = 8   # ~38 nodes
+            else:
+                coarsen_factor = 10  # ~56 nodes
+        elif n_nodes is not None and n_nodes < 1000:
+            coarsen_factor = 4       # ~420 nodes
+        else:
+            coarsen_factor = 1
 
     g = nx.Graph()
     coord_to_node: Dict[Tuple[int, int], int] = {}
@@ -169,6 +190,8 @@ def generate_movingai_warehouse(
     g.graph["coarsen_factor"] = coarsen_factor
     g.graph["n_nodes"] = len(g.nodes())
     g.graph["n_edges"] = len(g.edges())
+    if filepath is None:
+        _WAREHOUSE_GRAPH_CACHE[cache_key] = g.copy()
     return g
 
 
@@ -189,6 +212,10 @@ def generate_real_road_network(
     4. Preserves road geometry, connectivity, and edge distance attributes.
     5. Extracts largest connected component (216 nodes, 326 edges).
     """
+    global _ROAD_GRAPH_CACHE
+    if filepath is None and _ROAD_GRAPH_CACHE is not None and scale == 100.0:
+        return _ROAD_GRAPH_CACHE.copy()
+
     if filepath is None:
         filepath = os.path.join(DATA_MAPS_DIR, "boston_downtown_drive.graphml")
 
@@ -255,4 +282,6 @@ def generate_real_road_network(
     g_undir.graph["sha256"] = OSMNX_ROAD_NETWORK_HASH
     g_undir.graph["n_nodes"] = len(g_undir.nodes())
     g_undir.graph["n_edges"] = len(g_undir.edges())
+    if filepath is None and scale == 100.0:
+        _ROAD_GRAPH_CACHE = g_undir.copy()
     return g_undir

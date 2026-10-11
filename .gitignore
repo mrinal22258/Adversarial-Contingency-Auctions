@@ -11,6 +11,7 @@
 
 # Python artifacts
 __pycache__/
+*.pyc
 *.py[cod]
 *$py.class
 .pytest_cache/
@@ -18,6 +19,7 @@ __pycache__/
 /env/
 .env
 cache/
+results/raw/
 
 # OS & Environment artifacts
 .DS_Store
@@ -37,3 +39,10 @@ results/tv_evaluations.jsonl
 results/supplement/*.jsonl
 results/per_claim_evaluations.jsonl
 experiments/scratch/
+scratch/
+*.tmp
+*.bak
+*.orig
+*.swp
+*~
+debug.log

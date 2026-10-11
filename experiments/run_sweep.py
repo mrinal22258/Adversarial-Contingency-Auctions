@@ -101,6 +101,7 @@ def build_crn_environment(
     task_arrival_mode: str = "batch",
     poisson_rate: float = 0.5,
     task_deadline: int = 250,
+    **kwargs: Any,
 ) -> Dict[str, Any]:
     """
     Generate decoupled components using SeedSequence.spawn(5) for strict CRN across methods.
@@ -120,7 +121,7 @@ def build_crn_environment(
 
     # 1. Graph
     graph_seed = int(rng_graph.integers(0, 10000000))
-    graph = generate_graph(family=graph_family, n_nodes=n_nodes, seed=graph_seed)
+    graph = generate_graph(family=graph_family, n_nodes=n_nodes, seed=graph_seed, **kwargs)
     nodes_list = sorted(list(graph.nodes()))
 
     # 2. Robot start positions

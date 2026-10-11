@@ -202,4 +202,8 @@ class BayesianTypeFilter:
             prob_blocked = h / denom
             pi_e += self.beliefs[t] * prob_blocked
 
-        return float(np.clip(pi_e, 0.01, 0.99))
+        if pi_e < 0.01:
+            return 0.01
+        elif pi_e > 0.99:
+            return 0.99
+        return float(pi_e)

@@ -328,16 +328,16 @@ class SyntheticVisionSystem:
 
 def run_synthetic_vision_experiment(
     graphs: Optional[Dict[str, nx.Graph]] = None,
-    frames_per_run: int = 80,
+    frames_per_run: int = 50,
     seeds: Optional[List[int]] = None,
     output_video_path: Optional[str] = None,
 ) -> Dict[str, Any]:
     """
-    Execute synthetic-vision experiment across multiple maps and seeds (>= 300 frames total).
-    Renders camera frames, applies lens noise/occlusions, runs OpenCV ArUco detection,
-    and logs position and orientation error telemetry with bootstrap CIs.
+    Execute synthetic-vision experiment across multiple maps and seeds (>= 10 runs per map across >= 10 seeds).
+    Clusters/bootstraps over RUNS (not pooled frames) to ensure valid clustered variance estimation (STEP 6).
     """
     from acalib.env.real_maps import generate_movingai_warehouse, generate_real_road_network, DATA_MAPS_DIR
+    from experiments.stats import bootstrap_ci
 
     if graphs is None:
         g_wh = generate_movingai_warehouse(n_nodes=38, filepath=os.path.join(DATA_MAPS_DIR, "warehouse-10-20-10-2-1.map"))
@@ -348,21 +348,11 @@ def run_synthetic_vision_experiment(
         }
 
     if seeds is None:
-        seeds = [20001, 20002]
+        # At least 10 seeds for >= 10 runs per map
+        seeds = list(range(20001, 20011))
 
     if output_video_path is None:
         output_video_path = os.path.join(VISION_OUT_DIR, "vision_sim.mp4")
-
-    vision_sys = SyntheticVisionSystem(
-        img_width=640,
-        img_height=640,
-        world_size=100.0,
-        pixel_noise_sigma=2.0,
-        occlusion_prob=0.05,
-        detection_drop_prob=0.03,
-        latency_ticks=1,
-        seed=seeds[0],
-    )
 
     fourcc = cv2.VideoWriter_fourcc(*"mp4v")
     vw = cv2.VideoWriter(output_video_path, fourcc, 10.0, (640, 640))
@@ -370,7 +360,11 @@ def run_synthetic_vision_experiment(
     raw_frame_sample = None
     annotated_sample = None
 
-    evaluated_runs = []
+    run_records = []
+    total_frames = 0
+    total_opportunities = 0
+    total_detections = 0
+    total_occlusions = 0
 
     for map_name, graph in graphs.items():
         pos_dict = nx.get_node_attributes(graph, "pos")
@@ -379,12 +373,28 @@ def run_synthetic_vision_experiment(
         # Pre-render background map
         bg = np.ones((640, 640, 3), dtype=np.uint8) * 240
         for u, v in graph.edges():
-            pu = vision_sys.world_to_pixel(*pos_dict[u])
-            pv = vision_sys.world_to_pixel(*pos_dict[v])
+            pu = (
+                int(np.clip((pos_dict[u][0] / 100.0) * 639, 0, 639)),
+                int(np.clip(((100.0 - pos_dict[u][1]) / 100.0) * 639, 0, 639)),
+            )
+            pv = (
+                int(np.clip((pos_dict[v][0] / 100.0) * 639, 0, 639)),
+                int(np.clip(((100.0 - pos_dict[v][1]) / 100.0) * 639, 0, 639)),
+            )
             cv2.line(bg, pu, pv, (180, 180, 180), 1)
 
         for s in seeds:
-            evaluated_runs.append((map_name, s))
+            vision_sys = SyntheticVisionSystem(
+                img_width=640,
+                img_height=640,
+                world_size=100.0,
+                pixel_noise_sigma=2.0,
+                occlusion_prob=0.05,
+                detection_drop_prob=0.03,
+                latency_ticks=1,
+                seed=s,
+            )
+
             rng = np.random.default_rng(s)
             starts = rng.choice(nodes, size=4, replace=False)
             targets = rng.choice([n for n in nodes if n not in starts], size=4, replace=False)
@@ -419,14 +429,81 @@ def run_synthetic_vision_experiment(
                 if annotated_sample is None:
                     annotated_sample = annot_frame.copy()
 
-                vw.write(annot_frame)
+                if len(run_records) == 0:
+                    vw.write(annot_frame)
+
+            # Record run-level summary
+            run_pos = np.array(vision_sys.position_errors) if vision_sys.position_errors else np.array([0.0])
+            run_yaw = np.array(vision_sys.orientation_errors) if vision_sys.orientation_errors else np.array([0.0])
+            run_det_rate = (
+                float(vision_sys.successful_detections / vision_sys.marker_opportunities)
+                if vision_sys.marker_opportunities > 0
+                else 0.0
+            )
+
+            total_frames += vision_sys.total_frames
+            total_opportunities += vision_sys.marker_opportunities
+            total_detections += vision_sys.successful_detections
+            total_occlusions += vision_sys.occlusion_events
+
+            run_records.append({
+                "map": map_name,
+                "seed": s,
+                "frames": vision_sys.total_frames,
+                "opportunities": vision_sys.marker_opportunities,
+                "detections": vision_sys.successful_detections,
+                "detection_rate_pct": run_det_rate * 100.0,
+                "pos_mean_m": float(np.mean(run_pos)),
+                "pos_rmse_m": float(np.sqrt(np.mean(run_pos**2))),
+                "yaw_mean_rad": float(np.mean(run_yaw)),
+                "yaw_rmse_rad": float(np.sqrt(np.mean(run_yaw**2))),
+                "yaw_mean_deg": float(math.degrees(np.mean(run_yaw))),
+            })
 
     vw.release()
 
-    metrics = vision_sys.get_metrics_summary()
-    metrics["maps_evaluated"] = list(graphs.keys())
-    metrics["seeds_evaluated"] = seeds
-    metrics["total_runs_evaluated"] = len(evaluated_runs)
+    # Clustered Bootstrap across RUNS (not frames)
+    run_det_rates = [r["detection_rate_pct"] for r in run_records]
+    run_pos_means = [r["pos_mean_m"] for r in run_records]
+    run_pos_rmses = [r["pos_rmse_m"] for r in run_records]
+    run_yaw_means = [r["yaw_mean_rad"] for r in run_records]
+    run_yaw_rmses = [r["yaw_rmse_rad"] for r in run_records]
+    run_yaw_degs = [r["yaw_mean_deg"] for r in run_records]
+
+    det_mean, det_ci_low, det_ci_high = bootstrap_ci(run_det_rates, ci=0.95, n_resamples=10000)
+    pos_mean, pos_ci_low, pos_ci_high = bootstrap_ci(run_pos_means, ci=0.95, n_resamples=10000)
+    pos_rmse_mean, _, _ = bootstrap_ci(run_pos_rmses, ci=0.95, n_resamples=10000)
+    yaw_mean, yaw_ci_low, yaw_ci_high = bootstrap_ci(run_yaw_means, ci=0.95, n_resamples=10000)
+    yaw_rmse_mean, _, _ = bootstrap_ci(run_yaw_rmses, ci=0.95, n_resamples=10000)
+    yaw_deg_mean, yaw_deg_ci_low, yaw_deg_ci_high = bootstrap_ci(run_yaw_degs, ci=0.95, n_resamples=10000)
+
+    metrics = {
+        "disclaimer": "SYNTHETIC-VISION SIMULATION ONLY -- No physical cameras or robots used.",
+        "git_commit": get_git_commit(),
+        "clustering_level": "run_level_clustered",
+        "total_runs_evaluated": len(run_records),
+        "runs_per_map": len(seeds),
+        "maps_evaluated": list(graphs.keys()),
+        "seeds_evaluated": seeds,
+        "total_frames_analyzed": total_frames,
+        "total_marker_opportunities": total_opportunities,
+        "successful_detections": total_detections,
+        "detection_rate_pct": float(det_mean),
+        "detection_rate_ci_95": [float(det_ci_low), float(det_ci_high)],
+        "missed_marker_rate_pct": float(100.0 - det_mean),
+        "occlusion_events": total_occlusions,
+        "latency_ticks": 1,
+        "position_error_mean_meters": float(pos_mean),
+        "position_error_ci_95": [float(pos_ci_low), float(pos_ci_high)],
+        "position_error_rmse_meters": float(pos_rmse_mean),
+        "orientation_error_mean_rad": float(yaw_mean),
+        "orientation_error_ci_95_rad": [float(yaw_ci_low), float(yaw_ci_high)],
+        "orientation_error_mean_deg": float(yaw_deg_mean),
+        "orientation_error_ci_95_deg": [float(yaw_deg_ci_low), float(yaw_deg_ci_high)],
+        "orientation_error_rmse_rad": float(yaw_rmse_mean),
+        "orientation_threshold_passed": bool(yaw_mean < 0.10),
+        "runs": run_records,
+    }
 
     # Save metrics JSON
     json_path = os.path.join(VISION_OUT_DIR, "vision_metrics.json")
@@ -439,15 +516,17 @@ def run_synthetic_vision_experiment(
     if annotated_sample is not None:
         cv2.imwrite(os.path.join(VISION_OUT_DIR, "sample_annotated_frame.png"), annotated_sample)
 
-    print(f"Synthetic-vision simulation complete. Video saved to {output_video_path}.")
+    print(f"Synthetic-vision simulation complete. Output saved to {json_path}.")
+    print(f"Total Runs: {len(run_records)} ({len(seeds)} per map across {len(graphs)} maps)")
     print(f"Total Frames Analyzed: {metrics['total_frames_analyzed']}")
-    print(f"Detection Rate: {metrics['detection_rate_pct']:.2f}% (95% CI: [{metrics['detection_rate_ci_95'][0]:.2f}%, {metrics['detection_rate_ci_95'][1]:.2f}%])")
-    print(f"Position Error: {metrics['position_error_mean_meters']:.3f} m (95% CI: [{metrics['position_error_ci_95'][0]:.3f} m, {metrics['position_error_ci_95'][1]:.3f} m]), RMSE: {metrics['position_error_rmse_meters']:.3f} m")
-    print(f"Orientation Error: {metrics['orientation_error_mean_rad']:.4f} rad ({metrics['orientation_error_mean_deg']:.2f} deg) (95% CI: [{metrics['orientation_error_ci_95_rad'][0]:.4f}, {metrics['orientation_error_ci_95_rad'][1]:.4f}] rad)")
+    print(f"Clustered Detection Rate: {metrics['detection_rate_pct']:.2f}% (95% CI: [{metrics['detection_rate_ci_95'][0]:.2f}%, {metrics['detection_rate_ci_95'][1]:.2f}%])")
+    print(f"Clustered Position Error: {metrics['position_error_mean_meters']:.3f} m (95% CI: [{metrics['position_error_ci_95'][0]:.3f} m, {metrics['position_error_ci_95'][1]:.3f} m]), RMSE: {metrics['position_error_rmse_meters']:.3f} m")
+    print(f"Clustered Orientation Error: {metrics['orientation_error_mean_rad']:.4f} rad ({metrics['orientation_error_mean_deg']:.2f} deg) (95% CI: [{metrics['orientation_error_ci_95_rad'][0]:.4f}, {metrics['orientation_error_ci_95_rad'][1]:.4f}] rad)")
     print(f"Orientation Threshold (< 0.10 rad) Passed: {metrics['orientation_threshold_passed']}")
 
     return metrics
 
 
 if __name__ == "__main__":
-    run_synthetic_vision_experiment(frames_per_run=80, seeds=[20001, 20002])
+    run_synthetic_vision_experiment(frames_per_run=50, seeds=list(range(20001, 20011)))
+

@@ -33,7 +33,6 @@ from ..alloc.pessimistic import (
 )
 from ..alloc.ctp_replan import CTPReplanAllocator
 from ..alloc.cbba_gossip import CBBABeliefGossipAllocator
-from ..alloc.foresight_opt import ForesightOptAllocator
 from .metrics import SimulationMetrics
 import pandas as pd
 
@@ -201,6 +200,28 @@ class SimulationEngine:
             for r in self.robots.values():
                 r.type_filter.set_oracle(self.adversary_type)
             return alloc
+        elif alloc_type in ("aca_adaptive", "aca_adapt"):
+            return ACAAllocator(
+                graph=self.graph,
+                robots=self.robots,
+                comm_net=self.comm_net,
+                contingency_depth=self.contingency_depth,
+                delta_map=kwargs.get("delta_map", 0.0),
+                enable_margin=True,
+                adaptive_margin=True,
+                prune_threshold=0.0,
+            )
+        elif alloc_type in ("aca_plus", "aca_pruned"):
+            return ACAAllocator(
+                graph=self.graph,
+                robots=self.robots,
+                comm_net=self.comm_net,
+                contingency_depth=self.contingency_depth,
+                delta_map=kwargs.get("delta_map", 0.0),
+                enable_margin=True,
+                adaptive_margin=True,
+                prune_threshold=0.03,
+            )
         elif alloc_type in ("aca", "aca_cbba"):
             return ACAAllocator(
                 graph=self.graph,
@@ -286,6 +307,7 @@ class SimulationEngine:
                 blockage_process=self.blockage_process,
             )
         elif alloc_type in ("foresight_opt", "foresight_optimal"):
+            from ..alloc.foresight_opt import ForesightOptAllocator
             return ForesightOptAllocator(
                 graph=self.graph,
                 robots=self.robots,
@@ -383,10 +405,8 @@ class SimulationEngine:
                 self.metrics.belief_convergence_step = step
 
         # 5. Task Allocation Phase
-        unassigned = any(
-            tid not in [t for r in self.robots.values() for t in r.bundle]
-            for tid in active_available_tasks
-        )
+        assigned_tids = {t for r in self.robots.values() for t in r.bundle}
+        unassigned = any(tid not in assigned_tids for tid in active_available_tasks)
         replans_pending = any(len(r.replan_requests) > 0 for r in self.robots.values())
         robot_pos_dict = {rid: r.pos for rid, r in self.robots.items()}
 
@@ -413,9 +433,9 @@ class SimulationEngine:
             self.metrics.distinct_conflicts = len(self.distinct_conflicted_tids)
 
         # 6. Physical Execution Step (Movement, Recourse Pivots, Task Completions)
+        tasks_info = {tid: {"node": t.node} for tid, t in self.tasks.items()}
         for rid, robot in self.robots.items():
             prev_completed_count = len(robot.completed_tasks)
-            tasks_info = {tid: {"node": t.node} for tid, t in self.tasks.items()}
             robot.step_execution(self.blockage_process, tasks_info, dt=1.0)
 
             if len(robot.completed_tasks) > prev_completed_count:
@@ -447,6 +467,9 @@ class SimulationEngine:
 
         tick_elapsed_ms = (time.perf_counter() - tick_start) * 1000.0
         self.metrics.per_tick_runtimes_ms.append(tick_elapsed_ms)
+
+        self.metrics.total_messages_sent = self.comm_net.total_messages_sent
+        self.metrics.total_bytes_sent = self.comm_net.total_bytes_sent
 
         if self.record_traces:
             fleet_b = [r.type_filter.get_belief_vector() for r in self.robots.values()]

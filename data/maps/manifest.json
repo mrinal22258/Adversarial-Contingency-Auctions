@@ -26,7 +26,9 @@
     "osmnx_version": "2.1.1",
     "access_date": "2026-10-07",
     "nodes": 216,
-    "edges": 326,
+    "edges": 323,
+    "raw_graphml_edges": 326,
+    "matched_work_zone_edges": 112,
     "sha256": "50fe841b10fec5641736354008baacf5d51a2f9bbd304215f25e33d956d39705"
   },
   "boston_road_closures": {

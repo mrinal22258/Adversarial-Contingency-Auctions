@@ -1,6 +1,6 @@
 """
-Theory of Mind (ToM) Belief Estimation and Pinsker Claim Margin (Theorem 3).
-Computes closed-form belief divergence margins that mathematically guarantee conflict-freedom.
+Theory of Mind (ToM) Belief Estimation and Pinsker Claim Margin (Theorem 1).
+Computes closed-form belief divergence margins that mathematically guarantee conditional conflict-freedom.
 """
 
 from typing import Dict, List, Optional, Any
@@ -71,7 +71,7 @@ class TheoryOfMindTracker:
 
 class PinskerMarginCalculator:
     """
-    Computes the unit-consistent Pinsker claim margin (Theorem 3):
+    Computes the unit-consistent Pinsker claim margin (Theorem 1):
     m_{r, j} = Delta_j * ( sqrt(0.5 * D'_hat_r) + eta_eff ) + delta_map
     Derived from: TV(B_r, B_s) <= TV(B_r, B_hat_s) + TV(B_hat_s, B_s)
                                <= sqrt(0.5 * D_KL(B_r || B_hat_s)) + eta.
@@ -99,7 +99,7 @@ class PinskerMarginCalculator:
         margin: float,
     ) -> bool:
         """
-        Theorem 3 Conflict-Freedom Condition:
+        Theorem 1 Conflict-Freedom Condition:
         Robot r claims task j iff my_cost + m_{r, j} < min_{s != r} peer_cost.
         Guarantees that no peer s will simultaneously claim task j under bounded divergence.
         Ties strictly defer (strict inequality).

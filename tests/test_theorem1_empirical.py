@@ -11,6 +11,8 @@ import pandas as pd
 import numpy as np
 import pytest
 
+pytest.importorskip("statsmodels")
+
 from experiments.run_statistical_tests import (
     load_and_aggregate_instances,
     evaluate_hypotheses_prereg_v3,

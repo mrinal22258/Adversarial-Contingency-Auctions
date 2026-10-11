@@ -107,3 +107,63 @@ def test_linter_catches_staleness():
     # The current repo state has stale commit or stale node counts from previous run
     assert len(errors) > 0, "check_staleness must report violations on stale data or mismatched map citations"
 
+
+def test_linter_fails_on_deliberately_typed_number_paper_including_abstract():
+    """
+    Verify that the linter strictly fails on a deliberately typed-number paper
+    with violations across abstract, body text, captions, and tables (Rule R1, STEP 2).
+    """
+    dirty_paper = r"""
+\documentclass{article}
+\begin{document}
+
+\begin{abstract}
+Our method achieves a +1.90 percentage point lead and 0 conflicts across 32 seeds.
+\end{abstract}
+
+\section{Introduction}
+We evaluate navigation across 38 nodes with 10 robots.
+
+\section{Results}
+Our algorithm achieved 88.4\% completion across 1,466,999 observations.
+
+\begin{figure}
+\caption{Benchmark results over 32 seeds showing 0 conflicts.}
+\end{figure}
+
+\begin{table}
+\caption{Quantitative ablation metrics across 50 trials.}
+45.2 & 12.3 \\
+\end{table}
+
+\end{document}
+"""
+    errors = check_unmacroed_literal_numbers(dirty_paper)
+    assert len(errors) >= 5, f"Expected multiple number violations, got: {errors}"
+    
+    # Check abstract violations
+    assert any("+1.90" in e or "1.90" in e for e in errors), "Must catch '+1.90' in abstract"
+    assert any("32" in e for e in errors), "Must catch '32' in abstract/captions"
+    assert any("0" in e for e in errors), "Must catch '0' in abstract/captions"
+    
+    # Check body violations
+    assert any("38" in e for e in errors), "Must catch '38' map nodes in body"
+    assert any("88.4" in e for e in errors), "Must catch '88.4' percentage in body"
+    assert any("1,466,999" in e or "1466999" in e for e in errors), "Must catch '1,466,999' in body"
+    
+    # Check table / caption violations
+    assert any("45.2" in e for e in errors), "Must catch '45.2' in table"
+    assert any("12.3" in e for e in errors), "Must catch '12.3' in table"
+    assert any("50" in e for e in errors), "Must catch '50' trials in caption"
+
+
+def test_clean_paper_tex_has_zero_unmacroed_numbers():
+    """Verify that actual paper.tex in repository contains 0 unmacroed literal numbers."""
+    paper_tex_path = os.path.join(os.path.dirname(__file__), "..", "paper.tex")
+    if os.path.exists(paper_tex_path):
+        with open(paper_tex_path, "r", encoding="utf-8") as f:
+            content = f.read()
+        errors = check_unmacroed_literal_numbers(content)
+        assert len(errors) == 0, f"paper.tex has unmacroed literal numbers: {errors}"
+
+

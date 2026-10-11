@@ -1,10 +1,21 @@
+---
+title: Adversarial Contingency Auctions Mission Control
+emoji: 🛰️
+colorFrom: indigo
+colorTo: blue
+sdk: gradio
+app_file: app.py
+pinned: false
+license: mit
+---
+
 # Adversarial Contingency Auctions (ACA)
 
 > **Decentralized Multi-Robot Task Allocation under Strategic Blockages & Divergent Beliefs**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
-[![Tests: 88 Passing](https://img.shields.io/badge/tests-88%20passing-brightgreen.svg)]()
+[![Tests: 132 Passing](https://img.shields.io/badge/tests-132%20passing-brightgreen.svg)]()
 [![Simulation: Pure Software](https://img.shields.io/badge/simulation-pure%20software-informational.svg)]()
 
 ---
@@ -13,9 +24,9 @@
 In decentralized multi-robot task allocation, strategic adversarial path blockages and inconsistent local worldviews induce coordination failures. Standard market mechanisms (e.g., CBBA, SSI) assume consensus and require cascading market re-auctions upon path invalidation, causing communication surges and delays.
 
 **Adversarial Contingency Auctions (ACA)** addresses these vulnerabilities through three mechanisms:
-1. **Expected-Recourse Valuation (Theorem 1):** Robots bid their expected recourse cost over a depth-$d$ contingency branching policy under a Bayesian posterior over adversary types.
-2. **Pinsker Belief-Divergence Claim Margin (Theorem 3):** Tasks are claimed safely via a closed-form margin $m_{r,j} = \Delta_j (\sqrt{\frac{1}{2} D'_{\text{KL}}} + \eta_{\text{eff}}) + \delta_{\text{map}}$ derived from Pinsker's inequality and total variation triangle bounds, guaranteeing conflict-free safe claims under bounded belief estimation error without exchanging belief vectors.
-3. **Local Detour Execution (Proposition 2):** Blockage encounters activate local precomputed detours with zero communication messages, resorting to market re-auctions only upon recourse tree exhaustion.
+1. **Expected-Recourse Valuation (Proposition 1):** Robots bid their expected recourse cost over a depth-$d$ contingency branching policy under a Bayesian posterior over adversary types.
+2. **Pinsker Belief-Divergence Claim Margin (Theorem 1):** Tasks are claimed safely via a closed-form margin $m_{r,j} = \Delta_j (\sqrt{\frac{1}{2} D'_{\text{KL}}} + \eta_{\text{eff}}) + \delta_{\text{map}}$ derived from Pinsker's inequality and total variation triangle bounds, guaranteeing conflict-free safe claims under bounded belief estimation error without exchanging belief vectors.
+3. **Local Detour Execution (Section III-D & Proposition 4):** Blockage encounters activate local precomputed detours with zero communication messages, resorting to market re-auctions only upon recourse tree exhaustion.
 
 ---
 
@@ -34,9 +45,9 @@ In the SITL synthetic-vision pipeline, overhead camera observations track ArUco 
 
 ## 🔬 What This Repository Shows (Key Scientific Findings)
 
-This repository implements a rigorous, pre-registered empirical benchmark ($N = 13,800$ total trials across 5 graph families $\times$ 4 adversary profiles $\times$ 3 communication regimes) comparing ACA against literature baselines, level-execution variants (+LR), and clean ablations:
+This repository implements a rigorous empirical benchmark ($N = 13,800$ total trials: a balanced nominal core grid of 10,500 trials [$750$ matched trials/method across 250 independent instances], 400 targeted adversary evaluations, and 2,900 OFAT sensitivity sweep trials) comparing ACA against literature baselines, level-execution variants (+LR), and clean ablations:
 
-1. **ACA vs. Standard CBBA:** Under dynamic corridor blockages, standard CBBA drops its entire bundle upon a single blockage. ACA leverages type-aware expected recourse cost valuation and zero-message local detour execution, achieving significantly higher completion with lower message volume ($p < 0.05$).
+1. **ACA vs. Standard CBBA:** Under dynamic corridor blockages, standard CBBA drops its entire bundle upon a single blockage. ACA leverages type-aware expected recourse cost valuation and zero-message local detour execution, achieving significantly higher completion with comparable messages (333 ± 22 vs. 312 ± 10) and 3.7x tick runtime (44.36 ± 2.29 ms vs. 11.89 ± 0.63 ms).
 2. **Mechanism Attribution:** Disabling local contingency recourse (ACA Depth-0) drops completion, confirming that local detour evaluation drives ACA's completion advantage.
 3. **Pinsker Safe Claim Behavior:** The Pinsker margin operates conservatively. Safe claims maintain conflict-freedom under bounded error as predicted by Theorem 1.
 4. **Honest Comparative Trade-offs:** 
@@ -47,7 +58,7 @@ All empirical data is generated automatically with zero hand-typed numbers:
 
 <!-- RESULTS_TABLE_START -->
 
-### Benchmark Results ($N = 1650$ Paired Trials per Method)
+### Benchmark Results ($N = 750$ Paired Trials per Method Across 250 Independent Instances)
 
 | Method | Completion (%) | Net Welfare | Distinct Conflicts | Total Conflicts | Messages | Tick RT (ms) |
 |:-------|:--------------:|:-----------:|:------------------:|:---------------:|:--------:|:------------:|
@@ -57,24 +68,23 @@ All empirical data is generated automatically with zero hand-typed numbers:
 | ACA (Depth-2) | 91.2 ± 0.9 | 925 ± 21 | 6.3 ± 0.2 | 38.5 ± 2.4 | 234 ± 10 | 34.79 ± 2.27 |
 | ACA (No Inference) | 90.9 ± 0.9 | 928 ± 21 | 6.3 ± 0.2 | 38.7 ± 2.4 | 235 ± 10 | 31.98 ± 2.00 † |
 | CBBA [Choi '09] | 82.1 ± 1.2 † | 879 ± 19 † | 8.0 ± 0.2 † | 50.4 ± 2.5 † | 312 ± 10 † | 11.89 ± 0.63 † |
-| CBBA (+LR) | 86.9 ± 0.9 † | 865 ± 17 † | 7.8 ± 0.2 † | 53.4 ± 2.5 † | 280 ± 9 † | 13.47 ± 0.60 † |
+| CBBA (+LR) | 86.9 ± 0.9 † | 865 ± 17 | 7.8 ± 0.2 † | 53.4 ± 2.5 † | 280 ± 9 † | 13.47 ± 0.60 † |
 | CBBA-PR (Adapted) [Buckman '19] | 90.4 ± 0.9 | 977 ± 17 † | 8.0 ± 0.2 † | 59.7 ± 3.2 † | 295 ± 12 † | 12.57 ± 0.67 † |
-| CBBA-PR (+LR) | 88.1 ± 0.7 † | 1123 ± 43 | 8.1 ± 0.2 † | 53.1 ± 2.1 † | 353 ± 22 † | 14.78 ± 0.53 † |
+| CBBA-PR (+LR) | 88.1 ± 0.7 | 1123 ± 43 | 8.1 ± 0.2 † | 53.1 ± 2.1 † | 353 ± 22 † | 14.78 ± 0.53 † |
 | SSI [Koenig '06] | 84.3 ± 1.4 † | 694 ± 27 † | 0.0 ± 0.0 † | 0.0 ± 0.0 † | 252 ± 11 | 12.33 ± 0.69 † |
 | SSI (+LR) | 84.1 ± 1.4 † | 635 ± 29 † | 0.0 ± 0.0 † | 0.0 ± 0.0 † | 214 ± 10 † | 12.79 ± 0.76 † |
 | CTP Replan | 93.7 ± 0.6 † | 930 ± 30 † | 0.0 ± 0.0 † | 0.0 ± 0.0 † | 101 ± 5 † | 13.38 ± 0.46 † |
 | Implicit (No Consensus) [Alighanbari '05] | 94.5 ± 0.7 † | 781 ± 22 † | 10.6 ± 0.2 † | 107.7 ± 4.4 † | 0 ± 0 † | 19.57 ± 1.09 † |
 | Clairvoyant greedy (reference, not a bound) | 97.1 ± 0.5 † | 917 ± 26 † | 0.0 ± 0.0 † | 0.0 ± 0.0 † | 0 ± 0 † | 15.55 ± 0.81 † |
-| Foresight Optimal (CP-SAT bound) | 94.6 ± 2.8 | 263 ± 62 † | 0.0 ± 0.0 † | 0.0 ± 0.0 † | 0 ± 0 † | 34.56 ± 3.83 † |
 
 <!-- RESULTS_TABLE_END -->
 
-- Auto-generated Markdown Table: [`results/table_main_results.md`](file:///c:/Users/krmri/Downloads/Adversarial-Contingency-Auctions-main/Adversarial-Contingency-Auctions-main/results/table_main_results.md)
-- Auto-generated LaTeX Table: [`results/table_main_results.tex`](file:///c:/Users/krmri/Downloads/Adversarial-Contingency-Auctions-main/Adversarial-Contingency-Auctions-main/results/table_main_results.tex)
-- Stratified Results Table: [`results/table_stratified.tex`](file:///c:/Users/krmri/Downloads/Adversarial-Contingency-Auctions-main/Adversarial-Contingency-Auctions-main/results/table_stratified.tex)
-- Paired SITL Simulation Table: [`results/table_sitl.tex`](file:///c:/Users/krmri/Downloads/Adversarial-Contingency-Auctions-main/Adversarial-Contingency-Auctions-main/results/table_sitl.tex)
-- Pre-registered Hypothesis Verdict: [`RESULTS_VERDICT.md`](file:///c:/Users/krmri/Downloads/Adversarial-Contingency-Auctions-main/Adversarial-Contingency-Auctions-main/RESULTS_VERDICT.md)
-- Raw Trial Logs: [`results/raw_results.csv`](file:///c:/Users/krmri/Downloads/Adversarial-Contingency-Auctions-main/Adversarial-Contingency-Auctions-main/results/raw_results.csv) (13,800 records)
+- Auto-generated Markdown Table: [`results/table_main_results.md`](results/table_main_results.md)
+- Auto-generated LaTeX Table: [`results/table_main_results.tex`](results/table_main_results.tex)
+- Stratified Results Table: [`results/table_stratified.tex`](results/table_stratified.tex)
+- Paired SITL Simulation Table: [`results/table_sitl.tex`](results/table_sitl.tex)
+- Pre-registered Hypothesis Verdict: [`RESULTS_VERDICT.md`](RESULTS_VERDICT.md)
+- Raw Trial Logs: [`results/raw_results.csv`](results/raw_results.csv) (13,800 records)
 
 ---
 
@@ -87,7 +97,7 @@ acalib/
   alloc/      # ACA-CBBA, ablations, CBBA (Choi '09), CBBA-PR, CC-CBBA, Implicit, SSI, Foresight Opt (CP-SAT)
   sim/        # Simulation engine, wall-clock metrics, and statistical logging
 experiments/  # Parallel sweep runner, bootstrap CIs, paired Wilcoxon + Holm-Bonferroni tests, figures/tables
-tests/        # 60 automated verification and regression tests
+tests/        # 115 automated verification and regression tests
 results/      # Raw CSV trials, LaTeX tables, numbers macros, and publication PDF/PNG figures
 ```
 
@@ -96,7 +106,7 @@ results/      # Raw CSV trials, LaTeX tables, numbers macros, and publication PD
 ## 🚀 Quickstart & Reproduction
 
 ### 1. Run Verification Test Suite
-Run the 60 automated unit, property-based, and regression tests:
+Run the 115 automated unit, property-based, and regression tests:
 ```powershell
 pytest tests/ -v
 ```
@@ -116,9 +126,9 @@ python tools/lint_paper.py
 ## 📜 Citation
 ```bibtex
 @article{mrinal2026aca,
-  author  = {Mrinal, Kumar},
-  title   = {Adversarial Contingency Auctions for Decentralized Multi-Robot Task Allocation under Strategic Blockages},
-  journal = {IEEE Robotics and Automation Letters},
-  year    = {2026}
+  author = {Mrinal, Kumar},
+  title  = {Adversarial Contingency Auctions for Decentralized Multi-Robot Task Allocation under Strategic Blockages},
+  note   = {Preprint / under review},
+  year   = {2026}
 }
 ```
