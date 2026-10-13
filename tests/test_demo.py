@@ -17,6 +17,9 @@ import sys
 import numpy as np
 import networkx as nx
 
+pytest.importorskip("gradio")
+pytestmark = [pytest.mark.ui]
+
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from app import run_simulation_wrapper, plot_simulation_state, get_metrics_table

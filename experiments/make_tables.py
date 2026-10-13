@@ -22,6 +22,7 @@ from experiments.stats import (
     holm_bonferroni_correction,
     format_latex_ci,
 )
+from experiments.population import get_locked_population
 
 METHOD_PRETTY = {
     "aca": "\\textbf{ACA (Ours)}",
@@ -1205,12 +1206,12 @@ def main():
         return
 
     df = pd.read_csv(args.csv)
-    print(f"Loaded {len(df)} trials from {args.csv}.")
+    eval_df, _ = get_locked_population(df, population_id="nominal_balanced_core")
     tex_ii = generate_main_results_table(df, args.out)
     tex_iii = generate_stratified_table(df)
     tex_iv = generate_sitl_table()
     tex_v = generate_heldout_v5_table()
-    generate_numbers_macro_file(df)
+    generate_numbers_macro_file(eval_df)
     per_cond = generate_per_condition_table(df)
     update_readme_results_section()
     print(f"Wrote Table II to {args.out}")

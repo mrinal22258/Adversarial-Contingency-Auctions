@@ -11,6 +11,7 @@ import os
 import sys
 
 pytest.importorskip("pybullet")
+pytestmark = [pytest.mark.sitl]
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if REPO_ROOT not in sys.path:
