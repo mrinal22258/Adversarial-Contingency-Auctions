@@ -72,12 +72,7 @@ def test_lipschitz_cost_bound_monte_carlo():
 
             cost1 = plan1.expected_cost
             # Evaluate the expected cost of the same recourse policy under belief B2
-            cost2 = planner.compute_expected_cost(
-                primary_path=plan1.primary_path,
-                risky_edges=plan1.risky_edges,
-                detours=plan1.detours,
-                edge_marginals=pi2,
-            )
+            cost2 = planner.compute_expected_cost_for_plan(plan1, pi2)
             cost_diff = abs(cost1 - cost2)
 
             # Compute production Lipschitz bound on plan1
