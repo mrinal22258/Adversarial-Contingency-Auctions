@@ -69,3 +69,51 @@ In accordance with Section 0 and Section 1 of the End-to-End Repair Protocol, al
   3. Provenance & Determinism: Build pipeline `tools/build_all.py` compiles the single unified result model `results/result_model_v1.json`, generates `results/numbers.tex`, tables, figures, executes strict paper linting, and records SHA-256 hashes of all 12 key artifacts into `results/build_provenance.json`. Verified identical hashes across consecutive passes and enforced via `tests/test_build_manifest.py`.
 - **Rationale:** UI transparency and complete build reproducibility are essential for end-to-end scientific integrity.
 
+---
+
+### Decision D-08: Authoritative Protocol v6 Seed List and Pre-Execution Amendment
+- **Date:** 2026-10-13
+- **Context:** Preregistration `protocols/prereg-v6.md` listed a hand-written / near-evenly spaced list of 50 seeds that did not match the derivation from `np.random.default_rng(20261013)`.
+- **Decision:** The algorithmically generated list from `np.random.default_rng(20261013)` via `generate_v6_seeds(50)` is declared authoritative. It is frozen in `experiments/configs/protocol_v6.yaml` and replaces the listed seeds in `protocols/prereg-v6.md`. An explicit amendment note ("v6.1 pre-execution correction: original list did not match the stated derivation; corrected before any v6 data existed") is recorded in the preregistration. Development seeds ($N=15$) in $[40000, 45000]$ are generated with RNG seed 9992026 and stored separately.
+- **Rationale:** Cryptographic and mathematical integrity requires verifiable derivation from the declared pseudo-random number generator, without human intervention or manual spacing.
+
+---
+
+### Decision D-09: Active ACA+ Pruning Semantics and Numeric Threshold Selection
+- **Date:** 2026-10-13
+- **Context:** In Protocol v5 held-out evaluations, `aca_plus` set `prune_threshold=0.06` while the planner admitted risky edges only at $\ge 0.12$, rendering pruning a dead no-op. Furthermore, dropping pruned edges could erase modeled failure probabilities.
+- **Decision:** Pruning is strictly defined as removing pre-planned detours, NOT removing the underlying risk. A pruned edge remains in the probability model; if blocked during execution, it transitions to an explicit recovery/replan/failure leaf with its associated cost. The numerical pruning threshold $\tau_{\text{prune}}$ is frozen at 0.20 (selected from $\{0.15, 0.20, 0.25\}$ using development seeds only, strictly satisfying $\tau > 0.12$). The exact same pruned plan object is shared across Lipschitz bound, bid score, cache, and executor. Historical v5 ACA+ is reported as "pruning inactive".
+- **Rationale:** Pruning must not erase modeled failure probability, and the threshold must exceed the candidate admission threshold to be functionally active. Confirmatory seeds must never be used for parameter selection.
+
+---
+
+### Decision D-10: Exactness Scope for Recursive Expected Cost
+- **Date:** 2026-10-13
+- **Context:** `compute_tree_expected_cost()` evaluates recursive expected cost under the assumption of independent Bernoulli edge failures with fixed marginal probabilities. Adversaries in simulation may induce persistent blockages and state-dependent/reactive correlations.
+- **Decision:** Scope the analytical exactness claim explicitly to "exact under the independent-Bernoulli model" in all code docstrings, mathematical claims, paper prose, and documentation. Include simulation rollout tests quantifying the gap under reactive and persistent adversarial blocking. Remove all unapproved default marginal fallbacks (such as `0.15`).
+- **Rationale:** Transparency regarding modeling assumptions prevents overclaiming exactness where edge interactions violate independence.
+
+---
+
+### Decision D-11: Primary Estimator Specification and Multiplicity Control
+- **Date:** 2026-10-13
+- **Context:** Discrepancies between cell-level Wilcoxon tests and cluster-level (`graph_family × seed`) bootstrap intervals led to inconsistent reported p-values and confidence intervals.
+- **Decision:** Primary inferential estimands are strictly cluster-level ($n=50$ clusters per topology/seed combination) under step-down Holm–Bonferroni FWER adjustment. Cell-level paired tests are designated as secondary sensitivity analyses only. All primary tables, LaTeX macros, and claim validations must source their estimates, confidence intervals, raw p-values, and adjusted p-values from this cluster-level path in the unified result model.
+- **Rationale:** Instances sharing topology and seed violate independent-sample assumptions; cluster-aware inference reflects the true degrees of freedom.
+
+---
+
+### Decision D-12: Double-Blind Anonymization Policy
+- **Date:** 2026-10-13
+- **Context:** `paper.tex` had `\anonymousfalse`, exposing author names, institutional affiliation (IIIT Delhi), and contact details in rendered PDFs.
+- **Decision:** Set `\anonymoustrue` by default for submission builds, while preserving a configurable camera-ready switch. Scrub all PDF metadata, author paths, institutional acknowledgments, and repository links from anonymous builds.
+- **Rationale:** Adherence to double-blind conference review standards is mandatory for uncompromised peer review.
+
+---
+
+### Decision D-13: Executable Claim Verification and Negative Results Preservation
+- **Date:** 2026-10-13
+- **Context:** Claim ledgers previously recorded static `expected_verdict` without evaluating underlying data or handling empty populations.
+- **Decision:** The claim ledger is refactored into an active verification engine: `EmpiricalClaim.evaluate()` computes effect sizes, confidence intervals, and hypothesis tests directly from raw locked data and verifies them against registered claims within declared tolerances. Empty populations or hash mismatches trigger hard failures. Negative results from Protocol v5 held-out evaluations (CBBA+LR superior on completion and welfare, with fewer conflicts) remain prominent across the paper, README, and ledgers.
+- **Rationale:** Verifiable claims prevent drift between manuscript statements and empirical data.
+

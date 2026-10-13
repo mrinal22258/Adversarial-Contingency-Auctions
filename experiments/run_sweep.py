@@ -1,13 +1,15 @@
 """
-Parallel Seeded Experiment Runner with Common Random Numbers (CRN) and Resumability.
-Phase A Implementation:
-- Reads comm_regimes, final_seeds, environments (including real maps), baselines, and ablations.
+Parallel Seeded Experiment Runner with Common Random Numbers (CRN), Protocol Isolation, and Strict Resumability.
+Phase A & Protocol v6 Implementation:
+- Reads comm_regimes, seed list/schedule, environments, baselines, and ablations from authoritative config.
 - Per-component RNG via numpy.random.SeedSequence.spawn(5) (graph, starts, tasks, blockages, comm).
 - Pre-draws per-(edge, step) blockage uniforms so all allocation methods see identical blockage streams.
-- Fully resumable on (config_hash, seed, method, adversary, regime).
-- Appends granular per-trial JSONL records with git commit, library versions, and wall-clock times.
-- Saves per-step telemetry traces to results/traces/<run_id>.parquet.
-- Computes and displays total run count, cached runs, and empirical ETA before execution.
+- Full trial identity: SHA-256 over normalized resolved config including all physical/network factors, depth, allocator_kwargs, commit, and protocol hash.
+- Strict resumability on full trial identity.
+- Protocol-isolated output directories (no cross-contamination with global results/runs.jsonl).
+- Atomic logging with canonical per-record SHA-256 digests.
+- Strict Git reproducibility enforcement in confirmatory mode.
+- Explicit --dry-run (0 simulator steps) and --smoke-test support.
 """
 
 import os
@@ -19,7 +21,7 @@ import hashlib
 import subprocess
 import traceback
 import argparse
-from typing import Dict, Tuple, Any, Optional
+from typing import Dict, Tuple, Any, Optional, List
 import concurrent.futures
 import yaml
 import pandas as pd
@@ -33,6 +35,7 @@ from acalib.env.graph_families import generate_graph
 from acalib.env.adversaries import AdversaryType, canonical_edge
 from acalib.alloc.base import Task
 from acalib.sim.engine import SimulationEngine
+from acalib.data.logger import AtomicJsonlWriter, compute_record_hash
 
 
 def get_git_commit_hash() -> str:
@@ -45,14 +48,15 @@ def get_git_commit_hash() -> str:
                 .decode("ascii")
                 .strip()
             )
-            return commit
+            if commit:
+                return commit
         except Exception:
             pass
     return "unknown"
 
 
-def check_git_clean() -> bool:
-    """Check if git working tree is clean (Rule R1: reproducible commit)."""
+def check_git_clean() -> Tuple[bool, str]:
+    """Check if git working tree is clean. Returns (is_clean, status_str)."""
     git_bins = ["git", r"C:\Program Files\Git\cmd\git.exe"]
     for git_bin in git_bins:
         try:
@@ -61,25 +65,47 @@ def check_git_clean() -> bool:
                 .decode("utf-8")
                 .strip()
             )
-            return len(status) == 0
+            # Filter untracked test logs or temp files if needed, but porcelain output checks tracked modifications
+            lines = [l for l in status.splitlines() if not l.startswith("?? results/test_logs") and not l.startswith("?? ACA_End_to_End_Audit")]
+            is_clean = len(lines) == 0
+            return (is_clean, "clean" if is_clean else f"dirty: {status}")
         except Exception:
             pass
-    return True
+    return (False, "git_uninspectable")
 
 
 def compute_trial_hash(condition_dict: Dict[str, Any]) -> str:
-    """Compute deterministic MD5 hash of trial experimental condition."""
-    sorted_items = sorted((k, str(v)) for k, v in condition_dict.items())
-    raw = json.dumps(sorted_items, sort_keys=True)
-    return hashlib.md5(raw.encode("utf-8")).hexdigest()[:12]
+    """
+    Compute full deterministic SHA-256 hash of normalized trial experimental condition.
+    Includes all factors: graph, robots, tasks, comm, max_steps, depth, allocator kwargs, commit, protocol hash.
+    """
+    normalized = {}
+    for k, v in sorted(condition_dict.items()):
+        if isinstance(v, dict):
+            normalized[k] = json.dumps(sorted((dk, str(dv)) for dk, dv in v.items()))
+        elif isinstance(v, (list, tuple)):
+            normalized[k] = json.dumps(sorted([str(x) for x in v]))
+        else:
+            normalized[k] = str(v)
+    raw = json.dumps(sorted(normalized.items()), sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
 
-_EDGE_BC_CACHE: Dict[Tuple[str, int, int], Dict[Any, float]] = {}
+_EDGE_BC_CACHE: Dict[Tuple[str, int, int, str], Dict[Any, float]] = {}
+
+
+def compute_graph_hash(graph: nx.Graph) -> str:
+    """Deterministic hash of graph topology (nodes + canonical edges)."""
+    nodes = sorted(list(graph.nodes()))
+    edges = sorted([canonical_edge(u, v) for u, v in graph.edges()])
+    data = json.dumps({"nodes": nodes, "edges": edges}, sort_keys=True)
+    return hashlib.sha256(data.encode("utf-8")).hexdigest()[:16]
 
 
 def get_edge_betweenness(graph: nx.Graph, graph_family: str) -> Dict[Any, float]:
     """Retrieve or compute edge betweenness centrality with caching for static real topologies."""
-    cache_key = (graph_family, len(graph), len(graph.edges()))
+    g_hash = compute_graph_hash(graph)
+    cache_key = (graph_family, len(graph), len(graph.edges()), g_hash)
     if cache_key in _EDGE_BC_CACHE:
         return _EDGE_BC_CACHE[cache_key]
 
@@ -88,6 +114,7 @@ def get_edge_betweenness(graph: nx.Graph, graph_family: str) -> Dict[Any, float]
     if graph_family in ("warehouse_movingai", "road_osmnx", "warehouse"):
         _EDGE_BC_CACHE[cache_key] = bc
     return bc
+
 
 def build_crn_environment(
     graph_family: str,
@@ -195,9 +222,10 @@ def run_single_trial(
     seed: int,
     max_steps: int = 80,
     contingency_depth: int = 1,
-    traces_dir: Optional[str] = "results/traces",
-    runs_jsonl: Optional[str] = "results/runs.jsonl",
+    traces_dir: Optional[str] = None,
+    runs_jsonl: Optional[str] = None,
     git_commit: str = "unknown",
+    protocol_hash: str = "unknown",
     allocator_kwargs: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     """Execute a single trial with CRN coupling and save trace parquet and JSONL record."""
@@ -216,7 +244,10 @@ def run_single_trial(
     adv_enum = AdversaryType(adversary_type_str)
 
     # Determine recourse depth
-    if allocator_name == "aca_depth_0":
+    alloc_kw = dict(allocator_kwargs) if allocator_kwargs else {}
+    if "contingency_depth" in alloc_kw:
+        c_depth = alloc_kw["contingency_depth"]
+    elif allocator_name == "aca_depth_0":
         c_depth = 0
     elif allocator_name == "aca_depth_2":
         c_depth = 2
@@ -225,7 +256,7 @@ def run_single_trial(
     else:
         c_depth = 0
 
-    engine_kwargs = dict(allocator_kwargs) if allocator_kwargs else {}
+    engine_kwargs = dict(alloc_kw)
     engine = SimulationEngine(
         graph=env_components["graph"],
         adversary_type=adv_enum,
@@ -243,7 +274,7 @@ def run_single_trial(
         predrawn_onset_uniforms=env_components["predrawn_onset"],
         custom_risky_edges=env_components["risky_edges"],
         comm_net_seed=env_components["comm_seed"],
-        record_traces=True,
+        record_traces=(traces_dir is not None),
         **engine_kwargs,
     )
 
@@ -256,8 +287,7 @@ def run_single_trial(
     actual_n_edges = len(env_components["graph"].edges())
     condition_info = {
         "graph_family": graph_family,
-        "n_nodes": actual_n_nodes,
-        "n_edges": actual_n_edges,
+        "n_nodes": n_nodes,
         "adversary": adversary_type_str,
         "method": allocator_name,
         "comm_regime": comm_regime,
@@ -266,10 +296,14 @@ def run_single_trial(
         "n_robots": n_robots,
         "n_tasks": n_tasks,
         "seed": seed,
+        "max_steps": max_steps,
         "contingency_depth": c_depth,
+        "allocator_kwargs": alloc_kw,
+        "git_commit": git_commit,
+        "protocol_hash": protocol_hash,
     }
     trial_hash = compute_trial_hash(condition_info)
-    run_id = f"{graph_family}_{adversary_type_str[:7]}_{comm_regime}_{allocator_name}_s{seed}_{trial_hash}"
+    run_id = f"{graph_family}_{adversary_type_str[:7]}_{comm_regime}_{allocator_name}_s{seed}_{trial_hash[:16]}"
 
     # Save per-step traces as Parquet
     if traces_dir:
@@ -280,18 +314,18 @@ def run_single_trial(
 
     row = dict(condition_info)
     row.update(summary)
+    row["actual_n_nodes"] = actual_n_nodes
+    row["actual_n_edges"] = actual_n_edges
     row["trial_hash"] = trial_hash
     row["run_id"] = run_id
     row["wall_clock_ms"] = wall_clock_ms
 
-    # Write JSONL record
+    # Write JSONL record atomically with per-record SHA-256
     if runs_jsonl:
         os.makedirs(os.path.dirname(runs_jsonl), exist_ok=True)
-        jsonl_record = dict(row)
-        jsonl_record["git_commit"] = git_commit
-        from acalib.data.logger import AtomicJsonlWriter
         writer = AtomicJsonlWriter(runs_jsonl)
-        writer.append(jsonl_record)
+        rec_hash = writer.append(row)
+        row["record_sha256"] = rec_hash
 
     return row
 
@@ -301,33 +335,105 @@ def _worker_wrapper(args_tuple):
     return run_single_trial(*args_tuple)
 
 
+def resolve_seeds(args, yaml_config: Dict[str, Any]) -> Tuple[List[int], str]:
+    """Resolve exact seed list and compute its SHA-256 digest."""
+    if args.seed_list:
+        if args.seed_list in ("v6", "protocol_v6"):
+            from tests.test_prereg_v6_seeds import generate_v6_seeds
+            seeds = generate_v6_seeds(50)
+        elif args.seed_list in ("dev", "development"):
+            from tests.test_prereg_v6_seeds import generate_dev_seeds
+            seeds = generate_dev_seeds(15)
+        elif os.path.exists(args.seed_list):
+            with open(args.seed_list, "r", encoding="utf-8") as f:
+                content = f.read().strip()
+                if args.seed_list.endswith(".yaml") or args.seed_list.endswith(".yml"):
+                    cfg = yaml.safe_load(content)
+                    seeds = cfg.get("seeds") or cfg.get("evaluation_design", {}).get("confirmatory_phase", {}).get("seeds", [])
+                elif args.seed_list.endswith(".json"):
+                    seeds = json.loads(content)
+                else:
+                    seeds = [int(x.strip()) for x in content.replace(",", " ").split() if x.strip()]
+        else:
+            raise ValueError(f"Unknown seed-list option or file not found: {args.seed_list}")
+    elif args.pilot:
+        seeds = list(range(10000, 10010))
+    elif args.seeds is not None:
+        seeds = list(range(1, args.seeds + 1))
+    elif "evaluation_design" in yaml_config and "confirmatory_phase" in yaml_config["evaluation_design"]:
+        seeds = yaml_config["evaluation_design"]["confirmatory_phase"]["seeds"]
+    elif "final_seeds" in yaml_config:
+        n_seeds = yaml_config["final_seeds"]
+        seeds = list(range(1, n_seeds + 1))
+    else:
+        seeds = list(range(1, 11))
+
+    seed_hash = hashlib.sha256(str(seeds).encode("utf-8")).hexdigest()
+    return seeds, seed_hash
+
+
 def main():
-    parser = argparse.ArgumentParser(description="Parallel Seeded ACA Experiment Runner (Phase A)")
+    parser = argparse.ArgumentParser(description="Parallel Seeded ACA Experiment Runner (Phase A & Protocol v6)")
     parser.add_argument("--config", type=str, default="experiments/configs/config_final.yaml", help="Path to config YAML")
+    parser.add_argument("--protocol", type=str, default=None, help="Protocol ID (e.g. v6)")
     parser.add_argument("--seeds", type=int, default=None, help="Number of seeds (overrides YAML)")
+    parser.add_argument("--seed-list", type=str, default=None, help="Path to seed list file or 'v6' or 'dev'")
     parser.add_argument("--pilot", action="store_true", help="Run disjoint pilot sweep on seeds 10000-10009")
-    parser.add_argument("--output", type=str, default="results/raw_results.csv", help="Output summary CSV")
+    parser.add_argument("--output", type=str, default=None, help="Output summary CSV")
+    parser.add_argument("--output-dir", type=str, default=None, help="Directory for all run outputs (CSV, JSONL, traces)")
     parser.add_argument("--workers", type=int, default=8, help="Number of parallel worker processes")
-    parser.add_argument("--dry-run", action="store_true", help="Print total run count and ETA estimate without running")
+    parser.add_argument("--dry-run", action="store_true", help="Resolve and validate config, print planned workload, run NO simulator")
+    parser.add_argument("--smoke-test", action="store_true", help="Run single tiny trial to verify end-to-end pipeline")
+    parser.add_argument("--strict", action="store_true", help="Fail closed on any malformed record, hash mismatch, or dirty git")
+    parser.add_argument("--confirmatory", action="store_true", help="Enforce confirmatory reproducibility (clean git, strict cache)")
     args = parser.parse_args()
 
-    # Rule R1: strictly fail if working tree is dirty
-    if not args.dry_run:
-        if not check_git_clean():
-            print("ERROR (Rule R1): Git working tree is dirty. Sweep requires a clean git commit for reproducibility.")
-            sys.exit(1)
+    # Protocol selection override
+    if args.protocol == "v6":
+        args.config = "experiments/configs/protocol_v6.yaml"
+        args.confirmatory = True
 
-    os.makedirs(os.path.dirname(args.output), exist_ok=True)
-    traces_dir = "results/traces"
-    runs_jsonl = "results/runs.jsonl"
-    os.makedirs(traces_dir, exist_ok=True)
-
+    # Load YAML config
     yaml_config = {}
+    protocol_hash = "unknown"
     if os.path.exists(args.config):
         with open(args.config, "r", encoding="utf-8") as f:
-            yaml_config = yaml.safe_load(f) or {}
+            raw_content = f.read()
+            protocol_hash = hashlib.sha256(raw_content.encode("utf-8")).hexdigest()
+            yaml_config = yaml.safe_load(raw_content) or {}
 
+    is_confirmatory = (
+        args.confirmatory
+        or (args.protocol == "v6")
+        or ("confirmatory_phase" in yaml_config.get("evaluation_design", {}))
+    )
+
+    # Git cleanliness check (fail-closed in confirmatory mode)
+    git_clean, git_msg = check_git_clean()
     git_commit = get_git_commit_hash()
+
+    if is_confirmatory or args.strict:
+        if not git_clean:
+            raise RuntimeError(f"Confirmatory/strict mode failure: Git working tree is dirty ({git_msg}).")
+        if git_commit == "unknown":
+            raise RuntimeError("Confirmatory/strict mode failure: Git commit hash is unknown.")
+
+    # Output directory isolation
+    out_cfg = yaml_config.get("output", {})
+    if args.output_dir:
+        out_dir = args.output_dir
+    elif args.output:
+        out_dir = os.path.dirname(args.output) or "."
+    elif "dir" in out_cfg:
+        out_dir = out_cfg["dir"]
+    else:
+        out_dir = "results/sweep"
+
+    os.makedirs(out_dir, exist_ok=True)
+    results_csv = args.output or os.path.join(out_dir, "results.csv")
+    runs_jsonl = os.path.join(out_dir, "runs.jsonl")
+    traces_dir = os.path.join(out_dir, "traces")
+    os.makedirs(traces_dir, exist_ok=True)
 
     # Environments
     if "environments" in yaml_config:
@@ -349,13 +455,29 @@ def main():
         "theta_4_cyclic_patrol",
     ])
 
-    # Methods
-    methods = yaml_config.get("methods", [
-        "aca", "aca_no_margin", "aca_depth_0",
-        "cbba", "cbba_partial", "cc_cbba", "ssi",
-        "cbba_lr", "cbba_partial_lr", "cc_cbba_lr", "ssi_lr",
-        "implicit", "ctp_replan", "cbba_gossip", "clairvoyant_greedy",
-    ])
+    # Methods & per-method allocator kwargs
+    method_specs = {}
+    if "evaluated_methods" in yaml_config and isinstance(yaml_config["evaluated_methods"], dict):
+        for m_name, m_cfg in yaml_config["evaluated_methods"].items():
+            if isinstance(m_cfg, dict):
+                a_type = m_cfg.get("allocator_type", m_name)
+                a_kw = m_cfg.get("allocator_kwargs", {})
+            else:
+                a_type = m_name
+                a_kw = {}
+            method_specs[m_name] = (a_type, a_kw)
+    elif "methods" in yaml_config:
+        for m in yaml_config["methods"]:
+            method_specs[m] = (m, {})
+    else:
+        default_methods = [
+            "aca", "aca_no_margin", "aca_depth_0",
+            "cbba", "cbba_partial", "cc_cbba", "ssi",
+            "cbba_lr", "cbba_partial_lr", "cc_cbba_lr", "ssi_lr",
+            "implicit", "ctp_replan", "cbba_gossip", "clairvoyant_greedy",
+        ]
+        for m in default_methods:
+            method_specs[m] = (m, {})
 
     # Comm regimes
     comm_regimes = yaml_config.get("comm_regimes", {
@@ -365,74 +487,115 @@ def main():
     })
 
     # Seeds
-    if args.pilot:
-        seed_range = list(range(10000, 10010))  # 10 pilot seeds
-    elif args.seeds is not None:
-        seed_range = list(range(1, args.seeds + 1))
-    elif "final_seeds" in yaml_config:
-        n_seeds = yaml_config["final_seeds"]
-        seed_range = list(range(1, n_seeds + 1))
-    else:
-        seed_range = list(range(1, 11))
+    seed_range, seed_hash = resolve_seeds(args, yaml_config)
+
+    # Fleet sizes and task counts handling (grid iteration or rejection in single-cell)
+    fleet_sizes = yaml_config.get("fleet_sizes", [4])
+    task_counts = yaml_config.get("task_counts", [15])
+    if not isinstance(fleet_sizes, list):
+        fleet_sizes = [fleet_sizes]
+    if not isinstance(task_counts, list):
+        task_counts = [task_counts]
+
+    single_cell_mode = is_confirmatory or yaml_config.get("single_cell", False)
+    if single_cell_mode and (len(fleet_sizes) > 1 or len(task_counts) > 1):
+        raise ValueError(
+            f"Confirmatory/single-cell mode requires exactly 1 fleet size and 1 task count, "
+            f"got fleet_sizes={fleet_sizes}, task_counts={task_counts}. "
+            f"To evaluate a grid, disable single_cell mode."
+        )
 
     max_steps = yaml_config.get("max_steps", 80)
     contingency_depth = yaml_config.get("contingency_depth", 1)
-    fleet_sizes = yaml_config.get("fleet_sizes", [4])
-    task_counts = yaml_config.get("task_counts", [15])
-    n_robots = fleet_sizes[0]
-    n_tasks = task_counts[0]
 
-    # Check for existing completed trials (Resumability)
-    completed_keys = set()
+    # Strict cache loading and trial identity tracking
+    completed_trial_hashes = set()
     if os.path.exists(runs_jsonl):
-        try:
-            with open(runs_jsonl, "r", encoding="utf-8") as f:
-                for line in f:
-                    line = line.strip()
-                    if line:
-                        rec = json.loads(line)
-                        key = (
-                            rec.get("graph_family"),
-                            rec.get("adversary"),
-                            rec.get("comm_regime"),
-                            rec.get("method"),
-                            rec.get("seed"),
+        with open(runs_jsonl, "r", encoding="utf-8") as f:
+            for line_idx, line in enumerate(f, 1):
+                line_str = line.strip()
+                if not line_str:
+                    if args.strict or is_confirmatory:
+                        raise ValueError(f"Strict verification failed: Empty line at {runs_jsonl}:{line_idx}")
+                    continue
+                try:
+                    rec = json.loads(line_str)
+                except Exception as e:
+                    if args.strict or is_confirmatory:
+                        raise ValueError(f"Strict verification failed: Malformed JSON at {runs_jsonl}:{line_idx}: {e}")
+                    continue
+
+                if (args.strict or is_confirmatory) and "record_sha256" in rec:
+                    recomputed = compute_record_hash(rec)
+                    if rec["record_sha256"] != recomputed:
+                        raise ValueError(
+                            f"Strict verification failed: Record SHA-256 mismatch at {runs_jsonl}:{line_idx}: "
+                            f"{rec['record_sha256']} != {recomputed}"
                         )
-                        completed_keys.add(key)
-        except Exception:
-            pass
+
+                th = rec.get("trial_hash")
+                if th:
+                    completed_trial_hashes.add(th)
 
     # Assemble task tuples
     task_tuples = []
     skipped_count = 0
+    all_planned_trial_hashes = set()
+
     for fam, n_nodes in environments:
         for adv in adversaries:
             for regime_name, regime_cfg in comm_regimes.items():
                 c_range = regime_cfg.get("comm_range", 30.0)
                 p_d = regime_cfg.get("p_drop", 0.05)
-                for seed in seed_range:
-                    for method in methods:
-                        key = (fam, adv, regime_name, method, seed)
-                        if key in completed_keys:
-                            skipped_count += 1
-                            continue
-                        task_tuples.append((
-                            fam,
-                            n_nodes,
-                            adv,
-                            method,
-                            regime_name,
-                            c_range,
-                            p_d,
-                            n_robots,
-                            n_tasks,
-                            seed,
-                            max_steps,
-                            contingency_depth,
-                            traces_dir,
-                            runs_jsonl,
-                            git_commit,
-                        ))
+                for n_robots in fleet_sizes:
+                    for n_tasks in task_counts:
+                        for seed in seed_range:
+                            for m_name, (alloc_type, alloc_kw) in method_specs.items():
+                                # Compute deterministic trial identity
+                                c_depth = alloc_kw.get("contingency_depth", contingency_depth if contingency_depth > 0 else 1)
+                                cond = {
+                                    "graph_family": fam,
+                                    "n_nodes": n_nodes,
+                                    "adversary": adv,
+                                    "method": alloc_type,
+                                    "comm_regime": regime_name,
+                                    "comm_range": c_range,
+                                    "p_drop": p_d,
+                                    "n_robots": n_robots,
+                                    "n_tasks": n_tasks,
+                                    "seed": seed,
+                                    "max_steps": max_steps,
+                                    "contingency_depth": c_depth,
+                                    "allocator_kwargs": alloc_kw,
+                                    "git_commit": git_commit,
+                                    "protocol_hash": protocol_hash,
+                                }
+                                t_hash = compute_trial_hash(cond)
+                                all_planned_trial_hashes.add(t_hash)
+
+                                if t_hash in completed_trial_hashes:
+                                    skipped_count += 1
+                                    continue
+
+                                task_tuples.append((
+                                    fam,
+                                    n_nodes,
+                                    adv,
+                                    alloc_type,
+                                    regime_name,
+                                    c_range,
+                                    p_d,
+                                    n_robots,
+                                    n_tasks,
+                                    seed,
+                                    max_steps,
+                                    c_depth,
+                                    traces_dir,
+                                    runs_jsonl,
+                                    git_commit,
+                                    protocol_hash,
+                                    alloc_kw,
+                                ))
 
     total_tasks_needed = len(task_tuples) + skipped_count
     remaining_tasks = len(task_tuples)
@@ -441,63 +604,71 @@ def main():
     print("ACA EXPERIMENTAL SWEEP PRE-FLIGHT SUMMARY")
     print("=" * 70)
     print(f"Git Commit Hash    : {git_commit}")
+    print(f"Protocol Hash      : {protocol_hash}")
     print(f"Config File        : {args.config}")
+    print(f"Output Directory   : {out_dir}")
     print(f"Environments ({len(environments)})  : {[e[0] for e in environments]}")
     print(f"Adversaries ({len(adversaries)})   : {adversaries}")
     print(f"Comm Regimes ({len(comm_regimes)})  : {list(comm_regimes.keys())}")
-    print(f"Methods ({len(methods)})       : {methods}")
-    print(f"Seed Allocation    : {len(seed_range)} seeds (min={min(seed_range)}, max={max(seed_range)})")
+    print(f"Methods ({len(method_specs)})       : {list(method_specs.keys())}")
+    print(f"Seed Allocation    : {len(seed_range)} seeds (hash={seed_hash[:16]}...)")
     print(f"Total Design Runs  : {total_tasks_needed}")
     print(f"Cached / Completed : {skipped_count}")
     print(f"Remaining to Run   : {remaining_tasks}")
     print(f"Workers            : {args.workers}")
-
-    # Benchmark 1 sample trial for empirical ETA calculation
-    sample_time_sec = 0.35  # default empirical guess
-    if remaining_tasks > 0:
-        print("\nBenchmarking 1 sample instance for empirical rate estimation...")
-        t_bench_start = time.time()
-        _ = run_single_trial(
-            environments[0][0],
-            environments[0][1],
-            adversaries[0],
-            methods[0],
-            list(comm_regimes.keys())[0],
-            comm_regimes[list(comm_regimes.keys())[0]]["comm_range"],
-            comm_regimes[list(comm_regimes.keys())[0]]["p_drop"],
-            n_robots,
-            n_tasks,
-            seed_range[0],
-            max_steps=max_steps,
-            contingency_depth=contingency_depth,
-            traces_dir=None,
-            runs_jsonl=None,
-            git_commit=git_commit,
-        )
-        sample_time_sec = max(0.05, time.time() - t_bench_start)
-
-    est_total_sec = (remaining_tasks * sample_time_sec) / max(1, args.workers)
-    est_total_min = est_total_sec / 60.0
-    print(f"Sample Trial Time  : {sample_time_sec:.3f} s/trial")
-    print(f"Empirical Throughput: ~{(args.workers / sample_time_sec):.1f} trials/s with {args.workers} workers")
-    print(f"Estimated ETA      : {est_total_min:.1f} minutes ({est_total_sec:.0f} seconds)")
     print("=" * 70 + "\n")
 
+    # Gate 1 / Acceptance Test 7: --dry-run must run zero simulator steps
     if args.dry_run:
-        print("Dry run requested. Exiting without execution.")
+        print("Dry run requested. Configuration validated. Exiting without execution (0 steps run).")
+        return
+
+    # Gate 5 Smoke Test mode: run exactly 1 small trial and exit
+    if args.smoke_test:
+        print("Running single smoke test trial...")
+        if task_tuples:
+            smoke_task = task_tuples[0]
+        else:
+            # Reconstruct 1 trial
+            first_m = list(method_specs.keys())[0]
+            smoke_task = (
+                environments[0][0],
+                environments[0][1],
+                adversaries[0],
+                method_specs[first_m][0],
+                list(comm_regimes.keys())[0],
+                comm_regimes[list(comm_regimes.keys())[0]].get("comm_range", 30.0),
+                comm_regimes[list(comm_regimes.keys())[0]].get("p_drop", 0.10),
+                fleet_sizes[0],
+                task_counts[0],
+                seed_range[0],
+                10,  # small max steps for smoke
+                1,
+                traces_dir,
+                runs_jsonl,
+                git_commit,
+                protocol_hash,
+                method_specs[first_m][1],
+            )
+        res = run_single_trial(*smoke_task)
+        df = pd.DataFrame([res])
+        df.to_csv(results_csv, index=False)
+        print(f"Smoke test successful! Saved record to {runs_jsonl} and {results_csv}")
         return
 
     if remaining_tasks == 0:
-        print("All requested trials are already completed in results/runs.jsonl! Generating raw_results.csv from cached records.")
-        # Re-export CSV
+        print("All requested trials are already completed in runs.jsonl! Generating summary CSV.")
         records = []
         with open(runs_jsonl, "r", encoding="utf-8") as f:
             for line in f:
-                if line.strip():
-                    records.append(json.loads(line))
+                line_str = line.strip()
+                if line_str:
+                    rec = json.loads(line_str)
+                    if rec.get("trial_hash") in all_planned_trial_hashes:
+                        records.append(rec)
         df = pd.DataFrame(records)
-        df.to_csv(args.output, index=False)
-        print(f"Exported {len(df)} trials to {args.output}")
+        df.to_csv(results_csv, index=False)
+        print(f"Exported {len(df)} trials to {results_csv}")
         return
 
     results = []
@@ -537,32 +708,35 @@ def main():
                 rem_sec = (remaining_tasks - completed) / max(0.01, rate)
                 print(f"[{completed}/{remaining_tasks}] ({rate:.1f} trials/s, ~{rem_sec/60:.1f}m rem)")
 
-    # Read all lines from runs_jsonl to generate final CSV
+    # Read records strictly matching this experiment from isolated runs_jsonl
     all_records = []
     if os.path.exists(runs_jsonl):
         with open(runs_jsonl, "r", encoding="utf-8") as f:
             for line in f:
-                if line.strip():
-                    all_records.append(json.loads(line))
+                line_str = line.strip()
+                if line_str:
+                    rec = json.loads(line_str)
+                    if rec.get("trial_hash") in all_planned_trial_hashes:
+                        all_records.append(rec)
 
     df = pd.DataFrame(all_records)
-    # Sort deterministically
     sort_cols = [c for c in ["graph_family", "adversary", "comm_regime", "seed", "method"] if c in df.columns]
-    if sort_cols:
+    if sort_cols and not df.empty:
         df = df.sort_values(sort_cols).reset_index(drop=True)
-    df.to_csv(args.output, index=False)
-    print(f"\nCompleted! Saved {len(df)} total rows to {args.output}")
+    df.to_csv(results_csv, index=False)
+    print(f"\nCompleted! Saved {len(df)} total rows to {results_csv}")
 
     # Copy config used alongside results
-    config_copy_path = os.path.join(os.path.dirname(args.output), "config_used.yaml")
+    config_copy_path = os.path.join(out_dir, "config_used.yaml")
     if os.path.exists(args.config):
         shutil.copyfile(args.config, config_copy_path)
 
     # Save run metadata
-    meta_path = os.path.join(os.path.dirname(args.output), "run_metadata.json")
+    meta_path = os.path.join(out_dir, "run_metadata.json")
     import scipy
     metadata = {
         "commit": git_commit,
+        "protocol_hash": protocol_hash,
         "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "python_version": sys.version,
         "numpy_version": np.__version__,
@@ -572,12 +746,15 @@ def main():
         "total_trials": len(df),
         "environments": environments,
         "adversaries": adversaries,
-        "methods": methods,
+        "methods": list(method_specs.keys()),
         "comm_regimes": comm_regimes,
-        "n_seeds": len(seed_range),
+        "seed_list": seed_range,
+        "seed_list_hash": seed_hash,
         "fleet_sizes": fleet_sizes,
         "task_counts": task_counts,
         "max_steps": max_steps,
+        "contingency_depth": contingency_depth,
+        "resolved_hyperparameters": {m: specs[1] for m, specs in method_specs.items()},
     }
     with open(meta_path, "w", encoding="utf-8") as f:
         json.dump(metadata, f, indent=2)

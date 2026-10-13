@@ -1,8 +1,8 @@
 # Protocol v6: Pre-Registered Multi-Robot Contingency Benchmark Confirmation
 
 **Date of Cryptographic Freeze**: 2026-10-13  
-**Protocol Version**: 6.0.0  
-**Git Tag**: `prereg-v6`  
+**Protocol Version**: 6.1.0  
+**Git Tag**: `prereg-v6.1`  
 **Status**: REGISTERED_FROZEN (Confirmation execution pending compute allocation)
 
 ---
@@ -39,11 +39,18 @@ Hypotheses are evaluated as a single frozen family under step-down **Holm–Bonf
 
 ## 3. Seed Schedule & Disjointness Guarantee
 
-All Protocol v6 confirmatory instances are instantiated with fresh random seeds generated via `np.random.default_rng(20261013)`.
+> [!IMPORTANT]
+> **v6.1 pre-execution correction: original list did not match the stated derivation; corrected before any v6 data existed.**
+> In v6.0, the written seed list was inadvertently evenly spaced and did not correspond to the pseudo-random draw from `np.random.default_rng(20261013)`. The exact algorithmically derived sequence below is declared authoritative and is cryptographically hashed.
+
+All Protocol v6 confirmatory instances are instantiated with fresh random seeds generated via `np.random.default_rng(20261013)` (`rng.choice(np.arange(50000, 60000), size=100, replace=False)` filtered for disjointness and sorted).
 
 - **Confirmatory Seeds ($N=50$)**:
-  `[50084, 50257, 50381, 50419, 50572, 50731, 50924, 51105, 51348, 51602, 51833, 52049, 52271, 52490, 52714, 52938, 53160, 53381, 53605, 53829, 54051, 54273, 54495, 54718, 54940, 55163, 55385, 55608, 55830, 56053, 56275, 56498, 56720, 56943, 57165, 57388, 57610, 57833, 58055, 58278, 58500, 58723, 58945, 59168, 59390, 59613, 59835, 59912, 59945, 59981]`
-- **Development / Tuning Seeds ($N=15$)**: Generated separately in the range $[40000, 45000]$.
+  `[50515, 50594, 50806, 50971, 51085, 51276, 51357, 51470, 51776, 52166, 52184, 52279, 52822, 52851, 53040, 53147, 53328, 53579, 53654, 53868, 53890, 54014, 54514, 54540, 54594, 54984, 55009, 55184, 55401, 55442, 55805, 55966, 56357, 56394, 56806, 57016, 57034, 57182, 57559, 57652, 58002, 58128, 58382, 58513, 58531, 58616, 58668, 59283, 59685, 59762]`
+  - SHA-256: `09638b69b6d331eb3738023b4ad7502116e7d4768405235cf396d76bc3eea5cb`
+- **Development / Tuning Seeds ($N=15$)**: Generated separately in $[40000, 45000]$ via `np.random.default_rng(9992026)`:
+  `[40484, 40506, 40601, 40685, 40827, 41625, 41883, 41904, 42246, 42740, 43213, 44518, 44544, 44637, 44867]`
+  - SHA-256: `19a8aabd61d3f15800164feae865f285ec0d8b4ccc13619534a940d57d63417c`
 - **Disjointness Assertion**: Confirmed by unit test `tests/test_prereg_v6_seeds.py` (intersection with all prior seeds $= \emptyset$).
 
 ---
@@ -56,8 +63,8 @@ All methods are evaluated on identical shared cells (Common Random Numbers) acro
 - Fleet Configuration: 4 robots, 15 tasks, bundle capacity 4, sensor range 25.0, communication range 30.0, packet drop prob 0.10, horizon 80 ticks.
 
 ### Evaluated Methods:
-1. `aca`: Adversarial Contingency Auctions with recursive depth-$d$ recourse and closed-form Pinsker margin.
-2. `aca_plus`: Pruned recourse tree with calibrated threshold $\tau > \tau_{\text{planner}}$.
+1. `aca`: Adversarial Contingency Auctions with recursive depth-$d$ recourse and closed-form Pinsker margin ($\kappa=1.0$).
+2. `aca_plus`: Pruned recourse tree with calibrated threshold $\tau_{\text{prune}} = 0.20 > \tau_{\text{planner}} = 0.12$.
 3. `aca_adaptive`: Shannon entropy-adaptive margin inflation.
 4. `aca_no_margin`: Ablation with $\kappa = 0.0$ (no Pinsker margin).
 5. `aca_depth_0`: Ablation with $d = 0$ (no contingency detour branches).

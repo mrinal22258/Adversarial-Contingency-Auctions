@@ -3,6 +3,7 @@
 Log Integrity Verification Tool for ACA Benchmark Runs.
 Verifies pairing between CSV summary tables and JSONL event/trial traces.
 Exits non-zero on any corrupted line, duplicate record, or missing hash.
+Can recompute and verify per-record canonical SHA-256 digests.
 Can also verify historical Protocol v5 dataset status without modifying raw data.
 """
 
@@ -12,14 +13,21 @@ import json
 import argparse
 from typing import Dict, Any, Tuple, Set
 
+# Ensure acalib is importable from workspace root
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+from acalib.data.logger import compute_record_hash
+
 
 def verify_log_integrity(
     csv_path: str,
     jsonl_path: str,
     hash_key: str = "trial_hash",
+    strict: bool = False,
+    require_record_hashes: bool = False,
 ) -> Dict[str, Any]:
     """
     Perform exhaustive integrity audit on CSV and JSONL log pair.
+    If strict=True, raises ValueError immediately on any corruption or mismatch.
     """
     if not os.path.exists(csv_path):
         raise FileNotFoundError(f"CSV file not found: {csv_path}")
@@ -37,9 +45,12 @@ def verify_log_integrity(
     total_jsonl_lines = 0
     valid_records = 0
     malformed_lines = 0
+    hash_mismatches = 0
+    missing_record_hashes = 0
     jsonl_hashes: Set[str] = set()
     jsonl_duplicates = 0
     malformed_line_numbers = []
+    mismatch_line_numbers = []
 
     with open(jsonl_path, "r", encoding="utf-8", errors="replace") as f:
         for idx, line in enumerate(f, 1):
@@ -48,6 +59,8 @@ def verify_log_integrity(
             if not line_str:
                 malformed_lines += 1
                 malformed_line_numbers.append(idx)
+                if strict:
+                    raise ValueError(f"Strict validation failed: Empty/whitespace line at {jsonl_path}:{idx}")
                 continue
             try:
                 rec = json.loads(line_str)
@@ -56,18 +69,57 @@ def verify_log_integrity(
                 if th:
                     if th in jsonl_hashes:
                         jsonl_duplicates += 1
+                        if strict:
+                            raise ValueError(f"Strict validation failed: Duplicate {hash_key} '{th}' at line {idx}")
                     else:
                         jsonl_hashes.add(th)
-            except Exception:
+
+                # Check canonical record SHA-256
+                rec_sha = rec.get("record_sha256")
+                if rec_sha is not None:
+                    expected_sha = compute_record_hash(rec)
+                    if rec_sha != expected_sha:
+                        hash_mismatches += 1
+                        mismatch_line_numbers.append(idx)
+                        if strict:
+                            raise ValueError(
+                                f"Strict validation failed: Record SHA-256 mismatch at line {idx}: "
+                                f"stored '{rec_sha}' != recomputed '{expected_sha}'"
+                            )
+                elif require_record_hashes:
+                    missing_record_hashes += 1
+                    if strict:
+                        raise ValueError(f"Strict validation failed: Missing record_sha256 at line {idx}")
+
+            except Exception as e:
                 malformed_lines += 1
                 malformed_line_numbers.append(idx)
+                if strict:
+                    raise ValueError(f"Strict validation failed: Malformed JSON at {jsonl_path}:{idx}: {e}")
 
     # 3. Hash cross-check
     missing_in_jsonl = csv_hashes - jsonl_hashes
     extra_in_jsonl = jsonl_hashes - csv_hashes
 
+    if strict:
+        if csv_duplicate_hashes > 0:
+            raise ValueError(f"Strict validation failed: {csv_duplicate_hashes} duplicate CSV hashes")
+        if malformed_lines > 0:
+            raise ValueError(f"Strict validation failed: {malformed_lines} malformed JSONL lines")
+        if hash_mismatches > 0:
+            raise ValueError(f"Strict validation failed: {hash_mismatches} record hash mismatches")
+        if jsonl_duplicates > 0:
+            raise ValueError(f"Strict validation failed: {jsonl_duplicates} duplicate JSONL hashes")
+        if len(missing_in_jsonl) > 0:
+            raise ValueError(f"Strict validation failed: {len(missing_in_jsonl)} CSV hashes missing from JSONL")
+        if len(extra_in_jsonl) > 0:
+            raise ValueError(f"Strict validation failed: {len(extra_in_jsonl)} extra JSONL hashes not in CSV")
+        if csv_row_count != valid_records:
+            raise ValueError(f"Strict validation failed: CSV row count ({csv_row_count}) != valid JSONL ({valid_records})")
+
     is_clean = (
         malformed_lines == 0
+        and hash_mismatches == 0
         and jsonl_duplicates == 0
         and len(missing_in_jsonl) == 0
         and len(extra_in_jsonl) == 0
@@ -85,7 +137,10 @@ def verify_log_integrity(
         "jsonl_valid_records": valid_records,
         "jsonl_malformed_lines": malformed_lines,
         "jsonl_duplicates": jsonl_duplicates,
+        "hash_mismatches": hash_mismatches,
+        "missing_record_hashes": missing_record_hashes,
         "malformed_line_numbers": malformed_line_numbers[:10],
+        "mismatch_line_numbers": mismatch_line_numbers[:10],
         "missing_in_jsonl_count": len(missing_in_jsonl),
         "extra_in_jsonl_count": len(extra_in_jsonl),
     }
@@ -93,12 +148,32 @@ def verify_log_integrity(
 
 def main():
     parser = argparse.ArgumentParser(description="ACA Benchmark Log Integrity Verifier")
-    parser.add_argument("--csv", type=str, default="results/confirmatory/heldout_v5_results.csv", help="Path to CSV summary")
-    parser.add_argument("--jsonl", type=str, default="results/confirmatory/heldout_v5_runs.jsonl", help="Path to JSONL run log")
+    parser.add_argument("--protocol", type=str, default=None, help="Protocol ID (e.g. v6, v5)")
+    parser.add_argument("--csv", type=str, default=None, help="Path to CSV summary")
+    parser.add_argument("--jsonl", type=str, default=None, help="Path to JSONL run log")
+    parser.add_argument("--strict", action="store_true", help="Fail closed on any corruption, missing hash, or mismatch")
     parser.add_argument("--historical-v5", action="store_true", help="Audit Protocol v5 and assert known historical counts")
     args = parser.parse_args()
 
-    results = verify_log_integrity(args.csv, args.jsonl)
+    csv_path = args.csv
+    jsonl_path = args.jsonl
+
+    if args.protocol == "v6":
+        csv_path = csv_path or "results/confirmatory_v6/results.csv"
+        jsonl_path = jsonl_path or "results/confirmatory_v6/runs.jsonl"
+    elif args.protocol == "v5" or args.historical_v5:
+        csv_path = csv_path or "results/confirmatory/heldout_v5_results.csv"
+        jsonl_path = jsonl_path or "results/confirmatory/heldout_v5_runs.jsonl"
+    else:
+        csv_path = csv_path or "results/confirmatory/heldout_v5_results.csv"
+        jsonl_path = jsonl_path or "results/confirmatory/heldout_v5_runs.jsonl"
+
+    results = verify_log_integrity(
+        csv_path=csv_path,
+        jsonl_path=jsonl_path,
+        strict=args.strict,
+        require_record_hashes=(args.protocol == "v6" and args.strict),
+    )
 
     print("==================================================================")
     print("                    LOG INTEGRITY AUDIT REPORT                    ")
@@ -111,6 +186,7 @@ def main():
     print(f"JSONL Valid Records:     {results['jsonl_valid_records']}")
     print(f"JSONL Malformed Lines:   {results['jsonl_malformed_lines']}")
     print(f"JSONL Duplicate Hashes:  {results['jsonl_duplicates']}")
+    print(f"Record Hash Mismatches:  {results['hash_mismatches']}")
     print(f"CSV Hashes Missing:      {results['missing_in_jsonl_count']}")
     print(f"JSONL Extra Hashes:      {results['extra_in_jsonl_count']}")
     print("------------------------------------------------------------------")

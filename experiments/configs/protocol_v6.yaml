@@ -1,0 +1,136 @@
+# Protocol v6 Configuration: Single Authoritative Source of Truth
+# Pre-Registered Confirmatory Multi-Robot Contingency Benchmark Confirmation
+# Cryptographic & Procedural Freeze Date: 2026-10-13
+
+version: "6.1.0"
+date_frozen_utc: "2026-10-13T19:30:00Z"
+git_tag_freeze: "prereg-v6.1"
+status: "REGISTERED_FROZEN"
+
+evaluation_design:
+  protocol: "v6"
+  confirmatory_phase:
+    seeds: [50515, 50594, 50806, 50971, 51085, 51276, 51357, 51470, 51776, 52166, 52184, 52279, 52822, 52851, 53040, 53147, 53328, 53579, 53654, 53868, 53890, 54014, 54514, 54540, 54594, 54984, 55009, 55184, 55401, 55442, 55805, 55966, 56357, 56394, 56806, 57016, 57034, 57182, 57559, 57652, 58002, 58128, 58382, 58513, 58531, 58616, 58668, 59283, 59685, 59762]
+    seeds_sha256: "09638b69b6d331eb3738023b4ad7502116e7d4768405235cf396d76bc3eea5cb"
+    total_seeds: 50
+    rng_generator: "np.random.default_rng(20261013)"
+    candidate_range: [50000, 60000]
+
+  development_phase:
+    seeds: [40484, 40506, 40601, 40685, 40827, 41625, 41883, 41904, 42246, 42740, 43213, 44518, 44544, 44637, 44867]
+    seeds_sha256: "19a8aabd61d3f15800164feae865f285ec0d8b4ccc13619534a940d57d63417c"
+    total_seeds: 15
+    rng_generator: "np.random.default_rng(9992026)"
+    candidate_range: [40000, 45000]
+
+benchmark_universe:
+  environments:
+    - family: "warehouse_movingai"
+      n_nodes: 38
+    - family: "road_osmnx"
+      n_nodes: 216
+    - family: "rgg"
+      n_nodes: 35
+    - family: "grid"
+      n_nodes: 30
+    - family: "er"
+      n_nodes: 35
+  adversaries:
+    - "theta_1_stochastic"
+    - "theta_2_reactive"
+    - "theta_4_cyclic_patrol"
+  comm_regimes:
+    nominal:
+      comm_range: 30.0
+      p_drop: 0.10
+  comm_range: 30.0
+  p_drop: 0.10
+  n_robots: 4
+  n_tasks: 15
+  fleet_sizes: [4]
+  task_counts: [15]
+  max_steps: 80
+  horizon_ticks: 80
+  contingency_depth: 1
+  bundle_capacity: 4
+  sensor_range: 25.0
+
+evaluated_methods:
+  aca:
+    allocator_type: "aca"
+    allocator_kwargs:
+      kappa: 1.0
+      contingency_depth: 1
+  aca_plus:
+    allocator_type: "aca_plus"
+    allocator_kwargs:
+      kappa: 1.0
+      contingency_depth: 1
+      prune_threshold: 0.20
+  aca_adaptive:
+    allocator_type: "aca_adaptive"
+    allocator_kwargs:
+      contingency_depth: 1
+  aca_no_margin:
+    allocator_type: "aca_no_margin"
+    allocator_kwargs:
+      kappa: 0.0
+      contingency_depth: 1
+  aca_depth_0:
+    allocator_type: "aca_depth_0"
+    allocator_kwargs:
+      contingency_depth: 0
+  cbba_lr:
+    allocator_type: "cbba_lr"
+    allocator_kwargs:
+      contingency_depth: 1
+  cbba_partial_lr:
+    allocator_type: "cbba_partial_lr"
+    allocator_kwargs:
+      contingency_depth: 1
+  ctp_replan:
+    allocator_type: "ctp_replan"
+    allocator_kwargs: {}
+  ssi_lr:
+    allocator_type: "ssi_lr"
+    allocator_kwargs:
+      contingency_depth: 1
+
+methods:
+  - "aca"
+  - "aca_plus"
+  - "aca_adaptive"
+  - "aca_no_margin"
+  - "aca_depth_0"
+  - "cbba_lr"
+  - "cbba_partial_lr"
+  - "ctp_replan"
+  - "ssi_lr"
+
+output:
+  dir: "results/confirmatory_v6"
+  results_csv: "results/confirmatory_v6/results.csv"
+  runs_jsonl: "results/confirmatory_v6/runs.jsonl"
+  traces_dir: "results/confirmatory_v6/traces"
+  metadata_json: "results/confirmatory_v6/run_metadata.json"
+
+population:
+  name: "protocol_v6_confirmatory"
+  cluster_unit: "graph_family x seed"
+  clusters_per_topology: 50
+  total_clusters: 250
+  scenarios_per_cluster: 3
+  instances_per_method: 750
+
+statistical_testing:
+  primary_estimand:
+    unit: "graph_family x seed"
+    test: "paired_wilcoxon_signed_rank"
+    correction: "holm_bonferroni"
+    family: "confirmatory_h1_to_h6"
+    alpha: 0.05
+  secondary_estimand:
+    unit: "cell"
+    test: "paired_wilcoxon_signed_rank"
+    correction: "holm_bonferroni"
+    classification: "sensitivity_only"
