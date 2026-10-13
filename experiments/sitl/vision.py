@@ -1,11 +1,12 @@
 """
-Synthetic-Vision Simulation with In-the-Loop ArUco Marker Detection (Step 3.12 & 3.13).
+Open-Loop Synthetic Perception Demo (Software Simulation Only).
 Pipeline:
 Simulated Robot Ground Truth -> Rendered Camera Frame -> Simulated Lens Noise/Occlusion
--> OpenCV ArUco Detection -> Detected Pose -> Processing Latency -> Allocator Input
+-> OpenCV ArUco Detection -> Detected Pose -> Metric Logging (Open Loop).
 
-DISCLAIMER: This experiment is a SYNTHETIC-VISION SIMULATION.
-No physical cameras, lenses, or robots were used.
+DISCLAIMER: This experiment is an OPEN-LOOP SYNTHETIC-VISION DEMO.
+Estimated poses are NOT fed into the multi-robot allocator or continuous motion controller.
+No physical cameras, lenses, or physical robots were used.
 All images and detections are synthesized in simulation.
 """
 
@@ -68,10 +69,17 @@ class SyntheticVisionSystem:
 
         # Metric logs
         self.total_frames: int = 0
-        self.marker_opportunities: int = 0
-        self.successful_detections: int = 0
-        self.missed_detections: int = 0
-        self.occlusion_events: int = 0
+        self.total_opportunities: int = 0
+        self.occluded_opportunities: int = 0
+        self.visible_opportunities: int = 0
+        self.true_positives: int = 0
+        self.false_positives: int = 0
+        self.false_negatives: int = 0
+        self.id_swaps: int = 0
+        self.marker_opportunities: int = 0   # legacy alias for total_opportunities
+        self.successful_detections: int = 0  # legacy alias for true_positives
+        self.missed_detections: int = 0      # legacy alias
+        self.occlusion_events: int = 0       # legacy alias
         self.position_errors: List[float] = []
         self.orientation_errors: List[float] = []
 
@@ -107,18 +115,21 @@ class SyntheticVisionSystem:
         is_occluded = {}
 
         for rid, (rx, ry, ryaw) in robot_poses.items():
+            self.total_opportunities += 1
             self.marker_opportunities += 1
             cu, cv_px = self.world_to_pixel(rx, ry)
 
             # Check simulated occlusion
             if float(self.rng.uniform()) < self.occlusion_prob:
                 is_occluded[rid] = True
+                self.occluded_opportunities += 1
                 self.occlusion_events += 1
                 # Draw occlusion shadow
                 cv2.circle(canvas, (cu, cv_px), 25, (80, 80, 80), -1)
                 continue
 
             is_occluded[rid] = False
+            self.visible_opportunities += 1
 
             # Draw robot circular base
             cv2.circle(canvas, (cu, cv_px), 24, (200, 120, 50), -1)
@@ -163,9 +174,13 @@ class SyntheticVisionSystem:
         frame: np.ndarray,
         ground_truth_poses: Dict[int, Tuple[float, float, float]],
         current_step: int,
+        is_occluded: Optional[Dict[int, bool]] = None,
+        pos_tolerance: float = 3.0,
+        yaw_tolerance: float = 0.5,
     ) -> Tuple[Dict[int, Tuple[float, float, float]], np.ndarray]:
         """
         Run cv2.aruco marker detection on frame and calculate estimated continuous poses.
+        Validates marker ID and pose error BEFORE incrementing true_positives.
         Returns (detected_poses, annotated_visualization_frame).
         """
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -173,6 +188,7 @@ class SyntheticVisionSystem:
 
         detected_poses = {}
         annotated_frame = frame.copy()
+        matched_gt_ids = set()
 
         if ids is not None and len(ids) > 0:
             cv2.aruco.drawDetectedMarkers(annotated_frame, corners, ids)
@@ -188,43 +204,30 @@ class SyntheticVisionSystem:
 
                 est_x, est_y = self.pixel_to_world(center_u, center_v)
 
-                # -------------------------------------------------------------
-                # Mathematical Orientation Convention & Flip Ambiguity Resolution:
-                # 1. Marker Canonical Frame:
-                #    OpenCV ArUco detector orders corners clockwise:
-                #      pts[0]: Top-Left,     pts[1]: Top-Right,
-                #      pts[2]: Bottom-Right, pts[3]: Bottom-Left.
-                #    The internal 4x4 binary payload (DICT_4X4_50) is asymmetric
-                #    and rotationally distinct across all four 90-degree rotations.
-                #    This eliminates the 180-degree flip ambiguity inherent in
-                #    unmarked planar squares.
-                # 2. Camera Frame vs World Frame:
-                #    Overhead camera frame: +X_cam points right (+u), +Y_cam points down (+v),
-                #    with optical axis +Z_cam directed normal to the ground plane.
-                #    World frame: +X_world points right, +Y_world points up (+y).
-                # 3. Heading (Yaw) Calculation:
-                #    Forward orientation vector is defined by the top edge:
-                #      v_img = pts[1] - pts[0] = (u_1 - u_0, v_1 - v_0).
-                #    Inverting image Y to map to world coordinates:
-                #      edge_dx = u_1 - u_0
-                #      edge_dy = -(v_1 - v_0)
-                #      est_yaw = atan2(edge_dy, edge_dx) in [-pi, pi].
-                # -------------------------------------------------------------
                 edge_vector_img = pts[1] - pts[0]
                 edge_dx = float(edge_vector_img[0])
                 edge_dy = -float(edge_vector_img[1])
                 est_yaw = float(math.atan2(edge_dy, edge_dx))
 
-                detected_poses[int(mid)] = (est_x, est_y, est_yaw)
-                self.successful_detections += 1
+                mid_int = int(mid)
+                detected_poses[mid_int] = (est_x, est_y, est_yaw)
 
-                # Calculate error vs ground truth
-                if mid in ground_truth_poses:
-                    gt_x, gt_y, gt_yaw = ground_truth_poses[mid]
+                # Validate against ground truth BEFORE incrementing true_positives
+                if mid_int not in ground_truth_poses:
+                    self.false_positives += 1
+                else:
+                    gt_x, gt_y, gt_yaw = ground_truth_poses[mid_int]
                     pos_err = float(math.hypot(est_x - gt_x, est_y - gt_y))
                     yaw_err = abs((est_yaw - gt_yaw + math.pi) % (2.0 * math.pi) - math.pi)
-                    self.position_errors.append(pos_err)
-                    self.orientation_errors.append(yaw_err)
+
+                    if pos_err <= pos_tolerance and yaw_err <= yaw_tolerance:
+                        self.true_positives += 1
+                        self.successful_detections += 1
+                        matched_gt_ids.add(mid_int)
+                        self.position_errors.append(pos_err)
+                        self.orientation_errors.append(yaw_err)
+                    else:
+                        self.false_positives += 1
 
                     # Overlay error text
                     cv2.putText(
@@ -236,6 +239,16 @@ class SyntheticVisionSystem:
                         (0, 0, 255),
                         1,
                     )
+
+        # Count false negatives on visible robots
+        if is_occluded is not None:
+            visible_ids = [rid for rid in ground_truth_poses if not is_occluded.get(rid, False)]
+        else:
+            visible_ids = list(ground_truth_poses.keys())
+
+        for vid in visible_ids:
+            if vid not in matched_gt_ids:
+                self.false_negatives += 1
 
         # Buffer into latency queue
         delivery_tick = current_step + self.latency_ticks
@@ -271,18 +284,24 @@ class SyntheticVisionSystem:
         pos_errs = np.array(self.position_errors) if self.position_errors else np.array([0.0])
         yaw_errs = np.array(self.orientation_errors) if self.orientation_errors else np.array([0.0])
 
-        det_rate = (
-            float(self.successful_detections / self.marker_opportunities)
-            if self.marker_opportunities > 0
-            else 0.0
-        )
-        miss_rate = 1.0 - det_rate
+        denom_prec = self.true_positives + self.false_positives
+        precision = float(self.true_positives / denom_prec) if denom_prec > 0 else 1.0
+
+        # Grounded recall: denominator excludes occluded opportunities!
+        denom_recall = self.visible_opportunities if self.visible_opportunities > 0 else max(1, self.total_opportunities)
+        recall = float(self.true_positives / denom_recall)
+
+        det_rate = recall
+        miss_rate = 1.0 - recall
 
         # Bootstrap CIs
-        if self.marker_opportunities > 0:
-            det_binary = [1.0] * self.successful_detections + [0.0] * (self.marker_opportunities - self.successful_detections)
-            _, d_low, d_high = bootstrap_ci(det_binary, ci=0.95, n_resamples=1000)
-            det_ci = [float(d_low * 100.0), float(d_high * 100.0)]
+        if denom_recall > 0:
+            det_binary = [1.0] * self.true_positives + [0.0] * max(0, denom_recall - self.true_positives)
+            if len(det_binary) >= 2:
+                _, d_low, d_high = bootstrap_ci(det_binary, ci=0.95, n_resamples=1000)
+                det_ci = [float(d_low * 100.0), float(d_high * 100.0)]
+            else:
+                det_ci = [float(det_rate * 100.0), float(det_rate * 100.0)]
         else:
             det_ci = [0.0, 0.0]
 
@@ -303,15 +322,24 @@ class SyntheticVisionSystem:
         mean_yaw_rad = float(np.mean(yaw_errs))
 
         return {
-            "disclaimer": "SYNTHETIC-VISION SIMULATION ONLY -- No physical cameras or robots used.",
+            "pipeline_mode": "OPEN_LOOP_SYNTHETIC_SIMULATION",
+            "allocator_feedback": False,
+            "disclaimer": "OPEN-LOOP SYNTHETIC PERCEPTION DEMO ONLY -- Estimates are not fed to the multi-robot allocator. No physical cameras, lenses, or robots were deployed.",
             "git_commit": get_git_commit(),
             "total_frames_analyzed": self.total_frames,
-            "total_marker_opportunities": self.marker_opportunities,
-            "successful_detections": self.successful_detections,
+            "total_marker_opportunities": self.total_opportunities,
+            "occluded_opportunities": self.occluded_opportunities,
+            "visible_opportunities": self.visible_opportunities,
+            "true_positives": self.true_positives,
+            "false_positives": self.false_positives,
+            "false_negatives": self.false_negatives,
+            "precision": precision,
+            "recall": recall,
+            "successful_detections": self.true_positives,
             "detection_rate_pct": float(det_rate * 100.0),
             "detection_rate_ci_95": det_ci,
             "missed_marker_rate_pct": float(miss_rate * 100.0),
-            "occlusion_events": self.occlusion_events,
+            "occlusion_events": self.occluded_opportunities,
             "latency_ticks": self.latency_ticks,
             "position_error_mean_meters": float(np.mean(pos_errs)),
             "position_error_ci_95": pos_ci,
