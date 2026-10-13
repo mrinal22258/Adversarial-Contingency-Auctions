@@ -33,7 +33,7 @@
   - [ ] Build single versioned result model (`results/result_model_vN.json`)
 - [ ] **4. Correctness Repairs (Section 6 - Atomic Commits)**
   - [x] P0-01 / P1-01: Population & statistics - wire result model into `make_tables.py`, remove raw-mean mixing
-  - [ ] P0-02 / P0-08: Claim ledger - finalize `audit/CLAIM_LEDGER_V2.csv`, annotate legacy ledger
+  - [x] P0-02 / P0-08: Claim ledger - finalize `audit/CLAIM_LEDGER_V2.csv`, annotate legacy ledger
   - [ ] P0-03: Recursive recourse - true recursive tree in planner, valuation, bound, executor
   - [ ] P0-04 / P0-05: Bound, margin, pruning - bound on actual pruned policy, label empirical variants
   - [ ] P1-05: Belief model - validate `set_oracle`, reject unsupported or fix collapse, calibration harness
