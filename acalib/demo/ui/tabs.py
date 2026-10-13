@@ -165,7 +165,7 @@ def build_simulate_view():
                 components["kpi_msgs"] = gr.Markdown("<div class='kpi-card'><div class='kpi-val'>0</div><div class='kpi-lbl'>Msgs</div></div>")
                 components["kpi_trav"] = gr.Markdown("<div class='kpi-card'><div class='kpi-val'>0.0</div><div class='kpi-lbl'>Travel</div></div>")
                 components["kpi_blkd"] = gr.Markdown("<div class='kpi-card'><div class='kpi-val'>0</div><div class='kpi-lbl'>Blocked</div></div>")
-                components["kpi_detr"] = gr.Markdown("<div class='kpi-card'><div class='kpi-val'>0</div><div class='kpi-lbl'>Detours</div></div>")
+                components["kpi_detr"] = gr.Markdown("<div class='kpi-card' title='Active detour routes executing currently: 0 | Cumulative local detour activations across history: 0'><div class='kpi-val'>0 <span class='kpi-sub'>(0 cum)</span></div><div class='kpi-lbl'>Detours (Act/Cum)</div></div>")
 
             # Spatial Canvas & Controls
             components["map_title_md"] = gr.Markdown("### Spatial Telemetry View — Ready to Run")

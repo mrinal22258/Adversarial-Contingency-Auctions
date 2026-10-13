@@ -54,7 +54,7 @@ def generate_event_log(
                 t_str = f" to T{active_t}" if active_t is not None else ""
                 events.append({
                     "tick": tick,
-                    "category": "Execution",
+                    "category": "Detour",
                     "message": f"Robot R{rid} was en route{t_str} and executed a precomputed contingency detour locally (0 messages sent)."
                 })
             if status == "EXHAUSTED_NEEDS_REPLAN":
@@ -155,6 +155,7 @@ def format_event_log_html(
                 "Conflict": "#d97706",
                 "Mechanism": "#4f46e5",
                 "Execution": "#0284c7",
+                "Detour": "#0284c7",
             }.get(cat, "#475569")
 
             rows.append(
@@ -242,7 +243,7 @@ def generate_what_happened_narrative(
     s1 = f"Simulation of **{alloc_name}** concluded on **{map_name}** across **{makespan} ticks** facing the **{adv_name}** adversary with a fleet of {n_robots} robots."
     s2 = f"The fleet finalized **{completed_tasks} of {total_tasks} tasks ({comp_rate:.1f}% completion)**, achieving a cumulative net welfare of **{net_welfare:.1f}** against **{total_travel:.1f} units** of total physical traversal."
     s3 = f"Workload distribution: {top_robot_str}, requiring **{total_msgs} total inter-robot messages** across the mission."
-    s4 = f"During execution, the adversary closed **{len(all_blocked_ever)} distinct corridors**, triggering **{local_detour_count} local contingency detour activations** with zero communication overhead."
+    s4 = f"During execution, the adversary closed **{len(all_blocked_ever)} distinct corridors**, triggering **{local_detour_count} cumulative local contingency detour activations** with zero communication overhead."
     s5 = f"When local recourse paths were exhausted, the fleet engaged in **{reauctions} market re-auction round(s)** to re-coordinate bundles."
     s6 = f"Under Pinsker belief margin filtering, the mechanism admitted **{safe_claims} safe claims** resulting in **{safe_conflicts} safe claim conflicts**, while deferring **{deferred_claims} claims** to consensus."
     if failed_tasks > 0:

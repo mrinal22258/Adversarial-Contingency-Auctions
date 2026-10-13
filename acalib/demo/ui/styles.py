@@ -167,16 +167,16 @@ div[role="tablist"] > button.selected, .tab-nav button.selected, .tab-container 
     background: var(--slate-100) !important;
 }
 
-/* KPI Ribbon (7 Cards, Tabular Mono Figures) */
+/* KPI Ribbon: Responsive CSS Grid with minmax and wrapping labels to prevent clipping at 390px, 768px, 1440px */
 .kpi-row {
-    display: flex !important;
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(85px, 1fr)) !important;
     gap: 8px !important;
     width: 100% !important;
     margin-bottom: 12px !important;
 }
 
 .kpi-row > div {
-    flex: 1 1 0px !important;
     min-width: 0 !important;
 }
 
@@ -189,19 +189,28 @@ div[role="tablist"] > button.selected, .tab-nav button.selected, .tab-container 
     border-radius: 8px !important;
     padding: 8px 6px !important;
     text-align: center !important;
-    overflow: hidden !important;
     box-sizing: border-box !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: center !important;
 }
 
 .kpi-val {
     font-family: var(--font-mono) !important;
     font-variant-numeric: tabular-nums !important;
-    font-size: 17px !important;
+    font-size: 15px !important;
     font-weight: 700 !important;
     color: var(--slate-900) !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+    line-height: 1.2 !important;
+}
+
+.kpi-sub {
+    font-size: 11px !important;
+    color: var(--slate-500) !important;
+    font-weight: 500 !important;
 }
 
 .kpi-lbl {
@@ -209,12 +218,30 @@ div[role="tablist"] > button.selected, .tab-nav button.selected, .tab-container 
     font-size: 10px !important;
     font-weight: 600 !important;
     text-transform: uppercase !important;
-    letter-spacing: 0.05em !important;
+    letter-spacing: 0.04em !important;
     color: var(--slate-600) !important;
-    margin-top: 2px !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
+    margin-top: 3px !important;
+    white-space: normal !important;
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+    line-height: 1.2 !important;
+    text-align: center !important;
+}
+
+@media (max-width: 480px) {
+    .kpi-row {
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 6px !important;
+    }
+    .kpi-card {
+        padding: 6px 4px !important;
+    }
+    .kpi-val {
+        font-size: 13px !important;
+    }
+    .kpi-lbl {
+        font-size: 9px !important;
+    }
 }
 
 /* Result Banner */

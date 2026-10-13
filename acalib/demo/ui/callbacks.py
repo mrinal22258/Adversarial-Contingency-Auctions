@@ -278,7 +278,8 @@ def run_sim_action(
     msgs = final_frame.get("messages", 0)
     trav = final_frame.get("travel", 0.0)
     blks = len(final_frame.get("blocked_edges", []))
-    detours = len(final_frame.get("active_detours", []))
+    active_detours = len(final_frame.get("active_detours", []))
+    cum_detours = sum(1 for ev in events if ev.get("category") == "Detour")
 
     kpi_done_h = f"<div class='kpi-card'><div class='kpi-val'>{completed} / {total_t}</div><div class='kpi-lbl'>Done</div></div>"
     kpi_rate_h = f"<div class='kpi-card'><div class='kpi-val'>{pct:.1f}%</div><div class='kpi-lbl'>Rate</div></div>"
@@ -286,9 +287,14 @@ def run_sim_action(
     kpi_msgs_h = f"<div class='kpi-card'><div class='kpi-val'>{msgs}</div><div class='kpi-lbl'>Msgs</div></div>"
     kpi_trav_h = f"<div class='kpi-card'><div class='kpi-val'>{trav:.1f}</div><div class='kpi-lbl'>Travel</div></div>"
     kpi_blkd_h = f"<div class='kpi-card'><div class='kpi-val'>{blks}</div><div class='kpi-lbl'>Blocked</div></div>"
-    kpi_detr_h = f"<div class='kpi-card'><div class='kpi-val'>{detours}</div><div class='kpi-lbl'>Detours</div></div>"
+    kpi_detr_h = (
+        f"<div class='kpi-card' title='Active detour routes executing right now: {active_detours} | Cumulative local detour activations across mission history: {cum_detours}'>"
+        f"<div class='kpi-val'>{active_detours} <span class='kpi-sub'>({cum_detours} cum)</span></div>"
+        f"<div class='kpi-lbl'>Detours (Act/Cum)</div>"
+        f"</div>"
+    )
 
-    outcome_sent = f"Run Result: {completed}/{total_t} tasks completed in {len(history)} steps, {confs} conflicts, {msgs} messages, {blks} active blockages, {detours} absorbed by local detours."
+    outcome_sent = f"Run Result: {completed}/{total_t} tasks completed in {len(history)} steps, {confs} conflicts, {msgs} messages, {blks} active blockages, {active_detours} active detours ({cum_detours} cumulative activations)."
     banner_vis = gr.Row(visible=True)
     banner_txt = outcome_sent
 
@@ -346,7 +352,8 @@ def replay_from_start(history, env_info, work_zones_active):
     msgs = final_frame.get("messages", 0)
     trav = final_frame.get("travel", 0.0)
     blks = len(final_frame.get("blocked_edges", []))
-    detours = len(final_frame.get("active_detours", []))
+    active_detours = len(final_frame.get("active_detours", []))
+    cum_detours = 0
 
     kpi_done_h = f"<div class='kpi-card'><div class='kpi-val'>{completed} / {total_t}</div><div class='kpi-lbl'>Done</div></div>"
     kpi_rate_h = f"<div class='kpi-card'><div class='kpi-val'>{pct:.1f}%</div><div class='kpi-lbl'>Rate</div></div>"
@@ -354,7 +361,12 @@ def replay_from_start(history, env_info, work_zones_active):
     kpi_msgs_h = f"<div class='kpi-card'><div class='kpi-val'>{msgs}</div><div class='kpi-lbl'>Msgs</div></div>"
     kpi_trav_h = f"<div class='kpi-card'><div class='kpi-val'>{trav:.1f}</div><div class='kpi-lbl'>Travel</div></div>"
     kpi_blkd_h = f"<div class='kpi-card'><div class='kpi-val'>{blks}</div><div class='kpi-lbl'>Blocked</div></div>"
-    kpi_detr_h = f"<div class='kpi-card'><div class='kpi-val'>{detours}</div><div class='kpi-lbl'>Detours</div></div>"
+    kpi_detr_h = (
+        f"<div class='kpi-card' title='Active detour routes executing right now: {active_detours} | Cumulative local detour activations across mission history: {cum_detours}'>"
+        f"<div class='kpi-val'>{active_detours} <span class='kpi-sub'>({cum_detours} cum)</span></div>"
+        f"<div class='kpi-lbl'>Detours (Act/Cum)</div>"
+        f"</div>"
+    )
 
     title_md = f"### Spatial Telemetry View — Tick 1 of {len(history)}"
     return (
@@ -386,7 +398,8 @@ def scrub_action(tick, history, events, filter_category, env_info, work_zones_ac
     msgs = final_frame.get("messages", 0)
     trav = final_frame.get("travel", 0.0)
     blks = len(final_frame.get("blocked_edges", []))
-    detours = len(final_frame.get("active_detours", []))
+    active_detours = len(final_frame.get("active_detours", []))
+    cum_detours = sum(1 for ev in (events or []) if ev.get("category") == "Detour" and ev.get("tick", 0) <= tick_idx + 1)
 
     kpi_done_h = f"<div class='kpi-card'><div class='kpi-val'>{completed} / {total_t}</div><div class='kpi-lbl'>Done</div></div>"
     kpi_rate_h = f"<div class='kpi-card'><div class='kpi-val'>{pct:.1f}%</div><div class='kpi-lbl'>Rate</div></div>"
@@ -394,7 +407,12 @@ def scrub_action(tick, history, events, filter_category, env_info, work_zones_ac
     kpi_msgs_h = f"<div class='kpi-card'><div class='kpi-val'>{msgs}</div><div class='kpi-lbl'>Msgs</div></div>"
     kpi_trav_h = f"<div class='kpi-card'><div class='kpi-val'>{trav:.1f}</div><div class='kpi-lbl'>Travel</div></div>"
     kpi_blkd_h = f"<div class='kpi-card'><div class='kpi-val'>{blks}</div><div class='kpi-lbl'>Blocked</div></div>"
-    kpi_detr_h = f"<div class='kpi-card'><div class='kpi-val'>{detours}</div><div class='kpi-lbl'>Detours</div></div>"
+    kpi_detr_h = (
+        f"<div class='kpi-card' title='Active detour routes executing right now: {active_detours} | Cumulative local detour activations through tick {tick_idx + 1}: {cum_detours}'>"
+        f"<div class='kpi-val'>{active_detours} <span class='kpi-sub'>({cum_detours} cum)</span></div>"
+        f"<div class='kpi-lbl'>Detours (Act/Cum)</div>"
+        f"</div>"
+    )
 
     title_md = f"### Spatial Telemetry View — Tick {tick_idx + 1} of {len(history)}"
     events_html = format_event_log_html(events, active_tick=tick_idx + 1, filter_category=filter_category)
