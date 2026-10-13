@@ -56,11 +56,21 @@ def compute_paired_statistics(
     pairing_keys: List[str],
 ) -> Dict[str, Dict[str, Dict[str, Any]]]:
     """
-    Computes paired Wilcoxon test, Holm-Bonferroni corrected p-values,
-    and Cliff's delta effect sizes for each baseline vs ACA.
-    Guards against merge amplification and ensures per-baseline paired N.
+    Computes primary cluster-level paired t-test on cluster means (graph_family x seed),
+    Holm-Bonferroni corrected p-values, cluster-aware CIs, and Cliff's delta effect sizes
+    for each baseline vs ACA. Cell-level Wilcoxon is recorded as labelled sensitivity analysis.
     """
-    aca_df = df[df["method"] == "aca"]
+    from experiments.population import compute_cluster_paired_test
+    df = df.copy()
+    if "pairing_key" not in df.columns:
+        df["pairing_key"] = df[pairing_keys].astype(str).agg(":".join, axis=1)
+    if "cluster_id" not in df.columns:
+        cluster_cols = [c for c in ["graph_family", "seed"] if c in df.columns]
+        if cluster_cols:
+            df["cluster_id"] = df[cluster_cols].astype(str).agg(":".join, axis=1)
+        else:
+            df["cluster_id"] = df["pairing_key"]
+
     compared_baselines = [m for m in methods if m != "aca"]
 
     stats_results: Dict[str, Dict[str, Dict[str, Any]]] = {
@@ -68,52 +78,59 @@ def compute_paired_statistics(
     }
 
     for col in metrics:
-        raw_pvals = []
+        raw_cluster_pvals = []
         deltas = []
         valid_baselines = []
-        paired_dfs = {}
+        cluster_records = {}
 
         for m in compared_baselines:
-            m_df = df[df["method"] == m]
-            # Guard against duplicate pairing keys to prevent merge amplification
-            aca_clean = aca_df.drop_duplicates(subset=pairing_keys)
-            m_clean = m_df.drop_duplicates(subset=pairing_keys)
-
-            paired = pd.merge(
-                aca_clean,
-                m_clean,
-                on=pairing_keys,
-                suffixes=("_aca", f"_{m}"),
-            )
-            paired_dfs[m] = paired
-
-            if len(paired) >= 5:
-                x = paired[f"{col}_aca"].astype(float).values
-                y = paired[f"{col}_{m}"].astype(float).values
-                stat, pval = paired_wilcoxon_test(x, y)
-                delta = cliffs_delta(x, y)
-                raw_pvals.append(pval)
-                deltas.append(delta)
+            try:
+                res = compute_cluster_paired_test(
+                    df,
+                    method_a="aca",
+                    method_b=m,
+                    metric_col=col,
+                    pairing_col="pairing_key",
+                    cluster_col="cluster_id",
+                )
+                cluster_records[m] = res
+                raw_cluster_pvals.append(res["cluster_p_value"])
                 valid_baselines.append(m)
-            else:
+            except Exception:
                 stats_results[m][col] = {
                     "raw_p": 1.0,
                     "adj_p": 1.0,
                     "sig": False,
+                    "cluster_p": 1.0,
+                    "cluster_adj_p": 1.0,
+                    "cluster_sig": False,
+                    "cluster_ci_95": [0.0, 0.0],
                     "delta": 0.0,
-                    "n_pairs": len(paired),
+                    "n_pairs": 0,
                 }
 
-        if raw_pvals:
-            corrected = holm_bonferroni_correction(raw_pvals)
+        if raw_cluster_pvals:
+            corrected = holm_bonferroni_correction(raw_cluster_pvals)
             for i, m in enumerate(valid_baselines):
-                adj_p, is_sig = corrected[i]
+                adj_cl_p, is_cl_sig = corrected[i]
+                res = cluster_records[m]
                 stats_results[m][col] = {
-                    "raw_p": raw_pvals[i],
-                    "adj_p": adj_p,
-                    "sig": is_sig,
-                    "delta": deltas[i],
-                    "n_pairs": len(paired_dfs[m]),
+                    "raw_p": res["cluster_p_value"],
+                    "adj_p": adj_cl_p,
+                    "sig": is_cl_sig,
+                    "cluster_p": res["cluster_p_value"],
+                    "cluster_adj_p": adj_cl_p,
+                    "cluster_sig": is_cl_sig,
+                    "cluster_ci_95": res["cluster_ci_95"],
+                    "cluster_ci_half": res["cluster_ci_half"],
+                    "cell_sensitivity": {
+                        "cell_p_raw": res["cell_p_value"],
+                        "cell_wilcoxon_stat": res["cell_wilcoxon_stat"],
+                        "cell_ci_95": res["cell_ci_95"],
+                    },
+                    "delta": 0.0,
+                    "n_pairs": res["n_pairs"],
+                    "n_clusters": res["n_clusters"],
                 }
 
     return stats_results
@@ -126,15 +143,11 @@ def generate_main_results_table(
 ) -> str:
     """
     Generate LaTeX Table II and Markdown table directly from raw CSV.
-    Evaluates on balanced core grid to ensure paired estimand consistency:
-    means, bootstrap CIs, and paired tests use the identical matched population.
+    Primary estimator: cluster-level (graph_family x seed) bootstrap CIs and paired tests.
+    Evaluates on locked nominal_balanced_core grid to ensure paired estimand consistency.
     """
-    try:
-        from experiments.population import get_locked_population
-        eval_df, meta = get_locked_population(df, population_id="nominal_balanced_core")
-    except Exception:
-        core_mask = (df["comm_regime"] == "nominal") & (df["adversary"].isin(["theta_1_stochastic", "theta_2_reactive", "theta_4_cyclic_patrol"]))
-        eval_df = df[core_mask] if core_mask.sum() > 0 else df
+    from experiments.population import get_locked_population, compute_cluster_aware_ci
+    eval_df, meta = get_locked_population(df, population_id="nominal_balanced_core")
 
     methods = [m for m in METHOD_PRETTY.keys() if m in eval_df["method"].unique()]
     pairing_keys = [k for k in ["graph_family", "adversary", "comm_regime", "n_robots", "n_tasks", "seed"] if k in eval_df.columns]
@@ -153,11 +166,23 @@ def generate_main_results_table(
 
     n_trials = len(eval_df[eval_df["method"] == "aca"])
 
+    # Persist selected instance IDs and population hash next to table
+    instances_json_path = os.path.splitext(out_tex_path)[0] + "_instances.json"
+    with open(instances_json_path, "w", encoding="utf-8") as f:
+        json.dump({
+            "population_id": "nominal_balanced_core",
+            "population_hash": meta.get("population_hash", ""),
+            "n_trials": meta.get("n_trials", 0),
+            "n_pairs": meta.get("n_pairs", 0),
+            "n_clusters": meta.get("n_clusters", 0),
+            "selected_instance_ids": sorted(eval_df["pairing_key"].unique().tolist()) if "pairing_key" in eval_df.columns else [],
+        }, f, indent=2)
+
     latex_lines = [
         "\\begin{table*}[t]",
         "\\centering",
-        f"\\caption{{Main Benchmark Results Across Graph Topologies and Adversary Types (Mean $\\pm$ 95\\% Bootstrap CI, Balanced Core Grid, $N = {n_trials}$ Paired Trials per Method Across 250 Independent Instances).",
-        "$^\\dagger$ denotes statistically significant difference vs.\\ ACA ($p < 0.05$, paired Wilcoxon signed-rank test with Holm--Bonferroni correction).}",
+        f"\\caption{{Main Benchmark Results Across Graph Topologies and Adversary Types (Mean $\\pm$ 95\\% Cluster Bootstrap CI, Balanced Core Grid, $N = {n_trials}$ Paired Trials per Method Across 250 Independent Instances).",
+        "$^\\dagger$ denotes statistically significant difference vs.\\ ACA ($p < 0.05$, cluster-level paired $t$-test with Holm--Bonferroni correction; unit = graph\\_family $\\times$ seed).}",
         "\\label{tab:main_results}",
         "\\begin{tabular}{lcccccc}",
         "\\toprule",
@@ -166,7 +191,7 @@ def generate_main_results_table(
     ]
 
     md_lines = [
-        f"### Benchmark Results ($N = {n_trials}$ Paired Trials per Method Across 250 Independent Instances)",
+        f"### Benchmark Results ($N = {n_trials}$ Paired Trials per Method Across 250 Independent Instances, Cluster-Level Estimator)",
         "",
         "| Method | Completion (%) | Net Welfare | Distinct Conflicts | Total Conflicts | Messages | Tick RT (ms) |",
         "|:-------|:--------------:|:-----------:|:------------------:|:---------------:|:--------:|:------------:|",
@@ -193,13 +218,12 @@ def generate_main_results_table(
                 md_row.append("N/A")
                 continue
 
-            vals = sub[col].dropna().astype(float).values.tolist()
-            mean, low, high = bootstrap_ci(vals)
+            mean, low, high = compute_cluster_aware_ci(sub, val_col=col, cluster_col="cluster_id")
             entry = format_latex_ci(mean, low, high, decimals=dec)
 
             is_sig = False
             if m in stats_results and col in stats_results[m]:
-                is_sig = stats_results[m][col]["sig"]
+                is_sig = stats_results[m][col]["cluster_sig"]
                 if is_sig:
                     entry += "$^\\dagger$"
 

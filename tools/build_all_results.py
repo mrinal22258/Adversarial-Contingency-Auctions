@@ -22,7 +22,16 @@ sys.path.insert(0, REPO_ROOT)
 
 from acalib.data.schema import validate_results_dataframe, count_instances_and_trials
 from acalib.demo.provenance import verify_map_provenance, VerificationState
-from tools.claim_ledger import write_claim_ledger, validate_claim_ledger
+from tools.build_claim_ledger_v2 import build_claim_ledger_v2
+
+
+def get_git_info() -> dict:
+    try:
+        commit = subprocess.check_output("git rev-parse HEAD", cwd=REPO_ROOT, shell=True, text=True).strip()
+        status = subprocess.check_output("git status --porcelain", cwd=REPO_ROOT, shell=True, text=True).strip()
+        return {"commit": commit, "is_dirty": len(status) > 0}
+    except Exception as e:
+        return {"commit": "UNKNOWN", "is_dirty": True, "error": str(e)}
 
 
 def compute_file_sha256(path: str) -> str:
@@ -44,10 +53,13 @@ def log_step(name: str):
 
 def run_pipeline() -> bool:
     start_time = time.time()
+    git_info = get_git_info()
     provenance: dict = {
         "timestamp_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
         "python_version": sys.version,
-        "repo_root": REPO_ROOT,
+        "git_commit": git_info["commit"],
+        "git_dirty": git_info["is_dirty"],
+        "repo_root": ".",
         "steps": {},
         "artifacts": {},
     }
@@ -105,13 +117,9 @@ def run_pipeline() -> bool:
     provenance["steps"]["step5_figures"] = "PASS"
 
     # Step 6: Claim Ledger Auditing
-    log_step("Step 6: Auditing Material Claim Ledger")
-    ledger_path = write_claim_ledger()
-    valid, errors = validate_claim_ledger(ledger_path)
-    if not valid:
-        print(f"[FAIL] Claim ledger validation errors: {errors}")
-        return False
-    print("-> Claim ledger verified with 15 material claims.")
+    log_step("Step 6: Auditing Material Claim Ledger V2")
+    ledger_df = build_claim_ledger_v2()
+    print(f"-> Claim ledger V2 verified with {len(ledger_df)} material claims.")
     provenance["steps"]["step6_claim_ledger"] = "PASS"
 
     # Step 7: Compiling Manuscript
@@ -145,6 +153,8 @@ def run_pipeline() -> bool:
     artifacts_to_hash = [
         "results/raw_results.csv",
         "results/confirmatory/heldout_v5_results.csv",
+        "results/per_claim_evaluations.jsonl",
+        "results/sitl/analysis/sitl_vs_graph_summary.json",
         "results/result_model_v1.json",
         "results/numbers.tex",
         "results/table_main_results.tex",

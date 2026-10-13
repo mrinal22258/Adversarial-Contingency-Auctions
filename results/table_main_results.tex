@@ -1,26 +1,26 @@
 \begin{table*}[t]
 \centering
-\caption{Main Benchmark Results Across Graph Topologies and Adversary Types (Mean $\pm$ 95\% Bootstrap CI, Balanced Core Grid, $N = 750$ Paired Trials per Method Across 250 Independent Instances).
-$^\dagger$ denotes statistically significant difference vs.\ ACA ($p < 0.05$, paired Wilcoxon signed-rank test with Holm--Bonferroni correction).}
+\caption{Main Benchmark Results Across Graph Topologies and Adversary Types (Mean $\pm$ 95\% Cluster Bootstrap CI, Balanced Core Grid, $N = 750$ Paired Trials per Method Across 250 Independent Instances).
+$^\dagger$ denotes statistically significant difference vs.\ ACA ($p < 0.05$, cluster-level paired $t$-test with Holm--Bonferroni correction; unit = graph\_family $\times$ seed).}
 \label{tab:main_results}
 \begin{tabular}{lcccccc}
 \toprule
 \textbf{Method} & \textbf{Completion (\%)} & \textbf{Net Welfare} & \textbf{Distinct Conf.} & \textbf{Total Conf.} & \textbf{Messages} & \textbf{Tick RT (ms)} \\
 \midrule
-\textbf{ACA (Ours)} & $90.9 \pm 0.9$ & $921 \pm 22$ & $6.3 \pm 0.2$ & $38.1 \pm 2.3$ & $236 \pm 11$ & $35.52 \pm 2.40$ \\
-ACA (No Margin Ablation) & $90.7 \pm 0.9$ & $910 \pm 21$ & $7.8 \pm 0.2$$^\dagger$ & $47.4 \pm 2.6$$^\dagger$ & $238 \pm 10$ & $24.60 \pm 1.59$$^\dagger$ \\
-ACA (Depth-0 Ablation) & $86.8 \pm 1.0$$^\dagger$ & $916 \pm 19$ & $6.6 \pm 0.2$$^\dagger$ & $42.0 \pm 2.3$$^\dagger$ & $301 \pm 11$$^\dagger$ & $23.43 \pm 1.22$$^\dagger$ \\
-ACA (Depth-2) & $91.2 \pm 0.9$ & $925 \pm 21$ & $6.3 \pm 0.2$ & $38.5 \pm 2.4$ & $234 \pm 10$ & $34.79 \pm 2.27$ \\
-ACA (No Inference) & $90.9 \pm 0.9$ & $928 \pm 21$ & $6.3 \pm 0.2$ & $38.7 \pm 2.4$ & $235 \pm 10$ & $31.98 \pm 2.00$$^\dagger$ \\
-CBBA \cite{choi2009cbba} & $82.1 \pm 1.2$$^\dagger$ & $879 \pm 19$$^\dagger$ & $8.0 \pm 0.2$$^\dagger$ & $50.4 \pm 2.5$$^\dagger$ & $312 \pm 10$$^\dagger$ & $11.89 \pm 0.63$$^\dagger$ \\
-CBBA (+LR) & $88.8 \pm 0.9$$^\dagger$ & $910 \pm 19$ & $7.9 \pm 0.2$$^\dagger$ & $50.6 \pm 2.7$$^\dagger$ & $263 \pm 10$$^\dagger$ & $12.67 \pm 0.70$$^\dagger$ \\
-CBBA-PR (Adapted) \cite{buckman2019partial} & $90.4 \pm 0.9$ & $977 \pm 17$$^\dagger$ & $8.0 \pm 0.2$$^\dagger$ & $59.7 \pm 3.2$$^\dagger$ & $295 \pm 12$$^\dagger$ & $12.57 \pm 0.67$$^\dagger$ \\
-CBBA-PR (+LR) & $90.3 \pm 0.9$ & $923 \pm 19$ & $7.9 \pm 0.2$$^\dagger$ & $50.1 \pm 2.7$$^\dagger$ & $245 \pm 11$$^\dagger$ & $12.77 \pm 0.70$$^\dagger$ \\
-SSI \cite{koenig2006ssi} & $84.3 \pm 1.4$$^\dagger$ & $694 \pm 27$$^\dagger$ & $0.0 \pm 0.0$$^\dagger$ & $0.0 \pm 0.0$$^\dagger$ & $252 \pm 11$ & $12.33 \pm 0.69$$^\dagger$ \\
-SSI (+LR) & $84.1 \pm 1.4$$^\dagger$ & $635 \pm 29$$^\dagger$ & $0.0 \pm 0.0$$^\dagger$ & $0.0 \pm 0.0$$^\dagger$ & $214 \pm 10$$^\dagger$ & $12.79 \pm 0.76$$^\dagger$ \\
-CTP Replan & $96.4 \pm 0.5$$^\dagger$ & $832 \pm 27$$^\dagger$ & $0.0 \pm 0.0$$^\dagger$ & $0.0 \pm 0.0$$^\dagger$ & $77 \pm 3$$^\dagger$ & $11.64 \pm 0.66$$^\dagger$ \\
-Implicit (No Consensus) \cite{alighanbari2005implicit} & $94.5 \pm 0.7$$^\dagger$ & $781 \pm 22$$^\dagger$ & $10.6 \pm 0.2$$^\dagger$ & $107.7 \pm 4.4$$^\dagger$ & $0 \pm 0$$^\dagger$ & $19.57 \pm 1.09$$^\dagger$ \\
-Clairvoyant greedy (reference, not a bound) & $96.9 \pm 0.5$$^\dagger$ & $925 \pm 27$$^\dagger$ & $0.0 \pm 0.0$$^\dagger$ & $0.0 \pm 0.0$$^\dagger$ & $0 \pm 0$$^\dagger$ & $15.89 \pm 0.86$$^\dagger$ \\
+\textbf{ACA (Ours)} & $90.9 \pm 1.3$ & $921 \pm 35$ & $6.3 \pm 0.3$ & $38.1 \pm 3.5$ & $236 \pm 16$ & $35.52 \pm 4.19$ \\
+ACA (No Margin Ablation) & $90.7 \pm 1.4$ & $910 \pm 34$ & $7.8 \pm 0.4$$^\dagger$ & $47.4 \pm 4.1$$^\dagger$ & $238 \pm 16$ & $24.60 \pm 2.74$$^\dagger$ \\
+ACA (Depth-0 Ablation) & $86.8 \pm 1.5$$^\dagger$ & $916 \pm 30$ & $6.6 \pm 0.3$$^\dagger$ & $42.0 \pm 3.4$$^\dagger$ & $301 \pm 15$$^\dagger$ & $23.43 \pm 2.10$$^\dagger$ \\
+ACA (Depth-2) & $91.2 \pm 1.3$ & $925 \pm 34$ & $6.3 \pm 0.3$ & $38.5 \pm 3.7$ & $234 \pm 15$ & $34.79 \pm 4.15$ \\
+ACA (No Inference) & $90.9 \pm 1.4$ & $928 \pm 34$ & $6.3 \pm 0.3$ & $38.7 \pm 3.7$ & $235 \pm 16$ & $31.98 \pm 3.62$$^\dagger$ \\
+CBBA \cite{choi2009cbba} & $82.1 \pm 1.8$$^\dagger$ & $879 \pm 29$$^\dagger$ & $8.0 \pm 0.4$$^\dagger$ & $50.4 \pm 3.9$$^\dagger$ & $312 \pm 13$$^\dagger$ & $11.89 \pm 1.16$$^\dagger$ \\
+CBBA (+LR) & $88.8 \pm 1.4$$^\dagger$ & $910 \pm 30$ & $7.9 \pm 0.4$$^\dagger$ & $50.6 \pm 4.4$$^\dagger$ & $263 \pm 16$$^\dagger$ & $12.67 \pm 1.26$$^\dagger$ \\
+CBBA-PR (Adapted) \cite{buckman2019partial} & $90.4 \pm 1.4$ & $977 \pm 27$$^\dagger$ & $8.0 \pm 0.4$$^\dagger$ & $59.7 \pm 4.8$$^\dagger$ & $295 \pm 17$$^\dagger$ & $12.57 \pm 1.18$$^\dagger$ \\
+CBBA-PR (+LR) & $90.3 \pm 1.5$ & $923 \pm 31$ & $7.9 \pm 0.4$$^\dagger$ & $50.1 \pm 4.3$$^\dagger$ & $245 \pm 18$ & $12.77 \pm 1.24$$^\dagger$ \\
+SSI \cite{koenig2006ssi} & $84.3 \pm 2.1$$^\dagger$ & $694 \pm 45$$^\dagger$ & $0.0 \pm 0.0$$^\dagger$ & $0.0 \pm 0.0$$^\dagger$ & $252 \pm 18$ & $12.33 \pm 1.25$$^\dagger$ \\
+SSI (+LR) & $84.1 \pm 2.2$$^\dagger$ & $635 \pm 49$$^\dagger$ & $0.0 \pm 0.0$$^\dagger$ & $0.0 \pm 0.0$$^\dagger$ & $214 \pm 18$ & $12.79 \pm 1.35$$^\dagger$ \\
+CTP Replan & $96.4 \pm 0.8$$^\dagger$ & $832 \pm 45$$^\dagger$ & $0.0 \pm 0.0$$^\dagger$ & $0.0 \pm 0.0$$^\dagger$ & $77 \pm 3$$^\dagger$ & $11.64 \pm 1.18$$^\dagger$ \\
+Implicit (No Consensus) \cite{alighanbari2005implicit} & $94.5 \pm 1.1$$^\dagger$ & $781 \pm 36$$^\dagger$ & $10.6 \pm 0.3$$^\dagger$ & $107.7 \pm 6.6$$^\dagger$ & $0 \pm 0$$^\dagger$ & $19.57 \pm 1.94$$^\dagger$ \\
+Clairvoyant greedy (reference, not a bound) & $96.9 \pm 0.6$$^\dagger$ & $925 \pm 43$ & $0.0 \pm 0.0$$^\dagger$ & $0.0 \pm 0.0$$^\dagger$ & $0 \pm 0$$^\dagger$ & $15.89 \pm 1.54$$^\dagger$ \\
 \bottomrule
 \end{tabular}
 \end{table*}

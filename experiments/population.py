@@ -224,9 +224,19 @@ def compute_cluster_paired_test(
     if len(cluster_diffs) > 1 and not np.allclose(cluster_diffs, 0.0):
         t_res = stats.ttest_1samp(cluster_diffs, 0.0)
         cluster_t_stat, cluster_p = float(t_res.statistic), float(t_res.pvalue)
+        c_mean = float(np.mean(cluster_diffs))
+        c_se = float(stats.sem(cluster_diffs))
+        t_crit = float(stats.t.ppf(0.975, df=len(cluster_diffs) - 1))
+        cl_low = float(c_mean - t_crit * c_se)
+        cl_high = float(c_mean + t_crit * c_se)
+        cl_half = float(t_crit * c_se)
     else:
         cluster_t_stat, cluster_p = 0.0, 1.0
-        
+        c_mean = float(np.mean(cluster_diffs)) if len(cluster_diffs) > 0 else 0.0
+        cl_low, cl_high, cl_half = c_mean, c_mean, 0.0
+
+    _, cell_low, cell_high = compute_cell_bootstrap_ci(diffs)
+
     return {
         "n_pairs": len(common_pairs),
         "n_clusters": len(cluster_diffs),
@@ -234,8 +244,12 @@ def compute_cluster_paired_test(
         "hl_median_diff": hl_diff,
         "cell_wilcoxon_stat": w_stat,
         "cell_p_value": cell_p,
+        "cell_ci_95": [float(cell_low), float(cell_high)],
+        "cell_ci_half": float(0.5 * (cell_high - cell_low)),
         "cluster_t_stat": cluster_t_stat,
         "cluster_p_value": cluster_p,
+        "cluster_ci_95": [cl_low, cl_high],
+        "cluster_ci_half": cl_half,
     }
 
 

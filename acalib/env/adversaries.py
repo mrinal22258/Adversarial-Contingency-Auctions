@@ -131,13 +131,23 @@ def compute_interdiction_cut(
             od_pairs.append((curr, target))
 
     if not od_pairs:
-        edge_bc = nx.edge_betweenness_centrality(graph, weight="weight")
+        edge_bc = graph.graph.get("_edge_bc") if hasattr(graph, "graph") else None
+        if edge_bc is None:
+            edge_bc = nx.edge_betweenness_centrality(graph, weight="weight")
+            if hasattr(graph, "graph"):
+                graph.graph["_edge_bc"] = edge_bc
         sorted_risky = sorted(
             risky_edges,
             key=lambda e: edge_bc.get(e, edge_bc.get((e[1], e[0]), 0.0)),
             reverse=True,
         )
         return set(sorted_risky[:budget_k])
+
+    od_key = tuple(sorted(od_pairs))
+    if hasattr(graph, "graph"):
+        cut_cache = graph.graph.setdefault("_interdiction_cut_cache", {})
+        if (od_key, budget_k) in cut_cache:
+            return set(cut_cache[(od_key, budget_k)])
 
     def baseline_cost(g_sub: nx.Graph) -> float:
         tot = 0.0
@@ -179,7 +189,11 @@ def compute_interdiction_cut(
         else:
             break
 
-    return selected_cuts
+    if hasattr(graph, "graph"):
+        cut_cache = graph.graph.setdefault("_interdiction_cut_cache", {})
+        cut_cache[(od_key, budget_k)] = set(selected_cuts)
+
+    return set(selected_cuts)
 
 
 class ReactiveAdversary(Adversary):

@@ -1,4 +1,9 @@
 {
+  "results/per_claim_evaluations.jsonl": {
+    "sha256": "cc99067f784b557c4ee6037a15a1f7c33020b53af3b0541643f3e3595f0506db",
+    "size_bytes": 17960016,
+    "status": "PRESENT"
+  },
   "results/confirmatory/heldout_v5_results.csv": {
     "sha256": "a7470feb9f649baabef745b3d041629f8cbfe415c18f605a968b10b7df393ce5",
     "size_bytes": 1213596,

@@ -1,6 +1,12 @@
 """Build and validate audit/CLAIM_LEDGER_V2.csv with non-empty executable queries."""
 import os
+import sys
 import pandas as pd
+
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if REPO_ROOT not in sys.path:
+    sys.path.insert(0, REPO_ROOT)
+
 from experiments.claims import EmpiricalClaim, compute_file_sha256
 
 CLAIMS_V2_SPEC = [
@@ -111,11 +117,11 @@ CLAIMS_V2_SPEC = [
     {
         "claim_id": "CLAIM-09-V2",
         "claim_text": "SITL physics simulation introduces a substantial completion drop of ~18.9 pp; rank invariance fails across discrete and continuous simulation fidelities.",
-        "source_file": "results/raw_results.csv",
-        "executable_filter": "method in ['aca', 'cbba', 'ctp_replan']",
-        "cluster_unit": "graph_family:seed",
+        "source_file": "results/sitl/analysis/sitl_vs_graph_summary.json",
+        "executable_filter": "bland_altman.bias_mean_difference_pp < -15 and not ranking_preservation.ranking_preserved",
+        "cluster_unit": "map:seed",
         "estimator": "Hodges-Lehmann median drop: -18.8 pp; Spearman rho = 0.486 (p = 0.328)",
-        "ci_method": "Bootstrap 95% CI",
+        "ci_method": "Limits of Agreement 95% [-61.0, +17.4]",
         "test_method": "spearman_rank_correlation_test",
         "correction": "None",
         "evidence_tier": "Tier 1: SITL Physics Simulation",
@@ -123,7 +129,8 @@ CLAIMS_V2_SPEC = [
     },
 ]
 
-def build_claim_ledger_v2(out_path="audit/CLAIM_LEDGER_V2.csv"):
+
+def build_claim_ledger_v2(out_path="audit/CLAIM_LEDGER_V2.csv", root_dir="."):
     rows = []
     for spec in CLAIMS_V2_SPEC:
         claim = EmpiricalClaim(
@@ -139,10 +146,12 @@ def build_claim_ledger_v2(out_path="audit/CLAIM_LEDGER_V2.csv"):
             evidence_tier=spec["evidence_tier"],
             expected_verdict=spec["expected_verdict"],
         )
-        res = claim.evaluate()
+        res = claim.evaluate(root_dir=root_dir)
         if res["population_n"] == 0:
             raise ValueError(f"Build failed: Claim {spec['claim_id']} has empty population (n=0)!")
-            
+        if res["verdict"] != spec["expected_verdict"]:
+            raise ValueError(f"Build failed: Claim {spec['claim_id']} verdict {res['verdict']} != expected {spec['expected_verdict']} ({res['result']})")
+
         rows.append({
             "claim_id": spec["claim_id"],
             "claim_text": spec["claim_text"],
@@ -158,14 +167,15 @@ def build_claim_ledger_v2(out_path="audit/CLAIM_LEDGER_V2.csv"):
             "result_status": res["status"],
             "verdict": res["verdict"],
         })
-        
+
     df_v2 = pd.DataFrame(rows)
     os.makedirs(os.path.dirname(out_path), exist_ok=True)
-    df_v2.to_csv(out_path, index=False)
+    df_v2.to_csv(out_path, index=False, lineterminator="\n")
     print(f"Successfully generated {out_path} with {len(df_v2)} validated, non-empty claims.")
     for idx, r in df_v2.iterrows():
         print(f"  {r['claim_id']:12s} | N={r['population_n']:5d} | Verdict={r['verdict']:4s} | {r['claim_text'][:60]}...")
     return df_v2
+
 
 if __name__ == "__main__":
     build_claim_ledger_v2()

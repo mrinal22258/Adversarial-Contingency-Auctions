@@ -1,7 +1,9 @@
 {
-  "timestamp_utc": "2026-10-13T10:13:12.575658+00:00",
+  "timestamp_utc": "2026-10-13T15:52:51.552208+00:00",
   "python_version": "3.12.7 | packaged by Anaconda, Inc. | (main, Oct  4 2024, 13:17:27) [MSC v.1929 64 bit (AMD64)]",
-  "repo_root": "C:\\Users\\krmri\\Downloads\\Adversarial-Contingency-Auctions-main\\Adversarial-Contingency-Auctions-main",
+  "git_commit": "166b3d12ac88b491730b04af61acb79c7c4c366b",
+  "git_dirty": true,
+  "repo_root": ".",
   "steps": {
     "step1_validation": "PASS",
     "step2_coverage": "PASS",
@@ -21,17 +23,25 @@
       "sha256": "a7470feb9f649baabef745b3d041629f8cbfe415c18f605a968b10b7df393ce5",
       "bytes": 1213596
     },
+    "results/per_claim_evaluations.jsonl": {
+      "sha256": "cc99067f784b557c4ee6037a15a1f7c33020b53af3b0541643f3e3595f0506db",
+      "bytes": 17960016
+    },
+    "results/sitl/analysis/sitl_vs_graph_summary.json": {
+      "sha256": "186569824d0914984c023cbc53d356a882cbc692694572185321c777628e8443",
+      "bytes": 12762
+    },
     "results/result_model_v1.json": {
-      "sha256": "087c0fe4af8b0338ae82cfed5f122f0859192b6b21fd573a03e6248acd616970",
-      "bytes": 121814
+      "sha256": "a9034e91e52414854c67f26673a8b7c6869a49591bdbf388f2773a7f244e52d8",
+      "bytes": 138240
     },
     "results/numbers.tex": {
-      "sha256": "a822bfb467e2d27c048ea24bddb1eb58bc1719bce7e10cc79567951382e5163d",
-      "bytes": 11227
+      "sha256": "3c1a179aafcbe3a980807deee35c0954cae8e48e4cfe72f481a1eb3508ccfc31",
+      "bytes": 11151
     },
     "results/table_main_results.tex": {
-      "sha256": "55d97e86531f8b4862e1538529680d37d2c0eefc545d024ea42efb9254ea9049",
-      "bytes": 3004
+      "sha256": "a6e63d337754b6d31d72901c9b425aead04bcd3d832785376948ac063798d357",
+      "bytes": 3015
     },
     "results/table_stratified.tex": {
       "sha256": "a65288efd801078e7d7beab06627d500a3e20b7447586c4992037de1005b36fa",
@@ -54,13 +64,13 @@
       "bytes": 7468
     },
     "audit/CLAIM_LEDGER_V2.csv": {
-      "sha256": "225090551e6c2a56017ea7eba0ee3d5225c18bffa2462289c6f4272228c487df",
-      "bytes": 4812
+      "sha256": "0c68cac220f0a9d0a460a270f97a677675f1a59548091636f1a22c1d63a2d41d",
+      "bytes": 4890
     },
     "paper.pdf": {
-      "sha256": "420f12b6fe0167b9ff90c85dd4dbb2569b247b9892ce5489313fed459c6dd978",
-      "bytes": 701950
+      "sha256": "846b5ec58543187a0a806ca5cc3f018a908ed90d8e01b43356a2a389de12a9e2",
+      "bytes": 695214
     }
   },
-  "duration_sec": 48.61
+  "duration_sec": 63.02
 }

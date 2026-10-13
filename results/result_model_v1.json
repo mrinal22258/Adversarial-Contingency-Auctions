@@ -1,12 +1,24 @@
 {
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Unified verified empirical result model for ACA benchmark",
   "input_hashes": {
     "raw_results.csv": "3a1fc0416ce060f59fdb92ee25dc262a9b7560e7a5984b40fddee7ee392878c4",
     "heldout_v5_results.csv": "a7470feb9f649baabef745b3d041629f8cbfe415c18f605a968b10b7df393ce5",
+    "per_claim_evaluations.jsonl": "cc99067f784b557c4ee6037a15a1f7c33020b53af3b0541643f3e3595f0506db",
     "sitl_vs_graph_summary.json": "186569824d0914984c023cbc53d356a882cbc692694572185321c777628e8443",
     "vision_metrics.json": "d495d0eac3e0d0abe20da3716ec0b4ac3bb4f637dd694ee04b03d5343aa70588",
     "maps_manifest.json": "8a299e16d895a541f67e26851fbaac9966450e31fb9c1a1176c20d3dc6da982a"
+  },
+  "theorem_1_evidence": {
+    "total_claims": 106214,
+    "claimed_safe": 57334,
+    "tv_le_eta_subset": 12087,
+    "adherence_rate": 0.21081731607772003,
+    "adherence_pct": 21.08,
+    "conflicts_under_assumption_1": 0,
+    "conflicts_across_safe_claims": 330,
+    "clopper_pearson_upper_95": 0.00024781675038487716,
+    "clopper_pearson_upper_pct": 0.024781675038487716
   },
   "populations": {
     "nominal_balanced_core": {
@@ -14,6 +26,7 @@
       "instances": 750,
       "pairs": 750,
       "clusters": 250,
+      "n_seeds": 50,
       "methods": [
         "aca",
         "aca_depth_0",
@@ -36,6 +49,7 @@
       "instances": 450,
       "pairs": 450,
       "clusters": 150,
+      "n_seeds": 30,
       "methods": [
         "aca",
         "aca_adaptive",
@@ -2985,6 +2999,11 @@
         "test_method": "aca",
         "baseline_method": "aca_depth_0",
         "metric": "completion_rate_pct",
+        "primary_estimator": "cluster_mean_difference",
+        "cluster_unit": "graph_family:seed",
+        "test": "cluster_paired_t_test",
+        "family": "pre_registered_hypotheses",
+        "correction": "Holm-Bonferroni",
         "mean_diff": 4.142222222222222,
         "hl_median_diff": 3.3333333333333357,
         "cliffs_delta": [
@@ -2992,22 +3011,49 @@
           0.1846097777777778,
           0.1846097777777778
         ],
-        "cell_p_raw": 6.613286769549591e-17,
+        "cluster_ci_95": [
+          3.041201125854151,
+          5.243243318590293
+        ],
+        "cluster_ci_half": 1.1010210963680709,
         "cluster_p_raw": 1.9660193750653604e-12,
-        "cell_wilcoxon_stat": 29701.0,
         "cluster_t_stat": 7.40972121927019,
+        "cell_ci_95": [
+          3.1733333333333333,
+          5.120222222222222
+        ],
+        "cell_ci_half": 0.9734444444444443,
+        "cell_p_raw": 6.613286769549591e-17,
+        "cell_wilcoxon_stat": 29701.0,
         "n_pairs": 750,
         "n_clusters": 250,
         "cell_p_adjusted": 5.290629415639673e-16,
         "cluster_p_adjusted": 1.5728155000522883e-11,
         "cell_sig": true,
-        "cluster_sig": true
+        "cluster_sig": true,
+        "cell_sensitivity": {
+          "test": "paired_wilcoxon",
+          "stat": 29701.0,
+          "raw_p": 6.613286769549591e-17,
+          "adjusted_p": 5.290629415639673e-16,
+          "sig": true,
+          "ci_95": [
+            3.1733333333333333,
+            5.120222222222222
+          ],
+          "ci_half": 0.9734444444444443
+        }
       },
       "H2_cbba_lr": {
         "contrast_id": "H2_cbba_lr",
         "test_method": "aca",
         "baseline_method": "cbba_lr",
         "metric": "completion_rate_pct",
+        "primary_estimator": "cluster_mean_difference",
+        "cluster_unit": "graph_family:seed",
+        "test": "cluster_paired_t_test",
+        "family": "pre_registered_hypotheses",
+        "correction": "Holm-Bonferroni",
         "mean_diff": 2.142222222222222,
         "hl_median_diff": 3.3333333333333215,
         "cliffs_delta": [
@@ -3015,22 +3061,49 @@
           0.11122488888888889,
           0.11122488888888889
         ],
-        "cell_p_raw": 8.915778018347994e-06,
+        "cluster_ci_95": [
+          0.8987503822617859,
+          3.3856940621826586
+        ],
+        "cluster_ci_half": 1.2434718399604363,
         "cluster_p_raw": 0.0008039049300015111,
-        "cell_wilcoxon_stat": 41900.0,
         "cluster_t_stat": 3.3930689137903625,
+        "cell_ci_95": [
+          1.2353333333333334,
+          3.0491111111111096
+        ],
+        "cell_ci_half": 0.9068888888888881,
+        "cell_p_raw": 8.915778018347994e-06,
+        "cell_wilcoxon_stat": 41900.0,
         "n_pairs": 750,
         "n_clusters": 250,
         "cell_p_adjusted": 4.457889009173997e-05,
         "cluster_p_adjusted": 0.004019524650007556,
         "cell_sig": true,
-        "cluster_sig": true
+        "cluster_sig": true,
+        "cell_sensitivity": {
+          "test": "paired_wilcoxon",
+          "stat": 41900.0,
+          "raw_p": 8.915778018347994e-06,
+          "adjusted_p": 4.457889009173997e-05,
+          "sig": true,
+          "ci_95": [
+            1.2353333333333334,
+            3.0491111111111096
+          ],
+          "ci_half": 0.9068888888888881
+        }
       },
       "H2_cbba_partial_lr": {
         "contrast_id": "H2_cbba_partial_lr",
         "test_method": "aca",
         "baseline_method": "cbba_partial_lr",
         "metric": "completion_rate_pct",
+        "primary_estimator": "cluster_mean_difference",
+        "cluster_unit": "graph_family:seed",
+        "test": "cluster_paired_t_test",
+        "family": "pre_registered_hypotheses",
+        "correction": "Holm-Bonferroni",
         "mean_diff": 0.6311111111111103,
         "hl_median_diff": 0.0,
         "cliffs_delta": [
@@ -3038,22 +3111,49 @@
           0.023004444444444445,
           0.023004444444444445
         ],
-        "cell_p_raw": 0.32059257668974284,
+        "cluster_ci_95": [
+          -0.6259176419284874,
+          1.8881398641507081
+        ],
+        "cluster_ci_half": 1.2570287530395978,
         "cluster_p_raw": 0.32370277934203795,
-        "cell_wilcoxon_stat": 46290.0,
         "cluster_t_stat": 0.9888370476050335,
+        "cell_ci_95": [
+          -0.23111111111111118,
+          1.4757777777777752
+        ],
+        "cell_ci_half": 0.8534444444444432,
+        "cell_p_raw": 0.32059257668974284,
+        "cell_wilcoxon_stat": 46290.0,
         "n_pairs": 750,
         "n_clusters": 250,
         "cell_p_adjusted": 1.0,
         "cluster_p_adjusted": 1.0,
         "cell_sig": false,
-        "cluster_sig": false
+        "cluster_sig": false,
+        "cell_sensitivity": {
+          "test": "paired_wilcoxon",
+          "stat": 46290.0,
+          "raw_p": 0.32059257668974284,
+          "adjusted_p": 1.0,
+          "sig": false,
+          "ci_95": [
+            -0.23111111111111118,
+            1.4757777777777752
+          ],
+          "ci_half": 0.8534444444444432
+        }
       },
       "H2_ssi_lr": {
         "contrast_id": "H2_ssi_lr",
         "test_method": "aca",
         "baseline_method": "ssi_lr",
         "metric": "completion_rate_pct",
+        "primary_estimator": "cluster_mean_difference",
+        "cluster_unit": "graph_family:seed",
+        "test": "cluster_paired_t_test",
+        "family": "pre_registered_hypotheses",
+        "correction": "Holm-Bonferroni",
         "mean_diff": 6.773333333333333,
         "hl_median_diff": 3.333333333333343,
         "cliffs_delta": [
@@ -3061,22 +3161,49 @@
           0.1632071111111111,
           0.1632071111111111
         ],
-        "cell_p_raw": 3.089433545546985e-16,
+        "cluster_ci_95": [
+          4.567666327686155,
+          8.97900033898051
+        ],
+        "cluster_ci_half": 2.2056670056471774,
         "cluster_p_raw": 5.334877559166923e-09,
-        "cell_wilcoxon_stat": 44392.5,
         "cluster_t_stat": 6.048206589053018,
+        "cell_ci_95": [
+          5.359999999999999,
+          8.186666666666666
+        ],
+        "cell_ci_half": 1.413333333333333,
+        "cell_p_raw": 3.089433545546985e-16,
+        "cell_wilcoxon_stat": 44392.5,
         "n_pairs": 750,
         "n_clusters": 250,
         "cell_p_adjusted": 2.1626034818828897e-15,
         "cluster_p_adjusted": 3.734414291416846e-08,
         "cell_sig": true,
-        "cluster_sig": true
+        "cluster_sig": true,
+        "cell_sensitivity": {
+          "test": "paired_wilcoxon",
+          "stat": 44392.5,
+          "raw_p": 3.089433545546985e-16,
+          "adjusted_p": 2.1626034818828897e-15,
+          "sig": true,
+          "ci_95": [
+            5.359999999999999,
+            8.186666666666666
+          ],
+          "ci_half": 1.413333333333333
+        }
       },
       "H2_ctp": {
         "contrast_id": "H2_ctp",
         "test_method": "aca",
         "baseline_method": "ctp_replan",
         "metric": "completion_rate_pct",
+        "primary_estimator": "cluster_mean_difference",
+        "cluster_unit": "graph_family:seed",
+        "test": "cluster_paired_t_test",
+        "family": "pre_registered_hypotheses",
+        "correction": "Holm-Bonferroni",
         "mean_diff": -5.475555555555557,
         "hl_median_diff": -3.333333333333343,
         "cliffs_delta": [
@@ -3084,22 +3211,49 @@
           -0.2787946666666667,
           -0.2787946666666667
         ],
-        "cell_p_raw": 6.5144194391448385e-34,
+        "cluster_ci_95": [
+          -6.6333584530377525,
+          -4.317752658073362
+        ],
+        "cluster_ci_half": 1.1578028974821954,
         "cluster_p_raw": 6.741815546003204e-18,
-        "cell_wilcoxon_stat": 11211.0,
         "cluster_t_stat": -9.314459793568831,
+        "cell_ci_95": [
+          -6.337777777777778,
+          -4.65777777777778
+        ],
+        "cell_ci_half": 0.839999999999999,
+        "cell_p_raw": 6.5144194391448385e-34,
+        "cell_wilcoxon_stat": 11211.0,
         "n_pairs": 750,
         "n_clusters": 250,
         "cell_p_adjusted": 5.8629774952303544e-33,
         "cluster_p_adjusted": 6.067633991402884e-17,
         "cell_sig": true,
-        "cluster_sig": true
+        "cluster_sig": true,
+        "cell_sensitivity": {
+          "test": "paired_wilcoxon",
+          "stat": 11211.0,
+          "raw_p": 6.5144194391448385e-34,
+          "adjusted_p": 5.8629774952303544e-33,
+          "sig": true,
+          "ci_95": [
+            -6.337777777777778,
+            -4.65777777777778
+          ],
+          "ci_half": 0.839999999999999
+        }
       },
       "H2_implicit": {
         "contrast_id": "H2_implicit",
         "test_method": "aca",
         "baseline_method": "implicit",
         "metric": "completion_rate_pct",
+        "primary_estimator": "cluster_mean_difference",
+        "cluster_unit": "graph_family:seed",
+        "test": "cluster_paired_t_test",
+        "family": "pre_registered_hypotheses",
+        "correction": "Holm-Bonferroni",
         "mean_diff": -3.555555555555557,
         "hl_median_diff": -3.3333333333333286,
         "cliffs_delta": [
@@ -3107,22 +3261,49 @@
           -0.1883751111111111,
           -0.1883751111111111
         ],
-        "cell_p_raw": 6.0575769839632694e-15,
+        "cluster_ci_95": [
+          -4.768120464491549,
+          -2.3429906466195654
+        ],
+        "cluster_ci_half": 1.2125649089359918,
         "cluster_p_raw": 2.282142947953356e-08,
-        "cell_wilcoxon_stat": 19666.5,
         "cluster_t_stat": -5.775194136000737,
+        "cell_ci_95": [
+          -4.426666666666668,
+          -2.6666666666666683
+        ],
+        "cell_ci_half": 0.8799999999999997,
+        "cell_p_raw": 6.0575769839632694e-15,
+        "cell_wilcoxon_stat": 19666.5,
         "n_pairs": 750,
         "n_clusters": 250,
         "cell_p_adjusted": 3.634546190377962e-14,
         "cluster_p_adjusted": 1.3692857687720137e-07,
         "cell_sig": true,
-        "cluster_sig": true
+        "cluster_sig": true,
+        "cell_sensitivity": {
+          "test": "paired_wilcoxon",
+          "stat": 19666.5,
+          "raw_p": 6.0575769839632694e-15,
+          "adjusted_p": 3.634546190377962e-14,
+          "sig": true,
+          "ci_95": [
+            -4.426666666666668,
+            -2.6666666666666683
+          ],
+          "ci_half": 0.8799999999999997
+        }
       },
       "H3_welfare": {
         "contrast_id": "H3_welfare",
         "test_method": "aca",
         "baseline_method": "cbba_partial_lr",
         "metric": "net_welfare",
+        "primary_estimator": "cluster_mean_difference",
+        "cluster_unit": "graph_family:seed",
+        "test": "cluster_paired_t_test",
+        "family": "pre_registered_hypotheses",
+        "correction": "Holm-Bonferroni",
         "mean_diff": -2.738073099900922,
         "hl_median_diff": 6.575362870498992,
         "cliffs_delta": [
@@ -3130,22 +3311,49 @@
           0.029048888888888888,
           0.029048888888888888
         ],
-        "cell_p_raw": 0.5729360859763544,
+        "cluster_ci_95": [
+          -21.34595819969487,
+          15.869811999893024
+        ],
+        "cluster_ci_half": 18.607885099793947,
         "cluster_p_raw": 0.7722034075005624,
-        "cell_wilcoxon_stat": 136730.5,
         "cluster_t_stat": -0.2898091796905379,
+        "cell_ci_95": [
+          -16.11850129675077,
+          11.01063315490404
+        ],
+        "cell_ci_half": 13.564567225827407,
+        "cell_p_raw": 0.5729360859763544,
+        "cell_wilcoxon_stat": 136730.5,
         "n_pairs": 750,
         "n_clusters": 250,
         "cell_p_adjusted": 1.0,
         "cluster_p_adjusted": 1.0,
         "cell_sig": false,
-        "cluster_sig": false
+        "cluster_sig": false,
+        "cell_sensitivity": {
+          "test": "paired_wilcoxon",
+          "stat": 136730.5,
+          "raw_p": 0.5729360859763544,
+          "adjusted_p": 1.0,
+          "sig": false,
+          "ci_95": [
+            -16.11850129675077,
+            11.01063315490404
+          ],
+          "ci_half": 13.564567225827407
+        }
       },
       "H4_safe_conflicts": {
         "contrast_id": "H4_safe_conflicts",
         "test_method": "aca",
         "baseline_method": "aca_no_margin",
         "metric": "safe_claim_conflicts",
+        "primary_estimator": "cluster_mean_difference",
+        "cluster_unit": "graph_family:seed",
+        "test": "cluster_paired_t_test",
+        "family": "pre_registered_hypotheses",
+        "correction": "Holm-Bonferroni",
         "mean_diff": -4.846666666666667,
         "hl_median_diff": -5.0,
         "cliffs_delta": [
@@ -3153,22 +3361,49 @@
           -0.9820551111111111,
           -0.9820551111111111
         ],
-        "cell_p_raw": 1.4916046354220028e-123,
+        "cluster_ci_95": [
+          -5.046959852922755,
+          -4.646373480410577
+        ],
+        "cluster_ci_half": 0.20029318625608877,
         "cluster_p_raw": 3.723543247712774e-127,
-        "cell_wilcoxon_stat": 0.0,
         "cluster_t_stat": -47.65857922373362,
+        "cell_ci_95": [
+          -4.966666666666667,
+          -4.721333333333333
+        ],
+        "cell_ci_half": 0.12266666666666692,
+        "cell_p_raw": 1.4916046354220028e-123,
+        "cell_wilcoxon_stat": 0.0,
         "n_pairs": 750,
         "n_clusters": 250,
         "cell_p_adjusted": 1.6407650989642032e-122,
         "cluster_p_adjusted": 4.0958975724840514e-126,
         "cell_sig": true,
-        "cluster_sig": true
+        "cluster_sig": true,
+        "cell_sensitivity": {
+          "test": "paired_wilcoxon",
+          "stat": 0.0,
+          "raw_p": 1.4916046354220028e-123,
+          "adjusted_p": 1.6407650989642032e-122,
+          "sig": true,
+          "ci_95": [
+            -4.966666666666667,
+            -4.721333333333333
+          ],
+          "ci_half": 0.12266666666666692
+        }
       },
       "H4_completion": {
         "contrast_id": "H4_completion",
         "test_method": "aca",
         "baseline_method": "aca_no_margin",
         "metric": "completion_rate_pct",
+        "primary_estimator": "cluster_mean_difference",
+        "cluster_unit": "graph_family:seed",
+        "test": "cluster_paired_t_test",
+        "family": "pre_registered_hypotheses",
+        "correction": "Holm-Bonferroni",
         "mean_diff": 0.22222222222222188,
         "hl_median_diff": 0.0,
         "cliffs_delta": [
@@ -3176,22 +3411,49 @@
           0.007324444444444444,
           0.007324444444444444
         ],
-        "cell_p_raw": 0.5487509963296142,
+        "cluster_ci_95": [
+          -0.7312848536621133,
+          1.175729298106557
+        ],
+        "cluster_ci_half": 0.9535070758843351,
         "cluster_p_raw": 0.6466232183874467,
-        "cell_wilcoxon_stat": 35286.0,
         "cluster_t_stat": 0.4590158484870584,
+        "cell_ci_95": [
+          -0.6311111111111107,
+          1.022222222222222
+        ],
+        "cell_ci_half": 0.8266666666666663,
+        "cell_p_raw": 0.5487509963296142,
+        "cell_wilcoxon_stat": 35286.0,
         "n_pairs": 750,
         "n_clusters": 250,
         "cell_p_adjusted": 1.0,
         "cluster_p_adjusted": 1.0,
         "cell_sig": false,
-        "cluster_sig": false
+        "cluster_sig": false,
+        "cell_sensitivity": {
+          "test": "paired_wilcoxon",
+          "stat": 35286.0,
+          "raw_p": 0.5487509963296142,
+          "adjusted_p": 1.0,
+          "sig": false,
+          "ci_95": [
+            -0.6311111111111107,
+            1.022222222222222
+          ],
+          "ci_half": 0.8266666666666663
+        }
       },
       "H5_inference": {
         "contrast_id": "H5_inference",
         "test_method": "aca",
         "baseline_method": "aca_no_inference",
         "metric": "completion_rate_pct",
+        "primary_estimator": "cluster_mean_difference",
+        "cluster_unit": "graph_family:seed",
+        "test": "cluster_paired_t_test",
+        "family": "pre_registered_hypotheses",
+        "correction": "Holm-Bonferroni",
         "mean_diff": -0.02666666666666663,
         "hl_median_diff": 0.0,
         "cliffs_delta": [
@@ -3199,22 +3461,49 @@
           0.0023217777777777776,
           0.0023217777777777776
         ],
-        "cell_p_raw": 0.9684171647489395,
+        "cluster_ci_95": [
+          -0.8440169810539453,
+          0.7906836477206121
+        ],
+        "cluster_ci_half": 0.8173503143872787,
         "cluster_p_raw": 0.9488166566331186,
-        "cell_wilcoxon_stat": 29942.0,
         "cluster_t_stat": -0.0642576166088925,
+        "cell_ci_95": [
+          -0.7822222222222224,
+          0.7466666666666667
+        ],
+        "cell_ci_half": 0.7644444444444445,
+        "cell_p_raw": 0.9684171647489395,
+        "cell_wilcoxon_stat": 29942.0,
         "n_pairs": 750,
         "n_clusters": 250,
         "cell_p_adjusted": 1.0,
         "cluster_p_adjusted": 1.0,
         "cell_sig": false,
-        "cluster_sig": false
+        "cluster_sig": false,
+        "cell_sensitivity": {
+          "test": "paired_wilcoxon",
+          "stat": 29942.0,
+          "raw_p": 0.9684171647489395,
+          "adjusted_p": 1.0,
+          "sig": false,
+          "ci_95": [
+            -0.7822222222222224,
+            0.7466666666666667
+          ],
+          "ci_half": 0.7644444444444445
+        }
       },
       "H6_messages": {
         "contrast_id": "H6_messages",
         "test_method": "aca",
         "baseline_method": "cbba",
         "metric": "total_messages",
+        "primary_estimator": "cluster_mean_difference",
+        "cluster_unit": "graph_family:seed",
+        "test": "cluster_paired_t_test",
+        "family": "pre_registered_hypotheses",
+        "correction": "Holm-Bonferroni",
         "mean_diff": -76.064,
         "hl_median_diff": -72.0,
         "cliffs_delta": [
@@ -3222,16 +3511,38 @@
           -0.3009173333333333,
           -0.3009173333333333
         ],
-        "cell_p_raw": 5.37433085023933e-34,
+        "cluster_ci_95": [
+          -90.95616268232648,
+          -61.1718373176735
+        ],
+        "cluster_ci_half": 14.892162682326491,
         "cluster_p_raw": 3.377676323016108e-20,
-        "cell_wilcoxon_stat": 64359.0,
         "cluster_t_stat": -10.059710969846412,
+        "cell_ci_95": [
+          -87.38853333333333,
+          -64.138
+        ],
+        "cell_ci_half": 11.625266666666661,
+        "cell_p_raw": 5.37433085023933e-34,
+        "cell_wilcoxon_stat": 64359.0,
         "n_pairs": 750,
         "n_clusters": 250,
         "cell_p_adjusted": 5.3743308502393304e-33,
         "cluster_p_adjusted": 3.377676323016108e-19,
         "cell_sig": true,
-        "cluster_sig": true
+        "cluster_sig": true,
+        "cell_sensitivity": {
+          "test": "paired_wilcoxon",
+          "stat": 64359.0,
+          "raw_p": 5.37433085023933e-34,
+          "adjusted_p": 5.3743308502393304e-33,
+          "sig": true,
+          "ci_95": [
+            -87.38853333333333,
+            -64.138
+          ],
+          "ci_half": 11.625266666666661
+        }
       }
     },
     "protocol_v5_confirmatory": {
@@ -3240,6 +3551,11 @@
         "test_method": "aca_plus",
         "baseline_method": "aca",
         "metric": "net_welfare",
+        "primary_estimator": "cluster_mean_difference",
+        "cluster_unit": "graph_family:seed",
+        "test": "cluster_paired_t_test",
+        "family": "protocol_v5_confirmatory",
+        "correction": "Holm-Bonferroni",
         "mean_diff": -1.1789262964015643,
         "hl_median_diff": 0.0,
         "cliffs_delta": [
@@ -3247,22 +3563,49 @@
           0.00035061728395061726,
           0.00035061728395061726
         ],
-        "cell_p_raw": 0.9089078479778216,
+        "cluster_ci_95": [
+          -15.338883287475088,
+          12.981030694671958
+        ],
+        "cluster_ci_half": 14.159956991073523,
         "cluster_p_raw": 0.8695460135343009,
-        "cell_wilcoxon_stat": 23004.5,
         "cluster_t_stat": -0.16451843029400035,
+        "cell_ci_95": [
+          -13.16268265480601,
+          11.126949469591922
+        ],
+        "cell_ci_half": 12.144816062198966,
+        "cell_p_raw": 0.9089078479778216,
+        "cell_wilcoxon_stat": 23004.5,
         "n_pairs": 450,
         "n_clusters": 150,
         "cell_p_adjusted": 1.0,
         "cluster_p_adjusted": 1.0,
         "cell_sig": false,
-        "cluster_sig": false
+        "cluster_sig": false,
+        "cell_sensitivity": {
+          "test": "paired_wilcoxon",
+          "stat": 23004.5,
+          "raw_p": 0.9089078479778216,
+          "adjusted_p": 1.0,
+          "sig": false,
+          "ci_95": [
+            -13.16268265480601,
+            11.126949469591922
+          ],
+          "ci_half": 12.144816062198966
+        }
       },
       "H2_aca_plus_vs_aca_completion": {
         "contrast_id": "H2_aca_plus_vs_aca_completion",
         "test_method": "aca_plus",
         "baseline_method": "aca",
         "metric": "completion_rate_pct",
+        "primary_estimator": "cluster_mean_difference",
+        "cluster_unit": "graph_family:seed",
+        "test": "cluster_paired_t_test",
+        "family": "protocol_v5_confirmatory",
+        "correction": "Holm-Bonferroni",
         "mean_diff": 0.04444444444444429,
         "hl_median_diff": 0.0,
         "cliffs_delta": [
@@ -3270,22 +3613,49 @@
           0.0004691358024691358,
           0.0004691358024691358
         ],
-        "cell_p_raw": 0.9703347567328338,
+        "cluster_ci_95": [
+          -0.8113649656278218,
+          0.9002538545167104
+        ],
+        "cluster_ci_half": 0.8558094100722661,
         "cluster_p_raw": 0.9184028772126168,
-        "cell_wilcoxon_stat": 5568.0,
         "cluster_t_stat": 0.10261958663136808,
+        "cell_ci_95": [
+          -0.6666666666666667,
+          0.7407407407407408
+        ],
+        "cell_ci_half": 0.7037037037037037,
+        "cell_p_raw": 0.9703347567328338,
+        "cell_wilcoxon_stat": 5568.0,
         "n_pairs": 450,
         "n_clusters": 150,
         "cell_p_adjusted": 1.0,
         "cluster_p_adjusted": 1.0,
         "cell_sig": false,
-        "cluster_sig": false
+        "cluster_sig": false,
+        "cell_sensitivity": {
+          "test": "paired_wilcoxon",
+          "stat": 5568.0,
+          "raw_p": 0.9703347567328338,
+          "adjusted_p": 1.0,
+          "sig": false,
+          "ci_95": [
+            -0.6666666666666667,
+            0.7407407407407408
+          ],
+          "ci_half": 0.7037037037037037
+        }
       },
       "H3_aca_plus_vs_aca_conflicts": {
         "contrast_id": "H3_aca_plus_vs_aca_conflicts",
         "test_method": "aca_plus",
         "baseline_method": "aca",
         "metric": "total_conflicts",
+        "primary_estimator": "cluster_mean_difference",
+        "cluster_unit": "graph_family:seed",
+        "test": "cluster_paired_t_test",
+        "family": "protocol_v5_confirmatory",
+        "correction": "Holm-Bonferroni",
         "mean_diff": -1.0622222222222222,
         "hl_median_diff": 0.0,
         "cliffs_delta": [
@@ -3293,22 +3663,49 @@
           -0.020844444444444443,
           -0.020844444444444443
         ],
-        "cell_p_raw": 0.7052792642027441,
+        "cluster_ci_95": [
+          -3.242022457243738,
+          1.1175780127992936
+        ],
+        "cluster_ci_half": 2.1798002350215158,
         "cluster_p_raw": 0.33714966817184167,
-        "cell_wilcoxon_stat": 19020.0,
         "cluster_t_stat": -0.962916268661669,
+        "cell_ci_95": [
+          -3.1890555555555555,
+          0.9312222222222216
+        ],
+        "cell_ci_half": 2.0601388888888885,
+        "cell_p_raw": 0.7052792642027441,
+        "cell_wilcoxon_stat": 19020.0,
         "n_pairs": 450,
         "n_clusters": 150,
         "cell_p_adjusted": 1.0,
         "cluster_p_adjusted": 1.0,
         "cell_sig": false,
-        "cluster_sig": false
+        "cluster_sig": false,
+        "cell_sensitivity": {
+          "test": "paired_wilcoxon",
+          "stat": 19020.0,
+          "raw_p": 0.7052792642027441,
+          "adjusted_p": 1.0,
+          "sig": false,
+          "ci_95": [
+            -3.1890555555555555,
+            0.9312222222222216
+          ],
+          "ci_half": 2.0601388888888885
+        }
       },
       "H4_margin_vs_no_margin_conflicts": {
         "contrast_id": "H4_margin_vs_no_margin_conflicts",
         "test_method": "aca",
         "baseline_method": "aca_no_margin",
         "metric": "total_conflicts",
+        "primary_estimator": "cluster_mean_difference",
+        "cluster_unit": "graph_family:seed",
+        "test": "cluster_paired_t_test",
+        "family": "protocol_v5_confirmatory",
+        "correction": "Holm-Bonferroni",
         "mean_diff": -10.268888888888888,
         "hl_median_diff": -9.0,
         "cliffs_delta": [
@@ -3316,22 +3713,49 @@
           -0.16368888888888888,
           -0.16368888888888888
         ],
-        "cell_p_raw": 8.342951054503019e-13,
+        "cluster_ci_95": [
+          -14.579107155483737,
+          -5.95867062229404
+        ],
+        "cluster_ci_half": 4.310218266594848,
         "cluster_p_raw": 5.679177421571618e-06,
-        "cell_wilcoxon_stat": 26396.0,
         "cluster_t_stat": -4.707756895243758,
+        "cell_ci_95": [
+          -13.220222222222223,
+          -7.279444444444448
+        ],
+        "cell_ci_half": 2.970388888888887,
+        "cell_p_raw": 8.342951054503019e-13,
+        "cell_wilcoxon_stat": 26396.0,
         "n_pairs": 450,
         "n_clusters": 150,
         "cell_p_adjusted": 5.840065738152114e-12,
         "cluster_p_adjusted": 3.975424195100133e-05,
         "cell_sig": true,
-        "cluster_sig": true
+        "cluster_sig": true,
+        "cell_sensitivity": {
+          "test": "paired_wilcoxon",
+          "stat": 26396.0,
+          "raw_p": 8.342951054503019e-13,
+          "adjusted_p": 5.840065738152114e-12,
+          "sig": true,
+          "ci_95": [
+            -13.220222222222223,
+            -7.279444444444448
+          ],
+          "ci_half": 2.970388888888887
+        }
       },
       "H4_margin_preservation_cost": {
         "contrast_id": "H4_margin_preservation_cost",
         "test_method": "aca",
         "baseline_method": "aca_no_margin",
         "metric": "completion_rate_pct",
+        "primary_estimator": "cluster_mean_difference",
+        "cluster_unit": "graph_family:seed",
+        "test": "cluster_paired_t_test",
+        "family": "protocol_v5_confirmatory",
+        "correction": "Holm-Bonferroni",
         "mean_diff": -1.0814814814814817,
         "hl_median_diff": 0.0,
         "cliffs_delta": [
@@ -3339,22 +3763,49 @@
           -0.0495604938271605,
           -0.0495604938271605
         ],
-        "cell_p_raw": 0.008232839917235802,
+        "cluster_ci_95": [
+          -2.2120202980561308,
+          0.04905733509316712
+        ],
+        "cluster_ci_half": 1.1305388165746488,
         "cluster_p_raw": 0.060663962730004274,
-        "cell_wilcoxon_stat": 8498.5,
         "cluster_t_stat": -1.8902682751736166,
+        "cell_ci_95": [
+          -1.9851851851851847,
+          -0.17777777777777803
+        ],
+        "cell_ci_half": 0.9037037037037033,
+        "cell_p_raw": 0.008232839917235802,
+        "cell_wilcoxon_stat": 8498.5,
         "n_pairs": 450,
         "n_clusters": 150,
         "cell_p_adjusted": 0.04116419958617901,
         "cluster_p_adjusted": 0.30331981365002136,
         "cell_sig": true,
-        "cluster_sig": false
+        "cluster_sig": false,
+        "cell_sensitivity": {
+          "test": "paired_wilcoxon",
+          "stat": 8498.5,
+          "raw_p": 0.008232839917235802,
+          "adjusted_p": 0.04116419958617901,
+          "sig": true,
+          "ci_95": [
+            -1.9851851851851847,
+            -0.17777777777777803
+          ],
+          "ci_half": 0.9037037037037033
+        }
       },
       "cbba_lr_vs_aca_completion": {
         "contrast_id": "cbba_lr_vs_aca_completion",
         "test_method": "cbba_lr",
         "baseline_method": "aca",
         "metric": "completion_rate_pct",
+        "primary_estimator": "cluster_mean_difference",
+        "cluster_unit": "graph_family:seed",
+        "test": "cluster_paired_t_test",
+        "family": "protocol_v5_confirmatory",
+        "correction": "Holm-Bonferroni",
         "mean_diff": 2.2666666666666657,
         "hl_median_diff": 0.0,
         "cliffs_delta": [
@@ -3362,22 +3813,49 @@
           0.1043111111111111,
           0.1043111111111111
         ],
-        "cell_p_raw": 1.0409731470000023e-05,
+        "cluster_ci_95": [
+          1.1091802658932184,
+          3.424153067440113
+        ],
+        "cluster_ci_half": 1.1574864007734473,
         "cluster_p_raw": 0.00016258100309087342,
-        "cell_wilcoxon_stat": 8607.0,
         "cluster_t_stat": 3.8695601086513975,
+        "cell_ci_95": [
+          1.4074074074074066,
+          3.126296296296294
+        ],
+        "cell_ci_half": 0.8594444444444438,
+        "cell_p_raw": 1.0409731470000023e-05,
+        "cell_wilcoxon_stat": 8607.0,
         "n_pairs": 450,
         "n_clusters": 150,
         "cell_p_adjusted": 6.245838882000014e-05,
         "cluster_p_adjusted": 0.0009754860185452404,
         "cell_sig": true,
-        "cluster_sig": true
+        "cluster_sig": true,
+        "cell_sensitivity": {
+          "test": "paired_wilcoxon",
+          "stat": 8607.0,
+          "raw_p": 1.0409731470000023e-05,
+          "adjusted_p": 6.245838882000014e-05,
+          "sig": true,
+          "ci_95": [
+            1.4074074074074066,
+            3.126296296296294
+          ],
+          "ci_half": 0.8594444444444438
+        }
       },
       "ctp_replan_vs_aca_completion": {
         "contrast_id": "ctp_replan_vs_aca_completion",
         "test_method": "ctp_replan",
         "baseline_method": "aca",
         "metric": "completion_rate_pct",
+        "primary_estimator": "cluster_mean_difference",
+        "cluster_unit": "graph_family:seed",
+        "test": "cluster_paired_t_test",
+        "family": "protocol_v5_confirmatory",
+        "correction": "Holm-Bonferroni",
         "mean_diff": -0.11851851851851836,
         "hl_median_diff": 0.0,
         "cliffs_delta": [
@@ -3385,16 +3863,38 @@
           0.05230617283950617,
           0.05230617283950617
         ],
-        "cell_p_raw": 0.6886603728827744,
+        "cluster_ci_95": [
+          -1.7271934754514484,
+          1.490156438414412
+        ],
+        "cluster_ci_half": 1.6086749569329302,
         "cluster_p_raw": 0.8844481194749721,
-        "cell_wilcoxon_stat": 12212.5,
         "cluster_t_stat": -0.14558202288305222,
+        "cell_ci_95": [
+          -1.244444444444444,
+          0.977777777777777
+        ],
+        "cell_ci_half": 1.1111111111111105,
+        "cell_p_raw": 0.6886603728827744,
+        "cell_wilcoxon_stat": 12212.5,
         "n_pairs": 450,
         "n_clusters": 150,
         "cell_p_adjusted": 1.0,
         "cluster_p_adjusted": 1.0,
         "cell_sig": false,
-        "cluster_sig": false
+        "cluster_sig": false,
+        "cell_sensitivity": {
+          "test": "paired_wilcoxon",
+          "stat": 12212.5,
+          "raw_p": 0.6886603728827744,
+          "adjusted_p": 1.0,
+          "sig": false,
+          "ci_95": [
+            -1.244444444444444,
+            0.977777777777777
+          ],
+          "ci_half": 1.1111111111111105
+        }
       }
     }
   },

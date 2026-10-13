@@ -1,6 +1,6 @@
 {
   "figure_file": "results/figures\\fig_ablation_suite.png",
-  "git_commit": "ec2486ddfea81b12956cb971bf66b7b3a6ae441e",
+  "git_commit": "166b3d12ac88b491730b04af61acb79c7c4c366b",
   "source_files": [
     "results/raw_results.csv"
   ],

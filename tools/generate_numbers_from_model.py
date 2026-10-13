@@ -44,15 +44,16 @@ def generate_numbers(
     v5_metrics = m["metrics"]["protocol_v5_confirmatory"]
     core_contrasts = m["contrasts"]["nominal_balanced_core"]
     v5_contrasts = m["contrasts"]["protocol_v5_confirmatory"]
-    sitl = m.get("sitl", {})
-    vision = m.get("vision", {})
-    maps = m.get("maps", {})
+    th1 = m["theorem_1_evidence"]
+    sitl = m["sitl"]
+    vision = m["vision"]
+    maps = m["maps"]
 
     # General / Counts
     add("aeTrials", core_pop["cell_N"])
     add("aeMatchedBenchmarkInstances", core_pop["instances"])
     add("aeTotalTrials", "18{,}720")
-    add("aeSeedsCount", 15)
+    add("aeSeedsCount", core_pop["n_seeds"])
     add("aeBenchmarkMapCount", 5)
     add("aeConfidenceLevel", 95)
     add("aeBootstrapCiLevel", 95)
@@ -131,10 +132,6 @@ def generate_numbers(
     add("aeSsiWelfare", mw_ssi)
     add("aeSsiWelfareCI", ciw_ssi)
 
-    mw_cc, ciw_cc = get_core("cc_cbba", "net_welfare", 0) if "cc_cbba" in core_metrics else ("905", "15")
-    add("aeCcCbbaWelfare", mw_cc)
-    add("aeCcCbbaWelfareCI", ciw_cc)
-
     # Conflicts
     mc_aca, cic_aca = get_core("aca", "total_conflicts", 1)
     add("aeAcaTotConf", mc_aca)
@@ -196,64 +193,82 @@ def generate_numbers(
     msg_diff_cbba = int(round(float(mm_cbba) - float(mm_aca)))
     add("aeMsgDiffCbba", msg_diff_cbba)
 
-    # H1
-    h1 = core_contrasts.get("H1_recourse_depth", {})
-    add("aeHoneMeanDiff", f"{h1.get('mean_diff', 4.14):+.2f}")
-    add("aeHoneHlMedian", f"{h1.get('hl_median_diff', 3.33):+.2f}")
-    add("aeHoneCILow", "+2.22")
-    add("aeHoneCIHigh", "+4.44")
+    # H1 Recourse Depth
+    if "H1_recourse_depth" not in core_contrasts:
+        raise KeyError("Missing required contrast H1_recourse_depth")
+    h1 = core_contrasts["H1_recourse_depth"]
+    add("aeHoneMeanDiff", f"{h1['mean_diff']:+.2f}")
+    add("aeHoneHlMedian", f"{h1['hl_median_diff']:+.2f}")
+    add("aeHoneCILow", f"{h1['cluster_ci_95'][0]:+.2f}")
+    add("aeHoneCIHigh", f"{h1['cluster_ci_95'][1]:+.2f}")
 
     # H2 CBBA+LR
-    h2_lr = core_contrasts.get("H2_cbba_lr", {})
-    add("aeHtwoCbbaLrDiff", f"{h2_lr.get('mean_diff', 2.14):+.2f}")
-    add("aeHtwoCbbaLrHlMedian", f"{h2_lr.get('hl_median_diff', 1.90):+.2f}")
-    add("aeHtwoCbbaLrCILow", "+1.11")
-    add("aeHtwoCbbaLrCIHigh", "+3.02")
-    add("aePvalCbbaLr", format_pval(h2_lr.get("cell_p_adjusted", 0.000789)))
+    if "H2_cbba_lr" not in core_contrasts:
+        raise KeyError("Missing required contrast H2_cbba_lr")
+    h2_lr = core_contrasts["H2_cbba_lr"]
+    add("aeHtwoCbbaLrDiff", f"{h2_lr['mean_diff']:+.2f}")
+    add("aeHtwoCbbaLrHlMedian", f"{h2_lr['hl_median_diff']:+.2f}")
+    add("aeHtwoCbbaLrCILow", f"{h2_lr['cluster_ci_95'][0]:+.2f}")
+    add("aeHtwoCbbaLrCIHigh", f"{h2_lr['cluster_ci_95'][1]:+.2f}")
+    add("aePvalCbbaLr", format_pval(h2_lr["cluster_p_adjusted"]))
 
     # H2 CBBA-PR+LR
-    h2_pr = core_contrasts.get("H2_cbba_partial_lr", {})
-    add("aeHtwoCbbaPrLrDiff", f"{h2_pr.get('mean_diff', 0.25):+.2f}")
-    add("aeHtwoCbbaPrLrHlMedian", f"{h2_pr.get('hl_median_diff', 0.00):+.2f}")
-    add("aeHtwoCbbaPrLrCILow", "-0.83")
-    add("aeHtwoCbbaPrLrCIHigh", "+0.83")
-    add("aePvalCbbaPrLr", format_pval(h2_pr.get("cell_p_raw", 0.884)))
-    add("aePvalCbbaPrLrBonf", "1.000")
+    if "H2_cbba_partial_lr" not in core_contrasts:
+        raise KeyError("Missing required contrast H2_cbba_partial_lr")
+    h2_pr = core_contrasts["H2_cbba_partial_lr"]
+    add("aeHtwoCbbaPrLrDiff", f"{h2_pr['mean_diff']:+.2f}")
+    add("aeHtwoCbbaPrLrHlMedian", f"{h2_pr['hl_median_diff']:+.2f}")
+    add("aeHtwoCbbaPrLrCILow", f"{h2_pr['cluster_ci_95'][0]:+.2f}")
+    add("aeHtwoCbbaPrLrCIHigh", f"{h2_pr['cluster_ci_95'][1]:+.2f}")
+    add("aePvalCbbaPrLr", format_pval(h2_pr["cluster_p_adjusted"]))
+    add("aePvalCbbaPrLrBonf", format_pval(h2_pr["cluster_p_adjusted"]))
 
     # H2 SSI+LR
-    h2_ssi = core_contrasts.get("H2_ssi_lr", {})
-    add("aeHtwoSsiLrDiff", f"{h2_ssi.get('mean_diff', 6.77):+.2f}")
+    if "H2_ssi_lr" not in core_contrasts:
+        raise KeyError("Missing required contrast H2_ssi_lr")
+    h2_ssi = core_contrasts["H2_ssi_lr"]
+    add("aeHtwoSsiLrDiff", f"{h2_ssi['mean_diff']:+.2f}")
 
     # H2 CTP Replan
-    h2_ctp = core_contrasts.get("H2_ctp", {})
-    add("aeHtwoCtpDiff", f"{h2_ctp.get('mean_diff', -4.86):+.1f}")
-    add("aePvalCtp", format_pval(h2_ctp.get("cell_p_raw", 1.13e-15)))
+    if "H2_ctp" not in core_contrasts:
+        raise KeyError("Missing required contrast H2_ctp")
+    h2_ctp = core_contrasts["H2_ctp"]
+    add("aeHtwoCtpDiff", f"{h2_ctp['mean_diff']:+.1f}")
+    add("aePvalCtp", format_pval(h2_ctp["cluster_p_adjusted"]))
 
     # H2 Implicit
-    h2_imp = core_contrasts.get("H2_implicit", {})
-    add("aeHtwoImplicitDiff", f"{h2_imp.get('mean_diff', -3.56):+.1f}")
-    add("aePvalImplicit", format_pval(h2_imp.get("cell_p_raw", 2.0e-9)))
+    if "H2_implicit" not in core_contrasts:
+        raise KeyError("Missing required contrast H2_implicit")
+    h2_imp = core_contrasts["H2_implicit"]
+    add("aeHtwoImplicitDiff", f"{h2_imp['mean_diff']:+.1f}")
+    add("aePvalImplicit", format_pval(h2_imp["cluster_p_adjusted"]))
 
     # H3 Welfare
-    h3_welf = core_contrasts.get("H3_welfare", {})
-    add("aePvalHthreeWelfare", "< 0.001")
+    if "H3_welfare" not in core_contrasts:
+        raise KeyError("Missing required contrast H3_welfare")
+    h3_welf = core_contrasts["H3_welfare"]
+    add("aePvalHthreeWelfare", format_pval(h3_welf["cluster_p_adjusted"]))
 
     # H4 Safe Conflicts
-    h4_sc = core_contrasts.get("H4_safe_conflicts", {})
+    if "H4_safe_conflicts" not in core_contrasts:
+        raise KeyError("Missing required contrast H4_safe_conflicts")
+    h4_sc = core_contrasts["H4_safe_conflicts"]
     add("aeHfourSafeConflictReductionPct", "99.1")
     add("aeHfourDeferralPct", "86.6")
     add("aeHfourPreservationCost", "-0.5")
     add("aeTotalSafeConflicts", "32")
-    add("aeTotalEvaluatedClaims", "106{,}214")
+    add("aeTotalEvaluatedClaims", f"{th1['total_claims']:,}".replace(",", "{,}"))
     add("aeNoMarginSafeConflicts", "3{,}646")
     add("aeZeroConflicts", "0")
     add("aeTostEquivalenceMargin", "5.0")
 
     # H5 Inference
-    h5 = core_contrasts.get("H5_inference", {})
-    add("aeHfiveCompDiff", f"{h5.get('mean_diff', -0.03):+.1f}")
-    add("aeHfiveHlMedian", f"{h5.get('hl_median_diff', 0.00):.2f}")
-    add("aePvalInferenceNull", format_pval(h5.get("cell_p_adjusted", 0.515)))
+    if "H5_inference" not in core_contrasts:
+        raise KeyError("Missing required contrast H5_inference")
+    h5 = core_contrasts["H5_inference"]
+    add("aeHfiveCompDiff", f"{h5['mean_diff']:+.1f}")
+    add("aeHfiveHlMedian", f"{h5['hl_median_diff']:+.2f}")
+    add("aePvalInferenceNull", format_pval(h5["cluster_p_adjusted"]))
 
     # Regimes & Topologies Null
     add("aePvalRegimeNull", "0.507")
@@ -266,14 +281,14 @@ def generate_numbers(
     add("aeAdherencePerInstanceCIHigh", "58.9")
     add("aeAdherenceIdealThreshold", "90")
     add("aePvalAdherenceInstanceNull", "1.000")
-    add("aeAdherencePerClaim", "21.1")
+    add("aeAdherencePerClaim", f"{th1['adherence_pct']:.1f}")
     add("aeConflictFreeRunPct", "98.2")
     add("aeConflictFreeRunRateCILow", "97.6")
     add("aeConflictFreeRunRateCIHigh", "100.0")
-    add("aeSafeClaimsTotal", "57{,}334")
-    add("aeSafeClaimsAdhered", "12{,}087")
-    add("aeTheoremConflicts", "0")
-    add("aeTheoremConflictRateUpper", "0.025")
+    add("aeSafeClaimsTotal", f"{th1['claimed_safe']:,}".replace(",", "{,}"))
+    add("aeSafeClaimsAdhered", f"{th1['tv_le_eta_subset']:,}".replace(",", "{,}"))
+    add("aeTheoremConflicts", str(th1["conflicts_under_assumption_1"]))
+    add("aeTheoremConflictRateUpper", f"{th1['clopper_pearson_upper_pct']:.3f}")
     add("aeTheoremEarlyN", "11{,}184")
     add("aeTheoremEarlyUpper", "0.027")
     add("aeTheoremLateN", "903")
@@ -389,18 +404,26 @@ def generate_numbers(
     add("aeHeldoutAcaPlusMsgs", get_v5("aca_plus", "total_messages", 0))
 
     # v5 Contrasts
-    h1_v5 = v5_contrasts.get("H1_aca_plus_vs_aca_welfare", {})
-    h2_v5 = v5_contrasts.get("H2_aca_plus_vs_aca_completion", {})
-    h4_c_v5 = v5_contrasts.get("H4_margin_vs_no_margin_conflicts", {})
-    h4_p_v5 = v5_contrasts.get("H4_margin_preservation_cost", {})
+    if "H1_aca_plus_vs_aca_welfare" not in v5_contrasts:
+        raise KeyError("Missing required v5 contrast H1_aca_plus_vs_aca_welfare")
+    h1_v5 = v5_contrasts["H1_aca_plus_vs_aca_welfare"]
+    if "H2_aca_plus_vs_aca_completion" not in v5_contrasts:
+        raise KeyError("Missing required v5 contrast H2_aca_plus_vs_aca_completion")
+    h2_v5 = v5_contrasts["H2_aca_plus_vs_aca_completion"]
+    if "H4_margin_vs_no_margin_conflicts" not in v5_contrasts:
+        raise KeyError("Missing required v5 contrast H4_margin_vs_no_margin_conflicts")
+    h4_c_v5 = v5_contrasts["H4_margin_vs_no_margin_conflicts"]
+    if "H4_margin_preservation_cost" not in v5_contrasts:
+        raise KeyError("Missing required v5 contrast H4_margin_preservation_cost")
+    h4_p_v5 = v5_contrasts["H4_margin_preservation_cost"]
 
-    add("aeHeldoutDiffAcaPlusAca", f"{h2_v5.get('mean_diff', 0.044):+.2f}")
-    add("aeHeldoutHolmPvalParity", format_pval(h2_v5.get("cluster_p_adjusted", 1.0)))
-    add("aeHeldoutConflictReduction", f"{abs(h4_c_v5.get('mean_diff', -10.269)):.1f}")
+    add("aeHeldoutDiffAcaPlusAca", f"{h2_v5['mean_diff']:+.2f}")
+    add("aeHeldoutHolmPvalParity", format_pval(h2_v5["cluster_p_adjusted"]))
+    add("aeHeldoutConflictReduction", f"{abs(h4_c_v5['mean_diff']):.1f}")
     add("aeHeldoutConflictReductionPct", "20.6")
-    add("aePvalHeldoutNoMargin", format_pval(h4_c_v5.get("cluster_p_adjusted", 3.98e-5)))
-    add("aeHeldoutDiffNoMargin", f"{abs(h4_p_v5.get('mean_diff', -1.081)):.2f}")
-    add("aePvalHeldoutNoMarginDiff", format_pval(h4_p_v5.get("cell_p_raw", 0.0082)))
+    add("aePvalHeldoutNoMargin", format_pval(h4_c_v5["cluster_p_adjusted"]))
+    add("aeHeldoutDiffNoMargin", f"{abs(h4_p_v5['mean_diff']):.2f}")
+    add("aePvalHeldoutNoMarginDiff", format_pval(h4_p_v5["cell_p_raw"]))
     add("aeHeldoutSsiDiff", "+12.0")
     add("aePvalHeldoutSsi", "< 0.001")
     add("aeHeldoutPruneThreshold", "0.06")
