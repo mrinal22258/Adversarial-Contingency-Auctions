@@ -289,9 +289,9 @@ def run_single_trial(
         os.makedirs(os.path.dirname(runs_jsonl), exist_ok=True)
         jsonl_record = dict(row)
         jsonl_record["git_commit"] = git_commit
-        jsonl_record["timestamp"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(t_start))
-        with open(runs_jsonl, "a", encoding="utf-8") as f:
-            f.write(json.dumps(jsonl_record) + "\n")
+        from acalib.data.logger import AtomicJsonlWriter
+        writer = AtomicJsonlWriter(runs_jsonl)
+        writer.append(jsonl_record)
 
     return row
 
