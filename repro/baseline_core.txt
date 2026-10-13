@@ -1,0 +1,66 @@
+﻿EXIT_CODE: 2
+============================= test session starts =============================
+platform win32 -- Python 3.12.7, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\krmri\Downloads\Adversarial-Contingency-Auctions-main\Adversarial-Contingency-Auctions-main\venv_core\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\krmri\Downloads\Adversarial-Contingency-Auctions-main\Adversarial-Contingency-Auctions-main
+configfile: pyproject.toml
+collecting ... collected 95 items / 4 errors / 1 skipped
+
+=================================== ERRORS ====================================
+_______________ ERROR collecting experiments/sitl/test_pilot.py _______________
+ImportError while importing test module 'C:\Users\krmri\Downloads\Adversarial-Contingency-Auctions-main\Adversarial-Contingency-Auctions-main\experiments\sitl\test_pilot.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+..\..\..\anaconda3\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+experiments\sitl\test_pilot.py:5: in <module>
+    from experiments.sitl.world import PhysicsWorld
+experiments\sitl\world.py:21: in <module>
+    import pybullet as p
+E   ModuleNotFoundError: No module named 'pybullet'
+_____________________ ERROR collecting tests/test_demo.py _____________________
+ImportError while importing test module 'C:\Users\krmri\Downloads\Adversarial-Contingency-Auctions-main\Adversarial-Contingency-Auctions-main\tests\test_demo.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+..\..\..\anaconda3\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_demo.py:22: in <module>
+    from app import run_simulation_wrapper, plot_simulation_state, get_metrics_table
+app.py:14: in <module>
+    from acalib.demo.ui.layout import build_app, create_app
+acalib\demo\ui\__init__.py:5: in <module>
+    from acalib.demo.ui.layout import build_app, create_app
+acalib\demo\ui\layout.py:6: in <module>
+    import gradio as gr
+E   ModuleNotFoundError: No module named 'gradio'
+________________ ERROR collecting tests/test_foresight_opt.py _________________
+ImportError while importing test module 'C:\Users\krmri\Downloads\Adversarial-Contingency-Auctions-main\Adversarial-Contingency-Auctions-main\tests\test_foresight_opt.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+..\..\..\anaconda3\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_foresight_opt.py:8: in <module>
+    from acalib.alloc.foresight_opt import ForesightOptAllocator
+acalib\alloc\foresight_opt.py:10: in <module>
+    from ortools.sat.python import cp_model
+E   ModuleNotFoundError: No module named 'ortools'
+________________ ERROR collecting tools/test_ui_playwright.py _________________
+ImportError while importing test module 'C:\Users\krmri\Downloads\Adversarial-Contingency-Auctions-main\Adversarial-Contingency-Auctions-main\tools\test_ui_playwright.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+..\..\..\anaconda3\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tools\test_ui_playwright.py:10: in <module>
+    from playwright.sync_api import sync_playwright
+E   ModuleNotFoundError: No module named 'playwright'
+=========================== short test summary info ===========================
+ERROR experiments/sitl/test_pilot.py
+ERROR tests/test_demo.py
+ERROR tests/test_foresight_opt.py
+ERROR tools/test_ui_playwright.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 4 errors during collection !!!!!!!!!!!!!!!!!!!
+======================== 1 skipped, 4 errors in 9.81s =========================
