@@ -75,6 +75,113 @@ class StochasticAdversary(Adversary):
         return {e: self.p0 for e in risky_edges}
 
 
+def compute_fleet_edge_robot_counts(
+    graph: nx.Graph,
+    edges: Any,
+    fleet_states: Dict[int, Any],
+) -> Dict[Tuple[Any, Any], float]:
+    """
+    Standardized Hazard Event/State Contract (Protocol v6).
+    Computes robot proximity count for each canonical edge:
+    - Actively traversing (curr, nxt) matching edge: +1.0
+    - Stationed at endpoint node curr incident to edge: +0.5
+    """
+    counts = {canonical_edge(u, v): 0.0 for u, v in edges}
+    for _, state in fleet_states.items():
+        curr = state.get("current_node")
+        nxt = state.get("next_node")
+        if curr is not None and nxt is not None:
+            e_trav = canonical_edge(curr, nxt)
+            if e_trav in counts:
+                counts[e_trav] += 1.0
+        elif curr is not None and graph.has_node(curr):
+            for nbr in graph.neighbors(curr):
+                e_inc = canonical_edge(curr, nbr)
+                if e_inc in counts:
+                    counts[e_inc] += 0.5
+    return counts
+
+
+def compute_edge_robot_count(
+    graph: nx.Graph,
+    edge: Tuple[Any, Any],
+    fleet_states: Dict[int, Any],
+) -> float:
+    """Compute robot proximity count for a single canonical edge."""
+    c_e = canonical_edge(edge[0], edge[1])
+    return compute_fleet_edge_robot_counts(graph, [c_e], fleet_states).get(c_e, 0.0)
+
+
+def compute_interdiction_cut(
+    graph: nx.Graph,
+    risky_edges: Set[Tuple[Any, Any]],
+    fleet_states: Dict[int, Any],
+    budget_k: int = 4,
+) -> Set[Tuple[Any, Any]]:
+    """
+    Standardized Hazard Event/State Contract (Protocol v6).
+    Greedy approximation of max-delay network interdiction under budget k.
+    Evaluated identically by BudgetedInterdictionAdversary and planning estimators.
+    """
+    od_pairs = []
+    for _, state in fleet_states.items():
+        curr = state.get("current_node")
+        target = state.get("target_node")
+        if curr is not None and target is not None and curr != target and nx.has_path(graph, curr, target):
+            od_pairs.append((curr, target))
+
+    if not od_pairs:
+        edge_bc = nx.edge_betweenness_centrality(graph, weight="weight")
+        sorted_risky = sorted(
+            risky_edges,
+            key=lambda e: edge_bc.get(e, edge_bc.get((e[1], e[0]), 0.0)),
+            reverse=True,
+        )
+        return set(sorted_risky[:budget_k])
+
+    def baseline_cost(g_sub: nx.Graph) -> float:
+        tot = 0.0
+        for u, v in od_pairs:
+            try:
+                tot += nx.shortest_path_length(g_sub, u, v, weight="weight")
+            except (nx.NetworkXNoPath, nx.NodeNotFound):
+                tot += 1000.0
+        return tot
+
+    base_val = baseline_cost(graph)
+    selected_cuts = set()
+    g_temp = graph.copy()
+
+    for _ in range(budget_k):
+        best_e = None
+        best_increase = -1.0
+        for e in risky_edges:
+            if e in selected_cuts:
+                continue
+            u, v = e
+            if not g_temp.has_edge(u, v):
+                continue
+            w = g_temp[u][v].get("weight", 1.0)
+            g_temp.remove_edge(u, v)
+
+            new_cost = baseline_cost(g_temp)
+            increase = new_cost - base_val
+            if increase > best_increase:
+                best_increase = increase
+                best_e = e
+
+            g_temp.add_edge(u, v, weight=w)
+
+        if best_e is not None and best_increase > 0:
+            selected_cuts.add(best_e)
+            if g_temp.has_edge(best_e[0], best_e[1]):
+                g_temp.remove_edge(best_e[0], best_e[1])
+        else:
+            break
+
+    return selected_cuts
+
+
 class ReactiveAdversary(Adversary):
     """
     theta_2: Reactive adversary targeting edges with active robot traffic or proximity.
@@ -102,24 +209,9 @@ class ReactiveAdversary(Adversary):
         step: int,
     ) -> Dict[Tuple[Any, Any], float]:
         hazards = {}
-        # Count robot proximity for each edge
-        edge_counts = {e: 0 for e in risky_edges}
-        for _, state in fleet_states.items():
-            curr = state.get("current_node")
-            nxt = state.get("next_node")
-            if curr is not None and nxt is not None:
-                e_trav = canonical_edge(curr, nxt)
-                if e_trav in edge_counts:
-                    edge_counts[e_trav] += 1
-            elif curr is not None and graph.has_node(curr):
-                # Count incident edges
-                for nbr in graph.neighbors(curr):
-                    e_inc = canonical_edge(curr, nbr)
-                    if e_inc in edge_counts:
-                        edge_counts[e_inc] += 0.5
-
+        edge_counts = compute_fleet_edge_robot_counts(graph, risky_edges, fleet_states)
         for e in risky_edges:
-            count = edge_counts[e]
+            count = edge_counts.get(e, 0.0)
             h = min(1.0, self.p0 + self.alpha * count)
             hazards[e] = float(h)
         return hazards
@@ -153,67 +245,7 @@ class BudgetedInterdictionAdversary(Adversary):
         fleet_states: Dict[int, Any],
     ) -> Set[Tuple[Any, Any]]:
         """Greedy approximation of max-delay network interdiction under budget k."""
-        # Find active origin-destination pairs for the fleet
-        od_pairs = []
-        for _, state in fleet_states.items():
-            curr = state.get("current_node")
-            target = state.get("target_node")
-            if curr is not None and target is not None and curr != target and nx.has_path(graph, curr, target):
-                od_pairs.append((curr, target))
-
-        if not od_pairs:
-            # Fallback: pick top betweenness centrality edges among risky edges
-            edge_bc = nx.edge_betweenness_centrality(graph, weight="weight")
-            sorted_risky = sorted(
-                risky_edges,
-                key=lambda e: edge_bc.get(e, edge_bc.get((e[1], e[0]), 0.0)),
-                reverse=True,
-            )
-            return set(sorted_risky[: self.budget_k])
-
-        # Baseline total shortest path cost
-        def baseline_cost(g_sub: nx.Graph) -> float:
-            tot = 0.0
-            for u, v in od_pairs:
-                try:
-                    tot += nx.shortest_path_length(g_sub, u, v, weight="weight")
-                except (nx.NetworkXNoPath, nx.NodeNotFound):
-                    tot += 1000.0  # high penalty for disconnected
-            return tot
-
-        base_val = baseline_cost(graph)
-        selected_cuts = set()
-        g_temp = graph.copy()
-
-        # Greedy selection of edges up to budget k
-        for _ in range(self.budget_k):
-            best_e = None
-            best_increase = -1.0
-            for e in risky_edges:
-                if e in selected_cuts:
-                    continue
-                u, v = e
-                if not g_temp.has_edge(u, v):
-                    continue
-                w = g_temp[u][v].get("weight", 1.0)
-                g_temp.remove_edge(u, v)
-
-                new_cost = baseline_cost(g_temp)
-                increase = new_cost - base_val
-                if increase > best_increase:
-                    best_increase = increase
-                    best_e = e
-
-                g_temp.add_edge(u, v, weight=w)
-
-            if best_e is not None and best_increase > 0:
-                selected_cuts.add(best_e)
-                if g_temp.has_edge(best_e[0], best_e[1]):
-                    g_temp.remove_edge(best_e[0], best_e[1])
-            else:
-                break
-
-        return selected_cuts
+        return compute_interdiction_cut(graph, risky_edges, fleet_states, budget_k=self.budget_k)
 
     def get_onset_hazards(
         self,

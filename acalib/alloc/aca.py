@@ -61,12 +61,26 @@ class ACAAllocator(CBBAAllocator):
         self.logged_tv_observations: List[Tuple[float, float]] = []
         self.per_claim_logs: List[Dict[str, Any]] = []
 
-    def _get_peer_edge_marginals(self, robot_id: int, peer_id: int) -> Dict[Tuple[Any, Any], float]:
+    def _get_peer_edge_marginals(
+        self,
+        robot_id: int,
+        peer_id: int,
+        fleet_states: Optional[Dict[int, Any]] = None,
+    ) -> Dict[Tuple[Any, Any], float]:
         """Compute edge blockage marginals under peer s's ToM belief as estimated by robot r."""
         robot = self.robots[robot_id]
+        if fleet_states is None:
+            fleet_states = {r_id: r.get_state_summary() for r_id, r in self.robots.items()}
+
         peer_belief_vec = robot.tom_tracker.peer_beliefs.get(peer_id)
         if peer_belief_vec is None:
-            return robot.get_edge_marginals()
+            return robot.get_edge_marginals(fleet_states=fleet_states)
+
+        from ..env.adversaries import compute_fleet_edge_robot_counts, compute_interdiction_cut
+        edges = list(self.graph.edges())
+        edge_counts = compute_fleet_edge_robot_counts(self.graph, edges, fleet_states)
+        risky_set = set(robot.risky_edges) if robot.risky_edges is not None else set(canonical_edge(u, v) for u, v in edges)
+        targeted_cuts = compute_interdiction_cut(self.graph, risky_set, fleet_states)
 
         marginals = {}
         for u, v in self.graph.edges():
@@ -74,9 +88,16 @@ class ACAAllocator(CBBAAllocator):
             if robot.risky_edges is not None and c_e not in robot.risky_edges:
                 marginals[c_e] = 0.0
                 continue
+            erc = edge_counts.get(c_e, 0.0)
+            is_tgt = c_e in targeted_cuts
             pi_e = 0.0
             for i, t in enumerate(robot.type_filter.types):
-                h = robot.type_filter.get_hazard_under_type(t, c_e)
+                h = robot.type_filter.get_hazard_under_type(
+                    t,
+                    c_e,
+                    edge_robot_count=erc,
+                    is_targeted_by_interdiction=is_tgt,
+                )
                 denom = max(1e-5, h + robot.type_filter.clearance_rate)
                 pi_e += float(peer_belief_vec[i]) * (h / denom)
             marginals[c_e] = float(np.clip(pi_e, 0.01, 0.99))
@@ -102,12 +123,21 @@ class ACAAllocator(CBBAAllocator):
             return float("inf")
         return recourse_plan.expected_cost
 
-    def _compute_lipschitz_L_j(self, task: Task, robot_id: int, recourse_plan: Optional[RecoursePlan] = None) -> float:
+    def _compute_lipschitz_L_j(
+        self,
+        task: Task,
+        robot_id: int,
+        recourse_plan: Optional[RecoursePlan] = None,
+        fleet_states: Optional[Dict[int, Any]] = None,
+    ) -> float:
         """
         Proposition 2 Analytical Lipschitz Upper Bound L_j on the active recourse policy.
         """
         robot = self.robots[robot_id]
-        marginals = robot.get_edge_marginals()
+        if fleet_states is None:
+            fleet_states = {r_id: r.get_state_summary() for r_id, r in self.robots.items()}
+
+        marginals = robot.get_edge_marginals(fleet_states=fleet_states)
         if recourse_plan is None:
             recourse_plan = robot.planner.build_recourse_plan(
                 task_id=task.task_id,
@@ -140,10 +170,21 @@ class ACAAllocator(CBBAAllocator):
         if not all_active_risky:
             return 0.0
 
+        from ..env.adversaries import compute_fleet_edge_robot_counts, compute_interdiction_cut
+        edge_counts = compute_fleet_edge_robot_counts(self.graph, all_active_risky, fleet_states)
+        targeted_cuts = compute_interdiction_cut(self.graph, set(all_active_risky), fleet_states)
+
         hazards_by_type = {}
         for c_e in all_active_risky:
+            erc = edge_counts.get(c_e, 0.0)
+            is_tgt = c_e in targeted_cuts
             hazards_by_type[c_e] = [
-                robot.type_filter.get_hazard_under_type(t, c_e)
+                robot.type_filter.get_hazard_under_type(
+                    t,
+                    c_e,
+                    edge_robot_count=erc,
+                    is_targeted_by_interdiction=is_tgt,
+                )
                 for t in robot.type_filter.types
             ]
 
@@ -168,7 +209,8 @@ class ACAAllocator(CBBAAllocator):
         """
         robot = self.robots[robot_id]
         bundle = list(robot.bundle)
-        edge_marginals = robot.get_edge_marginals()
+        fleet_states = {r_id: r.get_state_summary() for r_id, r in self.robots.items()}
+        edge_marginals = robot.get_edge_marginals(fleet_states=fleet_states)
         round_safe = 0
         round_deferred = 0
         eta_eff = robot.tom_tracker.get_effective_eta(current_step)
@@ -237,14 +279,18 @@ class ACAAllocator(CBBAAllocator):
                             continue
                         pc_key = (peer_id, tid)
                         if pc_key not in peer_cost_cache:
-                            peer_marginals = self._get_peer_edge_marginals(robot_id, peer_id)
+                            peer_marginals = self._get_peer_edge_marginals(
+                                robot_id, peer_id, fleet_states=fleet_states
+                            )
                             peer_cost_cache[pc_key] = self._estimate_peer_cost(
                                 peer_id, task, robot_positions, peer_marginals
                             )
                         peer_costs.append(peer_cost_cache[pc_key])
 
                     min_peer_cost = min(peer_costs) if peer_costs else float("inf")
-                    L_j = self._compute_lipschitz_L_j(task, robot_id, recourse_plan=recourse_plan)
+                    L_j = self._compute_lipschitz_L_j(
+                        task, robot_id, recourse_plan=recourse_plan, fleet_states=fleet_states
+                    )
 
                     if self.fixed_margin is not None:
                         margin = float(self.fixed_margin)

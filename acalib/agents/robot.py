@@ -145,11 +145,10 @@ class RobotAgent:
                 curr_state = EdgeState.BLOCKED if is_blocked else EdgeState.OPEN
                 prior_state = self.known_edge_states.get(c_e)
 
-                # Count robots in proximity for reactive model likelihood
-                edge_robot_count = sum(
-                    1 for _, st in fleet_states.items()
-                    if st.get("current_node") in (u, v) or st.get("next_node") in (u, v)
-                )
+                from ..env.adversaries import compute_edge_robot_count, compute_interdiction_cut
+                edge_robot_count = compute_edge_robot_count(self.graph, c_e, fleet_states)
+                all_known = set(self.known_edge_states.keys()) or set(canonical_edge(x, y) for x, y in self.graph.edges())
+                is_targeted = c_e in compute_interdiction_cut(self.graph, all_known, fleet_states)
 
                 self.type_filter.update_observation(
                     step=step,
@@ -157,42 +156,42 @@ class RobotAgent:
                     observed_state=curr_state,
                     prior_state=prior_state,
                     edge_robot_count=edge_robot_count,
+                    is_targeted_by_interdiction=is_targeted,
                 )
                 self.known_edge_states[c_e] = curr_state
                 self._cached_marginals = None
 
     def get_edge_marginals(self, fleet_states: Optional[Dict[int, Any]] = None) -> Dict[Tuple[Any, Any], float]:
-        """Compute all edge blockage marginals under current Bayesian belief."""
-        if fleet_states is None and getattr(self, "_cached_marginals", None) is not None:
-            return self._cached_marginals
+        """Compute all edge blockage marginals under current Bayesian belief with explicit fleet state."""
+        if fleet_states is None:
+            fleet_states = {self.robot_id: self.get_state_summary()}
 
+        from ..env.adversaries import compute_fleet_edge_robot_counts, compute_interdiction_cut
         edges = self.graph.graph.get("_canonical_edges")
         if edges is None:
-            edges = [
-                ((u, v) if (type(u) is int and type(v) is int and u <= v) else ((v, u) if (type(u) is int and type(v) is int) else canonical_edge(u, v)))
-                for u, v in self.graph.edges()
-            ]
+            edges = [canonical_edge(u, v) for u, v in self.graph.edges()]
             self.graph.graph["_canonical_edges"] = edges
+
+        edge_counts = compute_fleet_edge_robot_counts(self.graph, edges, fleet_states)
+        risky_set = set(self.risky_edges) if self.risky_edges is not None else set(edges)
+        targeted_cuts = compute_interdiction_cut(self.graph, risky_set, fleet_states)
 
         marginals = {}
         for c_e in edges:
             if self.risky_edges is not None and c_e not in self.risky_edges:
                 marginals[c_e] = 0.0
                 continue
-            edge_robot_count = 0
-            if fleet_states:
-                u, v = c_e
-                edge_robot_count = sum(
-                    1 for _, st in fleet_states.items()
-                    if st.get("current_node") in (u, v) or st.get("next_node") in (u, v)
-                )
-            marginals[c_e] = self.type_filter.compute_edge_marginal(c_e, edge_robot_count=edge_robot_count)
+            count = edge_counts.get(c_e, 0.0)
+            is_tgt = c_e in targeted_cuts
+            marginals[c_e] = self.type_filter.compute_edge_marginal(
+                c_e,
+                edge_robot_count=count,
+                is_targeted_by_interdiction=is_tgt,
+            )
 
-        if fleet_states is None:
-            self._cached_marginals = marginals
         return marginals
 
-    def plan_task_bundle(self, tasks_dict: Dict[int, Any]) -> None:
+    def plan_task_bundle(self, tasks_dict: Dict[int, Any], fleet_states: Optional[Dict[int, Any]] = None) -> None:
         """
         Re-plan sequential paths for all tasks currently in bundle.
         Preserves bundle ordering and constructs contingency recourse plans.
@@ -207,7 +206,9 @@ class RobotAgent:
             self.assigned_plans.clear()
             return
 
-        marginals = self.get_edge_marginals()
+        if fleet_states is None:
+            fleet_states = {self.robot_id: self.get_state_summary()}
+        marginals = self.get_edge_marginals(fleet_states=fleet_states)
         curr_loc = self.current_node
         new_plans = {}
 

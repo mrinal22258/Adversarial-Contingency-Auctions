@@ -1,0 +1,11 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.7, pytest-9.1.1, pluggy-1.5.0
+rootdir: C:\Users\krmri\Downloads\Adversarial-Contingency-Auctions-main\Adversarial-Contingency-Auctions-main
+configfile: pyproject.toml
+plugins: anyio-4.6.2, cov-7.1.0, typeguard-4.3.0
+collected 9 items
+
+tests\test_hazard_interface.py ...
+tests\test_bayes.py ......
+
+============================== 9 passed in 1.22s ==============================

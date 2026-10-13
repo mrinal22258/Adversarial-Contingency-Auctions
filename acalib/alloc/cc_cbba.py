@@ -42,7 +42,8 @@ class ChanceConstrainedCBBAAllocator(CBBAAllocator):
         except (nx.NetworkXNoPath, nx.NodeNotFound):
             return 1.0
 
-        edge_marginals = robot.get_edge_marginals()
+        fleet_states = {r_id: r.get_state_summary() for r_id, r in self.robots.items()}
+        edge_marginals = robot.get_edge_marginals(fleet_states=fleet_states)
         prob_all_clear = 1.0
         for i in range(len(path) - 1):
             c_e = canonical_edge(path[i], path[i + 1])

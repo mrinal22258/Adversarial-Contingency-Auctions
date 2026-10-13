@@ -39,8 +39,8 @@ class PessimisticRobustAllocator(CBBAAllocator):
         bundle: List[int],
         tasks: Dict[int, Task],
     ) -> Tuple[float, int]:
-        """Compute path costs treating all risky edges with heavy penalty."""
-        risky_edges = set(robot.get_edge_marginals().keys())
+        fleet_states = {r_id: r.get_state_summary() for r_id, r in self.robots.items()}
+        risky_edges = set(robot.get_edge_marginals(fleet_states=fleet_states).keys())
 
         def robust_weight(u: Any, v: Any, d: Dict[str, Any]) -> float:
             c_e = canonical_edge(u, v)
