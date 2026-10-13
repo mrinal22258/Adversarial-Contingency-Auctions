@@ -85,7 +85,9 @@ def run_pipeline() -> bool:
     provenance["steps"]["step3_stats"] = "PASS"
 
     # Step 4: Tables, Numbers Macros & README Results
-    log_step("Step 4: Generating Tables, Numbers Macros, and README Synchronization")
+    log_step("Step 4: Generating Result Model, Tables, Numbers Macros, and README Synchronization")
+    import tools.build_result_model as brm
+    brm.main()
     import experiments.make_tables as mt
     mt.main()
     provenance["steps"]["step4_tables"] = "PASS"
@@ -142,12 +144,16 @@ def run_pipeline() -> bool:
     # Hash Output Artifacts
     artifacts_to_hash = [
         "results/raw_results.csv",
+        "results/confirmatory/heldout_v5_results.csv",
+        "results/result_model_v1.json",
         "results/numbers.tex",
         "results/table_main_results.tex",
         "results/table_stratified.tex",
         "results/table_sitl.tex",
+        "results/table_heldout_v5.tex",
         "results/stats/hypothesis_results.csv",
         "audit/CLAIM_LEDGER.csv",
+        "audit/CLAIM_LEDGER_V2.csv",
         "paper.pdf",
     ]
     for rel_path in artifacts_to_hash:

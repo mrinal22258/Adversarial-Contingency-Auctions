@@ -21,6 +21,19 @@ except ImportError:
     fcntl = None
 
 
+import threading
+
+_THREAD_LOCKS: Dict[str, threading.Lock] = {}
+_META_LOCK = threading.Lock()
+
+
+def _get_thread_lock(filepath: str) -> threading.Lock:
+    with _META_LOCK:
+        if filepath not in _THREAD_LOCKS:
+            _THREAD_LOCKS[filepath] = threading.Lock()
+        return _THREAD_LOCKS[filepath]
+
+
 class AtomicJsonlWriter:
     """
     Thread-safe and process-safe atomic JSONL appender with file locking and fsync.
@@ -30,6 +43,7 @@ class AtomicJsonlWriter:
     def __init__(self, filepath: str, fsync: bool = True):
         self.filepath = os.path.abspath(filepath)
         self.fsync = fsync
+        self._tlock = _get_thread_lock(self.filepath)
         os.makedirs(os.path.dirname(self.filepath), exist_ok=True)
 
     def append(self, record: Dict[str, Any]) -> str:
@@ -40,26 +54,33 @@ class AtomicJsonlWriter:
         line_bytes = (json.dumps(record, sort_keys=True) + "\n").encode("utf-8")
         rec_hash = hashlib.sha256(line_bytes.strip()).hexdigest()
 
-        # Open in append mode with explicit file locking
-        with open(self.filepath, "ab") as f:
-            self._lock(f)
-            try:
-                f.write(line_bytes)
-                f.flush()
-                if self.fsync:
-                    os.fsync(f.fileno())
-            finally:
-                self._unlock(f)
+        with self._tlock:
+            # Open in append mode with explicit file locking
+            with open(self.filepath, "a+b") as f:
+                self._lock(f)
+                try:
+                    f.seek(0, os.SEEK_END)
+                    f.write(line_bytes)
+                    f.flush()
+                    if self.fsync:
+                        os.fsync(f.fileno())
+                finally:
+                    self._unlock(f)
 
         return rec_hash
 
     def _lock(self, f) -> None:
         if msvcrt:
-            # Lock first byte on Windows
-            try:
-                msvcrt.locking(f.fileno(), msvcrt.LK_LOCK, 1)
-            except Exception:
-                pass
+            for attempt in range(100):
+                try:
+                    f.seek(0)
+                    msvcrt.locking(f.fileno(), msvcrt.LK_NBLCK, 1)
+                    return
+                except (OSError, IOError):
+                    time.sleep(0.002 * (1 + (attempt % 5)))
+            # Fallback to blocking lock
+            f.seek(0)
+            msvcrt.locking(f.fileno(), msvcrt.LK_LOCK, 1)
         elif fcntl:
             try:
                 fcntl.flock(f.fileno(), fcntl.LOCK_EX)
@@ -69,6 +90,7 @@ class AtomicJsonlWriter:
     def _unlock(self, f) -> None:
         if msvcrt:
             try:
+                f.seek(0)
                 msvcrt.locking(f.fileno(), msvcrt.LK_UNLCK, 1)
             except Exception:
                 pass
