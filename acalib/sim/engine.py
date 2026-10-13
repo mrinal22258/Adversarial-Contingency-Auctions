@@ -212,7 +212,7 @@ class SimulationEngine:
                 bundle_limit=kwargs.get("bundle_limit", 4),
             )
         elif alloc_type in ("aca_plus", "aca_pruned"):
-            return ACAAllocator(
+            alloc = ACAAllocator(
                 graph=self.graph,
                 robots=self.robots,
                 comm_net=self.comm_net,
@@ -220,10 +220,13 @@ class SimulationEngine:
                 delta_map=kwargs.get("delta_map", 0.0),
                 enable_margin=True,
                 adaptive_margin=True,
-                prune_threshold=kwargs.get("prune_threshold", 0.03),
+                prune_threshold=kwargs.get("prune_threshold", 0.20),
                 margin_kappa=kwargs.get("margin_kappa", 1.0),
                 bundle_limit=kwargs.get("bundle_limit", 4),
             )
+            for r in self.robots.values():
+                r.prune_threshold = alloc.prune_threshold
+            return alloc
         elif alloc_type in ("aca", "aca_cbba"):
             return ACAAllocator(
                 graph=self.graph,

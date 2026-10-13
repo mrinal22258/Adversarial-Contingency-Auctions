@@ -115,18 +115,17 @@ class ACAAllocator(CBBAAllocator):
                 target_node=task.node,
                 edge_marginals=marginals,
             )
+            if recourse_plan is not None and self.prune_threshold > 0.0 and recourse_plan.tree is not None:
+                recourse_plan = prune_recourse_plan(
+                    recourse_plan,
+                    self.prune_threshold,
+                    robot.planner,
+                    marginals,
+                )
         if recourse_plan is None or not recourse_plan.risky_edges:
             return 0.0
 
-        # If pruning is enabled, prune the actual recourse policy tree
         active_plan = recourse_plan
-        if self.prune_threshold > 0.0 and active_plan.tree is not None:
-            active_plan = prune_recourse_plan(
-                active_plan,
-                self.prune_threshold,
-                robot.planner,
-                marginals,
-            )
 
         # Collect all active risky edges from the active policy tree
         all_active_risky: List[Tuple[Any, Any]] = []
@@ -207,12 +206,15 @@ class ACAAllocator(CBBAAllocator):
 
                 # Expected recourse cost for robot_id
                 if tid not in robot_plan_cache:
-                    robot_plan_cache[tid] = robot.planner.build_recourse_plan(
+                    p = robot.planner.build_recourse_plan(
                         task_id=tid,
                         start_node=robot.current_node,
                         target_node=task.node,
                         edge_marginals=edge_marginals,
                     )
+                    if p is not None and self.prune_threshold > 0.0 and p.tree is not None:
+                        p = prune_recourse_plan(p, self.prune_threshold, robot.planner, edge_marginals)
+                    robot_plan_cache[tid] = p
                 recourse_plan = robot_plan_cache[tid]
                 if recourse_plan is None:
                     continue
@@ -277,6 +279,8 @@ class ACAAllocator(CBBAAllocator):
                 bundle.insert(best_insert_pos, best_task_id)
                 self.y[robot_id][best_task_id] = best_val
                 self.z[robot_id][best_task_id] = robot_id
+                if best_task_id in robot_plan_cache and robot_plan_cache[best_task_id] is not None:
+                    robot.assigned_plans[best_task_id] = robot_plan_cache[best_task_id]
             else:
                 break
 

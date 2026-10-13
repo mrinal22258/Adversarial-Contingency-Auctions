@@ -222,6 +222,9 @@ class RobotAgent:
                 edge_marginals=marginals,
             )
             if plan is not None:
+                if getattr(self, "prune_threshold", 0.0) > 0.0 and plan.tree is not None:
+                    from .contingency import prune_recourse_plan
+                    plan = prune_recourse_plan(plan, self.prune_threshold, self.planner, marginals)
                 new_plans[tid] = plan
                 curr_loc = task_node
             else:
@@ -235,11 +238,13 @@ class RobotAgent:
             self.active_task_id = new_active
             if new_active is not None:
                 self.active_path = list(self.assigned_plans[new_active].primary_path)
+                self.tree_cursor = self.assigned_plans[new_active].tree
                 self.path_index = 0
                 self.edge_progress = 0.0
                 self.status = "TRANSIT"
             else:
                 self.active_path = [self.current_node]
+                self.tree_cursor = None
                 self.path_index = 0
                 self.edge_progress = 0.0
                 self.status = "IDLE"
