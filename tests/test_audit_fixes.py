@@ -152,8 +152,8 @@ def test_theorem_3_end_to_end_conflict_freedom():
     # Robot 0 has task 0 right next to it (node 1)
     # Robot 1 has task 1 right next to it (node 18)
     tasks = {
-        0: Task(task_id=0, node=1, reward=50.0),
-        1: Task(task_id=1, node=18, reward=50.0),
+        0: Task(task_id=0, node=1, reward=100.0),
+        1: Task(task_id=1, node=18, reward=100.0),
     }
     positions = {0: robots[0].pos, 1: robots[1].pos}
 

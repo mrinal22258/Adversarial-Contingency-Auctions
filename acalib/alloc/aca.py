@@ -11,7 +11,12 @@ import networkx as nx
 from .base import Task
 from .cbba import CBBAAllocator
 from ..agents.robot import RobotAgent
-from ..agents.contingency import RecoursePlan, compute_lipschitz_bound
+from ..agents.contingency import (
+    RecoursePlan,
+    compute_lipschitz_bound,
+    prune_recourse_plan,
+    _collect_tree_risky_edges,
+)
 from ..env.comm import CommunicationNetwork
 from ..env.adversaries import canonical_edge
 
@@ -99,42 +104,54 @@ class ACAAllocator(CBBAAllocator):
 
     def _compute_lipschitz_L_j(self, task: Task, robot_id: int, recourse_plan: Optional[RecoursePlan] = None) -> float:
         """
-        Proposition 2 Analytical Lipschitz Upper Bound L_j:
-        L_j = sum_{k=1}^K |branch_cost_k - primary_cost| * Delta_pi(e_k)
-        Derived mathematically from multivariable mean value theorem over precomputed recourse branches.
-        Returns 0.0 if there are no risky edges.
+        Proposition 2 Analytical Lipschitz Upper Bound L_j on the active recourse policy.
         """
         robot = self.robots[robot_id]
+        marginals = robot.get_edge_marginals()
         if recourse_plan is None:
             recourse_plan = robot.planner.build_recourse_plan(
                 task_id=task.task_id,
                 start_node=robot.current_node,
                 target_node=task.node,
-                edge_marginals=robot.get_edge_marginals(),
+                edge_marginals=marginals,
             )
         if recourse_plan is None or not recourse_plan.risky_edges:
             return 0.0
 
+        # If pruning is enabled, prune the actual recourse policy tree
+        active_plan = recourse_plan
+        if self.prune_threshold > 0.0 and active_plan.tree is not None:
+            active_plan = prune_recourse_plan(
+                active_plan,
+                self.prune_threshold,
+                robot.planner,
+                marginals,
+            )
+
+        # Collect all active risky edges from the active policy tree
+        all_active_risky: List[Tuple[Any, Any]] = []
+        if active_plan.tree is not None:
+            _collect_tree_risky_edges(active_plan.tree, all_active_risky)
+        else:
+            for e in active_plan.risky_edges:
+                c_e = canonical_edge(e[0], e[1])
+                if c_e not in all_active_risky:
+                    all_active_risky.append(c_e)
+
+        if not all_active_risky:
+            return 0.0
+
         hazards_by_type = {}
-        marginals = robot.get_edge_marginals()
-        active_risky = []
-        for e in recourse_plan.risky_edges:
-            c_e = canonical_edge(e[0], e[1])
-            if self.prune_threshold > 0.0 and marginals.get(c_e, 0.0) < self.prune_threshold:
-                continue
-            active_risky.append(e)
+        for c_e in all_active_risky:
             hazards_by_type[c_e] = [
                 robot.type_filter.get_hazard_under_type(t, c_e)
                 for t in robot.type_filter.types
             ]
 
-        if not active_risky:
-            return 0.0
-
         mu = robot.type_filter.clearance_rate
         return compute_lipschitz_bound(
             planner=robot.planner,
-            recourse_plan=recourse_plan,
+            recourse_plan=active_plan,
             hazards_by_type=hazards_by_type,
             clearance_rate=mu,
         )
