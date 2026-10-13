@@ -1,5 +1,10 @@
 # RESULTS_VERDICT.md: Empirical Verdict for Hypotheses H1-H8 (prereg-v4)
 
+**Evidence Tier Classification**:
+- **Tier 1 (Exploratory / Discovery Nominal Grid, $N = 750$ matched trials across 250 instances, seeds 1–250):** The hypotheses $H_1-H_8$ tabulated below represent the original exploratory nominal benchmark grid evaluated under `prereg-v4`.
+- **Tier 2 (Pilot Optimization, $N = 60$ instances, seeds 51–60):** Stage 4 pilot heuristic search (documented in `audit/STAGE4_CONFIRMATORY_REPORT.md`). *Audit finding: Pilot completion gains (+2.67%) did not replicate in the larger out-of-sample confirmation.*
+- **Tier 3 (Confirmatory Held-Out Grid, $N = 450$ instances, 3,600 trials, seeds 101–130):** Frozen Protocol v5 evaluation (documented in `results/table_heldout_v5.tex` and `results/result_model_v1.json`).
+
 **Strict Rule R5**: Every empirical claim in the paper maps directly to a verified hypothesis ID below.
 Generated directly from executed raw runs, matched independent instance-level tests, and directional decision rules.
 

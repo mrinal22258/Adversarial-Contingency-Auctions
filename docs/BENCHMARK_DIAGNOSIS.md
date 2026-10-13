@@ -71,21 +71,22 @@ Based on the confirmed root causes (H2 and H5), two principled improvements were
 - **Mechanism:** In addition to adaptive margin calibration, edges with marginal blockage probability $\pi(e) < 0.03$ are pruned from the contingency branch set.
 - **Behavior:** Tightens the analytical Lipschitz bound $L_j = \sum_{k=1}^K |\Delta c_k| \Delta \pi(e_k)$, preventing negligible risks from blocking decisive bundle commitments.
 
-### 3. Pre-Registered Held-Out Confirmatory Evaluation
-To ensure scientific integrity and eliminate any possibility of overfitting to historical seeds 1–50, a pre-registered confirmatory experiment was executed on **strictly disjoint held-out seeds 51–60** across real topologies (`road_osmnx` Boston road network, `warehouse_movingai` MovingAI benchmark warehouse, and synthetic `rgg`):
+### 3. Tier 2: Stage 4 Pilot Heuristic Evaluation ($N = 60$ Pilot Instances, Seeds 51–60)
+To explore candidate improvements following root-cause analysis, a pilot heuristic search was run on seeds 51–60 across real topologies (`road_osmnx` Boston road network, `warehouse_movingai` MovingAI benchmark warehouse, and synthetic `rgg`):
 
 - **Script:** `experiments/run_heldout_eval.py`
 - **Instances:** $N = 60$ independent matched instances (300 total trials across 5 methods).
 - **Execution Time:** $52.3$ seconds (174.2 ms/trial).
 - **Stored Data:** `results/confirmatory/heldout_results.csv`, `results/confirmatory/heldout_summary.csv`.
+- **CRITICAL AUDIT NOTE (Non-Replication in Protocol v5):** While ACA-Adaptive and ACA+ demonstrated initial positive gains in this $N=60$ pilot, these improvements **did NOT replicate out-of-sample** when evaluated in the full pre-registered Protocol v5 confirmatory grid ($N = 450$ instances, 3,600 trials, seeds 101–130; ACA+ $92.44\%$ vs ACA static $92.40\%$, difference $+0.04$ pp, Holm $p = 1.000$). Scientific integrity requires classifying these findings strictly as Tier 2 pilot results superseded by Tier 3 confirmatory evidence.
 
-#### Confirmatory Evaluation Results ($N = 60$ Matched Instances, Seeds 51–60)
+#### Pilot Evaluation Results ($N = 60$ Matched Pilot Instances, Seeds 51–60)
 
-| Comparison | Metric | Proposed Mean | Comparator Mean | Paired Difference | Cohen's $d_z$ | Wilcoxon $p$-value | Confirmatory Verdict |
+| Comparison | Metric | Proposed Mean | Comparator Mean | Paired Difference | Cohen's $d_z$ | Wilcoxon $p$-value | Pilot Verdict |
 |---|---|---|---|---|---|---|---|
-| **ACA-Adaptive vs ACA-v1** | Completion Rate (%) | **88.78%** | 86.11% | **+2.67%** | **+0.327** | **$p = 0.0076$** | **CONFIRMED ($p < 0.01$)** |
-| **ACA-Adaptive vs ACA-v1** | Net Fleet Welfare | **979.49** | 955.42 | **+24.07** | +0.200 | $p = 0.0968$ | Positive / Non-inferior |
-| **ACA+ vs ACA-v1** | Completion Rate (%) | **89.11%** | 86.11% | **+3.00%** | **+0.295** | **$p = 0.0249$** | **CONFIRMED ($p < 0.05$)** |
+| **ACA-Adaptive vs ACA-v1** | Completion Rate (%) | **88.78%** | 86.11% | **+2.67%** | **+0.327** | **$p = 0.0076$** | **PILOT ONLY (Did Not Replicate in v5)** |
+| **ACA-Adaptive vs ACA-v1** | Net Fleet Welfare | **979.49** | 955.42 | **+24.07** | +0.200 | $p = 0.0968$ | Pilot Positive / Non-inferior |
+| **ACA+ vs ACA-v1** | Completion Rate (%) | **89.11%** | 86.11% | **+3.00%** | **+0.295** | **$p = 0.0249$** | **PILOT ONLY (Did Not Replicate in v5)** |
 | **ACA+ vs CBBA+LR** | Completion Rate (%) | 89.11% | 90.78% | -1.67% | -0.075 | $p = 0.3438$ | Parity ($p > 0.05$) |
 | **ACA+ vs CBBA+LR** | Total Conflicts | **41.70** | 48.03 | **-6.33** | **-0.185** | $p = 0.3729$ | Conflict Reduction |
 | **ACA+ vs CBBA+LR** | Total Messages | **238.93** | 244.47 | **-5.53** | -0.044 | $p = 0.4072$ | Communication Savings |

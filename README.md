@@ -15,8 +15,9 @@ license: mit
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
-[![Tests: 145 Passing](https://img.shields.io/badge/tests-145%20passing-brightgreen.svg)]()
+[![Tests: Verified Core & Extras](https://img.shields.io/badge/tests-verified%20clean-brightgreen.svg)]()
 [![Simulation: Pure Software](https://img.shields.io/badge/simulation-pure%20software-informational.svg)]()
+[![Protocol: prereg--v6](https://img.shields.io/badge/protocol-prereg--v6-blueviolet.svg)]()
 
 ---
 
@@ -25,7 +26,7 @@ In decentralized multi-robot task allocation, strategic adversarial path blockag
 
 **Adversarial Contingency Auctions (ACA)** addresses these vulnerabilities through three mechanisms:
 1. **Expected-Recourse Valuation (Proposition 1):** Robots bid their expected recourse cost over a depth-$d$ contingency branching policy under a Bayesian posterior over adversary types.
-2. **Pinsker Belief-Divergence Claim Margin (Theorem 1):** Tasks are claimed safely via a closed-form margin $m_{r,j} = \Delta_j (\sqrt{\frac{1}{2} D'_{\text{KL}}} + \eta_{\text{eff}}) + \delta_{\text{map}}$ derived from Pinsker's inequality and total variation triangle bounds, guaranteeing conflict-free safe claims under bounded belief estimation error without exchanging belief vectors.
+2. **Pinsker Belief-Divergence Claim Margin (Theorem 1):** Tasks are claimed safely via a closed-form margin $m_{r,j} = \Delta_j (\sqrt{\frac{1}{2} D'_{\text{KL}}} + \eta_{\text{eff}}) + \delta_{\text{map}}$ derived from Pinsker's inequality and total variation triangle bounds, guaranteeing conflict-free safe claims under bounded belief estimation error without exchanging belief vectors (conditional on fixed policy tree and bounded peer estimation error).
 3. **Local Detour Execution (Section III-D & Proposition 3):** Blockage encounters activate local precomputed detours with zero communication messages, resorting to market re-auctions only upon recourse tree exhaustion.
 
 ---
@@ -38,21 +39,24 @@ To ensure clear evaluation across domains:
 - **Physical Collisions:** Measured in continuous PyBullet simulation (`p.getContactPoints > 0`), representing physical surface contact between robot chassis/wheels and static or dynamic physical barriers.
 - **Abstract Conflicts:** Measured in discrete task allocation rounds, representing combinatorial double-claim inconsistencies where two or more robots concurrently claim the identical discrete task bundle or node without consensus.
 
-### Synthetic Vision & ArUco Pose Tracking
-In the SITL synthetic-vision pipeline, overhead camera observations track ArUco markers atop simulated robot chassis. The 4x4 binary code (`DICT_4X4_50`) provides rotationally asymmetric patterns that eliminate 180-degree planar flip ambiguity. Marker top-edge image vectors map to the world frame via $(dx_{world}, dy_{world}) = (u_1 - u_0, -(v_1 - v_0))$, calculating continuous yaw headings $\psi = \mathrm{atan2}(dy_{world}, dx_{world})$ consistent with the camera projection.
+### Open-Loop Synthetic Vision Demonstration
+In the SITL synthetic-vision pipeline, overhead camera observations track ArUco markers atop simulated robot chassis. The 4x4 binary code (`DICT_4X4_50`) provides rotationally asymmetric patterns that eliminate 180-degree planar flip ambiguity. Marker top-edge image vectors map to the world frame via $(dx_{world}, dy_{world}) = (u_1 - u_0, -(v_1 - v_0))$, calculating continuous yaw headings $\psi = \mathrm{atan2}(dy_{world}, dx_{world})$ consistent with the camera projection. **State estimates are evaluated in open loop against simulated ground truth; poses are not fed into the task allocator or motion controllers, and no closed-loop physical validation is claimed.**
 
 ---
 
-## 🔬 What This Repository Shows (Key Scientific Findings)
+## 🔬 Three Demarcated Evidence Tiers & Key Scientific Findings
 
-This repository implements a rigorous empirical benchmark ($N = 13,800$ total trials: a balanced nominal core grid of 10,500 trials [$750$ matched trials/method across 250 independent instances], 400 targeted adversary evaluations, and 2,900 OFAT sensitivity sweep trials) and a pre-registered Protocol v5 confirmatory held-out evaluation ($N = 450$ instances, 3,600 trials, seeds 101–130) comparing ACA against literature baselines, level-execution variants (+LR), and clean ablations:
+All claims and metrics in this repository are partitioned into three explicitly labelled evidence tiers:
 
-1. **ACA vs. Standard CBBA:** Under dynamic corridor blockages, standard CBBA drops its entire bundle upon a single blockage. ACA leverages type-aware expected recourse cost valuation and zero-message local detour execution, achieving significantly higher completion with comparable messages (333 ± 22 vs. 312 ± 10) and 3.7x tick runtime (44.36 ± 2.29 ms vs. 11.89 ± 0.63 ms).
-2. **Mechanism Attribution:** Disabling local contingency recourse (ACA Depth-0) drops completion, confirming that local detour evaluation drives ACA's completion advantage.
-3. **Pinsker Safe Claim Behavior:** The Pinsker margin operates conservatively. Safe claims maintain conflict-freedom under bounded error as predicted by Theorem 1.
-4. **Honest Comparative Trade-offs:** 
-   - **CBBA-PR (Partial Release)** preserves unblocked routes, achieving higher net welfare.
-   - **CTP Replan** and the **Clairvoyant Greedy reference** achieve higher completion via continuous single-robot replanning, trading off decentralized bundle coordination.
+1. **Tier 1 (Exploratory / Discovery — Nominal Main Grid, $N = 750$ Matched Trials Across 250 Instances):** Initial benchmark exploration across 14 allocators on seeds 1–250.
+2. **Tier 2 (Pilot Heuristic Search — Stage 4 Pilot, $N = 60$ Instances, Seeds 51–60):** Pilot exploration for adaptive margin calibration and low-hazard pruning.
+3. **Tier 3 (Confirmatory Out-of-Sample — Protocol v5 Held-Out, $N = 450$ Instances, 3,600 Trials, Seeds 101–130):** Frozen pre-registered confirmatory evaluation on un-tuned instances.
+
+### Key Empirical Takeaways Across Tiers:
+- **Pinsker Margin Trade-Off Confirmed (Tier 3):** On the confirmatory held-out grid, the Pinsker margin reduces total task conflicts by 20.6% ($38.6$ vs. $49.9$, paired difference $-10.27$, $p_{\text{adj}} < 0.001$) relative to unregularized coordination (`no-margin`), with only a modest, non-significant completion difference ($-1.08$ pp, $p_{\text{adj}} = 0.091$).
+- **Stage 4 Pilot Gains Did Not Replicate (Tier 2 vs. Tier 3):** While ACA+ and ACA-Adaptive achieved nominal $+2.67\%$ completion gains in the $N=60$ pilot, they exhibited statistical completion parity with static ACA in the full $N=450$ confirmation ($92.44\%$ vs. $92.40\%$, $\Delta = +0.04$ pp, $p_{\text{adj}} = 0.505$).
+- **Baseline Strengths (Tier 1 & Tier 3):** When CBBA is equipped with local recourse execution (`CBBA+LR`), it achieves higher completion ($94.67\%$), higher net welfare ($958.9$), and lower conflicts ($25.48$) in Protocol v5. On the balanced nominal core, `CTP Replan` achieves higher raw completion ($96.4\%$ vs. $90.9\%$) via continuous global re-auctions, while ACA excels in decentralized communication conservation.
+- **Negative Result on Type Inference (Tier 1):** Online Bayesian adversary type inference shows statistical parity with a static uniform prior ($p = 0.515$), indicating that generic corridor detour structures saturate benefit before fine-grained type identification.
 
 All empirical data is generated automatically with zero hand-typed numbers:
 
