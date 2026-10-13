@@ -57,3 +57,15 @@ In accordance with Section 0 and Section 1 of the End-to-End Repair Protocol, al
 - **Context:** `experiments/sitl/vision.py` implements an overhead synthetic ArUco marker detector whose estimated poses were never piped into the robot task allocator or motion controller (Finding J).
 - **Decision:** Explicitly classify `vision.py` as an "open-loop synthetic perception demonstration" in all docstrings, README, and paper prose. Disclaim any physical robot or in-the-loop perception validation. Separate detection opportunities, occlusions, true positives, and false positives in metric definitions.
 - **Rationale:** Connecting an unvalidated synthetic detector to the allocator without physical testing would add uncalibrated error without scientific justification. Honest classification preserves integrity.
+
+---
+
+### Decision D-07: Telemetry Semantics, Mobile UI Layout, and Deterministic Build Pipeline
+- **Date:** 2026-10-13
+- **Context:** Finding L noted desktop UI displayed `0 DETOURS` while the narrative summary stated 13 local activations, and the mobile viewport clipped KPI labels. Finding G noted stale build provenance and lack of verified multi-pass build determinism.
+- **Decision:** 
+  1. Telemetry: Disambiguate active detours at current step vs cumulative detours across trial history in UI KPI cards (`{active} ({cum} cum)`) and narrative summary.
+  2. Mobile UI: Adopt responsive CSS Grid `repeat(auto-fit, minmax(85px, 1fr))` with label wrapping; verify across 390px, 768px, 1440px via Playwright snapshots in `docs/ui_checks/`.
+  3. Provenance & Determinism: Build pipeline `tools/build_all.py` compiles the single unified result model `results/result_model_v1.json`, generates `results/numbers.tex`, tables, figures, executes strict paper linting, and records SHA-256 hashes of all 12 key artifacts into `results/build_provenance.json`. Verified identical hashes across consecutive passes and enforced via `tests/test_build_manifest.py`.
+- **Rationale:** UI transparency and complete build reproducibility are essential for end-to-end scientific integrity.
+

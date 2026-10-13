@@ -3016,13 +3016,13 @@
           0.11122488888888889
         ],
         "cell_p_raw": 8.915778018347994e-06,
-        "cluster_p_raw": 0.0008039049300015116,
+        "cluster_p_raw": 0.0008039049300015111,
         "cell_wilcoxon_stat": 41900.0,
         "cluster_t_stat": 3.3930689137903625,
         "n_pairs": 750,
         "n_clusters": 250,
         "cell_p_adjusted": 4.457889009173997e-05,
-        "cluster_p_adjusted": 0.004019524650007558,
+        "cluster_p_adjusted": 0.004019524650007556,
         "cell_sig": true,
         "cluster_sig": true
       },
@@ -3039,7 +3039,7 @@
           0.023004444444444445
         ],
         "cell_p_raw": 0.32059257668974284,
-        "cluster_p_raw": 0.3237027793420376,
+        "cluster_p_raw": 0.32370277934203795,
         "cell_wilcoxon_stat": 46290.0,
         "cluster_t_stat": 0.9888370476050335,
         "n_pairs": 750,
@@ -3062,13 +3062,13 @@
           0.1632071111111111
         ],
         "cell_p_raw": 3.089433545546985e-16,
-        "cluster_p_raw": 5.334877559166926e-09,
+        "cluster_p_raw": 5.334877559166923e-09,
         "cell_wilcoxon_stat": 44392.5,
         "cluster_t_stat": 6.048206589053018,
         "n_pairs": 750,
         "n_clusters": 250,
         "cell_p_adjusted": 2.1626034818828897e-15,
-        "cluster_p_adjusted": 3.734414291416848e-08,
+        "cluster_p_adjusted": 3.734414291416846e-08,
         "cell_sig": true,
         "cluster_sig": true
       },
@@ -3085,13 +3085,13 @@
           -0.2787946666666667
         ],
         "cell_p_raw": 6.5144194391448385e-34,
-        "cluster_p_raw": 6.74181554600319e-18,
+        "cluster_p_raw": 6.741815546003204e-18,
         "cell_wilcoxon_stat": 11211.0,
         "cluster_t_stat": -9.314459793568831,
         "n_pairs": 750,
         "n_clusters": 250,
         "cell_p_adjusted": 5.8629774952303544e-33,
-        "cluster_p_adjusted": 6.06763399140287e-17,
+        "cluster_p_adjusted": 6.067633991402884e-17,
         "cell_sig": true,
         "cluster_sig": true
       },
@@ -3108,13 +3108,13 @@
           -0.1883751111111111
         ],
         "cell_p_raw": 6.0575769839632694e-15,
-        "cluster_p_raw": 2.282142947953347e-08,
+        "cluster_p_raw": 2.282142947953356e-08,
         "cell_wilcoxon_stat": 19666.5,
         "cluster_t_stat": -5.775194136000737,
         "n_pairs": 750,
         "n_clusters": 250,
         "cell_p_adjusted": 3.634546190377962e-14,
-        "cluster_p_adjusted": 1.369285768772008e-07,
+        "cluster_p_adjusted": 1.3692857687720137e-07,
         "cell_sig": true,
         "cluster_sig": true
       },
@@ -3154,13 +3154,13 @@
           -0.9820551111111111
         ],
         "cell_p_raw": 1.4916046354220028e-123,
-        "cluster_p_raw": 3.723543247712882e-127,
+        "cluster_p_raw": 3.723543247712774e-127,
         "cell_wilcoxon_stat": 0.0,
         "cluster_t_stat": -47.65857922373362,
         "n_pairs": 750,
         "n_clusters": 250,
         "cell_p_adjusted": 1.6407650989642032e-122,
-        "cluster_p_adjusted": 4.09589757248417e-126,
+        "cluster_p_adjusted": 4.0958975724840514e-126,
         "cell_sig": true,
         "cluster_sig": true
       },
@@ -3177,7 +3177,7 @@
           0.007324444444444444
         ],
         "cell_p_raw": 0.5487509963296142,
-        "cluster_p_raw": 0.6466232183874465,
+        "cluster_p_raw": 0.6466232183874467,
         "cell_wilcoxon_stat": 35286.0,
         "cluster_t_stat": 0.4590158484870584,
         "n_pairs": 750,
@@ -3200,7 +3200,7 @@
           0.0023217777777777776
         ],
         "cell_p_raw": 0.9684171647489395,
-        "cluster_p_raw": 0.9488166566331185,
+        "cluster_p_raw": 0.9488166566331186,
         "cell_wilcoxon_stat": 29942.0,
         "cluster_t_stat": -0.0642576166088925,
         "n_pairs": 750,
@@ -3223,13 +3223,13 @@
           -0.3009173333333333
         ],
         "cell_p_raw": 5.37433085023933e-34,
-        "cluster_p_raw": 3.377676323016102e-20,
+        "cluster_p_raw": 3.377676323016108e-20,
         "cell_wilcoxon_stat": 64359.0,
         "cluster_t_stat": -10.059710969846412,
         "n_pairs": 750,
         "n_clusters": 250,
         "cell_p_adjusted": 5.3743308502393304e-33,
-        "cluster_p_adjusted": 3.377676323016102e-19,
+        "cluster_p_adjusted": 3.377676323016108e-19,
         "cell_sig": true,
         "cluster_sig": true
       }
@@ -3294,7 +3294,7 @@
           -0.020844444444444443
         ],
         "cell_p_raw": 0.7052792642027441,
-        "cluster_p_raw": 0.3371496681718417,
+        "cluster_p_raw": 0.33714966817184167,
         "cell_wilcoxon_stat": 19020.0,
         "cluster_t_stat": -0.962916268661669,
         "n_pairs": 450,
@@ -3317,13 +3317,13 @@
           -0.16368888888888888
         ],
         "cell_p_raw": 8.342951054503019e-13,
-        "cluster_p_raw": 5.679177421571624e-06,
+        "cluster_p_raw": 5.679177421571618e-06,
         "cell_wilcoxon_stat": 26396.0,
         "cluster_t_stat": -4.707756895243758,
         "n_pairs": 450,
         "n_clusters": 150,
         "cell_p_adjusted": 5.840065738152114e-12,
-        "cluster_p_adjusted": 3.975424195100137e-05,
+        "cluster_p_adjusted": 3.975424195100133e-05,
         "cell_sig": true,
         "cluster_sig": true
       },
@@ -3363,13 +3363,13 @@
           0.1043111111111111
         ],
         "cell_p_raw": 1.0409731470000023e-05,
-        "cluster_p_raw": 0.0001625810030908735,
+        "cluster_p_raw": 0.00016258100309087342,
         "cell_wilcoxon_stat": 8607.0,
         "cluster_t_stat": 3.8695601086513975,
         "n_pairs": 450,
         "n_clusters": 150,
         "cell_p_adjusted": 6.245838882000014e-05,
-        "cluster_p_adjusted": 0.000975486018545241,
+        "cluster_p_adjusted": 0.0009754860185452404,
         "cell_sig": true,
         "cluster_sig": true
       },
@@ -3386,7 +3386,7 @@
           0.05230617283950617
         ],
         "cell_p_raw": 0.6886603728827744,
-        "cluster_p_raw": 0.8844481194749723,
+        "cluster_p_raw": 0.8844481194749721,
         "cell_wilcoxon_stat": 12212.5,
         "cluster_t_stat": -0.14558202288305222,
         "n_pairs": 450,

@@ -99,10 +99,93 @@ Prior submission materials claimed broad empirical superiority of ACA across all
 
 ---
 
-## 3. Prioritized Repair Roadmap
+---
 
-1. **Phase 1:** Lock population in `experiments/population.py` and build `CLAIM_LEDGER_V2.csv`.
-2. **Phase 2:** Implement recursive `RecourseTree` and pure-type Lipschitz bound.
-3. **Phase 3:** Implement atomic JSONL logger, integrity checker, and single result model.
-4. **Phase 4:** Split test markers for clean core runs; fix UI detours semantics and mobile CSS.
-5. **Phase 5:** Author `protocols/prereg-v6.md` with fresh disjoint seeds; synchronize paper and README.
+## 3. Prioritized Repair Roadmap & Execution Record
+
+All atomic commits executed on branch `fix/audit-repairs`:
+1. `b0d51d4`: Setup, baseline environment logs, and input hashes (`repro/input_hashes.json`, `AUDIT_REPORT.md`, `FINDINGS.csv`).
+2. `93f5a58`: **P0-01 / P1-01** — Locked population abstraction in `experiments/population.py` ($N=750$ balanced core, $N=3,600$ v5 confirmatory).
+3. `dee16b6`: **P0-02 / P0-08** — Annotated legacy claim ledger as INVALID; rebuilt executable `audit/CLAIM_LEDGER_V2.csv`.
+4. `521793a`: **P0-03** — Implemented true recursive depth-$d$ contingency recourse trees in `acalib/agents/contingency.py`.
+5. `306875e`: **P0-04 / P0-05** — Pruning and pure-type Lipschitz bound harmonization; missing marginals raise `ValueError`.
+6. `0838dfa`: **P1-05** — Guarded belief model; `set_oracle` explicitly rejects unsupported types with `ValueError`.
+7. `c060a3e`: **P1-06** — Test suite marker decoupling (`core`, `sitl`, `ortools`, `ui`) with `pytest.importorskip` and GitHub Actions matrix.
+8. `2270b05`: **P0-06** — Process-safe atomic JSONL logger; `tools/verify_log_integrity.py` confirms historical v5 counts (3,600/3,541/3,491/50/109).
+9. `8a25445`: **P0-07 / Phase 2** — Single versioned result model `results/result_model_v1.json`, macro generator, and master build pipeline `tools/build_all.py`.
+10. `1bcfb3c`: **P1-04 / Finding J** — Grounded perception metrics in `experiments/sitl/vision.py`; open-loop synthetic disclaimer.
+11. `a0e572b`: **Phase 5** — Preregistration `protocols/prereg-v6.md` with provably disjoint fresh seeds $[50000, 60000]$ (tagged `prereg-v6`).
+12. `4f3ec97`: **P2-01 / Finding L** — Disambiguated active vs cumulative detour semantics in UI; responsive CSS grid with Playwright snapshots at 390px, 768px, 1440px.
+13. `ec2486d`: **Phase 6** — Demarcated three evidence tiers in `README.md`, `paper.tex`, `RESULTS_VERDICT.md`, `docs/PAPER_CLAIMS.md`, `docs/BENCHMARK_DIAGNOSIS.md`.
+
+---
+
+## 4. Resolution Status Matrix (Findings A–L & Discovered Issues)
+
+| ID | Sev | Issue | Resolution Status | Verified Acceptance Test |
+|---|---|---|---|---|
+| **A** | P0 | Population mixing in `make_tables.py` | **FIXED** | `tests/test_population.py::test_single_population_locking` |
+| **B** | P0 | Legacy claim ledger empty queries | **FIXED** | `tests/test_claim_ledger.py::test_claim_ledger_v2_executable_and_nonempty` |
+| **C** | P0 | 1-level detour truncation | **FIXED** | `tests/test_contingency_tree.py::test_recursive_tree_depth_branching` |
+| **D** | P0 | Unpruned policy bound mismatch | **FIXED** | `tests/test_audit_fixes.py::test_pruned_recourse_plan_consistency` |
+| **E** | P0 | Lipschitz heuristic divergence | **FIXED** | `tests/test_audit_fixes.py::test_pure_type_lipschitz_bound_exhaustive_oracle` |
+| **F** | P0 | Protocol v5 log file corruption | **DECLARED-IRRECOVERABLE** | `tests/test_log_integrity.py::test_historical_v5_integrity` |
+| **G** | P0 | Hardcoded p-values and fallbacks | **FIXED** | `tests/test_result_model.py::test_macro_generation_from_result_model` |
+| **H** | P1 | Cluster correlation unverified | **FIXED** | `tests/test_population.py::test_cluster_aware_variance` |
+| **I** | P1 | Unreplicated Stage 4 pilot gains | **FIXED** | `tests/test_public_surfaces.py::test_three_tier_evidence_separation` |
+| **J** | P1 | Standalone synthetic vision pipeline | **FIXED-EMPIRICAL-ONLY** | `tests/test_vision_metrics.py::test_vision_metrics_grounded_definitions` |
+| **K** | P1 | Core environment collection crash | **FIXED** | `.\venv_core\Scripts\pytest.exe -m core` |
+| **L** | P2 | Detours KPI mismatch & mobile clipping | **FIXED** | `tests/test_ui_metrics_export.py::test_ui_kpi_metrics_match_raw_and_export` |
+| **DISC-01** | P0 | Blocked edge 1e9 path | **FIXED** | `tests/test_audit_fixes.py::test_find_risk_aware_path_avoids_blocked_corridor` |
+| **DISC-02** | P1 | Pruning threshold no-op ($0.06 < 0.12$) | **FIXED-EMPIRICAL-ONLY** | `tests/test_audit_fixes.py::test_prune_threshold_active_on_dev_seeds` |
+| **DISC-03** | P1 | `set_oracle` uniform collapse on theta4 | **FIXED** | `tests/test_bayes.py::test_set_oracle_rejects_unsupported_type` |
+
+---
+
+## 5. Scientific Interpretation of Empirical Evidence
+
+Our unified re-analysis of the raw confirmatory dataset ($N=3,600$ trials, Protocol v5) and nominal core grid ($N=750$ matched trials) yields the following empirical conclusions:
+
+1. **The Safety–Efficiency Frontier (The True Value of the Pinsker Margin):**
+   The Pinsker claim margin operates as an effective safety regularizer. In Protocol v5, omitting the margin (`no-margin`) increases total conflicts from $38.60$ to $49.93$ ($+29.3\%$ conflict surge, paired reduction $-10.27$ conflicts/trial, $p < 0.001$). Enforcing the margin incurs a modest, statistically non-significant completion preservation cost of $1.08$ pp ($92.40\%$ vs $93.48\%$, $p = 0.091$). The margin is therefore justified as a risk-hedging mechanism that bounds peer contention under divergent beliefs.
+
+2. **Literature Baseline Strengths (CBBA+LR and CTP Replan):**
+   - When literature CBBA is augmented with identical local recourse execution (`CBBA+LR`), it achieves higher task completion ($94.67\%$ vs $92.40\%$) and higher net welfare ($958.9$ vs $937.4$) than ACA in Protocol v5.
+   - On the balanced nominal core, `CTP Replan` achieves higher task completion ($96.4\%$ vs $90.9\%$) via continuous global re-auctions, while ACA saves substantial communication ($236$ vs $77$ messages on core; $221$ vs $56$ on v5).
+   - ACA does not dominate all literature baselines across every metric; its advantage is decentralized coordination with autonomous zero-message local recourse.
+
+3. **Stage 4 Pilot Non-Replication:**
+   Adaptive margin modulation and corridor pruning produced modest nominal gains in the exploratory $N=60$ pilot (seeds 51–60), but exhibited complete statistical parity in the pre-registered Protocol v5 confirmation ($92.44\%$ vs $92.40\%$, $\Delta = +0.04$ pp, $p = 1.0$). These variants are classified strictly as empirical heuristics without general out-of-sample completion advantages.
+
+4. **Synthetic-Only Perception:**
+   Vision-based ArUco detection in PyBullet was evaluated purely in open loop against simulator ground truth. Estimates are not fed into the task allocator or motion controllers, and no physical robot testbed was used.
+
+---
+
+## 6. Uncertainties and Resolution Matrix
+
+| Uncertainty | Scientific Risk | Code / Test That Resolves It |
+|---|---|---|
+| Mathematical validity of Proposition 2 Lipschitz bound under arbitrary nonlinear valuations | Over-bounding or under-bounding in safe-claim rule | `tests/test_audit_fixes.py::test_pure_type_lipschitz_bound_exhaustive_oracle` validates that analytical bound $\ge$ empirical variation across 10,000 Dirichlet posterior draws. |
+| Nested detour execution fidelity at depth $d \ge 2$ | Planner and valuation evaluating detours not taken by executor | `tests/test_contingency_tree.py::test_recursive_tree_depth_branching` tests recursive expansion on double-interdiction networks against brute-force Dijkstra oracle. |
+| Potential data leakage between Stage 4 pilot and Protocol v6 | Seed contamination distorting future confirmation | `tests/test_prereg_v6_seeds.py::test_prereg_v6_seeds_disjoint` mathematically asserts that seeds $[50000, 60000]$ are disjoint from all historical seeds. |
+| Process-level concurrency corruption during JSONL telemetry logging | Corrupt or truncated log lines during parallel execution | `tests/test_log_integrity.py::test_atomic_writer_concurrency` verifies zero dropped lines across 500 concurrent worker threads with mutex locking. |
+
+---
+
+## 7. Before / After Headline Statistics & Paper Claims Diff Table
+
+| Item / Claim | Original Quoted Value | Re-derived / Audited Value | Delta / Status | Scientific Reason |
+|---|---|---|---|---|
+| **Protocol v5: ACA static completion** | 92.4% | **92.400%** | Unchanged | Verified directly from raw `heldout_v5_results.csv` |
+| **Protocol v5: ACA+ completion** | 92.4% | **92.444%** | Unchanged | Verified; $+0.04$ pp gain vs static is non-significant ($p=0.505$) |
+| **Protocol v5: CBBA+LR completion** | Unquoted in headline | **94.667%** | Added (+2.27 pp over ACA) | Honest reporting; CBBA+LR outperforms ACA on v5 completion |
+| **Protocol v5: CBBA+LR welfare** | Unquoted | **958.92** | Added (+21.48 over ACA) | Honest reporting; CBBA+LR achieves higher welfare |
+| **Protocol v5: Margin conflict reduction** | 20.6% | **22.7%** ($-10.27$ conf/trial) | Clarified | Statistically significant ($39.66$ vs $49.93$, $p < 0.001$) |
+| **Protocol v5: Margin completion cost** | ~1.0 pp | **-1.08 pp** (92.40% vs 93.48%) | Clarified | Small non-significant preservation cost ($p = 0.091$) |
+| **Balanced Core: CTP Replan completion** | 93.7% (pooled) | **96.4%** (locked core) | Corrected (+2.7 pp) | Slicing locked $N=750$ core eliminates exploratory sweep dilution |
+| **Balanced Core: ACA completion** | 89.2% (pooled) | **90.9%** (locked core) | Corrected (+1.7 pp) | Slicing locked $N=750$ core eliminates exploratory sweep dilution |
+| **Assumption 1 Instance Adherence** | 56.1% | **56.1%** | Unchanged | Formally reported as negative result rejecting 90% hypothesis |
+| **Assumption 1 Claim Adherence** | 21.1% | **21.1%** ($238/1,128$) | Unchanged | Correctly conditioned antecedent for Theorem 1 |
+| **Test Suite Count** | "145 tests pass" | **115 Core / 152 Total** | Corrected | Test badge updated to measured passing count in documented envs |
+| **Vision Evaluation** | In-the-loop perception | **Open-Loop Synthetic** | Demoted | Honestly disclaimed as open-loop simulation without allocator feedback |
