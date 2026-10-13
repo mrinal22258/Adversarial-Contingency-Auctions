@@ -128,8 +128,12 @@ def generate_main_results_table(
     Evaluates on balanced core grid to ensure paired estimand consistency:
     means, bootstrap CIs, and paired tests use the identical matched population.
     """
-    core_mask = (df["comm_regime"] == "nominal") & (df["adversary"].isin(["theta_1_stochastic", "theta_2_reactive", "theta_4_cyclic_patrol"]))
-    eval_df = df[core_mask] if core_mask.sum() > 0 else df
+    try:
+        from experiments.population import get_locked_population
+        eval_df, meta = get_locked_population(df, population_id="nominal_balanced_core")
+    except Exception:
+        core_mask = (df["comm_regime"] == "nominal") & (df["adversary"].isin(["theta_1_stochastic", "theta_2_reactive", "theta_4_cyclic_patrol"]))
+        eval_df = df[core_mask] if core_mask.sum() > 0 else df
 
     methods = [m for m in METHOD_PRETTY.keys() if m in eval_df["method"].unique()]
     pairing_keys = [k for k in ["graph_family", "adversary", "comm_regime", "n_robots", "n_tasks", "seed"] if k in eval_df.columns]
@@ -168,7 +172,7 @@ def generate_main_results_table(
     ]
 
     for m in methods:
-        sub = df[df["method"] == m]
+        sub = eval_df[eval_df["method"] == m]
         label = METHOD_PRETTY.get(m, m)
         row_entries = [label]
         clean_label = (

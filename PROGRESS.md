@@ -8,31 +8,31 @@
 
 ## Progress Checklist
 
-- [ ] **1. Setup, Baseline, Hashes (Section 2)**
+- [x] **1. Setup, Baseline, Hashes (Section 2)**
   - [x] Branch checked out (`fix/audit-repairs` from `6cabf8c`)
-  - [ ] Virtual environments created: `core` and `extras`
-  - [ ] `pip freeze` recorded to `repro/env_core.txt` and `repro/env_extras.txt`
-  - [ ] Input hashes computed and stored to `repro/input_hashes.json`
-  - [ ] Baseline pytest runs on original HEAD recorded to `repro/baseline_core.txt` and `repro/baseline_extras.txt`
-- [ ] **2. Verification of Prior Work & Evidence Documents (Section 4)**
-  - [ ] Verify issues A through L on original HEAD (worktree / branch)
-  - [ ] Verify 3 discovered issues (blocked-edge 1e9, prune_threshold 0.06 vs 0.12, set_oracle uniform collapse)
-  - [ ] Re-derive Lipschitz bound and verify total variation conventions against exhaustive oracle
-  - [ ] Verify recursive recourse tree counterexample (depth-2 vs depth-1)
-  - [ ] Write `AUDIT_REPORT.md`
-  - [ ] Write `FINDINGS.csv`
-  - [ ] Write `CLAIM_SOURCE_MATRIX.csv` (skeleton)
-  - [ ] Write `REPRODUCIBILITY_REPORT.md` (baseline part)
-  - [ ] Write `REPAIR_PLAN.md`
-  - [ ] Write `DECISIONS.md`
+  - [x] Virtual environments created: `core` and `extras`
+  - [x] `pip freeze` recorded to `repro/env_core.txt` and `repro/env_extras.txt`
+  - [x] Input hashes computed and stored to `repro/input_hashes.json`
+  - [x] Baseline pytest runs on original HEAD recorded to `repro/baseline_core.txt` and `repro/baseline_extras.txt`
+- [x] **2. Verification of Prior Work & Evidence Documents (Section 4)**
+  - [x] Verify issues A through L on original HEAD (worktree / branch)
+  - [x] Verify 3 discovered issues (blocked-edge 1e9, prune_threshold 0.06 vs 0.12, set_oracle uniform collapse)
+  - [x] Re-derive Lipschitz bound and verify total variation conventions against exhaustive oracle
+  - [x] Verify recursive recourse tree counterexample (depth-2 vs depth-1)
+  - [x] Write `AUDIT_REPORT.md`
+  - [x] Write `FINDINGS.csv`
+  - [x] Write `CLAIM_SOURCE_MATRIX.csv` (skeleton)
+  - [x] Write `REPRODUCIBILITY_REPORT.md` (baseline part)
+  - [x] Write `REPAIR_PLAN.md`
+  - [x] Write `DECISIONS.md`
 - [ ] **3. Re-analysis of Existing Evidence (Section 5)**
-  - [ ] Build locked population definitions (`experiments/population.py`)
-  - [ ] Recompute raw v5 means and check against reported table
+  - [x] Build locked population definitions (`experiments/population.py`)
+  - [x] Recompute raw v5 means and check against reported table
   - [ ] Implement cluster-aware CIs and tests alongside registered cell-level tests
   - [ ] Apply frozen Holm correction to registered hypothesis family
   - [ ] Build single versioned result model (`results/result_model_vN.json`)
 - [ ] **4. Correctness Repairs (Section 6 - Atomic Commits)**
-  - [ ] P0-01 / P1-01: Population & statistics - wire result model into `make_tables.py`, remove raw-mean mixing
+  - [x] P0-01 / P1-01: Population & statistics - wire result model into `make_tables.py`, remove raw-mean mixing
   - [ ] P0-02 / P0-08: Claim ledger - finalize `audit/CLAIM_LEDGER_V2.csv`, annotate legacy ledger
   - [ ] P0-03: Recursive recourse - true recursive tree in planner, valuation, bound, executor
   - [ ] P0-04 / P0-05: Bound, margin, pruning - bound on actual pruned policy, label empirical variants
