@@ -91,3 +91,39 @@ def test_belief_pooling():
 
     pooled_tv = compute_tv_distance(agent1.get_belief_vector(), agent2.get_belief_vector())
     assert pooled_tv < init_tv, "Pooling must strictly reduce belief disagreement"
+
+
+def test_set_oracle_rejects_unsupported_types():
+    """Verify P1-05: set_oracle explicitly rejects out-of-model types like CYCLIC_PATROL."""
+    import pytest
+    agent = BayesianTypeFilter()
+    
+    # Valid canonical type succeeds and freezes
+    agent.set_oracle(AdversaryType.STOCHASTIC)
+    assert agent.frozen
+    b = agent.get_belief_vector()
+    assert b[CanonicalTypeSet.index(AdversaryType.STOCHASTIC)] == 1.0
+
+    # Unsupported type must raise ValueError, not silently collapse to uniform
+    with pytest.raises(ValueError, match="Unsupported oracle adversary type"):
+        agent.set_oracle(AdversaryType.CYCLIC_PATROL)
+
+
+def test_calibration_brier_and_reliability():
+    """Verify calibration metrics (Brier score and reliability curve)."""
+    from acalib.agents.belief import compute_brier_score, compute_reliability_curve
+
+    forecasts = np.array([0.9, 0.8, 0.2, 0.1])
+    outcomes = np.array([1.0, 1.0, 0.0, 0.0])
+
+    bs = compute_brier_score(forecasts, outcomes)
+    # Mean of (0.1^2, 0.2^2, 0.2^2, 0.1^2) = (0.01 + 0.04 + 0.04 + 0.01) / 4 = 0.025
+    assert np.isclose(bs, 0.025)
+
+    centers, freqs, counts = compute_reliability_curve(forecasts, outcomes, n_bins=2)
+    assert len(centers) == 2
+    assert counts[0] == 2  # [0.2, 0.1]
+    assert counts[1] == 2  # [0.9, 0.8]
+    assert freqs[0] == 0.0
+    assert freqs[1] == 1.0
+

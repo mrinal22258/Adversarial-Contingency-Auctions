@@ -59,7 +59,17 @@ class BayesianTypeFilter:
         self.frozen: bool = False
 
     def set_oracle(self, adv_type: AdversaryType) -> None:
-        """Set belief strictly to 1.0 on adv_type (oracle adversary knowledge) and freeze."""
+        """
+        Set belief strictly to 1.0 on adv_type (oracle adversary knowledge) and freeze.
+        Raises ValueError if adv_type is not supported by the canonical type space.
+        """
+        if adv_type not in self.types:
+            supported = [t.value for t in self.types]
+            raise ValueError(
+                f"Unsupported oracle adversary type '{adv_type}'! "
+                f"Canonical belief model only represents: {supported}. "
+                f"Cannot represent out-of-model dynamics without expanding the type simplex."
+            )
         for t in self.types:
             self.beliefs[t] = 1.0 if t == adv_type else 0.0
         self._normalize()
@@ -206,3 +216,51 @@ class BayesianTypeFilter:
         elif pi_e > 0.99:
             return 0.99
         return float(pi_e)
+
+
+def compute_brier_score(
+    forecasts: np.ndarray,
+    outcomes: np.ndarray,
+) -> float:
+    """
+    Compute multi-class or binary Brier score:
+        BS = (1/N) * sum_{i=1}^N sum_{k=1}^K (f_{i,k} - o_{i,k})^2
+    Lower score indicates superior probability calibration (0 = perfect, 1 = max error).
+    """
+    f = np.asarray(forecasts, dtype=float)
+    o = np.asarray(outcomes, dtype=float)
+    if f.shape != o.shape:
+        raise ValueError(f"Shape mismatch: forecasts {f.shape} vs outcomes {o.shape}")
+    sq_err = (f - o) ** 2
+    if sq_err.ndim > 1:
+        return float(np.mean(np.sum(sq_err, axis=-1)))
+    return float(np.mean(sq_err))
+
+
+def compute_reliability_curve(
+    predicted_probs: np.ndarray,
+    binary_outcomes: np.ndarray,
+    n_bins: int = 5,
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """
+    Compute reliability curve coordinates (predicted bin center vs empirical frequency)
+    and sample counts per bin for calibration validation on fresh confirmatory data.
+    """
+    p = np.asarray(predicted_probs, dtype=float)
+    y = np.asarray(binary_outcomes, dtype=float)
+    bins = np.linspace(0.0, 1.0, n_bins + 1)
+    bin_centers = 0.5 * (bins[:-1] + bins[1:])
+    emp_freqs = []
+    bin_counts = []
+
+    for low, high in zip(bins[:-1], bins[1:]):
+        mask = (p >= low) & (p <= high if high == 1.0 else p < high)
+        count = int(np.sum(mask))
+        bin_counts.append(count)
+        if count > 0:
+            emp_freqs.append(float(np.mean(y[mask])))
+        else:
+            emp_freqs.append(float("nan"))
+
+    return bin_centers, np.array(emp_freqs), np.array(bin_counts)
+
