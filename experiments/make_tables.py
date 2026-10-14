@@ -383,11 +383,11 @@ def generate_sitl_table(
         "\\centering",
         f"\\caption{{Software-in-the-Loop (SITL) Physics Simulation vs.\\ Discrete Graph Simulation ($N = {n_trials_per_m}$ Paired Trials per Method on Real Maps).}}",
         "\\label{tab:sitl_results}",
-        "\\renewcommand{\\arraystretch}{0.88}",
+        "\\renewcommand{\\arraystretch}{0.92}",
         "\\resizebox{\\columnwidth}{!}{%",
-        "\\begin{tabular}{lcccccc}",
+        "\\begin{tabular}{@{\\hskip 2pt}l@{\\hskip 4pt}c@{\\hskip 4pt}c@{\\hskip 4pt}c@{\\hskip 4pt}c@{\\hskip 4pt}c@{\\hskip 2pt}c@{}}",
         "\\toprule",
-        "\\textbf{Method} & \\textbf{SITL Comp. (\\%)} & \\textbf{Graph Comp. (\\%)} & \\textbf{Domain Gap (pp)} & \\textbf{vs. ACA ($p$)} & \\textbf{Phys. Collisions} & \\textbf{Abstract Conf.} \\\\",
+        "\\textbf{Method} & \\textbf{SITL (\\%)} & \\textbf{Graph (\\%)} & \\textbf{Gap (pp)} & \\textbf{$p$-val} & \\textbf{Contacts} & \\textbf{Conflicts} \\\\",
         "\\midrule",
     ]
 

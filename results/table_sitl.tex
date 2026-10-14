@@ -2,11 +2,11 @@
 \centering
 \caption{Software-in-the-Loop (SITL) Physics Simulation vs.\ Discrete Graph Simulation ($N = 360$ Paired Trials per Method on Real Maps).}
 \label{tab:sitl_results}
-\renewcommand{\arraystretch}{0.88}
+\renewcommand{\arraystretch}{0.92}
 \resizebox{\columnwidth}{!}{%
-\begin{tabular}{lcccccc}
+\begin{tabular}{@{\hskip 2pt}l@{\hskip 4pt}c@{\hskip 4pt}c@{\hskip 4pt}c@{\hskip 4pt}c@{\hskip 4pt}c@{\hskip 2pt}c@{}}
 \toprule
-\textbf{Method} & \textbf{SITL Comp. (\%)} & \textbf{Graph Comp. (\%)} & \textbf{Domain Gap (pp)} & \textbf{vs. ACA ($p$)} & \textbf{Phys. Collisions} & \textbf{Abstract Conf.} \\
+\textbf{Method} & \textbf{SITL (\%)} & \textbf{Graph (\%)} & \textbf{Gap (pp)} & \textbf{$p$-val} & \textbf{Contacts} & \textbf{Conflicts} \\
 \midrule
 \textbf{ACA (Ours)} & 69.4 $\pm$ 20.3 & 88.4 $\pm$ 16.7 & -18.9 & -- & 158.6 & 37.5 \\
 ACA (No Margin Ablation) & 68.6 $\pm$ 20.4 & 88.6 $\pm$ 14.9 & -20.1 & 0.8358 & 171.7 & 66.5 \\

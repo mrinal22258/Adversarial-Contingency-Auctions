@@ -8,6 +8,7 @@
 *.synctex.gz
 *.fdb_latexmk
 *.fls
+results/figures/rendered_pages/
 
 # Python artifacts
 __pycache__/

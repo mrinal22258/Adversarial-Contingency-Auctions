@@ -85,7 +85,7 @@ def check_figure_provenance(tex_content: str, base_dir: str) -> List[str]:
                     with open(p, "r", encoding="utf-8") as pf:
                         pdata = json.load(pf)
                     gen = pdata.get("generator_script", pdata.get("generated_by", ""))
-                    if gen and not any(allowed in gen for allowed in ["make_figures.py", "make_map_figures.py", "generate_paper_figures.py", "plot_comm_degradation_diagnostic.py", "make_rollout_videos.py", "build_all_results.py"]):
+                    if gen and not any(allowed in gen for allowed in ["make_figures.py", "make_map_figures.py", "make_cd_diagram.py", "generate_paper_figures.py", "plot_comm_degradation_diagnostic.py", "make_rollout_videos.py", "build_all_results.py"]):
                         errors.append(f"Figure {fig_path} provenance records generator '{gen}' (must be produced by make_figures.py / make_map_figures.py / make_rollout_videos.py)")
                 except Exception:
                     pass

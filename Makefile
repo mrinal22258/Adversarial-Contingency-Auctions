@@ -19,6 +19,9 @@ figures:
 test:
 	pytest
 
+paper:
+	python tools/build_paper.py
+
 lint:
 	python tools/lint_paper.py
 

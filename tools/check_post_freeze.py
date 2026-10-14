@@ -27,6 +27,7 @@ ALLOWED_EXPERIMENT_SCRIPTS = {
     "experiments/plot_style.py",
     "experiments/plot_comm_degradation_diagnostic.py",
     "experiments/make_rollout_videos.py",
+    "experiments/make_cd_diagram.py",
 }
 
 
