@@ -1,0 +1,54 @@
+# Pipeline Smoke Test Configuration (Development Seeds Only - NOT EVIDENCE)
+# Used to verify the end-to-end execution, logging, verification, and analysis pipeline.
+
+version: "smoke-v1"
+evaluation_design:
+  protocol: "smoke"
+  development_phase:
+    seeds: [40484, 40506]
+    total_seeds: 2
+    rng_generator: "np.random.default_rng(9992026)"
+
+benchmark_universe:
+  environments:
+    - family: "grid"
+      n_nodes: 16
+  adversaries:
+    - "theta_1_stochastic"
+  comm_regimes:
+    nominal:
+      comm_range: 30.0
+      p_drop: 0.10
+  comm_range: 30.0
+  p_drop: 0.10
+  n_robots: 2
+  n_tasks: 4
+  fleet_sizes: [2]
+  task_counts: [4]
+  max_steps: 20
+  horizon_ticks: 20
+  contingency_depth: 1
+  bundle_capacity: 2
+  sensor_range: 25.0
+
+evaluated_methods:
+  aca:
+    allocator_type: "aca"
+    allocator_kwargs:
+      kappa: 1.0
+      contingency_depth: 1
+  cbba_lr:
+    allocator_type: "cbba_lr"
+    allocator_kwargs:
+      contingency_depth: 1
+
+methods:
+  - "aca"
+  - "cbba_lr"
+
+output:
+  dir: "results/smoke"
+  results_csv: "results/smoke/results.csv"
+  runs_jsonl: "results/smoke/runs.jsonl"
+  traces_dir: "results/smoke/traces"
+  metadata_json: "results/smoke/run_metadata.json"

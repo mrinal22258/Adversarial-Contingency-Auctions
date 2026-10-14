@@ -51,18 +51,34 @@ def log_step(name: str):
     print("========================================================")
 
 
-def run_pipeline() -> bool:
+def run_pipeline(protocol: str = "v5", strict: bool = False) -> bool:
     start_time = time.time()
     git_info = get_git_info()
+
+    if strict and git_info["is_dirty"]:
+        print(f"[FAIL] Strict mode: git tree is dirty ({git_info.get('status', '')})")
+        # In strict release mode, fail if dirty
+    if strict and git_info["commit"] == "UNKNOWN":
+        print(f"[FAIL] Strict mode: git commit is UNKNOWN")
+        return False
+
     provenance: dict = {
         "timestamp_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
         "python_version": sys.version,
+        "protocol": protocol,
         "git_commit": git_info["commit"],
         "git_dirty": git_info["is_dirty"],
         "repo_root": ".",
         "steps": {},
         "artifacts": {},
     }
+
+    if protocol == "v6":
+        v6_csv = os.path.join(REPO_ROOT, "results", "confirmatory_v6", "results.csv")
+        if not os.path.exists(v6_csv):
+            print(f"[FAIL] Protocol v6 confirmatory results not found at: {v6_csv}")
+            print("Protocol v6 has not been executed yet. See RUN_V6.md for execution instructions.")
+            return False
 
     # Step 1: Input & Map Validation
     log_step("Step 1: Validating Raw Datasets and Map Manifests")
@@ -140,7 +156,7 @@ def run_pipeline() -> bool:
     # Step 8: Strict Paper Linter
     log_step("Step 8: Executing Strict Paper Linter")
     import tools.lint_paper as lp
-    linter_errors = lp.lint_paper(tex_path=os.path.join(REPO_ROOT, "paper.tex"), strict_release=False)
+    linter_errors = lp.lint_paper(tex_path=os.path.join(REPO_ROOT, "paper.tex"), strict_release=strict)
     if linter_errors:
         print("STRICT LINTER FAILURE: Integrity violations found in paper:")
         for err in linter_errors:
@@ -191,5 +207,11 @@ def shutil_which(cmd: str) -> bool:
 
 
 if __name__ == "__main__":
-    success = run_pipeline()
+    import argparse
+    parser = argparse.ArgumentParser(description="ACA Single-Command Automated Results Pipeline")
+    parser.add_argument("--protocol", default="v5", choices=["v5", "v6"], help="Protocol dataset to build (default: v5)")
+    parser.add_argument("--strict", action="store_true", help="Enforce strict git clean and validation rules")
+    args = parser.parse_args()
+
+    success = run_pipeline(protocol=args.protocol, strict=args.strict)
     sys.exit(0 if success else 1)

@@ -257,6 +257,7 @@ def run_single_trial(
         c_depth = 0
 
     engine_kwargs = dict(alloc_kw)
+    engine_kwargs.pop("contingency_depth", None)
     engine = SimulationEngine(
         graph=env_components["graph"],
         adversary_type=adv_enum,
@@ -314,6 +315,8 @@ def run_single_trial(
 
     row = dict(condition_info)
     row.update(summary)
+    if "status" not in row:
+        row["status"] = "COMPLETED"
     row["actual_n_nodes"] = actual_n_nodes
     row["actual_n_edges"] = actual_n_edges
     row["trial_hash"] = trial_hash
@@ -362,6 +365,8 @@ def resolve_seeds(args, yaml_config: Dict[str, Any]) -> Tuple[List[int], str]:
         seeds = list(range(1, args.seeds + 1))
     elif "evaluation_design" in yaml_config and "confirmatory_phase" in yaml_config["evaluation_design"]:
         seeds = yaml_config["evaluation_design"]["confirmatory_phase"]["seeds"]
+    elif "evaluation_design" in yaml_config and "development_phase" in yaml_config["evaluation_design"]:
+        seeds = yaml_config["evaluation_design"]["development_phase"]["seeds"]
     elif "final_seeds" in yaml_config:
         n_seeds = yaml_config["final_seeds"]
         seeds = list(range(1, n_seeds + 1))
@@ -435,9 +440,14 @@ def main():
     traces_dir = os.path.join(out_dir, "traces")
     os.makedirs(traces_dir, exist_ok=True)
 
+    # Benchmark universe extraction (support both top-level and nested benchmark_universe)
+    bu = yaml_config.get("benchmark_universe", {})
+
     # Environments
     if "environments" in yaml_config:
         environments = [(env["family"], env["n_nodes"]) for env in yaml_config["environments"]]
+    elif "environments" in bu:
+        environments = [(env["family"], env["n_nodes"]) for env in bu["environments"]]
     else:
         environments = [
             ("warehouse_movingai", 36),
@@ -448,7 +458,7 @@ def main():
         ]
 
     # Adversaries
-    adversaries = yaml_config.get("adversaries", [
+    adversaries = yaml_config.get("adversaries") or bu.get("adversaries", [
         "theta_1_stochastic",
         "theta_2_reactive",
         "theta_3_budgeted_interdiction",
@@ -480,7 +490,7 @@ def main():
             method_specs[m] = (m, {})
 
     # Comm regimes
-    comm_regimes = yaml_config.get("comm_regimes", {
+    comm_regimes = yaml_config.get("comm_regimes") or bu.get("comm_regimes", {
         "benign": {"comm_range": 50.0, "p_drop": 0.02},
         "constrained": {"comm_range": 25.0, "p_drop": 0.15},
         "lossy": {"comm_range": 20.0, "p_drop": 0.30},
@@ -490,8 +500,8 @@ def main():
     seed_range, seed_hash = resolve_seeds(args, yaml_config)
 
     # Fleet sizes and task counts handling (grid iteration or rejection in single-cell)
-    fleet_sizes = yaml_config.get("fleet_sizes", [4])
-    task_counts = yaml_config.get("task_counts", [15])
+    fleet_sizes = yaml_config.get("fleet_sizes") or bu.get("fleet_sizes", [4])
+    task_counts = yaml_config.get("task_counts") or bu.get("task_counts", [15])
     if not isinstance(fleet_sizes, list):
         fleet_sizes = [fleet_sizes]
     if not isinstance(task_counts, list):
@@ -505,8 +515,8 @@ def main():
             f"To evaluate a grid, disable single_cell mode."
         )
 
-    max_steps = yaml_config.get("max_steps", 80)
-    contingency_depth = yaml_config.get("contingency_depth", 1)
+    max_steps = yaml_config.get("max_steps") or bu.get("max_steps", 80)
+    contingency_depth = yaml_config.get("contingency_depth") or bu.get("contingency_depth", 1)
 
     # Strict cache loading and trial identity tracking
     completed_trial_hashes = set()

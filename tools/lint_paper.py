@@ -497,9 +497,11 @@ def main():
     parser = argparse.ArgumentParser(description="Strict Paper & Provenance Linter")
     parser.add_argument("--tex-path", default="paper.tex", help="Path to paper.tex")
     parser.add_argument("--strict-release", action="store_true", help="Fail build on dirty working tree")
+    parser.add_argument("--strict", action="store_true", help="Strict mode (enforces clean working tree and strict claims)")
     args = parser.parse_args()
 
-    errors = lint_paper(args.tex_path, strict_release=args.strict_release)
+    strict_release = args.strict_release or args.strict
+    errors = lint_paper(args.tex_path, strict_release=strict_release)
     if errors:
         print("STRICT LINTER FAILURE: Integrity violations found in paper:")
         for err in errors:

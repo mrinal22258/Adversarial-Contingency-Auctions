@@ -117,3 +117,12 @@ In accordance with Section 0 and Section 1 of the End-to-End Repair Protocol, al
 - **Decision:** The claim ledger is refactored into an active verification engine: `EmpiricalClaim.evaluate()` computes effect sizes, confidence intervals, and hypothesis tests directly from raw locked data and verifies them against registered claims within declared tolerances. Empty populations or hash mismatches trigger hard failures. Negative results from Protocol v5 held-out evaluations (CBBA+LR superior on completion and welfare, with fewer conflicts) remain prominent across the paper, README, and ledgers.
 - **Rationale:** Verifiable claims prevent drift between manuscript statements and empirical data.
 
+---
+
+### Decision D-14: Protocol Preparation, Tooling Validation, and Smoke Pipeline Isolation
+- **Date:** 2026-10-14
+- **Context:** Gate 5 requires preparing (but not executing) the 50-seed confirmatory v6 evaluation (~40 CPU-hours), validating protocol verification tools, and verifying the end-to-end execution pipeline on development seeds without polluting confirmatory data.
+- **Decision:** Implement `tools/verify_protocol.py` to cryptographically validate the protocol, enforce clean Git status, check seed disjointness, and verify map file hashes. Deliver `RUN_V6.md` with explicit crash-resumption instructions and pinned environment setup (`requirements.lock`, `.github/workflows/ci.yml`). Execute a minimal 4-trial smoke test on 2 development seeds (`40484`, `40506`) demonstrating end-to-end pipeline execution (Run -> Verify -> Build -> Ledger) saved under `results/smoke/` with a prominent non-evidence disclaimer.
+- **Rationale:** Proves operational readiness of the execution and verification tooling without expending large compute or compromising pre-registered confirmatory hold-outs.
+
+

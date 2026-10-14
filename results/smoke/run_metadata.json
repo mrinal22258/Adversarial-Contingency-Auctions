@@ -1,0 +1,52 @@
+{
+  "commit": "a7c4d587ede89dcc0f8bb79e4fe867db10dfa05a",
+  "protocol_hash": "f651169f028d4257ebeb0cd7cb6f9a88baf303dfe7f28d128b209eeb398081e8",
+  "timestamp": "2026-10-14T05:33:07Z",
+  "python_version": "3.12.7 | packaged by Anaconda, Inc. | (main, Oct  4 2024, 13:17:27) [MSC v.1929 64 bit (AMD64)]",
+  "numpy_version": "2.2.4",
+  "pandas_version": "2.2.3",
+  "scipy_version": "1.13.1",
+  "networkx_version": "3.4.2",
+  "total_trials": 4,
+  "environments": [
+    [
+      "grid",
+      16
+    ]
+  ],
+  "adversaries": [
+    "theta_1_stochastic"
+  ],
+  "methods": [
+    "aca",
+    "cbba_lr"
+  ],
+  "comm_regimes": {
+    "nominal": {
+      "comm_range": 30.0,
+      "p_drop": 0.1
+    }
+  },
+  "seed_list": [
+    40484,
+    40506
+  ],
+  "seed_list_hash": "faee2fba2579b51c13d4e0f9c5477923aa37ac4c6736454c4fe96e5c3debc3cd",
+  "fleet_sizes": [
+    2
+  ],
+  "task_counts": [
+    4
+  ],
+  "max_steps": 20,
+  "contingency_depth": 1,
+  "resolved_hyperparameters": {
+    "aca": {
+      "kappa": 1.0,
+      "contingency_depth": 1
+    },
+    "cbba_lr": {
+      "contingency_depth": 1
+    }
+  }
+}
