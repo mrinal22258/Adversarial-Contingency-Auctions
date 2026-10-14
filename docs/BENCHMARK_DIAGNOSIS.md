@@ -77,7 +77,7 @@ To explore candidate improvements following root-cause analysis, a pilot heurist
 - **Script:** `experiments/run_heldout_eval.py`
 - **Instances:** $N = 60$ independent matched instances (300 total trials across 5 methods).
 - **Execution Time:** $52.3$ seconds (174.2 ms/trial).
-- **Stored Data:** `results/confirmatory/heldout_results.csv`, `results/confirmatory/heldout_summary.csv`.
+- **Stored Data:** `results/pilot/stage4_pilot_results.csv`, `results/pilot/stage4_pilot_summary.csv`.
 - **CRITICAL AUDIT NOTE (Non-Replication in Protocol v5):** While ACA-Adaptive and ACA+ demonstrated initial positive gains in this $N=60$ pilot, these improvements **did NOT replicate out-of-sample** when evaluated in the full pre-registered Protocol v5 confirmatory grid ($N = 450$ instances, 3,600 trials, seeds 101–130; ACA+ $92.44\%$ vs ACA static $92.40\%$, difference $+0.04$ pp, Holm $p = 1.000$). Scientific integrity requires classifying these findings strictly as Tier 2 pilot results superseded by Tier 3 confirmatory evidence.
 
 #### Pilot Evaluation Results ($N = 60$ Matched Pilot Instances, Seeds 51–60)

@@ -66,7 +66,7 @@
 - [x] **Full Regression Test Suite:** Executed full test suite with **138 tests passing in 135.56s** with zero regressions.
 - [x] **Pre-Registered Held-Out Confirmatory Evaluation:** Created `experiments/run_heldout_eval.py` and executed 300 trials on strictly disjoint held-out seeds (51–60) across Boston OSMnx, MovingAI warehouse, and RGG topologies.
 - [x] **Statistically Significant Improvement Confirmed:** ACA-Adaptive demonstrated a statistically significant $+2.67\%$ completion gain ($p = 0.0076$, Cohen's $d_z = 0.327$) over standard ACA on held-out instances; ACA+ demonstrated $+3.00\%$ gain ($p = 0.0249$).
-- [x] **Confirmatory Telemetry & Provenance:** Output saved to `results/confirmatory/heldout_results.csv` and `results/confirmatory/heldout_summary.csv`.
+- [x] **Confirmatory Telemetry & Provenance:** Output saved to `results/pilot/stage4_pilot_results.csv` and `results/pilot/stage4_pilot_summary.csv`.
 - [x] **Stage 4 Confirmatory Report:** Authored `audit/STAGE4_CONFIRMATORY_REPORT.md`.
 
 ---

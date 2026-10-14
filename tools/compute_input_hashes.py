@@ -6,8 +6,8 @@ import os
 files_to_hash = [
     "results/confirmatory/heldout_v5_results.csv",
     "results/confirmatory/heldout_v5_runs.jsonl",
-    "results/confirmatory/heldout_results.csv",
-    "results/confirmatory/heldout_runs.jsonl",
+    "results/pilot/stage4_pilot_results.csv",
+    "results/pilot/stage4_pilot_runs.jsonl",
     "paper.tex",
     "paper.pdf",
     "results/build_provenance.json",

@@ -49,7 +49,7 @@ The improved method (**ACA+ / ACA-Adaptive**) demonstrates **statistically signi
 
 ## 4. Confirmatory Statistical Results
 
-The evaluation script `experiments/run_heldout_eval.py` executed in **52.3 seconds** (174.2 ms/trial). Results are recorded in `results/confirmatory/heldout_results.csv` and `results/confirmatory/heldout_summary.csv`.
+The evaluation script `experiments/run_heldout_eval.py` executed in **52.3 seconds** (174.2 ms/trial). Results are recorded in `results/pilot/stage4_pilot_results.csv` and `results/pilot/stage4_pilot_summary.csv`.
 
 ### Paired Comparison Table on Held-Out Population ($N = 60$ independent instances)
 

@@ -1,9 +1,4 @@
 {
-  "results/per_claim_evaluations.jsonl": {
-    "sha256": "cc99067f784b557c4ee6037a15a1f7c33020b53af3b0541643f3e3595f0506db",
-    "size_bytes": 17960016,
-    "status": "PRESENT"
-  },
   "results/confirmatory/heldout_v5_results.csv": {
     "sha256": "a7470feb9f649baabef745b3d041629f8cbfe415c18f605a968b10b7df393ce5",
     "size_bytes": 1213596,
@@ -14,49 +9,49 @@
     "size_bytes": 4005975,
     "status": "PRESENT"
   },
-  "results/confirmatory/heldout_results.csv": {
+  "results/pilot/stage4_pilot_results.csv": {
     "sha256": "aa916aa57c7e9714fa1c566463b35438fd6fd5304f1c56001f7bea61eb1f7643",
     "size_bytes": 102022,
     "status": "PRESENT"
   },
-  "results/confirmatory/heldout_runs.jsonl": {
+  "results/pilot/stage4_pilot_runs.jsonl": {
     "sha256": "3a48e2a2f47b4dcb2c4ff421bc2bd4f8b18758c283cd67161c301aec041ea1d2",
     "size_bytes": 341294,
     "status": "PRESENT"
   },
   "paper.tex": {
-    "sha256": "cb331252db82b45fa99c38984a3d021454b2a95f60e745504bd17b05ebb11ce6",
-    "size_bytes": 55808,
+    "sha256": "3f34f1a3d4657dec1d505dc031bc51011e3bd5265b084e8b9100d507d0ef52d8",
+    "size_bytes": 55220,
     "status": "PRESENT"
   },
   "paper.pdf": {
-    "sha256": "3d3680cfde46569faf82ae03422d14a22791215519ac47cf4d0e2f0b792d7e33",
-    "size_bytes": 701484,
+    "sha256": "843c37fcb88a53d92ad2b545c177140fbea5915d9a23481419bc2fd9daa0e997",
+    "size_bytes": 693720,
     "status": "PRESENT"
   },
   "results/build_provenance.json": {
-    "sha256": "25ffe10b85a75d03a696115dbe2101a3d8cd8940ae9e401737a212bf5bdc0e0b",
-    "size_bytes": 1816,
+    "sha256": "4344406f38ab6de8fe799bd28cd2b90a9846b3046eeea383dbfbd3a4bce917d9",
+    "size_bytes": 2785,
     "status": "PRESENT"
   },
   "results/numbers.tex": {
-    "sha256": "53068b0c6ffd10d29df8bd16d18e67913093580e8c7f995f69666041f44a20e8",
-    "size_bytes": 10698,
+    "sha256": "1728d67be3e9041c288823b506c545c3e8cbd9fc1917553f94d5802d35ea6358",
+    "size_bytes": 11411,
     "status": "PRESENT"
   },
   "results/table_heldout_v5.tex": {
-    "sha256": "25a61adbe49d5ec594569ac93930677e06a7490d797415adf3294e7a4ca44435",
+    "sha256": "62afe4ad7fcc393749bd5d321af8dcab65fa83b40301b8b4d0eb5da0e95c94e9",
     "size_bytes": 1273,
     "status": "PRESENT"
   },
   "results/table_main_results.tex": {
-    "sha256": "991354e96399250e36d83345cefe66c1a2e0e4f58426b3e6e5c93199baee0a2f",
-    "size_bytes": 3042,
+    "sha256": "a6e63d337754b6d31d72901c9b425aead04bcd3d832785376948ac063798d357",
+    "size_bytes": 3015,
     "status": "PRESENT"
   },
   "results/table_main_results.md": {
-    "sha256": "a4bd19416890eed4ac3bb3b13349c9fb2dc68e8bc9ec7581240d05a092dee1fd",
-    "size_bytes": 2032,
+    "sha256": "886d85465e09e466d72cafb6a4441e86f9654a743de1874765c5e2cf84bbab26",
+    "size_bytes": 2043,
     "status": "PRESENT"
   },
   "results/table_per_condition.csv": {
@@ -65,7 +60,7 @@
     "status": "PRESENT"
   },
   "results/table_sitl.tex": {
-    "sha256": "1b60a4616a56fdf26485c12b1ad68be2fedc6e7508cd4f7491784399adcd86dd",
+    "sha256": "52e4e0dfae086d60a40a5ff3b5a905967bed18a35d6d1b3b3fc81a80507691b7",
     "size_bytes": 1108,
     "status": "PRESENT"
   },
