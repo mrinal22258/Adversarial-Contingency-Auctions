@@ -47,5 +47,6 @@ scratch/
 *.orig
 *.swp
 *~
-debug.log
 release/
+ui.zip
+update.zip
