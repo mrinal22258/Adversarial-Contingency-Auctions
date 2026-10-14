@@ -12,6 +12,32 @@ from ..agents.robot import RobotAgent
 from ..env.comm import CommunicationNetwork
 
 
+_ALL_PAIRS_DIST_CACHE: Dict[Any, Dict[Any, Dict[Any, float]]] = {}
+
+
+def get_all_pairs_distances(graph: nx.Graph) -> Dict[Any, Dict[Any, float]]:
+    """Retrieve or compute all-pairs Dijkstra path lengths with caching by topology."""
+    if hasattr(graph, "_all_pairs_dist_cache") and graph._all_pairs_dist_cache is not None:
+        return graph._all_pairs_dist_cache
+
+    n_nodes = len(graph)
+    n_edges = len(graph.edges())
+    g_hash = getattr(graph, "graph", {}).get("sha256")
+    cache_key = (g_hash, n_nodes, n_edges)
+
+    if g_hash is not None and cache_key in _ALL_PAIRS_DIST_CACHE:
+        return _ALL_PAIRS_DIST_CACHE[cache_key]
+
+    dists = dict(nx.all_pairs_dijkstra_path_length(graph, weight="weight"))
+    if g_hash is not None:
+        _ALL_PAIRS_DIST_CACHE[cache_key] = dists
+    try:
+        graph._all_pairs_dist_cache = dists
+    except Exception:
+        pass
+    return dists
+
+
 class CBBAAllocator(BaseAllocator):
     """
     Standard decentralized Consensus-Based Bundle Algorithm.
@@ -37,9 +63,7 @@ class CBBAAllocator(BaseAllocator):
         self.s: Dict[int, Dict[int, int]] = {
             i: {k: 0 for k in self.fleet_ids} for i in self.fleet_ids
         }
-        self._dist_cache: Dict[Any, Dict[Any, float]] = dict(
-            nx.all_pairs_dijkstra_path_length(graph, weight="weight")
-        )
+        self._dist_cache: Dict[Any, Dict[Any, float]] = get_all_pairs_distances(graph)
 
     def _get_marginal_score(
         self,

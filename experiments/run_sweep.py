@@ -333,8 +333,26 @@ def run_single_trial(
     return row
 
 
+def get_default_workers() -> int:
+    """Determine default worker count based on physical CPU cores."""
+    try:
+        import psutil
+        cores = psutil.cpu_count(logical=False)
+        if cores and cores > 0:
+            return cores
+    except Exception:
+        pass
+    logical = os.cpu_count() or 4
+    return max(1, logical // 2)
+
+
 def _worker_wrapper(args_tuple):
-    """Wrapper for multiprocessing."""
+    """Wrapper for multiprocessing with single-threaded BLAS to prevent oversubscription."""
+    os.environ["OMP_NUM_THREADS"] = "1"
+    os.environ["MKL_NUM_THREADS"] = "1"
+    os.environ["OPENBLAS_NUM_THREADS"] = "1"
+    os.environ["VECLIB_MAXIMUM_THREADS"] = "1"
+    os.environ["NUMEXPR_NUM_THREADS"] = "1"
     return run_single_trial(*args_tuple)
 
 
@@ -386,12 +404,15 @@ def main():
     parser.add_argument("--pilot", action="store_true", help="Run disjoint pilot sweep on seeds 10000-10009")
     parser.add_argument("--output", type=str, default=None, help="Output summary CSV")
     parser.add_argument("--output-dir", type=str, default=None, help="Directory for all run outputs (CSV, JSONL, traces)")
-    parser.add_argument("--workers", type=int, default=8, help="Number of parallel worker processes")
+    parser.add_argument("--workers", type=int, default=None, help="Number of parallel worker processes (defaults to physical cores)")
     parser.add_argument("--dry-run", action="store_true", help="Resolve and validate config, print planned workload, run NO simulator")
     parser.add_argument("--smoke-test", action="store_true", help="Run single tiny trial to verify end-to-end pipeline")
     parser.add_argument("--strict", action="store_true", help="Fail closed on any malformed record, hash mismatch, or dirty git")
     parser.add_argument("--confirmatory", action="store_true", help="Enforce confirmatory reproducibility (clean git, strict cache)")
     args = parser.parse_args()
+
+    if args.workers is None:
+        args.workers = get_default_workers()
 
     # Protocol selection override
     if args.protocol == "v6":

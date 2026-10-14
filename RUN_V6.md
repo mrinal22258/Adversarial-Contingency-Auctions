@@ -62,7 +62,7 @@ STATUS: PROTOCOL VERIFIED 100% VALID AND FROZEN (PASS)
 | Evaluated Methods | 9 (`aca`, `aca_plus`, `aca_adaptive`, `aca_no_margin`, `aca_depth_0`, `cbba_lr`, `cbba_partial_lr`, `ctp_replan`, `ssi_lr`) |
 | Fleet / Tasks | 4 robots, 15 tasks, bundle capacity 4, horizon 80 ticks |
 | **Total Trials** | **6,750 trials** ($5 \times 3 \times 1 \times 50 \times 9$) |
-| **Estimated Runtime** | **~35–45 CPU-hours** (~4.5 hours on an 8-core CPU) |
+| **Estimated Runtime** | **~40 CPU-hours** (40 CPU-hours ÷ cores, e.g., ~10.0 h on 4 cores, ~5.0 h on 8 cores, ~2.5 h on 16 cores, ~1.25 h on 32 cores; see `results/perf/throughput.md`) |
 
 Output is strictly isolated under `results/confirmatory_v6/`. Global `results/runs.jsonl` is not touched.
 

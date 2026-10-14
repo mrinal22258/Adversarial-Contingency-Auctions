@@ -68,13 +68,23 @@ class ACAAllocator(CBBAAllocator):
         fleet_states: Optional[Dict[int, Any]] = None,
     ) -> Dict[Tuple[Any, Any], float]:
         """Compute edge blockage marginals under peer s's ToM belief as estimated by robot r."""
+        cache_key = (robot_id, peer_id)
+        if hasattr(self, "_round_marginal_cache") and self._round_marginal_cache is not None:
+            if cache_key in self._round_marginal_cache:
+                return self._round_marginal_cache[cache_key]
+
         robot = self.robots[robot_id]
         if fleet_states is None:
-            fleet_states = {r_id: r.get_state_summary() for r_id, r in self.robots.items()}
+            fleet_states = getattr(self, "_round_fleet_states", None)
+            if fleet_states is None:
+                fleet_states = {r_id: r.get_state_summary() for r_id, r in self.robots.items()}
 
         peer_belief_vec = robot.tom_tracker.peer_beliefs.get(peer_id)
         if peer_belief_vec is None:
-            return robot.get_edge_marginals(fleet_states=fleet_states)
+            res = robot.get_edge_marginals(fleet_states=fleet_states)
+            if hasattr(self, "_round_marginal_cache") and self._round_marginal_cache is not None:
+                self._round_marginal_cache[cache_key] = res
+            return res
 
         from ..env.adversaries import compute_fleet_edge_robot_counts, compute_interdiction_cut
         edges = list(self.graph.edges())
@@ -101,6 +111,9 @@ class ACAAllocator(CBBAAllocator):
                 denom = max(1e-5, h + robot.type_filter.clearance_rate)
                 pi_e += float(peer_belief_vec[i]) * (h / denom)
             marginals[c_e] = float(np.clip(pi_e, 0.01, 0.99))
+
+        if hasattr(self, "_round_marginal_cache") and self._round_marginal_cache is not None:
+            self._round_marginal_cache[cache_key] = marginals
         return marginals
 
     def _estimate_peer_cost(
@@ -377,6 +390,10 @@ class ACAAllocator(CBBAAllocator):
         """
         # Handle replan requests from robots experiencing unresolvable blockages
         round_replans = self.handle_replan_requests(tasks, current_step, robot_positions)
+
+        # Initialize invariant caches for this auction round
+        self._round_marginal_cache = {}
+        self._round_fleet_states = {r_id: r.get_state_summary() for r_id, r in self.robots.items()}
 
         # Clean up completed tasks from tables and robot bundles
         for rid in self.fleet_ids:
