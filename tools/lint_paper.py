@@ -22,6 +22,8 @@ import subprocess
 from typing import List, Tuple, Optional
 
 REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+if REPO_ROOT not in sys.path:
+    sys.path.insert(0, REPO_ROOT)
 DATA_MAPS_DIR = os.path.join(REPO_ROOT, "data", "maps")
 
 
@@ -282,29 +284,7 @@ def check_unmacroed_literal_numbers(tex_content: str) -> List[str]:
     return errors
 
 
-def get_git_commit() -> Optional[str]:
-    """Retrieve current Git HEAD commit hash."""
-    git_bin = shutil.which("git") or r"C:\Program Files\Git\cmd\git.exe"
-    try:
-        res = subprocess.run([git_bin, "rev-parse", "HEAD"], capture_output=True, text=True, check=True)
-        return res.stdout.strip()
-    except Exception:
-        git_dir = os.path.join(REPO_ROOT, ".git")
-        head_file = os.path.join(git_dir, "HEAD")
-        if os.path.exists(head_file):
-            try:
-                with open(head_file, "r") as f:
-                    ref = f.read().strip()
-                if ref.startswith("ref: "):
-                    ref_path = os.path.join(git_dir, ref[5:])
-                    if os.path.exists(ref_path):
-                        with open(ref_path, "r") as f:
-                            return f.read().strip()
-                else:
-                    return ref
-            except Exception:
-                pass
-    return None
+from acalib.utils.gitinfo import get_git_info, get_git_commit
 
 
 def check_staleness(tex_content: str, base_dir: str = REPO_ROOT, strict_release: bool = False) -> List[str]:
@@ -316,26 +296,19 @@ def check_staleness(tex_content: str, base_dir: str = REPO_ROOT, strict_release:
     4. the paper cites sizes not in the results
     """
     errors = []
-    current_commit = get_git_commit()
+    git_info = get_git_info()
+    current_commit = git_info.commit if git_info.commit != "unknown" else None
     results_dir = os.path.join(REPO_ROOT, "results")
     raw_results_path = os.path.join(results_dir, "raw_results.csv")
     runs_jsonl_path = os.path.join(results_dir, "runs.jsonl")
 
     # 1. results git_commit != code commit (Rule R1: must equal HEAD with a clean tree in release mode)
-    git_bin = shutil.which("git") or r"C:\Program Files\Git\cmd\git.exe"
-    is_dirty = False
-    try:
-        status_res = subprocess.run([git_bin, "status", "--porcelain"], capture_output=True, text=True, check=False)
-        if status_res.returncode == 0 and status_res.stdout.strip():
-            dirty_lines = [l for l in status_res.stdout.strip().splitlines() if not l.endswith("paper.pdf")]
-            if dirty_lines:
-                is_dirty = True
-                if strict_release:
-                    errors.append(f"Dirty working tree: {len(dirty_lines)} uncommitted changes detected. Results commit must equal HEAD with a clean tree.")
-                else:
-                    print(f"  [NOTICE: DEV MODE] Dirty working tree ({len(dirty_lines)} uncommitted files). Valid development artifact.")
-    except Exception:
-        pass
+    is_dirty = git_info.is_dirty
+    if is_dirty:
+        if strict_release:
+            errors.append("Dirty working tree: uncommitted changes detected. Results commit must equal HEAD with a clean tree.")
+        else:
+            print("  [NOTICE: DEV MODE] Dirty working tree. Valid development artifact.")
 
     if current_commit:
         git_bin = shutil.which("git") or r"C:\Program Files\Git\cmd\git.exe"

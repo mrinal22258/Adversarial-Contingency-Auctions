@@ -22,16 +22,13 @@ sys.path.insert(0, REPO_ROOT)
 
 from acalib.data.schema import validate_results_dataframe, count_instances_and_trials
 from acalib.demo.provenance import verify_map_provenance, VerificationState
+from acalib.utils.gitinfo import get_git_info as _get_git_info
 from tools.build_claim_ledger_v2 import build_claim_ledger_v2
 
 
 def get_git_info() -> dict:
-    try:
-        commit = subprocess.check_output("git rev-parse HEAD", cwd=REPO_ROOT, shell=True, text=True).strip()
-        status = subprocess.check_output("git status --porcelain", cwd=REPO_ROOT, shell=True, text=True).strip()
-        return {"commit": commit, "is_dirty": len(status) > 0}
-    except Exception as e:
-        return {"commit": "UNKNOWN", "is_dirty": True, "error": str(e)}
+    info = _get_git_info(REPO_ROOT)
+    return {"commit": info.commit, "is_dirty": info.is_dirty, "source": info.source}
 
 
 def compute_file_sha256(path: str) -> str:

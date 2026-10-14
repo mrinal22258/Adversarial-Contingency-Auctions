@@ -98,26 +98,7 @@ def parse_seeds_from_prereg(filepath: str) -> Tuple[List[int], List[int]]:
 FROZEN_DEV_SEEDS = [40484, 40506, 40601, 40685, 40827, 41625, 41883, 41904, 42246, 42740, 43213, 44518, 44544, 44637, 44867]
 
 
-def check_git_status() -> Tuple[bool, str, str]:
-    git_bins = ["git", r"C:\Program Files\Git\cmd\git.exe"]
-    commit = "unknown"
-    for git_bin in git_bins:
-        try:
-            commit = subprocess.check_output([git_bin, "rev-parse", "HEAD"], stderr=subprocess.DEVNULL).decode("ascii").strip()
-            if commit:
-                break
-        except Exception:
-            pass
-
-    for git_bin in git_bins:
-        try:
-            status = subprocess.check_output([git_bin, "status", "--porcelain"], stderr=subprocess.DEVNULL).decode("utf-8").strip()
-            lines = [l for l in status.splitlines() if not l.startswith("?? results/test_logs") and not l.startswith("?? ACA_End_to_End_Audit")]
-            is_clean = len(lines) == 0
-            return is_clean, commit, status
-        except Exception as e:
-            pass
-    return False, commit, "git_uninspectable"
+from acalib.utils.gitinfo import check_git_status
 
 
 def verify_protocol(config_path: str, prereg_path: str = "protocols/prereg-v6.md", strict: bool = False) -> Dict[str, Any]:

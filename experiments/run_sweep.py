@@ -38,40 +38,9 @@ from acalib.sim.engine import SimulationEngine
 from acalib.data.logger import AtomicJsonlWriter, compute_record_hash
 
 
-def get_git_commit_hash() -> str:
-    """Retrieve current git commit hash if in a git repository."""
-    git_bins = ["git", r"C:\Program Files\Git\cmd\git.exe"]
-    for git_bin in git_bins:
-        try:
-            commit = (
-                subprocess.check_output([git_bin, "rev-parse", "HEAD"], stderr=subprocess.DEVNULL)
-                .decode("ascii")
-                .strip()
-            )
-            if commit:
-                return commit
-        except Exception:
-            pass
-    return "unknown"
+from acalib.utils.gitinfo import get_git_info, get_git_commit, check_git_clean
 
-
-def check_git_clean() -> Tuple[bool, str]:
-    """Check if git working tree is clean. Returns (is_clean, status_str)."""
-    git_bins = ["git", r"C:\Program Files\Git\cmd\git.exe"]
-    for git_bin in git_bins:
-        try:
-            status = (
-                subprocess.check_output([git_bin, "status", "--porcelain"], stderr=subprocess.DEVNULL)
-                .decode("utf-8")
-                .strip()
-            )
-            # Filter untracked test logs or temp files if needed, but porcelain output checks tracked modifications
-            lines = [l for l in status.splitlines() if not l.startswith("?? results/test_logs") and not l.startswith("?? ACA_End_to_End_Audit")]
-            is_clean = len(lines) == 0
-            return (is_clean, "clean" if is_clean else f"dirty: {status}")
-        except Exception:
-            pass
-    return (False, "git_uninspectable")
+get_git_commit_hash = get_git_commit
 
 
 def compute_trial_hash(condition_dict: Dict[str, Any]) -> str:
@@ -437,12 +406,15 @@ def main():
     # Git cleanliness check (fail-closed in confirmatory mode)
     git_clean, git_msg = check_git_clean()
     git_commit = get_git_commit_hash()
+    git_info = get_git_info()
 
     if is_confirmatory or args.strict:
         if not git_clean:
             raise RuntimeError(f"Confirmatory/strict mode failure: Git working tree is dirty ({git_msg}).")
         if git_commit == "unknown":
             raise RuntimeError("Confirmatory/strict mode failure: Git commit hash is unknown.")
+        if git_info.source != "git":
+            raise RuntimeError(f"Confirmatory/strict mode failure: Must run within a live Git repository (got source '{git_info.source}').")
 
     # Output directory isolation
     out_cfg = yaml_config.get("output", {})

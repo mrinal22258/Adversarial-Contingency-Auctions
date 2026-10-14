@@ -78,14 +78,7 @@ def apply_ieee_style():
     })
 
 
-def get_git_commit():
-    """Retrieve git commit hash for provenance."""
-    git_cmd = r"C:\Program Files\Git\cmd\git.exe"
-    try:
-        commit = subprocess.check_output([git_cmd, "rev-parse", "HEAD"], stderr=subprocess.DEVNULL).decode("ascii").strip()
-        return commit
-    except Exception:
-        return "unknown"
+from acalib.utils.gitinfo import get_git_commit
 
 
 def write_figure_provenance(fig_path: str, source_files: list, n_instances: int, extra_meta: dict = None):

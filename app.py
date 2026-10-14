@@ -28,9 +28,10 @@ if __name__ == "__main__":
     server_name = os.environ.get("HOST", "127.0.0.1")
     print(f"[*] Starting ACA Mission Control on {server_name}:{server_port}...")
     print(f"[*] Browser URL: http://localhost:{server_port} or http://127.0.0.1:{server_port}")
+    show_error = os.environ.get("ACA_DEBUG") == "1"
     demo.launch(
         server_name=server_name,
         server_port=server_port,
-        show_error=True,
+        show_error=show_error,
     )
 

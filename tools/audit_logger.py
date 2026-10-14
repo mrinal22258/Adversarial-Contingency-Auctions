@@ -34,9 +34,11 @@ def log_command(command: str, exit_code: int, stdout: str = "", stderr: str = ""
 
 
 def run_and_log(cmd_list, cwd=REPO_ROOT, env=None) -> subprocess.CompletedProcess:
+    import shlex
     start = time.time()
     cmd_str = " ".join(cmd_list) if isinstance(cmd_list, list) else str(cmd_list)
-    res = subprocess.run(cmd_list, cwd=cwd, env=env, capture_output=True, text=True, shell=isinstance(cmd_list, str))
+    cmd = shlex.split(cmd_list) if isinstance(cmd_list, str) else list(cmd_list)
+    res = subprocess.run(cmd, cwd=cwd, env=env, capture_output=True, text=True)
     dur = time.time() - start
     log_command(cmd_str, res.returncode, stdout=res.stdout, stderr=res.stderr, cwd=cwd, duration_sec=dur)
     return res
