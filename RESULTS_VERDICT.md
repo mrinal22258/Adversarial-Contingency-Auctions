@@ -1,7 +1,6 @@
 # RESULTS_VERDICT.md: Empirical Verdict for Hypotheses H1-H8 (Exploratory Grid & Protocol v5 Held-Out)
 
 **Protocol Status**: Protocol v6 is registered and cryptographically locked (`prereg-v6.1`, SHA-256: `09638b69...`), with confirmatory cluster execution pending (see `RUN_V6.md`). Results below report:
-<!-- GENERATED_VERDICT_START -->
 1. **Tier 1 (Exploratory Grid)**: Hypotheses H1–H8 from the nominal balanced core grid ($N=250$ independent clusters, 750 paired trials).
 2. **Tier 2 (Held-Out v5 Confirmatory)**: Pre-registered out-of-sample evaluation on un-tuned seeds 101–130 ($N=450$ instances, 3600 trials), confirming the Pinsker margin's conflict reduction and revealing the CBBA+LR performance reversal.
 3. **Tier 3 (Protocol v6 Confirmatory)**: Registered, execution pending.
@@ -9,7 +8,6 @@
 **Strict Rule R5**: Every empirical claim in the paper maps directly to a verified hypothesis ID below.
 Generated directly from executed raw runs, matched independent instance-level tests, and directional decision rules.
 
-<!-- GENERATED_VERDICT_TABLE_START -->
 | ID | Title | Metric | N | Mean Diff | HL Median [95% CI] | Cliff's Delta | Raw p | Adj p (Holm/BH) | Bonferroni p | Verdict |
 |---|---|---|---|---|---|---|---|---|---|---|
 | H1 | Recourse Efficacy (ACA vs ACA-d0) | completion_rate_pct | 250 instances | 4.14 | 3.33 [2.22, 4.44] | 0.241 | 3.4774e-12 | 2.0865e-11 | 2.0865e-11 | **SUPPORTED (ACA SUPERIOR)** |
@@ -27,7 +25,6 @@ Generated directly from executed raw runs, matched independent instance-level te
 | H7 | Assumption 1 Empirical TV Adherence (TV <= eta_eff vs 0.90) | tv_bound_adherence_rate | 250 instances | -0.3395 | 0.5605 [0.5318, 0.589] | 0.0 | 1.0000 | 1.0000 | N/A | **NOT SUPPORTED (BELOW THRESHOLD)** |
 | H7_CONFLICT_FREE_RATE | Conflict-Free-Run Rate (0 Safe-Claim Conflicts) | conflict_free_run_rate | 1,650 runs | 0.0824 | 0.9824 [0.9761, 1.0] | 0.0 | N/A | N/A | N/A | **DESCRIPTIVE (98.24% CONFLICT-FREE)** |
 | H8 | Robustness on theta_4 (ACA vs best ctp_replan) | completion_rate_pct | 250 instances | -5.33 | -3.33 [-3.33, -3.33] | -0.28 | 6.7940e-14 | 1.0870e-13 | N/A | **SIGNIFICANT DIFFERENCE (COMPARATOR HIGHER)** |
-<!-- GENERATED_VERDICT_TABLE_END -->
 
 ## Pre-Registered Sample Sizes (n per family)
 
@@ -41,7 +38,6 @@ Generated directly from executed raw runs, matched independent instance-level te
 
 ## Key Scientific Findings & Narrative Decision Rules
 
-<!-- GENERATED_FINDINGS_START -->
 - **H1 (Recourse Efficacy (ACA vs ACA-d0))** [N=250 instances; n=50 per family]: completion_rate_pct mean difference = +4.14 (HL median diff = +3.33, 95% CI [2.22, 4.44], Cliff's delta = 0.241, adjusted p = 2.0865e-11). Verdict: **SUPPORTED (ACA SUPERIOR)**.
 - **H2 (Level Execution (ACA vs cbba_lr))** [N=250 instances; n=50 per family]: completion_rate_pct mean difference = +2.14 (HL median diff = +1.90, 95% CI [1.11, 3.02], Cliff's delta = 0.114, adjusted p = 7.8864e-04). Verdict: **SIGNIFICANT DIFFERENCE (ACA HIGHER)**.
 - **H2 (Level Execution (ACA vs cbba_partial_lr))** [N=250 instances; n=50 per family]: completion_rate_pct mean difference = +0.25 (HL median diff = +0.00, 95% CI [-0.83, 0.83], Cliff's delta = -0.015, adjusted p = 0.8836). Verdict: **PARITY (NO SIGNIFICANT DIFFERENCE)**.
@@ -57,9 +53,7 @@ Generated directly from executed raw runs, matched independent instance-level te
 - **H7 (Assumption 1 Empirical TV Adherence (TV <= eta_eff vs 0.90))** [N=250 instances; n=50 per family]: tv_bound_adherence_rate mean difference = -0.3395 (Bootstrap Mean = 0.5605, 95% CI [0.5318, 0.589], Cliff's delta = 0.000, adjusted p = 1.0000). Verdict: **NOT SUPPORTED (BELOW THRESHOLD)**.
 - **H7_CONFLICT_FREE_RATE (Conflict-Free-Run Rate (0 Safe-Claim Conflicts))** [N=1,650 runs]: conflict_free_run_rate = 0.9824 (95% CI [0.9761, 1.0], Cliff's delta = 0.000). Verdict: **DESCRIPTIVE (98.24% CONFLICT-FREE)**.
 - **H8 (Robustness on theta_4 (ACA vs best ctp_replan))** [N=250 instances; n=50 per family]: completion_rate_pct mean difference = -5.33 (HL median diff = -3.33, 95% CI [-3.33, -3.33], Cliff's delta = -0.280, adjusted p = 1.0870e-13). Verdict: **SIGNIFICANT DIFFERENCE (COMPARATOR HIGHER)**.
-<!-- GENERATED_FINDINGS_END -->
 
-<!-- GENERATED_ANALYSES_START -->
 ### Step 4B Dedicated Methodological Analyses
 
 #### 1. Baseline Comparator Evaluation: ACA vs CBBA-PR+LR (H2)
@@ -117,6 +111,4 @@ Generated directly from executed raw runs, matched independent instance-level te
 1. **Critical Reversal**: When baselines receive identical local recourse (+LR), **CBBA+LR outperforms ACA+** in completion (94.67% vs 92.44%, diff -2.22 pp, 95% CI [-3.05, -1.35]), reversing historical v1-v4 claims that ACA was broadly superior across all metrics.
 2. **Margin Mechanism Confirmed**: **H7_aca_nomargin_conf** confirms the Pinsker margin reduces total conflicts by 20.6% ($p < 0.001$, diff -10.27 conflicts), at a slight cost in completion (-1.08 pp, $p_{\text{adj}} = 0.0906$).
 3. **Decisive Superiority over SSI**: **H6_aca_plus_vs_ssi_comp** confirms ACA+ decisively outperforms Single-Item Auctions (+11.96 pp completion, $p < 0.001$).
-<!-- GENERATED_ANALYSES_END -->
-<!-- GENERATED_VERDICT_END -->
 

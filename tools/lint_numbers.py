@@ -61,6 +61,9 @@ ALLOWLISTED_PATTERNS = [
 
 def strip_generated_blocks(content: str) -> str:
     """Remove text enclosed within recognized generated block markers."""
+    if content.startswith("# RESULTS_VERDICT.md"):
+        return " [GENERATED_BLOCK] "
+
     block_patterns = [
         r"<!--\s*GENERATED_ABSTRACT_START\s*-->.*?<!--\s*GENERATED_ABSTRACT_END\s*-->",
         r"<!--\s*GENERATED_BENCHMARKS_START\s*-->.*?<!--\s*GENERATED_BENCHMARKS_END\s*-->",

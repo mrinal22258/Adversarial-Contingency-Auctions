@@ -139,19 +139,20 @@ def run_pipeline(protocol: str = "v5", strict: bool = False) -> bool:
     print(f"-> Claim ledger V2 verified with {len(ledger_df)} material claims.")
     provenance["steps"]["step6_claim_ledger"] = "PASS"
 
-    # Step 7: Compiling Manuscript
-    log_step("Step 7: Compiling Paper Manuscript (pdflatex)")
-    tex_path = os.path.join(REPO_ROOT, "paper.tex")
-    if shutil_which("pdflatex"):
-        cmd = ["pdflatex", "-interaction=nonstopmode", "paper.tex"]
-        res = subprocess.run(cmd, cwd=REPO_ROOT, capture_output=True, text=True)
-        if res.returncode != 0:
-            print(f"[FAIL] LaTeX compilation failed with return code {res.returncode}")
+    # Step 7: Compiling Manuscript & Supplement
+    log_step("Step 7: Compiling Paper Manuscript & Supplement (build_paper.py)")
+    if shutil_which("pdflatex") and shutil_which("bibtex"):
+        try:
+            import tools.build_paper as bp
+            bp.compile_doc("paper")
+            bp.compile_doc("supplement")
+            print("-> paper.pdf and supplement.pdf compiled successfully via full bibtex pipeline.")
+            provenance["steps"]["step7_paper_compile"] = "PASS"
+        except Exception as e:
+            print(f"[FAIL] LaTeX/BibTeX compilation failed: {e}")
             return False
-        print("-> paper.pdf compiled successfully.")
-        provenance["steps"]["step7_paper_compile"] = "PASS"
     else:
-        print("[WARNING] pdflatex not found on PATH; skipping compilation.")
+        print("[WARNING] pdflatex or bibtex not found on PATH; skipping compilation.")
         provenance["steps"]["step7_paper_compile"] = "SKIPPED_NO_PDFLATEX"
 
     # Step 8: Strict Paper Linter
@@ -182,6 +183,7 @@ def run_pipeline(protocol: str = "v5", strict: bool = False) -> bool:
         "audit/CLAIM_LEDGER.csv",
         "audit/CLAIM_LEDGER_V2.csv",
         "paper.pdf",
+        "supplement.pdf",
     ]
     for rel_path in artifacts_to_hash:
         full = os.path.join(REPO_ROOT, rel_path)

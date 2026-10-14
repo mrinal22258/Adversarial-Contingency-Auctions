@@ -1,6 +1,6 @@
 {
   "figure_file": "static/images\\fig_welfare_messages.png",
-  "git_commit": "da68be270a59eee710c300d6bfdfbd8109150518",
+  "git_commit": "c48b5029bd9c76393e3fc3a7508e64fb58e06256",
   "source_files": [
     "results/stats/instance_aggregated_results.csv"
   ],

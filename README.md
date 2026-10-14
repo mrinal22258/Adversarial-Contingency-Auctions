@@ -6,7 +6,7 @@
 
 [![CI Status](https://github.com/anonymous/adversarial-contingency-auctions/actions/workflows/ci.yml/badge.svg)](https://github.com/anonymous/adversarial-contingency-auctions/actions)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
-[![Tests: Suite Status](https://img.shields.io/badge/tests-168%20passed%20(54%20deselected)-brightgreen.svg)]()
+[![Tests: Suite Status](https://img.shields.io/badge/tests-173%20passed%20(54%20deselected)-brightgreen.svg)]()
 [![Simulation: Pure Software](https://img.shields.io/badge/simulation-pure%20software-informational.svg)]()
 [![Protocol: prereg--v6.2](https://img.shields.io/badge/protocol-prereg--v6.2-blueviolet.svg)](protocols/prereg-v6.md)
 
@@ -31,7 +31,7 @@ In decentralized multi-robot task allocation, strategic adversarial path blockag
 Adversarial Contingency Auctions (ACA) is a decentralized coordination framework designed for multi-robot fleets operating in contested environments where edges may be dynamically blocked by adversarial agents and robots maintain subjective, divergent worldviews. ACA addresses these challenges through three foundational mechanisms:
 
 1. **Expected-Recourse Valuation (Proposition 1):** Instead of evaluating tasks along a single brittle shortest path, each robot computes the expected traversal cost over a depth-$d$ contingency branching tree. Robots evaluate alternative bypass branches weighted by a Bayesian posterior over adversary behavioral types ($\mathcal{P}(\theta^*)$), pricing risk directly into auction bids.
-2. **Pinsker Belief-Divergence Claim Margin (Theorem 1):** Divergent subjective beliefs between robots can cause simultaneous claims on identical tasks. ACA derives a closed-form claim margin $m_{r,j} = \Delta_j (\sqrt{\frac{1}{2} D'_{\text{KL}}} + \eta_{\text{eff}}) + \delta_{\text{map}}$ from Pinsker's inequality and total variation triangle bounds. Under Assumption 1 ($\mathrm{TV}(B_s, \hat{B}_s^{(r)}) \le \eta_{\text{eff}}$), this margin mathematically guarantees conflict-free safe task claims without exchanging full belief vectors.
+2. **Pinsker Belief-Divergence Claim Margin (Theorem 1):** Divergent subjective beliefs between robots can cause simultaneous claims on identical tasks. ACA derives a closed-form claim margin $m_{r,j} = \Delta_j (\sqrt{\frac{1}{2} D'_{\text{KL}}} + \eta_{\text{eff}}) + \delta_{\text{map}}$ from Pinsker's inequality and total variation triangle bounds. Under Theorem 1, conditional on Assumption 1 (bounded belief estimation error $\mathrm{TV}(B_s, \hat{B}_s^{(r)}) \le \eta_{\text{eff}}$), this margin mathematically guarantees conflict-free safe task claims without exchanging full belief vectors.
 3. **Zero-Message Local Detour Execution (Proposition 3):** When an agent encounters an edge blockage during plan execution, it immediately activates its precomputed local contingency detour branch with zero inter-robot communication messages. Global market re-auctions are triggered only upon complete recourse tree exhaustion.
 
 ---
@@ -104,7 +104,7 @@ To ensure scientific honesty and transparency, all project claims are demarcated
 1. **Exploratory Main Grid Findings:** On the balanced nominal benchmark grid ($N = 250$ independent clusters, 750 paired trials), ACA achieves an exploratory completion gain of $+2.14$ percentage points over CBBA+LR ($p = 0.004$ under cluster-level Holm adjustment).
 2. **Out-of-Sample Protocol v5 Headline Reversal:** On held-out un-tuned seeds 101–130 ($N = 450$ instances, 3,600 trials), when baseline CBBA is equipped with local recourse (+LR), **CBBA+LR outperforms ACA** on task completion (94.67% vs. 92.40%, paired difference +2.27 pp) and net welfare (958.9 vs. 937.4) with fewer conflicts (25.48 vs. 39.66). This establishes that local detour execution is the primary driver of corridor completion, while ACA's primary scientific advantage is safe decentralized coordination via the Pinsker margin under communication constraints.
 3. **Pinsker Margin Trade-Off:** The Pinsker claim margin reduces total conflicts by 20.6% (39.66 vs. 49.93, $p < 0.001$) relative to unregularized coordination, at a modest, non-significant completion difference ($-1.08$ pp, $p_{\text{adj}} = 0.091$).
-4. **Conditional Safety Guarantee (Theorem 1):** Across 106,214 analyzed task claims, Assumption 1 adherence holds in $21.08\%$ of safe claims ($12,087$ commitments); under verified adherence, exactly $0$ conflicts occurred ($95\%$ one-sided Clopper-Pearson bound $\le 0.025\%$), providing empirical validation of Theorem 1 within its declared conditional scope.
+4. **Conditional Safety Guarantee (Theorem 1):** Across 106,214 analyzed task claims under Theorem 1, conditional on Assumption 1 (bounded belief estimation error), adherence holds in $21.08\%$ of safe claims ($12,087$ commitments); under verified adherence, exactly $0$ conflicts occurred ($95\%$ one-sided Clopper-Pearson bound $\le 0.025\%$), providing empirical validation of Theorem 1 within its declared conditional scope.
 5. **Decentralized Superiority over SSI:** ACA decisively outperforms Single-Item Auctions ($+11.96$ pp completion, $p < 10^{-25}$).
 6. **Physical Simulation Domain Gap:** Software-in-the-Loop continuous physics introduces an average completion drop of $\approx 18.9$ pp and rank invariance failure across simulation fidelities ($\rho = 0.486, p = 0.328$). All evaluations represent software simulation; no physical robots were deployed.
 
@@ -161,7 +161,7 @@ Run the full test suite (excluding slow SITL physics and external solvers):
 ```powershell
 pytest -q -m "not (sitl or ortools or ui)"
 ```
-Saved run log: `results/test_logs/gate-6.txt` (168 passed, 54 deselected, 2 warnings).
+Saved run log: `results/test_logs/gate-6.txt` (173 passed, 54 deselected, 2 warnings).
 
 ### 3. Run Smoke Pipeline
 Verify end-to-end execution on development seeds with the 2-seed smoke pipeline:
