@@ -14,7 +14,7 @@
 | **P0-1** | Sweep runner config identity, resume key, output isolation, exact seed execution | **Fixed** | `c9d4de2` | `tests/test_runner_protocol.py` (8/8 passed) |
 | **P0-2** | Policy equivalence between priced recursive tree and runtime execution | **Fixed** | `a886500` | `tests/test_policy_equivalence.py` (7/7 passed) |
 | **P0-3** | Existing experiment data pre-dates repair; prepare fresh v6 confirmatory run | **Fixed** | `da68be2` | `tests/test_gate5_protocol_and_smoke.py`, `RUN_V6.md`, `results/smoke/` |
-| **P0-4** | ACA+ pruning threshold inactive in v5; active pruning with recovery cost leaves | **Fixed** | `a886500` | `tests/test_policy_equivalence.py` (threshold=0.20 > 0.12 on dev seeds) |
+| **P0-4** | ACA+ pruning threshold inactive in v5; active pruning with recovery cost leaves | **Calibrated** | `experiments/run_prune_dev_tuning.py` | $\tau_{\text{prune}}=0.15$ selected from $\{0.15, 0.20, 0.25\}$ on 15 dev seeds via parsimony tie-break ($\le 0.5$ pp). Provenance: `results/tuning/prune_dev_v6.csv`, `prune_dev_v6_summary.json` |
 | **P0-5** | Belief/hazard interface called with default fleet state in planning paths | **Fixed** | `166b3d1` | `tests/test_hazard_interface.py` (6/6 passed), `docs/HAZARD_CONTRACT.md` |
 | **P0-6** | Exact recursive expected cost scope (independent-Bernoulli) & fail-closed marginals | **Fixed** | `a886500` | `tests/test_policy_equivalence.py` (missing marginal raises `MissingMarginalError`) |
 | **P1-1** | Paper headline reconciled with held-out negative result (CBBA+LR reversal) | **Fixed** | `4acb3f9` | `tests/test_gate6_manuscript_ui_docs.py` (abstract & discussion updated) |
@@ -49,7 +49,7 @@
 
 ### What the Paper CANNOT Claim Today:
 1. **Cannot Claim Confirmatory Validation of the Repaired Recursive Planner:** The newly implemented full recursive tree planner, active pruning with recovery cost leaves, and grounded hazard interface have not been executed across the 50 confirmatory seeds ($40$ CPU-hours). Protocol v6 is registered and cryptographically frozen, but its confirmatory execution remains pending per `RUN_V6.md`.
-2. **Cannot Claim Active Pruning Benefits in Protocol v5:** In Protocol v5, ACA+ set $\tau_{\text{prune}} = 0.06 < \tau_{\text{planner}} = 0.12$, rendering pruning functionally inactive. v5 results demonstrate parity with static ACA, but do not provide evidence for active pruning. Active pruning ($\tau = 0.20$) will be evaluated in Protocol v6.
+2. **Cannot Claim Active Pruning Benefits in Protocol v5:** In Protocol v5, ACA+ set $\tau_{\text{prune}} = 0.06 < \tau_{\text{planner}} = 0.12$, rendering pruning functionally inactive. v5 results demonstrate parity with static ACA, but do not provide evidence for active pruning. Active pruning ($\tau_{\text{prune}} = 0.15$, empirically selected on development seeds) will be evaluated in Protocol v6.
 3. **Cannot Claim General Completion Dominance over CBBA+LR:** Out-of-sample confirmatory evidence demonstrates that CBBA+LR is superior in unconstrained task completion and welfare.
 4. **Cannot Claim Online Type Inference Advantage:** Online Bayesian adversary type inference shows statistical parity with a static uniform prior ($p = 0.515$).
 5. **Cannot Claim Universal Conflict-Freedom:** Theorem 1 applies strictly when $\mathrm{TV} \le \eta_{\text{eff}}$; safe claims outside this condition incurred 330 conflicts in historical logs.

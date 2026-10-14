@@ -1,0 +1,56 @@
+{
+  "protocol": "v6",
+  "evaluation_phase": "development_seeds_only",
+  "code_commit": "645ace2d7450e3ecdafa5cf816064fdfbdbea4d5",
+  "date_utc": "2026-10-14T07:33:32Z",
+  "total_seeds": 15,
+  "seeds": [
+    40484,
+    40506,
+    40601,
+    40685,
+    40827,
+    41625,
+    41883,
+    41904,
+    42246,
+    42740,
+    43213,
+    44518,
+    44544,
+    44637,
+    44867
+  ],
+  "selection_rule": "Primary = mean completion rate (%); ties within 0.5 pp choose smaller threshold for parsimony.",
+  "candidate_results": [
+    {
+      "prune_threshold": 0.15,
+      "mean_completion_pct": 88.26666666666667,
+      "std_completion_pct": 18.32813779194807,
+      "mean_net_welfare": 895.4601302036233,
+      "mean_conflicts": 37.91555555555556,
+      "total_trials": 225
+    },
+    {
+      "prune_threshold": 0.2,
+      "mean_completion_pct": 86.81481481481481,
+      "std_completion_pct": 19.33871481387937,
+      "mean_net_welfare": 890.2131978622365,
+      "mean_conflicts": 37.39555555555555,
+      "total_trials": 225
+    },
+    {
+      "prune_threshold": 0.25,
+      "mean_completion_pct": 88.35555555555555,
+      "std_completion_pct": 17.27784157595529,
+      "mean_net_welfare": 893.8427356015789,
+      "mean_conflicts": 39.61333333333334,
+      "total_trials": 225
+    }
+  ],
+  "winning_prune_threshold": 0.15,
+  "winning_mean_completion_pct": 88.26666666666667,
+  "winning_mean_net_welfare": 895.4601302036233,
+  "winning_mean_conflicts": 37.91555555555556,
+  "status": "DETERMINED"
+}

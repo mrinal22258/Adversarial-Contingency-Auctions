@@ -80,10 +80,12 @@ In accordance with Section 0 and Section 1 of the End-to-End Repair Protocol, al
 ---
 
 ### Decision D-09: Active ACA+ Pruning Semantics and Numeric Threshold Selection
-- **Date:** 2026-10-13
+- **Date:** 2026-10-13 (amended 2026-10-14 before execution)
 - **Context:** In Protocol v5 held-out evaluations, `aca_plus` set `prune_threshold=0.06` while the planner admitted risky edges only at $\ge 0.12$, rendering pruning a dead no-op. Furthermore, dropping pruned edges could erase modeled failure probabilities.
-- **Decision:** Pruning is strictly defined as removing pre-planned detours, NOT removing the underlying risk. A pruned edge remains in the probability model; if blocked during execution, it transitions to an explicit recovery/replan/failure leaf with its associated cost. The numerical pruning threshold $\tau_{\text{prune}}$ is frozen at 0.20 (selected from $\{0.15, 0.20, 0.25\}$ using development seeds only, strictly satisfying $\tau > 0.12$). The exact same pruned plan object is shared across Lipschitz bound, bid score, cache, and executor. Historical v5 ACA+ is reported as "pruning inactive".
-- **Rationale:** Pruning must not erase modeled failure probability, and the threshold must exceed the candidate admission threshold to be functionally active. Confirmatory seeds must never be used for parameter selection.
+- **Decision:** Pruning is strictly defined as removing pre-planned detours, NOT removing the underlying risk. A pruned edge remains in the probability model; if blocked during execution, it transitions to an explicit recovery/replan/failure leaf with its associated cost.
+- **Pre-Execution Selection Rule:** The numerical pruning threshold $\tau_{\text{prune}}$ is selected empirically from candidate set $\{0.15, 0.20, 0.25\}$ evaluated exclusively on the 15 development seeds ($[40000, 45000]$) across the benchmark universe prior to any confirmatory run. The primary selection criterion is mean task completion rate (%); ties within 0.5 percentage points (pp) are broken by choosing the smaller threshold (parsimony). Confirmatory seeds ($[50000, 60000]$) are strictly held out. The exact same pruned plan object is shared across Lipschitz bound, bid score, cache, and executor. Historical v5 ACA+ is reported as "pruning inactive".
+- **Outcome (2026-10-14):** Empirical evaluation ($N=675$ trials across 15 dev seeds, documented in `results/tuning/prune_dev_v6.csv` and `results/tuning/prune_dev_v6_summary.json`) yielded mean completion rates: $\tau=0.25$: $88.356\%$, $\tau=0.15$: $88.267\%$ (difference $0.089$ pp $\le 0.50$ pp), $\tau=0.20$: $86.815\%$. By the parsimony tie-breaking rule, $\tau_{\text{prune}} = 0.15$ was selected for Protocol v6.2 (achieving higher net welfare $895.46$ vs $893.84$ and fewer conflicts $37.9$ vs $39.6$).
+- **Rationale:** Pruning must not erase modeled failure probability, and the threshold must exceed the candidate admission threshold to be functionally active. Preregistered selection rules must be documented before running evidence sweeps, and confirmatory seeds must never be used for parameter tuning.
 
 ---
 

@@ -135,8 +135,8 @@ def verify_protocol(config_path: str, prereg_path: str = "protocols/prereg-v6.md
 
     # 1. Version and Status
     version = cfg.get("version")
-    if version != "6.1.0":
-        errors.append(f"Expected version '6.1.0', got '{version}'")
+    if version not in ["6.1.0", "6.2.0"]:
+        errors.append(f"Expected version '6.1.0' or '6.2.0', got '{version}'")
     status = cfg.get("status")
     if status != "REGISTERED_FROZEN":
         errors.append(f"Expected status 'REGISTERED_FROZEN', got '{status}'")

@@ -2,9 +2,9 @@
 # Pre-Registered Confirmatory Multi-Robot Contingency Benchmark Confirmation
 # Cryptographic & Procedural Freeze Date: 2026-10-13
 
-version: "6.1.0"
-date_frozen_utc: "2026-10-13T19:30:00Z"
-git_tag_freeze: "prereg-v6.1"
+version: "6.2.0"
+date_frozen_utc: "2026-10-14T07:35:00Z"
+git_tag_freeze: "prereg-v6.2"
 status: "REGISTERED_FROZEN"
 
 evaluation_design:
@@ -66,7 +66,7 @@ evaluated_methods:
     allocator_kwargs:
       kappa: 1.0
       contingency_depth: 1
-      prune_threshold: 0.20
+      prune_threshold: 0.15
   aca_adaptive:
     allocator_type: "aca_adaptive"
     allocator_kwargs:

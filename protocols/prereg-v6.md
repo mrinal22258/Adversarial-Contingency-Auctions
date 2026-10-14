@@ -1,8 +1,8 @@
 # Protocol v6: Pre-Registered Multi-Robot Contingency Benchmark Confirmation
 
-**Date of Cryptographic Freeze**: 2026-10-13  
-**Protocol Version**: 6.1.0  
-**Git Tag**: `prereg-v6.1`  
+**Date of Cryptographic Freeze**: 2026-10-14  
+**Protocol Version**: 6.2.0  
+**Git Tag**: `prereg-v6.2`  
 **Status**: REGISTERED_FROZEN (Confirmation execution pending compute allocation)
 
 ---
@@ -64,7 +64,7 @@ All methods are evaluated on identical shared cells (Common Random Numbers) acro
 
 ### Evaluated Methods:
 1. `aca`: Adversarial Contingency Auctions with recursive depth-$d$ recourse and closed-form Pinsker margin ($\kappa=1.0$).
-2. `aca_plus`: Pruned recourse tree with calibrated threshold $\tau_{\text{prune}} = 0.20 > \tau_{\text{planner}} = 0.12$.
+2. `aca_plus`: Pruned recourse tree with calibrated threshold $\tau_{\text{prune}} = 0.15 > \tau_{\text{planner}} = 0.12$.
 3. `aca_adaptive`: Shannon entropy-adaptive margin inflation.
 4. `aca_no_margin`: Ablation with $\kappa = 0.0$ (no Pinsker margin).
 5. `aca_depth_0`: Ablation with $d = 0$ (no contingency detour branches).
@@ -101,3 +101,19 @@ All methods are evaluated on identical shared cells (Common Random Numbers) acro
 - **Status**: Registered and cryptographically frozen.
 - **Compute Availability**: Formal 50-seed execution requires ~40 CPU-hours. Dry run on 5 development seeds verified. Full confirmatory benchmark run will proceed when high-throughput cluster compute is scheduled.
 - **Hold-Out Integrity**: Seeds $50000 \dots 60000$ remain strictly untouched.
+
+---
+
+## 8. Chronological Pre-Execution Amendments
+
+### Amendment 1 (2026-10-13): Algorithmic Seed Sequence Alignment
+- In v6.0, the written seed list was evenly spaced and did not match the pseudo-random generator output. Corrected to exact sequence from `np.random.default_rng(20261013)` before any v6 execution.
+
+### Amendment 2 (2026-10-14): Empirical Pruning Threshold Selection ($\tau_{\text{prune}} = 0.15$)
+- **Context**: Decision D-09 specified candidate set $\{0.15, 0.20, 0.25\}$ with primary criterion = mean task completion rate on the 15 development seeds ($[40000, 45000]$), with ties within 0.5 pp broken by choosing the smaller threshold (parsimony).
+- **Evidence**: Executed in `experiments/run_prune_dev_tuning.py` across 15 development seeds ($N=675$ trials). Results recorded in `results/tuning/prune_dev_v6.csv` and `results/tuning/prune_dev_v6_summary.json`:
+  - $\tau = 0.25$: mean completion $88.356\%$, welfare $893.84$, conflicts $39.61$.
+  - $\tau = 0.15$: mean completion $88.267\%$, welfare $895.46$, conflicts $37.92$.
+  - $\tau = 0.20$: mean completion $86.815\%$, welfare $890.21$, conflicts $37.40$.
+- **Selection**: Completion difference between $0.25$ and $0.15$ is $0.089\text{ pp} \le 0.50\text{ pp}$. The parsimony tie-breaker rule selects $\tau_{\text{prune}} = 0.15$ for Protocol v6.2.
+- **Historical Notice**: Historical `results/tuning/best_hyperparameters.json` (listing $\tau=0.06$ on seeds 1-30) is marked as historical v5-era artifact and is not used in Protocol v6.

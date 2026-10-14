@@ -1,4 +1,5 @@
 {
+  "_historical_notice": "HISTORICAL (v5-era, pre-repair code, evaluated on seeds 1-30). Not used in Protocol v6.",
   "aca_adaptive": {
     "parameter": "margin_kappa",
     "best_value": 0.5,

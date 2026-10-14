@@ -436,7 +436,14 @@ def generate_numbers(
     add("aePvalHeldoutSsi", "< 0.001")
     add("aeHeldoutPruneThreshold", "0.06")
     add("aePlannerRiskThreshold", "0.12")
-    add("aePruneThresholdSix", "0.20")
+    protocol_v6_path = os.path.join(REPO_ROOT, "experiments", "configs", "protocol_v6.yaml")
+    prune_v6_val = "0.15"
+    if os.path.exists(protocol_v6_path):
+        import yaml
+        with open(protocol_v6_path, "r", encoding="utf-8") as pf:
+            pcfg = yaml.safe_load(pf)
+        prune_v6_val = str(pcfg.get("evaluated_methods", {}).get("aca_plus", {}).get("allocator_kwargs", {}).get("prune_threshold", "0.15"))
+    add("aePruneThresholdSix", prune_v6_val)
     add("aeHeldoutAdaptiveKappa", "0.5")
     add("aeAdaptiveStaticBound", "1.0")
     add("aeAdaptiveBaseFactor", "0.75")

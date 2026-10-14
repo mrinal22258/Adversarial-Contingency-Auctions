@@ -55,7 +55,7 @@ All claims and metrics in this repository are partitioned into three explicitly 
 ### Key Empirical Takeaways Across Tiers:
 - **Headline Reversal on Unconstrained Completion (Tier 2):** When baselines are equipped with local recourse execution (`CBBA+LR`), CBBA+LR outperforms ACA on completion ($94.67\%$ vs. $92.40\%$, paired diff $+2.22$ pp) and net welfare ($958.9$ vs. $937.4$) with fewer conflicts ($25.48$ vs. $39.66$), demonstrating that ACA's advantage is safe coordination under communication constraints rather than uniform completion dominance.
 - **Pinsker Margin Trade-Off Confirmed (Tier 2):** On the confirmatory held-out grid, the Pinsker margin reduces total task conflicts by 20.6% ($38.6$ vs. $49.9$, paired difference $-10.27$, $p_{\text{adj}} < 0.001$) relative to unregularized coordination (`no-margin`), with only a modest, non-significant completion difference ($-1.08$ pp, $p_{\text{adj}} = 0.091$).
-- **Inactive Pruning in Protocol v5:** In Protocol v5, ACA+ pruning was functionally inactive ($\tau_{\text{prune}} = 0.06 < \tau_{\text{planner}} = 0.12$). Active pruning with calibrated threshold $\tau = 0.20$ is registered for Protocol v6.
+- **Inactive Pruning in Protocol v5:** In Protocol v5, ACA+ pruning was functionally inactive ($\tau_{\text{prune}} = 0.06 < \tau_{\text{planner}} = 0.12$). Active pruning with calibrated threshold $\tau = 0.15$ is registered for Protocol v6.
 - **Negative Result on Type Inference (Tier 1):** Online Bayesian adversary type inference shows statistical parity with a static uniform prior ($p = 0.515$), indicating that generic corridor detour structures saturate benefit before fine-grained type identification.
 
 All empirical data is generated automatically with zero hand-typed numbers:
