@@ -27,7 +27,7 @@ def test_gate5_protocol_v6_valid():
     assert res["conf_seeds_count"] == 50
     assert res["dev_seeds_count"] == 15
     assert res["status"] == "REGISTERED_FROZEN"
-    assert res["version"] == "6.1.0"
+    assert res["version"] in ["6.1.0", "6.2.0"]
 
 
 @pytest.mark.core

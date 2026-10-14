@@ -1,9 +1,10 @@
 {
-  "version": "2.0.0",
-  "description": "Unified verified empirical result model for ACA benchmark",
+  "version": "2.1.0",
+  "description": "Unified verified empirical result model for ACA benchmark with reconciled named populations",
   "input_hashes": {
     "raw_results.csv": "3a1fc0416ce060f59fdb92ee25dc262a9b7560e7a5984b40fddee7ee392878c4",
     "heldout_v5_results.csv": "a7470feb9f649baabef745b3d041629f8cbfe415c18f605a968b10b7df393ce5",
+    "stage4_pilot_results.csv": "aa916aa57c7e9714fa1c566463b35438fd6fd5304f1c56001f7bea61eb1f7643",
     "per_claim_evaluations.jsonl": "cc99067f784b557c4ee6037a15a1f7c33020b53af3b0541643f3e3595f0506db",
     "sitl_vs_graph_summary.json": "186569824d0914984c023cbc53d356a882cbc692694572185321c777628e8443",
     "vision_metrics.json": "d495d0eac3e0d0abe20da3716ec0b4ac3bb4f637dd694ee04b03d5343aa70588",
@@ -21,12 +22,15 @@
     "clopper_pearson_upper_pct": 0.024781675038487716
   },
   "populations": {
-    "nominal_balanced_core": {
-      "cell_N": 10500,
-      "instances": 750,
-      "pairs": 750,
-      "clusters": 250,
+    "exploratory_core": {
+      "name": "exploratory_core",
+      "file": "results/raw_results.csv",
+      "filter": "comm_regime == 'nominal' and 14 core methods and 3 nominal adversaries",
+      "n_rows": 10500,
+      "n_instances": 750,
+      "n_clusters": 250,
       "n_seeds": 50,
+      "n_methods": 14,
       "methods": [
         "aca",
         "aca_depth_0",
@@ -42,14 +46,58 @@
         "implicit",
         "ssi",
         "ssi_lr"
-      ]
+      ],
+      "row_id_sha256": "5349dcfffd524395ab825ec95a7bf4c5c1b925b3abd524a0c5821109980d492e",
+      "description": "Nominal balanced core grid: 50 seeds x 5 families x 3 adversaries x 14 methods = 10,500 trials.",
+      "cell_N": 10500,
+      "instances": 750,
+      "pairs": 750,
+      "clusters": 250
     },
-    "protocol_v5_confirmatory": {
-      "cell_N": 3600,
-      "instances": 450,
-      "pairs": 450,
-      "clusters": 150,
+    "exploratory_sweep": {
+      "name": "exploratory_sweep",
+      "file": "results/raw_results.csv",
+      "filter": "none (full raw sweep including OFAT ablations)",
+      "n_rows": 13800,
+      "n_instances": 920,
+      "n_clusters": 250,
+      "n_seeds": 50,
+      "n_methods": 21,
+      "methods": [
+        "aca",
+        "aca_depth_0",
+        "aca_depth_2",
+        "aca_kappa_0",
+        "aca_kappa_0.1",
+        "aca_kappa_0.25",
+        "aca_kappa_0.5",
+        "aca_kappa_1",
+        "aca_kappa_2",
+        "aca_no_inference",
+        "aca_no_margin",
+        "cbba",
+        "cbba_lr",
+        "cbba_partial",
+        "cbba_partial_lr",
+        "clairvoyant_greedy",
+        "ctp_replan",
+        "foresight_opt",
+        "implicit",
+        "ssi",
+        "ssi_lr"
+      ],
+      "row_id_sha256": "3a1fc0416ce060f59fdb92ee25dc262a9b7560e7a5984b40fddee7ee392878c4",
+      "description": "Full exploratory sweep dataset: 10,500 core trials + 3,300 OFAT ablation trials = 13,800 trials."
+    },
+    "heldout_v5": {
+      "name": "heldout_v5",
+      "file": "results/confirmatory/heldout_v5_results.csv",
+      "filter": "none (all held-out v5 trials)",
+      "n_rows": 3600,
+      "n_instances": 450,
+      "n_clusters": 150,
       "n_seeds": 30,
+      "n_methods": 8,
       "methods": [
         "aca",
         "aca_adaptive",
@@ -59,8 +107,148 @@
         "cbba_partial_lr",
         "ctp_replan",
         "ssi_lr"
-      ]
+      ],
+      "row_id_sha256": "a7470feb9f649baabef745b3d041629f8cbfe415c18f605a968b10b7df393ce5",
+      "description": "Protocol v5 held-out confirmatory evaluation: 30 seeds x 5 families x 3 adversaries x 8 methods = 3,600 trials.",
+      "cell_N": 3600,
+      "instances": 450,
+      "pairs": 450,
+      "clusters": 150
+    },
+    "pilot_stage4": {
+      "name": "pilot_stage4",
+      "file": "results/pilot/stage4_pilot_results.csv",
+      "filter": "none (Stage 4 pilot search)",
+      "n_rows": 300,
+      "n_instances": 60,
+      "n_clusters": 30,
+      "n_seeds": 10,
+      "n_methods": 5,
+      "methods": [
+        "aca",
+        "aca_adaptive",
+        "aca_plus",
+        "cbba_lr",
+        "ctp_replan"
+      ],
+      "row_id_sha256": "aa916aa57c7e9714fa1c566463b35438fd6fd5304f1c56001f7bea61eb1f7643",
+      "description": "Stage 4 pilot search: 10 seeds (51-60) x 3 families x 2 adversaries x 5 methods = 300 trials."
+    },
+    "sitl": {
+      "name": "sitl",
+      "file": "results/sitl/analysis/sitl_vs_graph_summary.json",
+      "filter": "matched continuous vs discrete trials",
+      "n_rows": 360,
+      "n_instances": 360,
+      "n_clusters": 18,
+      "n_seeds": 360,
+      "n_methods": 4,
+      "methods": [
+        "aca",
+        "cbba_lr",
+        "cbba_partial_lr",
+        "ctp_replan"
+      ],
+      "row_id_sha256": "186569824d0914984c023cbc53d356a882cbc692694572185321c777628e8443",
+      "description": "Software-in-the-loop physics simulation: 18 condition cells x 20 matched seeds = 360 matched pairs."
+    },
+    "v6_confirmatory": {
+      "name": "v6_confirmatory",
+      "file": "results/confirmatory_v6/results.csv (pending execution)",
+      "filter": "protocol v6.2 confirmatory specification",
+      "n_rows": 0,
+      "n_instances": 750,
+      "n_clusters": 250,
+      "n_seeds": 50,
+      "n_methods": 9,
+      "methods": [
+        "aca",
+        "aca_plus",
+        "aca_adaptive",
+        "aca_no_margin",
+        "aca_depth_0",
+        "cbba_lr",
+        "cbba_partial_lr",
+        "ctp_replan",
+        "ssi_lr"
+      ],
+      "row_id_sha256": "PENDING_EXECUTION",
+      "status": "EXECUTION_PENDING",
+      "description": "Protocol v6 confirmatory replication: 50 seeds x 5 families x 3 adversaries x 9 methods = 6,750 trials registered."
+    },
+    "nominal_balanced_core": {
+      "name": "exploratory_core",
+      "file": "results/raw_results.csv",
+      "filter": "comm_regime == 'nominal' and 14 core methods and 3 nominal adversaries",
+      "n_rows": 10500,
+      "n_instances": 750,
+      "n_clusters": 250,
+      "n_seeds": 50,
+      "n_methods": 14,
+      "methods": [
+        "aca",
+        "aca_depth_0",
+        "aca_depth_2",
+        "aca_no_inference",
+        "aca_no_margin",
+        "cbba",
+        "cbba_lr",
+        "cbba_partial",
+        "cbba_partial_lr",
+        "clairvoyant_greedy",
+        "ctp_replan",
+        "implicit",
+        "ssi",
+        "ssi_lr"
+      ],
+      "row_id_sha256": "5349dcfffd524395ab825ec95a7bf4c5c1b925b3abd524a0c5821109980d492e",
+      "description": "Nominal balanced core grid: 50 seeds x 5 families x 3 adversaries x 14 methods = 10,500 trials.",
+      "cell_N": 10500,
+      "instances": 750,
+      "pairs": 750,
+      "clusters": 250
+    },
+    "protocol_v5_confirmatory": {
+      "name": "heldout_v5",
+      "file": "results/confirmatory/heldout_v5_results.csv",
+      "filter": "none (all held-out v5 trials)",
+      "n_rows": 3600,
+      "n_instances": 450,
+      "n_clusters": 150,
+      "n_seeds": 30,
+      "n_methods": 8,
+      "methods": [
+        "aca",
+        "aca_adaptive",
+        "aca_no_margin",
+        "aca_plus",
+        "cbba_lr",
+        "cbba_partial_lr",
+        "ctp_replan",
+        "ssi_lr"
+      ],
+      "row_id_sha256": "a7470feb9f649baabef745b3d041629f8cbfe415c18f605a968b10b7df393ce5",
+      "description": "Protocol v5 held-out confirmatory evaluation: 30 seeds x 5 families x 3 adversaries x 8 methods = 3,600 trials.",
+      "cell_N": 3600,
+      "instances": 450,
+      "pairs": 450,
+      "clusters": 150
     }
+  },
+  "population_reconciliation": {
+    "n_sweep_trials_raw_results": 13800,
+    "n_core_trials_exploratory": 10500,
+    "n_instances_exploratory": 750,
+    "n_clusters_exploratory": 250,
+    "n_seeds_exploratory": 50,
+    "n_heldout_v5_trials": 3600,
+    "n_heldout_v5_instances": 450,
+    "n_heldout_v5_clusters": 150,
+    "n_stage4_pilot_trials": 300,
+    "n_stage4_pilot_instances": 60,
+    "historical_18720_explanation": "The historical manuscript cited '18,720 total sweep trials' (an unexecuted theoretical grid budget). In verified empirical data, results/raw_results.csv contains exactly 13,800 trials (50 seeds, 5 graph families, 21 allocator variants). The primary balanced core grid contains exactly 10,500 trials (750 instances = 50 seeds x 5 families x 3 adversaries; 250 clusters = 50 seeds x 5 families; 14 methods). The remaining 3,300 trials in raw_results.csv are OFAT ablations. The result model corrects this count to the actual data (13,800).",
+    "seed_vs_cluster_explanation": "The README phrase '14 allocators on seeds 1-250' conflated cluster count with seed count. The actual evaluation used seeds 1-50 across 5 graph families, yielding 50 x 5 = 250 independent clusters.",
+    "heldout_conflict_reduction_explanation": "In heldout_v5_results.csv, ACA achieves 39.66 conflicts/trial vs 49.93 for ACA (No Margin), a reduction of 10.27 conflicts (-20.6%). The historical README typo '38.6' is reconciled to the true data value 39.7 (39.66)."
   },
   "metrics": {
     "nominal_balanced_core": {
@@ -2990,6 +3178,2934 @@
           "sum": 1523.2098693613411
         }
       }
+    },
+    "exploratory_core": {
+      "aca": {
+        "completion_rate_pct": {
+          "mean": 90.89777777777778,
+          "cell_ci_95": [
+            90.04444444444444,
+            91.79555555555554
+          ],
+          "cell_ci_half": 0.8755555555555503,
+          "cluster_ci_95": [
+            89.54644444444445,
+            92.20444444444446
+          ],
+          "cluster_ci_half": 1.3290000000000077,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 68173.33333333333
+        },
+        "net_welfare": {
+          "mean": 920.7269755327541,
+          "cell_ci_95": [
+            898.9467047971158,
+            941.3781943730779
+          ],
+          "cell_ci_half": 21.215744787981066,
+          "cluster_ci_95": [
+            884.9764745286078,
+            955.3373158757793
+          ],
+          "cluster_ci_half": 35.18042067358573,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 690545.2316495655
+        },
+        "distinct_conflicts": {
+          "mean": 6.290666666666667,
+          "cell_ci_95": [
+            6.089333333333333,
+            6.496
+          ],
+          "cell_ci_half": 0.2033333333333336,
+          "cluster_ci_95": [
+            5.965333333333334,
+            6.613366666666667
+          ],
+          "cluster_ci_half": 0.3240166666666666,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 4718.0
+        },
+        "total_conflicts": {
+          "mean": 38.112,
+          "cell_ci_95": [
+            35.80526666666666,
+            40.4867
+          ],
+          "cell_ci_half": 2.340716666666669,
+          "cluster_ci_95": [
+            34.7091,
+            41.79643333333333
+          ],
+          "cluster_ci_half": 3.5436666666666667,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 28584.0
+        },
+        "safe_claim_conflicts": {
+          "mean": 0.014666666666666666,
+          "cell_ci_95": [
+            0.005333333333333333,
+            0.025333333333333333
+          ],
+          "cell_ci_half": 0.01,
+          "cluster_ci_95": [
+            0.0013333333333333333,
+            0.034666666666666665
+          ],
+          "cluster_ci_half": 0.016666666666666666,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 11.0
+        },
+        "safe_claims": {
+          "mean": 18.24,
+          "cell_ci_95": [
+            17.822533333333332,
+            18.686766666666667
+          ],
+          "cell_ci_half": 0.43211666666666737,
+          "cluster_ci_95": [
+            17.589066666666668,
+            18.885366666666666
+          ],
+          "cluster_ci_half": 0.6481499999999993,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 13680.0
+        },
+        "deferred_claims": {
+          "mean": 103.612,
+          "cell_ci_95": [
+            96.48713333333333,
+            110.96023333333332
+          ],
+          "cell_ci_half": 7.236549999999994,
+          "cluster_ci_95": [
+            92.37296666666667,
+            115.8882
+          ],
+          "cluster_ci_half": 11.757616666666664,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 77709.0
+        },
+        "total_claims": {
+          "mean": 121.852,
+          "cell_ci_95": [
+            114.69096666666667,
+            129.29623333333333
+          ],
+          "cell_ci_half": 7.302633333333333,
+          "cluster_ci_95": [
+            110.5677,
+            134.10686666666666
+          ],
+          "cluster_ci_half": 11.76958333333333,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 91389.0
+        },
+        "total_messages": {
+          "mean": 235.824,
+          "cell_ci_95": [
+            225.14600000000002,
+            246.72013333333334
+          ],
+          "cell_ci_half": 10.78706666666666,
+          "cluster_ci_95": [
+            219.90066666666667,
+            251.0421333333333
+          ],
+          "cluster_ci_half": 15.570733333333322,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 176868.0
+        },
+        "mean_tick_runtime_ms": {
+          "mean": 35.520664864801084,
+          "cell_ci_95": [
+            33.06033500712208,
+            38.035158170949046
+          ],
+          "cell_ci_half": 2.4874115819134843,
+          "cluster_ci_95": [
+            31.374213884704595,
+            39.75384092223973
+          ],
+          "cluster_ci_half": 4.1898135187675685,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 26640.498648600813
+        }
+      },
+      "aca_depth_0": {
+        "completion_rate_pct": {
+          "mean": 86.75555555555555,
+          "cell_ci_95": [
+            85.69777777777777,
+            87.85777777777777
+          ],
+          "cell_ci_half": 1.0799999999999983,
+          "cluster_ci_95": [
+            85.16444444444444,
+            88.2311111111111
+          ],
+          "cluster_ci_half": 1.5333333333333314,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 65066.66666666666
+        },
+        "net_welfare": {
+          "mean": 916.2103071031845,
+          "cell_ci_95": [
+            897.2783321672742,
+            934.5041858749892
+          ],
+          "cell_ci_half": 18.61292685385746,
+          "cluster_ci_95": [
+            885.2655504244259,
+            945.374916315391
+          ],
+          "cluster_ci_half": 30.05468294548257,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 687157.7303273884
+        },
+        "distinct_conflicts": {
+          "mean": 6.621333333333333,
+          "cell_ci_95": [
+            6.4093,
+            6.820033333333334
+          ],
+          "cell_ci_half": 0.20536666666666692,
+          "cluster_ci_95": [
+            6.301266666666667,
+            6.929333333333333
+          ],
+          "cluster_ci_half": 0.31403333333333316,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 4966.0
+        },
+        "total_conflicts": {
+          "mean": 41.998666666666665,
+          "cell_ci_95": [
+            39.72383333333333,
+            44.29213333333333
+          ],
+          "cell_ci_half": 2.2841500000000003,
+          "cluster_ci_95": [
+            38.61306666666667,
+            45.47476666666666
+          ],
+          "cluster_ci_half": 3.430849999999996,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 31499.0
+        },
+        "safe_claim_conflicts": {
+          "mean": 0.13466666666666666,
+          "cell_ci_95": [
+            0.10266666666666667,
+            0.168
+          ],
+          "cell_ci_half": 0.03266666666666667,
+          "cluster_ci_95": [
+            0.09066666666666667,
+            0.18803333333333316
+          ],
+          "cluster_ci_half": 0.048683333333333245,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 101.0
+        },
+        "safe_claims": {
+          "mean": 21.249333333333333,
+          "cell_ci_95": [
+            20.709333333333333,
+            21.854666666666667
+          ],
+          "cell_ci_half": 0.5726666666666667,
+          "cluster_ci_95": [
+            20.553233333333335,
+            21.95873333333333
+          ],
+          "cluster_ci_half": 0.7027499999999982,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 15937.0
+        },
+        "deferred_claims": {
+          "mean": 73.13733333333333,
+          "cell_ci_95": [
+            66.97973333333334,
+            80.16136666666667
+          ],
+          "cell_ci_half": 6.590816666666662,
+          "cluster_ci_95": [
+            63.736200000000004,
+            84.37419999999999
+          ],
+          "cluster_ci_half": 10.318999999999992,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 54853.0
+        },
+        "total_claims": {
+          "mean": 94.38666666666667,
+          "cell_ci_95": [
+            88.25823333333334,
+            101.34899999999999
+          ],
+          "cell_ci_half": 6.5453833333333264,
+          "cluster_ci_95": [
+            84.8953,
+            105.45636666666667
+          ],
+          "cluster_ci_half": 10.28053333333333,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 70790.0
+        },
+        "total_messages": {
+          "mean": 301.3066666666667,
+          "cell_ci_95": [
+            290.15413333333333,
+            312.5337333333334
+          ],
+          "cell_ci_half": 11.18980000000002,
+          "cluster_ci_95": [
+            286.26013333333333,
+            316.4378666666667
+          ],
+          "cluster_ci_half": 15.08886666666669,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 225980.0
+        },
+        "mean_tick_runtime_ms": {
+          "mean": 23.428513183798817,
+          "cell_ci_95": [
+            22.226042247017524,
+            24.717794022167485
+          ],
+          "cell_ci_half": 1.2458758875749805,
+          "cluster_ci_95": [
+            21.37752761645448,
+            25.573259664082364
+          ],
+          "cluster_ci_half": 2.0978660238139426,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 17571.38488784911
+        }
+      },
+      "aca_depth_2": {
+        "completion_rate_pct": {
+          "mean": 91.16444444444444,
+          "cell_ci_95": [
+            90.34644444444443,
+            91.98244444444443
+          ],
+          "cell_ci_half": 0.8179999999999978,
+          "cluster_ci_95": [
+            89.86644444444444,
+            92.40044444444445
+          ],
+          "cluster_ci_half": 1.267000000000003,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 68373.33333333333
+        },
+        "net_welfare": {
+          "mean": 924.7653925121255,
+          "cell_ci_95": [
+            903.5650711957086,
+            945.288684021791
+          ],
+          "cell_ci_half": 20.861806413041222,
+          "cluster_ci_95": [
+            889.9732708273917,
+            957.807260915044
+          ],
+          "cluster_ci_half": 33.91699504382615,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 693574.0443840941
+        },
+        "distinct_conflicts": {
+          "mean": 6.292,
+          "cell_ci_95": [
+            6.0893,
+            6.489366666666667
+          ],
+          "cell_ci_half": 0.20003333333333373,
+          "cluster_ci_95": [
+            5.986633333333333,
+            6.6094333333333335
+          ],
+          "cluster_ci_half": 0.31140000000000034,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 4719.0
+        },
+        "total_conflicts": {
+          "mean": 38.465333333333334,
+          "cell_ci_95": [
+            36.061299999999996,
+            40.96806666666667
+          ],
+          "cell_ci_half": 2.4533833333333384,
+          "cluster_ci_95": [
+            34.8957,
+            42.2202
+          ],
+          "cluster_ci_half": 3.6622500000000002,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 28849.0
+        },
+        "safe_claim_conflicts": {
+          "mean": 0.017333333333333333,
+          "cell_ci_95": [
+            0.006666666666666667,
+            0.029333333333333333
+          ],
+          "cell_ci_half": 0.011333333333333332,
+          "cluster_ci_95": [
+            0.0026666666666666666,
+            0.03866666666666667
+          ],
+          "cluster_ci_half": 0.018000000000000002,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 13.0
+        },
+        "safe_claims": {
+          "mean": 18.28,
+          "cell_ci_95": [
+            17.871966666666665,
+            18.72273333333333
+          ],
+          "cell_ci_half": 0.42538333333333256,
+          "cluster_ci_95": [
+            17.609133333333332,
+            18.9454
+          ],
+          "cluster_ci_half": 0.6681333333333335,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 13710.0
+        },
+        "deferred_claims": {
+          "mean": 102.53866666666667,
+          "cell_ci_95": [
+            95.64766666666667,
+            109.83876666666667
+          ],
+          "cell_ci_half": 7.095550000000003,
+          "cluster_ci_95": [
+            91.50193333333334,
+            114.4658
+          ],
+          "cluster_ci_half": 11.48193333333333,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 76904.0
+        },
+        "total_claims": {
+          "mean": 120.81866666666667,
+          "cell_ci_95": [
+            113.87763333333334,
+            128.25353333333334
+          ],
+          "cell_ci_half": 7.187950000000001,
+          "cluster_ci_95": [
+            109.58656666666667,
+            132.76246666666665
+          ],
+          "cluster_ci_half": 11.587949999999992,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 90614.0
+        },
+        "total_messages": {
+          "mean": 233.70133333333334,
+          "cell_ci_95": [
+            223.2532,
+            244.14453333333333
+          ],
+          "cell_ci_half": 10.445666666666668,
+          "cluster_ci_95": [
+            218.39866666666668,
+            248.76373333333328
+          ],
+          "cluster_ci_half": 15.182533333333296,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 175276.0
+        },
+        "mean_tick_runtime_ms": {
+          "mean": 34.791602427437866,
+          "cell_ci_95": [
+            32.40837262755406,
+            37.17984508297486
+          ],
+          "cell_ci_half": 2.3857362277103995,
+          "cluster_ci_95": [
+            30.748571759135068,
+            39.052805742352895
+          ],
+          "cluster_ci_half": 4.152116991608914,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 26093.701820578397
+        }
+      },
+      "aca_no_inference": {
+        "completion_rate_pct": {
+          "mean": 90.92444444444446,
+          "cell_ci_95": [
+            90.01777777777777,
+            91.80466666666668
+          ],
+          "cell_ci_half": 0.8934444444444551,
+          "cluster_ci_95": [
+            89.52866666666665,
+            92.3111111111111
+          ],
+          "cluster_ci_half": 1.3912222222222255,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 68193.33333333334
+        },
+        "net_welfare": {
+          "mean": 927.6157669933428,
+          "cell_ci_95": [
+            907.3870781223576,
+            948.5673021920936
+          ],
+          "cell_ci_half": 20.590112034868014,
+          "cluster_ci_95": [
+            892.9144314577271,
+            960.587871391696
+          ],
+          "cluster_ci_half": 33.83671996698445,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 695711.8252450072
+        },
+        "distinct_conflicts": {
+          "mean": 6.3453333333333335,
+          "cell_ci_95": [
+            6.136,
+            6.550666666666666
+          ],
+          "cell_ci_half": 0.20733333333333315,
+          "cluster_ci_95": [
+            6.021333333333334,
+            6.664066666666666
+          ],
+          "cluster_ci_half": 0.32136666666666613,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 4759.0
+        },
+        "total_conflicts": {
+          "mean": 38.67733333333333,
+          "cell_ci_95": [
+            36.36096666666667,
+            41.17346666666666
+          ],
+          "cell_ci_half": 2.4062499999999964,
+          "cluster_ci_95": [
+            35.20263333333333,
+            42.53263333333333
+          ],
+          "cluster_ci_half": 3.664999999999999,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 29008.0
+        },
+        "safe_claim_conflicts": {
+          "mean": 0.0,
+          "cell_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cell_ci_half": 0.0,
+          "cluster_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cluster_ci_half": 0.0,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 0.0
+        },
+        "safe_claims": {
+          "mean": 20.432,
+          "cell_ci_95": [
+            20.00926666666667,
+            20.8574
+          ],
+          "cell_ci_half": 0.4240666666666648,
+          "cluster_ci_95": [
+            19.746466666666667,
+            21.074866666666665
+          ],
+          "cluster_ci_half": 0.6641999999999992,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 15324.0
+        },
+        "deferred_claims": {
+          "mean": 96.32133333333333,
+          "cell_ci_95": [
+            88.4585,
+            105.11043333333332
+          ],
+          "cell_ci_half": 8.325966666666659,
+          "cluster_ci_95": [
+            84.0886,
+            110.23693333333333
+          ],
+          "cluster_ci_half": 13.074166666666663,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 72241.0
+        },
+        "total_claims": {
+          "mean": 116.75333333333333,
+          "cell_ci_95": [
+            109.07270000000001,
+            125.5968
+          ],
+          "cell_ci_half": 8.262049999999995,
+          "cluster_ci_95": [
+            104.5468,
+            130.50993333333332
+          ],
+          "cluster_ci_half": 12.981566666666659,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 87565.0
+        },
+        "total_messages": {
+          "mean": 234.896,
+          "cell_ci_95": [
+            224.20226666666665,
+            245.03640000000001
+          ],
+          "cell_ci_half": 10.417066666666685,
+          "cluster_ci_95": [
+            218.62813333333332,
+            249.6816
+          ],
+          "cluster_ci_half": 15.52673333333334,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 176172.0
+        },
+        "mean_tick_runtime_ms": {
+          "mean": 31.979078481219933,
+          "cell_ci_95": [
+            30.03950011962864,
+            34.060598922038196
+          ],
+          "cell_ci_half": 2.010549401204777,
+          "cluster_ci_95": [
+            28.383660452013217,
+            35.633389696019435
+          ],
+          "cluster_ci_half": 3.624864622003109,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 23984.30886091495
+        }
+      },
+      "aca_no_margin": {
+        "completion_rate_pct": {
+          "mean": 90.67555555555555,
+          "cell_ci_95": [
+            89.77733333333333,
+            91.56444444444443
+          ],
+          "cell_ci_half": 0.893555555555551,
+          "cluster_ci_95": [
+            89.23555555555554,
+            92.00888888888888
+          ],
+          "cluster_ci_half": 1.3866666666666703,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 68006.66666666666
+        },
+        "net_welfare": {
+          "mean": 910.352872440792,
+          "cell_ci_95": [
+            889.7655966419843,
+            930.8809386530218
+          ],
+          "cell_ci_half": 20.557671005518728,
+          "cluster_ci_95": [
+            875.2977907928253,
+            943.8198795238726
+          ],
+          "cluster_ci_half": 34.261044365523674,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 682764.654330594
+        },
+        "distinct_conflicts": {
+          "mean": 7.789333333333333,
+          "cell_ci_95": [
+            7.566666666666666,
+            8.014666666666667
+          ],
+          "cell_ci_half": 0.2240000000000002,
+          "cluster_ci_95": [
+            7.415866666666667,
+            8.1467
+          ],
+          "cluster_ci_half": 0.36541666666666606,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 5842.0
+        },
+        "total_conflicts": {
+          "mean": 47.44133333333333,
+          "cell_ci_95": [
+            44.75046666666667,
+            50.10933333333333
+          ],
+          "cell_ci_half": 2.679433333333332,
+          "cluster_ci_95": [
+            43.4343,
+            51.672399999999996
+          ],
+          "cluster_ci_half": 4.119049999999998,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 35581.0
+        },
+        "safe_claim_conflicts": {
+          "mean": 4.8613333333333335,
+          "cell_ci_95": [
+            4.737299999999999,
+            4.98
+          ],
+          "cell_ci_half": 0.12135000000000051,
+          "cluster_ci_95": [
+            4.664,
+            5.069333333333334
+          ],
+          "cluster_ci_half": 0.202666666666667,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 3646.0
+        },
+        "safe_claims": {
+          "mean": 0.0,
+          "cell_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cell_ci_half": 0.0,
+          "cluster_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cluster_ci_half": 0.0,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 0.0
+        },
+        "deferred_claims": {
+          "mean": 0.0,
+          "cell_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cell_ci_half": 0.0,
+          "cluster_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cluster_ci_half": 0.0,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 0.0
+        },
+        "total_claims": {
+          "mean": 0.0,
+          "cell_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cell_ci_half": 0.0,
+          "cluster_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cluster_ci_half": 0.0,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 0.0
+        },
+        "total_messages": {
+          "mean": 238.05866666666665,
+          "cell_ci_95": [
+            227.69013333333334,
+            248.18866666666665
+          ],
+          "cell_ci_half": 10.249266666666657,
+          "cluster_ci_95": [
+            221.92973333333336,
+            254.35746666666668
+          ],
+          "cluster_ci_half": 16.21386666666666,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 178544.0
+        },
+        "mean_tick_runtime_ms": {
+          "mean": 24.60404848103592,
+          "cell_ci_95": [
+            23.039150601975027,
+            26.205027562246016
+          ],
+          "cell_ci_half": 1.5829384801354944,
+          "cluster_ci_95": [
+            21.876553104162646,
+            27.362850489751985
+          ],
+          "cluster_ci_half": 2.7431486927946693,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 18453.03636077694
+        }
+      },
+      "cbba": {
+        "completion_rate_pct": {
+          "mean": 82.07111111111111,
+          "cell_ci_95": [
+            80.87088888888889,
+            83.2622222222222
+          ],
+          "cell_ci_half": 1.1956666666666607,
+          "cluster_ci_95": [
+            80.222,
+            83.83155555555554
+          ],
+          "cluster_ci_half": 1.8047777777777725,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 61553.33333333333
+        },
+        "net_welfare": {
+          "mean": 878.8765714741176,
+          "cell_ci_95": [
+            860.061222657427,
+            897.9528546521937
+          ],
+          "cell_ci_half": 18.945815997383306,
+          "cluster_ci_95": [
+            849.224328430333,
+            907.760906846949
+          ],
+          "cluster_ci_half": 29.268289208307976,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 659157.4286055882
+        },
+        "distinct_conflicts": {
+          "mean": 8.006666666666666,
+          "cell_ci_95": [
+            7.772,
+            8.248033333333332
+          ],
+          "cell_ci_half": 0.23801666666666588,
+          "cluster_ci_95": [
+            7.607966666666666,
+            8.373466666666666
+          ],
+          "cluster_ci_half": 0.3827499999999997,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 6005.0
+        },
+        "total_conflicts": {
+          "mean": 50.446666666666665,
+          "cell_ci_95": [
+            47.937200000000004,
+            52.841499999999996
+          ],
+          "cell_ci_half": 2.452149999999996,
+          "cluster_ci_95": [
+            46.4814,
+            54.371066666666664
+          ],
+          "cluster_ci_half": 3.9448333333333316,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 37835.0
+        },
+        "safe_claim_conflicts": {
+          "mean": 0.0,
+          "cell_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cell_ci_half": 0.0,
+          "cluster_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cluster_ci_half": 0.0,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 0.0
+        },
+        "safe_claims": {
+          "mean": 0.0,
+          "cell_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cell_ci_half": 0.0,
+          "cluster_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cluster_ci_half": 0.0,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 0.0
+        },
+        "deferred_claims": {
+          "mean": 0.0,
+          "cell_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cell_ci_half": 0.0,
+          "cluster_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cluster_ci_half": 0.0,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 0.0
+        },
+        "total_claims": {
+          "mean": 0.0,
+          "cell_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cell_ci_half": 0.0,
+          "cluster_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cluster_ci_half": 0.0,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 0.0
+        },
+        "total_messages": {
+          "mean": 311.888,
+          "cell_ci_95": [
+            302.07893333333334,
+            321.2228
+          ],
+          "cell_ci_half": 9.571933333333334,
+          "cluster_ci_95": [
+            299.18226666666664,
+            325.6072
+          ],
+          "cluster_ci_half": 13.212466666666671,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 233916.0
+        },
+        "mean_tick_runtime_ms": {
+          "mean": 11.88512981383051,
+          "cell_ci_95": [
+            11.253028121334522,
+            12.555303078183007
+          ],
+          "cell_ci_half": 0.6511374784242427,
+          "cluster_ci_95": [
+            10.755786521132862,
+            13.06911295092994
+          ],
+          "cluster_ci_half": 1.156663214898539,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 8913.847360372882
+        }
+      },
+      "cbba_lr": {
+        "completion_rate_pct": {
+          "mean": 88.75555555555555,
+          "cell_ci_95": [
+            87.81311111111111,
+            89.68022222222223
+          ],
+          "cell_ci_half": 0.9335555555555572,
+          "cluster_ci_95": [
+            87.29755555555555,
+            90.152
+          ],
+          "cluster_ci_half": 1.4272222222222268,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 66566.66666666666
+        },
+        "net_welfare": {
+          "mean": 909.9376540880706,
+          "cell_ci_95": [
+            890.2872809550682,
+            928.5818850400723
+          ],
+          "cell_ci_half": 19.14730204250202,
+          "cluster_ci_95": [
+            879.4319397209731,
+            939.9674700427076
+          ],
+          "cluster_ci_half": 30.26776516086727,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 682453.240566053
+        },
+        "distinct_conflicts": {
+          "mean": 7.905333333333333,
+          "cell_ci_95": [
+            7.678633333333333,
+            8.157366666666666
+          ],
+          "cell_ci_half": 0.23936666666666673,
+          "cluster_ci_95": [
+            7.510566666666667,
+            8.2868
+          ],
+          "cluster_ci_half": 0.38811666666666644,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 5929.0
+        },
+        "total_conflicts": {
+          "mean": 50.59733333333333,
+          "cell_ci_95": [
+            47.8705,
+            53.39483333333333
+          ],
+          "cell_ci_half": 2.7621666666666655,
+          "cluster_ci_95": [
+            46.17403333333334,
+            55.03873333333333
+          ],
+          "cluster_ci_half": 4.432349999999996,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 37948.0
+        },
+        "safe_claim_conflicts": {
+          "mean": 0.0,
+          "cell_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cell_ci_half": 0.0,
+          "cluster_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cluster_ci_half": 0.0,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 0.0
+        },
+        "safe_claims": {
+          "mean": 0.0,
+          "cell_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cell_ci_half": 0.0,
+          "cluster_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cluster_ci_half": 0.0,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 0.0
+        },
+        "deferred_claims": {
+          "mean": 0.0,
+          "cell_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cell_ci_half": 0.0,
+          "cluster_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cluster_ci_half": 0.0,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 0.0
+        },
+        "total_claims": {
+          "mean": 0.0,
+          "cell_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cell_ci_half": 0.0,
+          "cluster_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cluster_ci_half": 0.0,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 0.0
+        },
+        "total_messages": {
+          "mean": 263.24266666666665,
+          "cell_ci_95": [
+            252.64453333333333,
+            273.344
+          ],
+          "cell_ci_half": 10.349733333333333,
+          "cluster_ci_95": [
+            247.0674666666667,
+            279.96066666666667
+          ],
+          "cluster_ci_half": 16.44659999999999,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 197432.0
+        },
+        "mean_tick_runtime_ms": {
+          "mean": 12.665992660076256,
+          "cell_ci_95": [
+            11.981802581363933,
+            13.396042877239779
+          ],
+          "cell_ci_half": 0.707120147937923,
+          "cluster_ci_95": [
+            11.438411436698065,
+            13.959419800455171
+          ],
+          "cluster_ci_half": 1.2605041818785532,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 9499.494495057192
+        }
+      },
+      "cbba_partial": {
+        "completion_rate_pct": {
+          "mean": 90.36444444444444,
+          "cell_ci_95": [
+            89.45777777777778,
+            91.22666666666667
+          ],
+          "cell_ci_half": 0.8844444444444477,
+          "cluster_ci_95": [
+            88.94177777777777,
+            91.75111111111113
+          ],
+          "cluster_ci_half": 1.404666666666678,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 67773.33333333333
+        },
+        "net_welfare": {
+          "mean": 976.7220502779331,
+          "cell_ci_95": [
+            959.7893796809975,
+            992.7753538935002
+          ],
+          "cell_ci_half": 16.49298710625135,
+          "cluster_ci_95": [
+            949.3687642043762,
+            1002.6980148092211
+          ],
+          "cluster_ci_half": 26.66462530242245,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 732541.5377084499
+        },
+        "distinct_conflicts": {
+          "mean": 7.950666666666667,
+          "cell_ci_95": [
+            7.727966666666666,
+            8.197333333333333
+          ],
+          "cell_ci_half": 0.23468333333333335,
+          "cluster_ci_95": [
+            7.554600000000001,
+            8.312033333333332
+          ],
+          "cluster_ci_half": 0.3787166666666657,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 5963.0
+        },
+        "total_conflicts": {
+          "mean": 59.718666666666664,
+          "cell_ci_95": [
+            56.7354,
+            62.844433333333335
+          ],
+          "cell_ci_half": 3.054516666666668,
+          "cluster_ci_95": [
+            54.977266666666665,
+            64.51496666666667
+          ],
+          "cluster_ci_half": 4.7688500000000005,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 44789.0
+        },
+        "safe_claim_conflicts": {
+          "mean": 0.0,
+          "cell_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cell_ci_half": 0.0,
+          "cluster_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cluster_ci_half": 0.0,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 0.0
+        },
+        "safe_claims": {
+          "mean": 0.0,
+          "cell_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cell_ci_half": 0.0,
+          "cluster_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cluster_ci_half": 0.0,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 0.0
+        },
+        "deferred_claims": {
+          "mean": 0.0,
+          "cell_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cell_ci_half": 0.0,
+          "cluster_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cluster_ci_half": 0.0,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 0.0
+        },
+        "total_claims": {
+          "mean": 0.0,
+          "cell_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cell_ci_half": 0.0,
+          "cluster_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cluster_ci_half": 0.0,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 0.0
+        },
+        "total_messages": {
+          "mean": 295.42133333333334,
+          "cell_ci_95": [
+            283.5119,
+            307.52453333333335
+          ],
+          "cell_ci_half": 12.006316666666663,
+          "cluster_ci_95": [
+            278.30656666666664,
+            313.0018
+          ],
+          "cluster_ci_half": 17.34761666666668,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 221566.0
+        },
+        "mean_tick_runtime_ms": {
+          "mean": 12.567310216290794,
+          "cell_ci_95": [
+            11.900132657635206,
+            13.26417411491097
+          ],
+          "cell_ci_half": 0.6820207286378821,
+          "cluster_ci_95": [
+            11.408128563565976,
+            13.776708052610246
+          ],
+          "cluster_ci_half": 1.1842897445221352,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 9425.482662218095
+        }
+      },
+      "cbba_partial_lr": {
+        "completion_rate_pct": {
+          "mean": 90.26666666666667,
+          "cell_ci_95": [
+            89.35111111111111,
+            91.14688888888888
+          ],
+          "cell_ci_half": 0.8978888888888861,
+          "cluster_ci_95": [
+            88.73777777777777,
+            91.68
+          ],
+          "cluster_ci_half": 1.4711111111111208,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 67700.0
+        },
+        "net_welfare": {
+          "mean": 923.465048632655,
+          "cell_ci_95": [
+            904.110713343941,
+            941.9644518576697
+          ],
+          "cell_ci_half": 18.926869256864336,
+          "cluster_ci_95": [
+            892.0722724111054,
+            953.9283529559385
+          ],
+          "cluster_ci_half": 30.92804027241658,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 692598.7864744912
+        },
+        "distinct_conflicts": {
+          "mean": 7.890666666666666,
+          "cell_ci_95": [
+            7.6613,
+            8.134699999999999
+          ],
+          "cell_ci_half": 0.23669999999999947,
+          "cluster_ci_95": [
+            7.483966666666666,
+            8.2667
+          ],
+          "cluster_ci_half": 0.39136666666666686,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 5918.0
+        },
+        "total_conflicts": {
+          "mean": 50.10933333333333,
+          "cell_ci_95": [
+            47.36766666666667,
+            52.74036666666667
+          ],
+          "cell_ci_half": 2.6863499999999974,
+          "cluster_ci_95": [
+            45.78926666666666,
+            54.4774
+          ],
+          "cluster_ci_half": 4.34406666666667,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 37582.0
+        },
+        "safe_claim_conflicts": {
+          "mean": 0.0,
+          "cell_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cell_ci_half": 0.0,
+          "cluster_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cluster_ci_half": 0.0,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 0.0
+        },
+        "safe_claims": {
+          "mean": 0.0,
+          "cell_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cell_ci_half": 0.0,
+          "cluster_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cluster_ci_half": 0.0,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 0.0
+        },
+        "deferred_claims": {
+          "mean": 0.0,
+          "cell_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cell_ci_half": 0.0,
+          "cluster_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cluster_ci_half": 0.0,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 0.0
+        },
+        "total_claims": {
+          "mean": 0.0,
+          "cell_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cell_ci_half": 0.0,
+          "cluster_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cluster_ci_half": 0.0,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 0.0
+        },
+        "total_messages": {
+          "mean": 244.60133333333334,
+          "cell_ci_95": [
+            234.0338,
+            255.52009999999999
+          ],
+          "cell_ci_half": 10.743149999999986,
+          "cluster_ci_95": [
+            227.0152,
+            262.6599333333333
+          ],
+          "cluster_ci_half": 17.822366666666653,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 183451.0
+        },
+        "mean_tick_runtime_ms": {
+          "mean": 12.769072580803641,
+          "cell_ci_95": [
+            12.066392767019659,
+            13.50570997075746
+          ],
+          "cell_ci_half": 0.7196586018689004,
+          "cluster_ci_95": [
+            11.558549601075907,
+            14.033883626271447
+          ],
+          "cluster_ci_half": 1.23766701259777,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 9576.804435602731
+        }
+      },
+      "clairvoyant_greedy": {
+        "completion_rate_pct": {
+          "mean": 96.94222222222223,
+          "cell_ci_95": [
+            96.40888888888888,
+            97.45777777777778
+          ],
+          "cell_ci_half": 0.5244444444444483,
+          "cluster_ci_95": [
+            96.26666666666667,
+            97.56466666666668
+          ],
+          "cluster_ci_half": 0.649000000000008,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 72706.66666666667
+        },
+        "net_welfare": {
+          "mean": 925.0190373779047,
+          "cell_ci_95": [
+            897.6139546884706,
+            952.7984491332716
+          ],
+          "cell_ci_half": 27.592247222400488,
+          "cluster_ci_95": [
+            880.8182395882103,
+            966.4447685193803
+          ],
+          "cluster_ci_half": 42.81326446558501,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 693764.2780334286
+        },
+        "distinct_conflicts": {
+          "mean": 0.0,
+          "cell_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cell_ci_half": 0.0,
+          "cluster_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cluster_ci_half": 0.0,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 0.0
+        },
+        "total_conflicts": {
+          "mean": 0.0,
+          "cell_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cell_ci_half": 0.0,
+          "cluster_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cluster_ci_half": 0.0,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 0.0
+        },
+        "safe_claim_conflicts": {
+          "mean": 0.0,
+          "cell_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cell_ci_half": 0.0,
+          "cluster_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cluster_ci_half": 0.0,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 0.0
+        },
+        "safe_claims": {
+          "mean": 0.0,
+          "cell_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cell_ci_half": 0.0,
+          "cluster_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cluster_ci_half": 0.0,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 0.0
+        },
+        "deferred_claims": {
+          "mean": 0.0,
+          "cell_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cell_ci_half": 0.0,
+          "cluster_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cluster_ci_half": 0.0,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 0.0
+        },
+        "total_claims": {
+          "mean": 0.0,
+          "cell_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cell_ci_half": 0.0,
+          "cluster_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cluster_ci_half": 0.0,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 0.0
+        },
+        "total_messages": {
+          "mean": 0.0,
+          "cell_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cell_ci_half": 0.0,
+          "cluster_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cluster_ci_half": 0.0,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 0.0
+        },
+        "mean_tick_runtime_ms": {
+          "mean": 15.887709262399175,
+          "cell_ci_95": [
+            15.033787464788512,
+            16.79078203452861
+          ],
+          "cell_ci_half": 0.8784972848700496,
+          "cluster_ci_95": [
+            14.354302435884419,
+            17.439435500629376
+          ],
+          "cluster_ci_half": 1.5425665323724784,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 11915.781946799381
+        }
+      },
+      "ctp_replan": {
+        "completion_rate_pct": {
+          "mean": 96.37333333333333,
+          "cell_ci_95": [
+            95.82199999999999,
+            96.88888888888887
+          ],
+          "cell_ci_half": 0.5334444444444415,
+          "cluster_ci_95": [
+            95.5111111111111,
+            97.17355555555555
+          ],
+          "cluster_ci_half": 0.8312222222222232,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 72280.0
+        },
+        "net_welfare": {
+          "mean": 831.5301722059477,
+          "cell_ci_95": [
+            805.0780030102734,
+            857.4762834777224
+          ],
+          "cell_ci_half": 26.199140233724506,
+          "cluster_ci_95": [
+            785.5888113009231,
+            875.434372219736
+          ],
+          "cluster_ci_half": 44.922780459406454,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 623647.6291544607
+        },
+        "distinct_conflicts": {
+          "mean": 0.0,
+          "cell_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cell_ci_half": 0.0,
+          "cluster_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cluster_ci_half": 0.0,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 0.0
+        },
+        "total_conflicts": {
+          "mean": 0.0,
+          "cell_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cell_ci_half": 0.0,
+          "cluster_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cluster_ci_half": 0.0,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 0.0
+        },
+        "safe_claim_conflicts": {
+          "mean": 0.0,
+          "cell_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cell_ci_half": 0.0,
+          "cluster_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cluster_ci_half": 0.0,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 0.0
+        },
+        "safe_claims": {
+          "mean": 0.0,
+          "cell_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cell_ci_half": 0.0,
+          "cluster_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cluster_ci_half": 0.0,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 0.0
+        },
+        "deferred_claims": {
+          "mean": 0.0,
+          "cell_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cell_ci_half": 0.0,
+          "cluster_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cluster_ci_half": 0.0,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 0.0
+        },
+        "total_claims": {
+          "mean": 0.0,
+          "cell_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cell_ci_half": 0.0,
+          "cluster_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cluster_ci_half": 0.0,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 0.0
+        },
+        "total_messages": {
+          "mean": 77.32,
+          "cell_ci_95": [
+            74.35576666666667,
+            80.45366666666666
+          ],
+          "cell_ci_half": 3.048949999999998,
+          "cluster_ci_95": [
+            74.31866666666667,
+            80.69219999999999
+          ],
+          "cluster_ci_half": 3.1867666666666565,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 57990.0
+        },
+        "mean_tick_runtime_ms": {
+          "mean": 11.63759493163762,
+          "cell_ci_95": [
+            10.969699519669396,
+            12.32688700375635
+          ],
+          "cell_ci_half": 0.6785937420434767,
+          "cluster_ci_95": [
+            10.487936777111555,
+            12.846465162444613
+          ],
+          "cluster_ci_half": 1.1792641926665288,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 8728.196198728216
+        }
+      },
+      "implicit": {
+        "completion_rate_pct": {
+          "mean": 94.45333333333333,
+          "cell_ci_95": [
+            93.70666666666666,
+            95.18244444444444
+          ],
+          "cell_ci_half": 0.7378888888888895,
+          "cluster_ci_95": [
+            93.31555555555555,
+            95.52022222222222
+          ],
+          "cluster_ci_half": 1.102333333333334,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 70840.0
+        },
+        "net_welfare": {
+          "mean": 780.9165668303804,
+          "cell_ci_95": [
+            757.6740700175105,
+            802.3705901045776
+          ],
+          "cell_ci_half": 22.348260043533514,
+          "cluster_ci_95": [
+            742.4478857092033,
+            814.9292066530177
+          ],
+          "cluster_ci_half": 36.24066047190718,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 585687.4251227853
+        },
+        "distinct_conflicts": {
+          "mean": 10.594666666666667,
+          "cell_ci_95": [
+            10.4013,
+            10.786666666666667
+          ],
+          "cell_ci_half": 0.1926833333333331,
+          "cluster_ci_95": [
+            10.269300000000001,
+            10.9147
+          ],
+          "cluster_ci_half": 0.3226999999999993,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 7946.0
+        },
+        "total_conflicts": {
+          "mean": 107.70266666666667,
+          "cell_ci_95": [
+            103.6249,
+            111.98729999999999
+          ],
+          "cell_ci_half": 4.181199999999997,
+          "cluster_ci_95": [
+            101.10706666666667,
+            114.38943333333334
+          ],
+          "cluster_ci_half": 6.641183333333338,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 80777.0
+        },
+        "safe_claim_conflicts": {
+          "mean": 9.293333333333333,
+          "cell_ci_95": [
+            8.726633333333334,
+            9.9254
+          ],
+          "cell_ci_half": 0.5993833333333329,
+          "cluster_ci_95": [
+            8.608,
+            10.065466666666666
+          ],
+          "cluster_ci_half": 0.7287333333333326,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 6970.0
+        },
+        "safe_claims": {
+          "mean": 0.0,
+          "cell_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cell_ci_half": 0.0,
+          "cluster_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cluster_ci_half": 0.0,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 0.0
+        },
+        "deferred_claims": {
+          "mean": 0.0,
+          "cell_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cell_ci_half": 0.0,
+          "cluster_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cluster_ci_half": 0.0,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 0.0
+        },
+        "total_claims": {
+          "mean": 0.0,
+          "cell_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cell_ci_half": 0.0,
+          "cluster_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cluster_ci_half": 0.0,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 0.0
+        },
+        "total_messages": {
+          "mean": 0.0,
+          "cell_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cell_ci_half": 0.0,
+          "cluster_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cluster_ci_half": 0.0,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 0.0
+        },
+        "mean_tick_runtime_ms": {
+          "mean": 19.57215181763492,
+          "cell_ci_95": [
+            18.46660242128676,
+            20.716480013362574
+          ],
+          "cell_ci_half": 1.1249387960379078,
+          "cluster_ci_95": [
+            17.671250585098395,
+            21.552361366457937
+          ],
+          "cluster_ci_half": 1.940555390679771,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 14679.113863226192
+        }
+      },
+      "ssi": {
+        "completion_rate_pct": {
+          "mean": 84.29333333333334,
+          "cell_ci_95": [
+            82.94222222222223,
+            85.618
+          ],
+          "cell_ci_half": 1.3378888888888838,
+          "cluster_ci_95": [
+            82.16866666666668,
+            86.4
+          ],
+          "cluster_ci_half": 2.1156666666666624,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 63220.0
+        },
+        "net_welfare": {
+          "mean": 693.831588823661,
+          "cell_ci_95": [
+            665.2465254073196,
+            720.5783225693785
+          ],
+          "cell_ci_half": 27.665898581029467,
+          "cluster_ci_95": [
+            648.5452826458578,
+            738.3744235799645
+          ],
+          "cluster_ci_half": 44.91457046705335,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 520373.6916177458
+        },
+        "distinct_conflicts": {
+          "mean": 0.0,
+          "cell_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cell_ci_half": 0.0,
+          "cluster_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cluster_ci_half": 0.0,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 0.0
+        },
+        "total_conflicts": {
+          "mean": 0.0,
+          "cell_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cell_ci_half": 0.0,
+          "cluster_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cluster_ci_half": 0.0,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 0.0
+        },
+        "safe_claim_conflicts": {
+          "mean": 0.0,
+          "cell_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cell_ci_half": 0.0,
+          "cluster_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cluster_ci_half": 0.0,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 0.0
+        },
+        "safe_claims": {
+          "mean": 0.0,
+          "cell_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cell_ci_half": 0.0,
+          "cluster_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cluster_ci_half": 0.0,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 0.0
+        },
+        "deferred_claims": {
+          "mean": 0.0,
+          "cell_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cell_ci_half": 0.0,
+          "cluster_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cluster_ci_half": 0.0,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 0.0
+        },
+        "total_claims": {
+          "mean": 0.0,
+          "cell_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cell_ci_half": 0.0,
+          "cluster_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cluster_ci_half": 0.0,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 0.0
+        },
+        "total_messages": {
+          "mean": 252.14666666666668,
+          "cell_ci_95": [
+            241.08513333333332,
+            263.02846666666665
+          ],
+          "cell_ci_half": 10.971666666666664,
+          "cluster_ci_95": [
+            234.6749333333333,
+            269.9636
+          ],
+          "cluster_ci_half": 17.644333333333336,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 189110.0
+        },
+        "mean_tick_runtime_ms": {
+          "mean": 12.326403013340986,
+          "cell_ci_95": [
+            11.640885898463889,
+            13.037075762349778
+          ],
+          "cell_ci_half": 0.6980949319429444,
+          "cluster_ci_95": [
+            11.090548437126841,
+            13.59648983588084
+          ],
+          "cluster_ci_half": 1.2529706993769993,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 9244.80226000574
+        }
+      },
+      "ssi_lr": {
+        "completion_rate_pct": {
+          "mean": 84.12444444444444,
+          "cell_ci_95": [
+            82.68444444444445,
+            85.52022222222222
+          ],
+          "cell_ci_half": 1.417888888888882,
+          "cluster_ci_95": [
+            81.85755555555555,
+            86.27599999999998
+          ],
+          "cluster_ci_half": 2.209222222222216,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 63093.33333333333
+        },
+        "net_welfare": {
+          "mean": 634.7342147242035,
+          "cell_ci_95": [
+            605.1553214339899,
+            663.6914586889894
+          ],
+          "cell_ci_half": 29.26806862749976,
+          "cluster_ci_95": [
+            585.2782624689818,
+            683.4149611245692
+          ],
+          "cluster_ci_half": 49.068349327793726,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 476050.6610431526
+        },
+        "distinct_conflicts": {
+          "mean": 0.0,
+          "cell_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cell_ci_half": 0.0,
+          "cluster_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cluster_ci_half": 0.0,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 0.0
+        },
+        "total_conflicts": {
+          "mean": 0.0,
+          "cell_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cell_ci_half": 0.0,
+          "cluster_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cluster_ci_half": 0.0,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 0.0
+        },
+        "safe_claim_conflicts": {
+          "mean": 0.0,
+          "cell_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cell_ci_half": 0.0,
+          "cluster_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cluster_ci_half": 0.0,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 0.0
+        },
+        "safe_claims": {
+          "mean": 0.0,
+          "cell_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cell_ci_half": 0.0,
+          "cluster_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cluster_ci_half": 0.0,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 0.0
+        },
+        "deferred_claims": {
+          "mean": 0.0,
+          "cell_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cell_ci_half": 0.0,
+          "cluster_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cluster_ci_half": 0.0,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 0.0
+        },
+        "total_claims": {
+          "mean": 0.0,
+          "cell_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cell_ci_half": 0.0,
+          "cluster_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cluster_ci_half": 0.0,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 0.0
+        },
+        "total_messages": {
+          "mean": 214.26266666666666,
+          "cell_ci_95": [
+            204.22653333333332,
+            224.76303333333334
+          ],
+          "cell_ci_half": 10.268250000000009,
+          "cluster_ci_95": [
+            196.91763333333333,
+            232.51649999999998
+          ],
+          "cluster_ci_half": 17.799433333333326,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 160697.0
+        },
+        "mean_tick_runtime_ms": {
+          "mean": 12.79470394479057,
+          "cell_ci_95": [
+            12.035342507838829,
+            13.607396229131206
+          ],
+          "cell_ci_half": 0.7860268606461887,
+          "cluster_ci_95": [
+            11.462874632608274,
+            14.166105815126446
+          ],
+          "cluster_ci_half": 1.351615591259086,
+          "cell_n": 750,
+          "cluster_count": 250,
+          "sum": 9596.027958592927
+        }
+      }
+    },
+    "heldout_v5": {
+      "aca": {
+        "completion_rate_pct": {
+          "mean": 92.4,
+          "cell_ci_95": [
+            91.39259259259259,
+            93.45185185185184
+          ],
+          "cell_ci_half": 1.0296296296296248,
+          "cluster_ci_95": [
+            90.72592592592594,
+            93.95592592592591
+          ],
+          "cluster_ci_half": 1.6149999999999878,
+          "cell_n": 450,
+          "cluster_count": 150,
+          "sum": 41580.0
+        },
+        "net_welfare": {
+          "mean": 937.4369690797587,
+          "cell_ci_95": [
+            913.4430038414705,
+            961.8896982416394
+          ],
+          "cell_ci_half": 24.223347200084447,
+          "cluster_ci_95": [
+            896.9560457156242,
+            976.838273285003
+          ],
+          "cluster_ci_half": 39.94111378468938,
+          "cell_n": 450,
+          "cluster_count": 150,
+          "sum": 421846.6360858914
+        },
+        "total_conflicts": {
+          "mean": 39.66444444444444,
+          "cell_ci_95": [
+            36.92666666666667,
+            42.591277777777776
+          ],
+          "cell_ci_half": 2.8323055555555534,
+          "cluster_ci_95": [
+            35.27633333333333,
+            44.369
+          ],
+          "cluster_ci_half": 4.546333333333333,
+          "cell_n": 450,
+          "cluster_count": 150,
+          "sum": 17849.0
+        },
+        "total_messages": {
+          "mean": 218.0,
+          "cell_ci_95": [
+            205.68755555555558,
+            230.57866666666666
+          ],
+          "cell_ci_half": 12.445555555555543,
+          "cluster_ci_95": [
+            199.18066666666667,
+            237.20399999999998
+          ],
+          "cluster_ci_half": 19.011666666666656,
+          "cell_n": 450,
+          "cluster_count": 150,
+          "sum": 98100.0
+        },
+        "mean_tick_runtime_ms": {
+          "mean": 14.886363372975136,
+          "cell_ci_95": [
+            13.431386817433417,
+            16.279600901055613
+          ],
+          "cell_ci_half": 1.424107041811098,
+          "cluster_ci_95": [
+            12.63165324726066,
+            17.370086584039687
+          ],
+          "cluster_ci_half": 2.3692166683895133,
+          "cell_n": 450,
+          "cluster_count": 150,
+          "sum": 6698.863517838811
+        }
+      },
+      "aca_adaptive": {
+        "completion_rate_pct": {
+          "mean": 91.28888888888888,
+          "cell_ci_95": [
+            90.1922222222222,
+            92.38555555555556
+          ],
+          "cell_ci_half": 1.0966666666666782,
+          "cluster_ci_95": [
+            89.43703703703703,
+            92.96296296296295
+          ],
+          "cluster_ci_half": 1.762962962962959,
+          "cell_n": 450,
+          "cluster_count": 150,
+          "sum": 41079.99999999999
+        },
+        "net_welfare": {
+          "mean": 919.6694630719625,
+          "cell_ci_95": [
+            893.4892927343801,
+            944.7785938444874
+          ],
+          "cell_ci_half": 25.64465055505366,
+          "cluster_ci_95": [
+            877.6301836121002,
+            960.8915580309941
+          ],
+          "cluster_ci_half": 41.63068720944699,
+          "cell_n": 450,
+          "cluster_count": 150,
+          "sum": 413851.2583823831
+        },
+        "total_conflicts": {
+          "mean": 39.04222222222222,
+          "cell_ci_95": [
+            36.2065,
+            41.8625
+          ],
+          "cell_ci_half": 2.8279999999999994,
+          "cluster_ci_95": [
+            34.40555555555556,
+            43.57783333333333
+          ],
+          "cluster_ci_half": 4.586138888888886,
+          "cell_n": 450,
+          "cluster_count": 150,
+          "sum": 17569.0
+        },
+        "total_messages": {
+          "mean": 232.37333333333333,
+          "cell_ci_95": [
+            218.56755555555557,
+            245.91288888888886
+          ],
+          "cell_ci_half": 13.672666666666643,
+          "cluster_ci_95": [
+            213.24,
+            251.39577777777777
+          ],
+          "cluster_ci_half": 19.07788888888888,
+          "cell_n": 450,
+          "cluster_count": 150,
+          "sum": 104568.0
+        },
+        "mean_tick_runtime_ms": {
+          "mean": 14.543269806695607,
+          "cell_ci_95": [
+            13.236904872432614,
+            15.812364985711506
+          ],
+          "cell_ci_half": 1.2877300566394458,
+          "cluster_ci_95": [
+            12.459174359045283,
+            16.794637412647628
+          ],
+          "cluster_ci_half": 2.1677315268011723,
+          "cell_n": 450,
+          "cluster_count": 150,
+          "sum": 6544.471413013023
+        }
+      },
+      "aca_no_margin": {
+        "completion_rate_pct": {
+          "mean": 93.48148148148148,
+          "cell_ci_95": [
+            92.50370370370369,
+            94.44444444444444
+          ],
+          "cell_ci_half": 0.9703703703703752,
+          "cluster_ci_95": [
+            91.94037037037036,
+            94.87444444444442
+          ],
+          "cluster_ci_half": 1.4670370370370307,
+          "cell_n": 450,
+          "cluster_count": 150,
+          "sum": 42066.666666666664
+        },
+        "net_welfare": {
+          "mean": 938.8368543119874,
+          "cell_ci_95": [
+            914.5661935813777,
+            963.375647851239
+          ],
+          "cell_ci_half": 24.40472713493068,
+          "cluster_ci_95": [
+            897.6447061727022,
+            977.3752722679324
+          ],
+          "cluster_ci_half": 39.865283047615094,
+          "cell_n": 450,
+          "cluster_count": 150,
+          "sum": 422476.5844403943
+        },
+        "total_conflicts": {
+          "mean": 49.93333333333333,
+          "cell_ci_95": [
+            46.64683333333334,
+            53.42722222222222
+          ],
+          "cell_ci_half": 3.3901944444444396,
+          "cluster_ci_95": [
+            44.439388888888885,
+            55.76022222222222
+          ],
+          "cluster_ci_half": 5.660416666666666,
+          "cell_n": 450,
+          "cluster_count": 150,
+          "sum": 22470.0
+        },
+        "total_messages": {
+          "mean": 212.88,
+          "cell_ci_95": [
+            200.96733333333336,
+            225.17444444444445
+          ],
+          "cell_ci_half": 12.103555555555545,
+          "cluster_ci_95": [
+            194.82577777777777,
+            232.2408888888889
+          ],
+          "cluster_ci_half": 18.707555555555558,
+          "cell_n": 450,
+          "cluster_count": 150,
+          "sum": 95796.0
+        },
+        "mean_tick_runtime_ms": {
+          "mean": 8.267335079412009,
+          "cell_ci_95": [
+            7.513560483246517,
+            9.00821449215076
+          ],
+          "cell_ci_half": 0.7473270044521216,
+          "cluster_ci_95": [
+            7.041439314028947,
+            9.548734885514223
+          ],
+          "cluster_ci_half": 1.253647785742638,
+          "cell_n": 450,
+          "cluster_count": 150,
+          "sum": 3720.300785735404
+        }
+      },
+      "aca_plus": {
+        "completion_rate_pct": {
+          "mean": 92.44444444444444,
+          "cell_ci_95": [
+            91.42222222222222,
+            93.46666666666667
+          ],
+          "cell_ci_half": 1.0222222222222257,
+          "cluster_ci_95": [
+            90.75555555555556,
+            94.0
+          ],
+          "cluster_ci_half": 1.62222222222222,
+          "cell_n": 450,
+          "cluster_count": 150,
+          "sum": 41600.0
+        },
+        "net_welfare": {
+          "mean": 936.2580427833572,
+          "cell_ci_95": [
+            911.3991204914336,
+            961.2250883727235
+          ],
+          "cell_ci_half": 24.91298394064495,
+          "cluster_ci_95": [
+            895.7260953544126,
+            977.0920020144426
+          ],
+          "cluster_ci_half": 40.68295333001504,
+          "cell_n": 450,
+          "cluster_count": 150,
+          "sum": 421316.1192525107
+        },
+        "total_conflicts": {
+          "mean": 38.602222222222224,
+          "cell_ci_95": [
+            35.76661111111111,
+            41.56688888888889
+          ],
+          "cell_ci_half": 2.9001388888888897,
+          "cluster_ci_95": [
+            34.09022222222222,
+            43.35822222222222
+          ],
+          "cluster_ci_half": 4.633999999999997,
+          "cell_n": 450,
+          "cluster_count": 150,
+          "sum": 17371.0
+        },
+        "total_messages": {
+          "mean": 220.5688888888889,
+          "cell_ci_95": [
+            207.09022222222222,
+            234.08288888888887
+          ],
+          "cell_ci_half": 13.496333333333325,
+          "cluster_ci_95": [
+            201.36711111111111,
+            239.68155555555555
+          ],
+          "cluster_ci_half": 19.157222222222217,
+          "cell_n": 450,
+          "cluster_count": 150,
+          "sum": 99256.0
+        },
+        "mean_tick_runtime_ms": {
+          "mean": 15.195559141684683,
+          "cell_ci_95": [
+            13.748789823411544,
+            16.627127332344966
+          ],
+          "cell_ci_half": 1.4391687544667109,
+          "cluster_ci_95": [
+            12.811749214080283,
+            17.712322373720617
+          ],
+          "cluster_ci_half": 2.450286579820167,
+          "cell_n": 450,
+          "cluster_count": 150,
+          "sum": 6838.001613758107
+        }
+      },
+      "cbba_lr": {
+        "completion_rate_pct": {
+          "mean": 94.66666666666667,
+          "cell_ci_95": [
+            93.77777777777777,
+            95.51148148148147
+          ],
+          "cell_ci_half": 0.8668518518518482,
+          "cluster_ci_95": [
+            93.22925925925925,
+            95.98518518518517
+          ],
+          "cluster_ci_half": 1.377962962962961,
+          "cell_n": 450,
+          "cluster_count": 150,
+          "sum": 42600.0
+        },
+        "net_welfare": {
+          "mean": 958.9185729133087,
+          "cell_ci_95": [
+            936.9449110567074,
+            980.3597324119933
+          ],
+          "cell_ci_half": 21.70741067764294,
+          "cluster_ci_95": [
+            922.3196248944157,
+            993.3925339163554
+          ],
+          "cluster_ci_half": 35.53645451096986,
+          "cell_n": 450,
+          "cluster_count": 150,
+          "sum": 431513.3578109889
+        },
+        "total_conflicts": {
+          "mean": 25.484444444444446,
+          "cell_ci_95": [
+            23.63488888888889,
+            27.258611111111108
+          ],
+          "cell_ci_half": 1.8118611111111083,
+          "cluster_ci_95": [
+            22.7885,
+            28.351166666666668
+          ],
+          "cluster_ci_half": 2.7813333333333343,
+          "cell_n": 450,
+          "cluster_count": 150,
+          "sum": 11468.0
+        },
+        "total_messages": {
+          "mean": 243.49333333333334,
+          "cell_ci_95": [
+            231.9908888888889,
+            254.7942222222222
+          ],
+          "cell_ci_half": 11.401666666666657,
+          "cluster_ci_95": [
+            228.37311111111111,
+            258.80111111111114
+          ],
+          "cluster_ci_half": 15.214000000000013,
+          "cell_n": 450,
+          "cluster_count": 150,
+          "sum": 109572.0
+        },
+        "mean_tick_runtime_ms": {
+          "mean": 3.4254761143879033,
+          "cell_ci_95": [
+            3.1692895660205505,
+            3.6926843598586854
+          ],
+          "cell_ci_half": 0.26169739691906746,
+          "cluster_ci_95": [
+            3.010463540005871,
+            3.835619563397278
+          ],
+          "cluster_ci_half": 0.41257801169570363,
+          "cell_n": 450,
+          "cluster_count": 150,
+          "sum": 1541.4642514745565
+        }
+      },
+      "cbba_partial_lr": {
+        "completion_rate_pct": {
+          "mean": 93.39259259259259,
+          "cell_ci_95": [
+            92.42925925925925,
+            94.34074074074073
+          ],
+          "cell_ci_half": 0.9557407407407368,
+          "cluster_ci_95": [
+            91.73296296296296,
+            94.88925925925925
+          ],
+          "cluster_ci_half": 1.578148148148145,
+          "cell_n": 450,
+          "cluster_count": 150,
+          "sum": 42026.666666666664
+        },
+        "net_welfare": {
+          "mean": 953.354729978906,
+          "cell_ci_95": [
+            931.2882079146832,
+            976.1071351546727
+          ],
+          "cell_ci_half": 22.409463619994767,
+          "cluster_ci_95": [
+            914.2696416395363,
+            989.1473352459246
+          ],
+          "cluster_ci_half": 37.43884680319417,
+          "cell_n": 450,
+          "cluster_count": 150,
+          "sum": 429009.6284905077
+        },
+        "total_conflicts": {
+          "mean": 40.55111111111111,
+          "cell_ci_95": [
+            37.84222222222222,
+            43.27344444444444
+          ],
+          "cell_ci_half": 2.7156111111111123,
+          "cluster_ci_95": [
+            36.38833333333333,
+            44.98049999999999
+          ],
+          "cluster_ci_half": 4.296083333333332,
+          "cell_n": 450,
+          "cluster_count": 150,
+          "sum": 18248.0
+        },
+        "total_messages": {
+          "mean": 239.16222222222223,
+          "cell_ci_95": [
+            226.79305555555555,
+            251.9185
+          ],
+          "cell_ci_half": 12.56272222222222,
+          "cluster_ci_95": [
+            221.2528888888889,
+            258.49738888888885
+          ],
+          "cluster_ci_half": 18.62224999999998,
+          "cell_n": 450,
+          "cluster_count": 150,
+          "sum": 107623.0
+        },
+        "mean_tick_runtime_ms": {
+          "mean": 3.4792721075576107,
+          "cell_ci_95": [
+            3.20824007176799,
+            3.7597240988136518
+          ],
+          "cell_ci_half": 0.2757420135228308,
+          "cluster_ci_95": [
+            3.052323457014494,
+            3.918410968555781
+          ],
+          "cluster_ci_half": 0.43304375577064347,
+          "cell_n": 450,
+          "cluster_count": 150,
+          "sum": 1565.6724484009248
+        }
+      },
+      "ctp_replan": {
+        "completion_rate_pct": {
+          "mean": 92.28148148148149,
+          "cell_ci_95": [
+            91.06629629629627,
+            93.4522222222222
+          ],
+          "cell_ci_half": 1.192962962962966,
+          "cluster_ci_95": [
+            90.22185185185185,
+            94.16296296296295
+          ],
+          "cluster_ci_half": 1.9705555555555492,
+          "cell_n": 450,
+          "cluster_count": 150,
+          "sum": 41526.66666666667
+        },
+        "net_welfare": {
+          "mean": 539.8819828689292,
+          "cell_ci_95": [
+            499.3540623696987,
+            582.2912854057131
+          ],
+          "cell_ci_half": 41.46861151800721,
+          "cluster_ci_95": [
+            466.31776753148114,
+            608.3616642418876
+          ],
+          "cluster_ci_half": 71.02194835520325,
+          "cell_n": 450,
+          "cluster_count": 150,
+          "sum": 242946.89229101816
+        },
+        "total_conflicts": {
+          "mean": 0.0,
+          "cell_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cell_ci_half": 0.0,
+          "cluster_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cluster_ci_half": 0.0,
+          "cell_n": 450,
+          "cluster_count": 150,
+          "sum": 0.0
+        },
+        "total_messages": {
+          "mean": 56.10666666666667,
+          "cell_ci_95": [
+            53.16411111111111,
+            59.09338888888889
+          ],
+          "cell_ci_half": 2.9646388888888886,
+          "cluster_ci_95": [
+            53.10405555555556,
+            59.513777777777776
+          ],
+          "cluster_ci_half": 3.204861111111107,
+          "cell_n": 450,
+          "cluster_count": 150,
+          "sum": 25248.0
+        },
+        "mean_tick_runtime_ms": {
+          "mean": 3.1614044439480384,
+          "cell_ci_95": [
+            2.912919221746681,
+            3.40800510718399
+          ],
+          "cell_ci_half": 0.2475429427186544,
+          "cluster_ci_95": [
+            2.751362714286843,
+            3.563401624163167
+          ],
+          "cluster_ci_half": 0.40601945493816216,
+          "cell_n": 450,
+          "cluster_count": 150,
+          "sum": 1422.6319997766172
+        }
+      },
+      "ssi_lr": {
+        "completion_rate_pct": {
+          "mean": 80.4888888888889,
+          "cell_ci_95": [
+            78.57777777777778,
+            82.50370370370369
+          ],
+          "cell_ci_half": 1.9629629629629548,
+          "cluster_ci_95": [
+            77.02148148148147,
+            83.74814814814815
+          ],
+          "cluster_ci_half": 3.363333333333337,
+          "cell_n": 450,
+          "cluster_count": 150,
+          "sum": 36220.0
+        },
+        "net_welfare": {
+          "mean": 666.0209522155825,
+          "cell_ci_95": [
+            626.4539887869478,
+            706.2653246450163
+          ],
+          "cell_ci_half": 39.90566792903428,
+          "cluster_ci_95": [
+            594.5129653361087,
+            734.1474356447819
+          ],
+          "cluster_ci_half": 69.81723515433663,
+          "cell_n": 450,
+          "cluster_count": 150,
+          "sum": 299709.4284970121
+        },
+        "total_conflicts": {
+          "mean": 0.0,
+          "cell_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cell_ci_half": 0.0,
+          "cluster_ci_95": [
+            0.0,
+            0.0
+          ],
+          "cluster_ci_half": 0.0,
+          "cell_n": 450,
+          "cluster_count": 150,
+          "sum": 0.0
+        },
+        "total_messages": {
+          "mean": 145.95777777777778,
+          "cell_ci_95": [
+            136.46872222222223,
+            156.46266666666665
+          ],
+          "cell_ci_half": 9.996972222222212,
+          "cluster_ci_95": [
+            130.63799999999998,
+            164.2949444444444
+          ],
+          "cluster_ci_half": 16.828472222222217,
+          "cell_n": 450,
+          "cluster_count": 150,
+          "sum": 65681.0
+        },
+        "mean_tick_runtime_ms": {
+          "mean": 3.3849108208029803,
+          "cell_ci_95": [
+            3.085230568256702,
+            3.6728943090801387
+          ],
+          "cell_ci_half": 0.29383187041171843,
+          "cluster_ci_95": [
+            2.900022676946128,
+            3.874249313792471
+          ],
+          "cluster_ci_half": 0.4871133184231715,
+          "cell_n": 450,
+          "cluster_count": 150,
+          "sum": 1523.2098693613411
+        }
+      }
     }
   },
   "contrasts": {
@@ -3546,6 +6662,910 @@
       }
     },
     "protocol_v5_confirmatory": {
+      "H1_aca_plus_vs_aca_welfare": {
+        "contrast_id": "H1_aca_plus_vs_aca_welfare",
+        "test_method": "aca_plus",
+        "baseline_method": "aca",
+        "metric": "net_welfare",
+        "primary_estimator": "cluster_mean_difference",
+        "cluster_unit": "graph_family:seed",
+        "test": "cluster_paired_t_test",
+        "family": "protocol_v5_confirmatory",
+        "correction": "Holm-Bonferroni",
+        "mean_diff": -1.1789262964015643,
+        "hl_median_diff": 0.0,
+        "cliffs_delta": [
+          0.00035061728395061726,
+          0.00035061728395061726,
+          0.00035061728395061726
+        ],
+        "cluster_ci_95": [
+          -15.338883287475088,
+          12.981030694671958
+        ],
+        "cluster_ci_half": 14.159956991073523,
+        "cluster_p_raw": 0.8695460135343009,
+        "cluster_t_stat": -0.16451843029400035,
+        "cell_ci_95": [
+          -13.16268265480601,
+          11.126949469591922
+        ],
+        "cell_ci_half": 12.144816062198966,
+        "cell_p_raw": 0.9089078479778216,
+        "cell_wilcoxon_stat": 23004.5,
+        "n_pairs": 450,
+        "n_clusters": 150,
+        "cell_p_adjusted": 1.0,
+        "cluster_p_adjusted": 1.0,
+        "cell_sig": false,
+        "cluster_sig": false,
+        "cell_sensitivity": {
+          "test": "paired_wilcoxon",
+          "stat": 23004.5,
+          "raw_p": 0.9089078479778216,
+          "adjusted_p": 1.0,
+          "sig": false,
+          "ci_95": [
+            -13.16268265480601,
+            11.126949469591922
+          ],
+          "ci_half": 12.144816062198966
+        }
+      },
+      "H2_aca_plus_vs_aca_completion": {
+        "contrast_id": "H2_aca_plus_vs_aca_completion",
+        "test_method": "aca_plus",
+        "baseline_method": "aca",
+        "metric": "completion_rate_pct",
+        "primary_estimator": "cluster_mean_difference",
+        "cluster_unit": "graph_family:seed",
+        "test": "cluster_paired_t_test",
+        "family": "protocol_v5_confirmatory",
+        "correction": "Holm-Bonferroni",
+        "mean_diff": 0.04444444444444429,
+        "hl_median_diff": 0.0,
+        "cliffs_delta": [
+          0.0004691358024691358,
+          0.0004691358024691358,
+          0.0004691358024691358
+        ],
+        "cluster_ci_95": [
+          -0.8113649656278218,
+          0.9002538545167104
+        ],
+        "cluster_ci_half": 0.8558094100722661,
+        "cluster_p_raw": 0.9184028772126168,
+        "cluster_t_stat": 0.10261958663136808,
+        "cell_ci_95": [
+          -0.6666666666666667,
+          0.7407407407407408
+        ],
+        "cell_ci_half": 0.7037037037037037,
+        "cell_p_raw": 0.9703347567328338,
+        "cell_wilcoxon_stat": 5568.0,
+        "n_pairs": 450,
+        "n_clusters": 150,
+        "cell_p_adjusted": 1.0,
+        "cluster_p_adjusted": 1.0,
+        "cell_sig": false,
+        "cluster_sig": false,
+        "cell_sensitivity": {
+          "test": "paired_wilcoxon",
+          "stat": 5568.0,
+          "raw_p": 0.9703347567328338,
+          "adjusted_p": 1.0,
+          "sig": false,
+          "ci_95": [
+            -0.6666666666666667,
+            0.7407407407407408
+          ],
+          "ci_half": 0.7037037037037037
+        }
+      },
+      "H3_aca_plus_vs_aca_conflicts": {
+        "contrast_id": "H3_aca_plus_vs_aca_conflicts",
+        "test_method": "aca_plus",
+        "baseline_method": "aca",
+        "metric": "total_conflicts",
+        "primary_estimator": "cluster_mean_difference",
+        "cluster_unit": "graph_family:seed",
+        "test": "cluster_paired_t_test",
+        "family": "protocol_v5_confirmatory",
+        "correction": "Holm-Bonferroni",
+        "mean_diff": -1.0622222222222222,
+        "hl_median_diff": 0.0,
+        "cliffs_delta": [
+          -0.020844444444444443,
+          -0.020844444444444443,
+          -0.020844444444444443
+        ],
+        "cluster_ci_95": [
+          -3.242022457243738,
+          1.1175780127992936
+        ],
+        "cluster_ci_half": 2.1798002350215158,
+        "cluster_p_raw": 0.33714966817184167,
+        "cluster_t_stat": -0.962916268661669,
+        "cell_ci_95": [
+          -3.1890555555555555,
+          0.9312222222222216
+        ],
+        "cell_ci_half": 2.0601388888888885,
+        "cell_p_raw": 0.7052792642027441,
+        "cell_wilcoxon_stat": 19020.0,
+        "n_pairs": 450,
+        "n_clusters": 150,
+        "cell_p_adjusted": 1.0,
+        "cluster_p_adjusted": 1.0,
+        "cell_sig": false,
+        "cluster_sig": false,
+        "cell_sensitivity": {
+          "test": "paired_wilcoxon",
+          "stat": 19020.0,
+          "raw_p": 0.7052792642027441,
+          "adjusted_p": 1.0,
+          "sig": false,
+          "ci_95": [
+            -3.1890555555555555,
+            0.9312222222222216
+          ],
+          "ci_half": 2.0601388888888885
+        }
+      },
+      "H4_margin_vs_no_margin_conflicts": {
+        "contrast_id": "H4_margin_vs_no_margin_conflicts",
+        "test_method": "aca",
+        "baseline_method": "aca_no_margin",
+        "metric": "total_conflicts",
+        "primary_estimator": "cluster_mean_difference",
+        "cluster_unit": "graph_family:seed",
+        "test": "cluster_paired_t_test",
+        "family": "protocol_v5_confirmatory",
+        "correction": "Holm-Bonferroni",
+        "mean_diff": -10.268888888888888,
+        "hl_median_diff": -9.0,
+        "cliffs_delta": [
+          -0.16368888888888888,
+          -0.16368888888888888,
+          -0.16368888888888888
+        ],
+        "cluster_ci_95": [
+          -14.579107155483737,
+          -5.95867062229404
+        ],
+        "cluster_ci_half": 4.310218266594848,
+        "cluster_p_raw": 5.679177421571618e-06,
+        "cluster_t_stat": -4.707756895243758,
+        "cell_ci_95": [
+          -13.220222222222223,
+          -7.279444444444448
+        ],
+        "cell_ci_half": 2.970388888888887,
+        "cell_p_raw": 8.342951054503019e-13,
+        "cell_wilcoxon_stat": 26396.0,
+        "n_pairs": 450,
+        "n_clusters": 150,
+        "cell_p_adjusted": 5.840065738152114e-12,
+        "cluster_p_adjusted": 3.975424195100133e-05,
+        "cell_sig": true,
+        "cluster_sig": true,
+        "cell_sensitivity": {
+          "test": "paired_wilcoxon",
+          "stat": 26396.0,
+          "raw_p": 8.342951054503019e-13,
+          "adjusted_p": 5.840065738152114e-12,
+          "sig": true,
+          "ci_95": [
+            -13.220222222222223,
+            -7.279444444444448
+          ],
+          "ci_half": 2.970388888888887
+        }
+      },
+      "H4_margin_preservation_cost": {
+        "contrast_id": "H4_margin_preservation_cost",
+        "test_method": "aca",
+        "baseline_method": "aca_no_margin",
+        "metric": "completion_rate_pct",
+        "primary_estimator": "cluster_mean_difference",
+        "cluster_unit": "graph_family:seed",
+        "test": "cluster_paired_t_test",
+        "family": "protocol_v5_confirmatory",
+        "correction": "Holm-Bonferroni",
+        "mean_diff": -1.0814814814814817,
+        "hl_median_diff": 0.0,
+        "cliffs_delta": [
+          -0.0495604938271605,
+          -0.0495604938271605,
+          -0.0495604938271605
+        ],
+        "cluster_ci_95": [
+          -2.2120202980561308,
+          0.04905733509316712
+        ],
+        "cluster_ci_half": 1.1305388165746488,
+        "cluster_p_raw": 0.060663962730004274,
+        "cluster_t_stat": -1.8902682751736166,
+        "cell_ci_95": [
+          -1.9851851851851847,
+          -0.17777777777777803
+        ],
+        "cell_ci_half": 0.9037037037037033,
+        "cell_p_raw": 0.008232839917235802,
+        "cell_wilcoxon_stat": 8498.5,
+        "n_pairs": 450,
+        "n_clusters": 150,
+        "cell_p_adjusted": 0.04116419958617901,
+        "cluster_p_adjusted": 0.30331981365002136,
+        "cell_sig": true,
+        "cluster_sig": false,
+        "cell_sensitivity": {
+          "test": "paired_wilcoxon",
+          "stat": 8498.5,
+          "raw_p": 0.008232839917235802,
+          "adjusted_p": 0.04116419958617901,
+          "sig": true,
+          "ci_95": [
+            -1.9851851851851847,
+            -0.17777777777777803
+          ],
+          "ci_half": 0.9037037037037033
+        }
+      },
+      "cbba_lr_vs_aca_completion": {
+        "contrast_id": "cbba_lr_vs_aca_completion",
+        "test_method": "cbba_lr",
+        "baseline_method": "aca",
+        "metric": "completion_rate_pct",
+        "primary_estimator": "cluster_mean_difference",
+        "cluster_unit": "graph_family:seed",
+        "test": "cluster_paired_t_test",
+        "family": "protocol_v5_confirmatory",
+        "correction": "Holm-Bonferroni",
+        "mean_diff": 2.2666666666666657,
+        "hl_median_diff": 0.0,
+        "cliffs_delta": [
+          0.1043111111111111,
+          0.1043111111111111,
+          0.1043111111111111
+        ],
+        "cluster_ci_95": [
+          1.1091802658932184,
+          3.424153067440113
+        ],
+        "cluster_ci_half": 1.1574864007734473,
+        "cluster_p_raw": 0.00016258100309087342,
+        "cluster_t_stat": 3.8695601086513975,
+        "cell_ci_95": [
+          1.4074074074074066,
+          3.126296296296294
+        ],
+        "cell_ci_half": 0.8594444444444438,
+        "cell_p_raw": 1.0409731470000023e-05,
+        "cell_wilcoxon_stat": 8607.0,
+        "n_pairs": 450,
+        "n_clusters": 150,
+        "cell_p_adjusted": 6.245838882000014e-05,
+        "cluster_p_adjusted": 0.0009754860185452404,
+        "cell_sig": true,
+        "cluster_sig": true,
+        "cell_sensitivity": {
+          "test": "paired_wilcoxon",
+          "stat": 8607.0,
+          "raw_p": 1.0409731470000023e-05,
+          "adjusted_p": 6.245838882000014e-05,
+          "sig": true,
+          "ci_95": [
+            1.4074074074074066,
+            3.126296296296294
+          ],
+          "ci_half": 0.8594444444444438
+        }
+      },
+      "ctp_replan_vs_aca_completion": {
+        "contrast_id": "ctp_replan_vs_aca_completion",
+        "test_method": "ctp_replan",
+        "baseline_method": "aca",
+        "metric": "completion_rate_pct",
+        "primary_estimator": "cluster_mean_difference",
+        "cluster_unit": "graph_family:seed",
+        "test": "cluster_paired_t_test",
+        "family": "protocol_v5_confirmatory",
+        "correction": "Holm-Bonferroni",
+        "mean_diff": -0.11851851851851836,
+        "hl_median_diff": 0.0,
+        "cliffs_delta": [
+          0.05230617283950617,
+          0.05230617283950617,
+          0.05230617283950617
+        ],
+        "cluster_ci_95": [
+          -1.7271934754514484,
+          1.490156438414412
+        ],
+        "cluster_ci_half": 1.6086749569329302,
+        "cluster_p_raw": 0.8844481194749721,
+        "cluster_t_stat": -0.14558202288305222,
+        "cell_ci_95": [
+          -1.244444444444444,
+          0.977777777777777
+        ],
+        "cell_ci_half": 1.1111111111111105,
+        "cell_p_raw": 0.6886603728827744,
+        "cell_wilcoxon_stat": 12212.5,
+        "n_pairs": 450,
+        "n_clusters": 150,
+        "cell_p_adjusted": 1.0,
+        "cluster_p_adjusted": 1.0,
+        "cell_sig": false,
+        "cluster_sig": false,
+        "cell_sensitivity": {
+          "test": "paired_wilcoxon",
+          "stat": 12212.5,
+          "raw_p": 0.6886603728827744,
+          "adjusted_p": 1.0,
+          "sig": false,
+          "ci_95": [
+            -1.244444444444444,
+            0.977777777777777
+          ],
+          "ci_half": 1.1111111111111105
+        }
+      }
+    },
+    "exploratory_core": {
+      "H1_recourse_depth": {
+        "contrast_id": "H1_recourse_depth",
+        "test_method": "aca",
+        "baseline_method": "aca_depth_0",
+        "metric": "completion_rate_pct",
+        "primary_estimator": "cluster_mean_difference",
+        "cluster_unit": "graph_family:seed",
+        "test": "cluster_paired_t_test",
+        "family": "pre_registered_hypotheses",
+        "correction": "Holm-Bonferroni",
+        "mean_diff": 4.142222222222222,
+        "hl_median_diff": 3.3333333333333357,
+        "cliffs_delta": [
+          0.1846097777777778,
+          0.1846097777777778,
+          0.1846097777777778
+        ],
+        "cluster_ci_95": [
+          3.041201125854151,
+          5.243243318590293
+        ],
+        "cluster_ci_half": 1.1010210963680709,
+        "cluster_p_raw": 1.9660193750653604e-12,
+        "cluster_t_stat": 7.40972121927019,
+        "cell_ci_95": [
+          3.1733333333333333,
+          5.120222222222222
+        ],
+        "cell_ci_half": 0.9734444444444443,
+        "cell_p_raw": 6.613286769549591e-17,
+        "cell_wilcoxon_stat": 29701.0,
+        "n_pairs": 750,
+        "n_clusters": 250,
+        "cell_p_adjusted": 5.290629415639673e-16,
+        "cluster_p_adjusted": 1.5728155000522883e-11,
+        "cell_sig": true,
+        "cluster_sig": true,
+        "cell_sensitivity": {
+          "test": "paired_wilcoxon",
+          "stat": 29701.0,
+          "raw_p": 6.613286769549591e-17,
+          "adjusted_p": 5.290629415639673e-16,
+          "sig": true,
+          "ci_95": [
+            3.1733333333333333,
+            5.120222222222222
+          ],
+          "ci_half": 0.9734444444444443
+        }
+      },
+      "H2_cbba_lr": {
+        "contrast_id": "H2_cbba_lr",
+        "test_method": "aca",
+        "baseline_method": "cbba_lr",
+        "metric": "completion_rate_pct",
+        "primary_estimator": "cluster_mean_difference",
+        "cluster_unit": "graph_family:seed",
+        "test": "cluster_paired_t_test",
+        "family": "pre_registered_hypotheses",
+        "correction": "Holm-Bonferroni",
+        "mean_diff": 2.142222222222222,
+        "hl_median_diff": 3.3333333333333215,
+        "cliffs_delta": [
+          0.11122488888888889,
+          0.11122488888888889,
+          0.11122488888888889
+        ],
+        "cluster_ci_95": [
+          0.8987503822617859,
+          3.3856940621826586
+        ],
+        "cluster_ci_half": 1.2434718399604363,
+        "cluster_p_raw": 0.0008039049300015111,
+        "cluster_t_stat": 3.3930689137903625,
+        "cell_ci_95": [
+          1.2353333333333334,
+          3.0491111111111096
+        ],
+        "cell_ci_half": 0.9068888888888881,
+        "cell_p_raw": 8.915778018347994e-06,
+        "cell_wilcoxon_stat": 41900.0,
+        "n_pairs": 750,
+        "n_clusters": 250,
+        "cell_p_adjusted": 4.457889009173997e-05,
+        "cluster_p_adjusted": 0.004019524650007556,
+        "cell_sig": true,
+        "cluster_sig": true,
+        "cell_sensitivity": {
+          "test": "paired_wilcoxon",
+          "stat": 41900.0,
+          "raw_p": 8.915778018347994e-06,
+          "adjusted_p": 4.457889009173997e-05,
+          "sig": true,
+          "ci_95": [
+            1.2353333333333334,
+            3.0491111111111096
+          ],
+          "ci_half": 0.9068888888888881
+        }
+      },
+      "H2_cbba_partial_lr": {
+        "contrast_id": "H2_cbba_partial_lr",
+        "test_method": "aca",
+        "baseline_method": "cbba_partial_lr",
+        "metric": "completion_rate_pct",
+        "primary_estimator": "cluster_mean_difference",
+        "cluster_unit": "graph_family:seed",
+        "test": "cluster_paired_t_test",
+        "family": "pre_registered_hypotheses",
+        "correction": "Holm-Bonferroni",
+        "mean_diff": 0.6311111111111103,
+        "hl_median_diff": 0.0,
+        "cliffs_delta": [
+          0.023004444444444445,
+          0.023004444444444445,
+          0.023004444444444445
+        ],
+        "cluster_ci_95": [
+          -0.6259176419284874,
+          1.8881398641507081
+        ],
+        "cluster_ci_half": 1.2570287530395978,
+        "cluster_p_raw": 0.32370277934203795,
+        "cluster_t_stat": 0.9888370476050335,
+        "cell_ci_95": [
+          -0.23111111111111118,
+          1.4757777777777752
+        ],
+        "cell_ci_half": 0.8534444444444432,
+        "cell_p_raw": 0.32059257668974284,
+        "cell_wilcoxon_stat": 46290.0,
+        "n_pairs": 750,
+        "n_clusters": 250,
+        "cell_p_adjusted": 1.0,
+        "cluster_p_adjusted": 1.0,
+        "cell_sig": false,
+        "cluster_sig": false,
+        "cell_sensitivity": {
+          "test": "paired_wilcoxon",
+          "stat": 46290.0,
+          "raw_p": 0.32059257668974284,
+          "adjusted_p": 1.0,
+          "sig": false,
+          "ci_95": [
+            -0.23111111111111118,
+            1.4757777777777752
+          ],
+          "ci_half": 0.8534444444444432
+        }
+      },
+      "H2_ssi_lr": {
+        "contrast_id": "H2_ssi_lr",
+        "test_method": "aca",
+        "baseline_method": "ssi_lr",
+        "metric": "completion_rate_pct",
+        "primary_estimator": "cluster_mean_difference",
+        "cluster_unit": "graph_family:seed",
+        "test": "cluster_paired_t_test",
+        "family": "pre_registered_hypotheses",
+        "correction": "Holm-Bonferroni",
+        "mean_diff": 6.773333333333333,
+        "hl_median_diff": 3.333333333333343,
+        "cliffs_delta": [
+          0.1632071111111111,
+          0.1632071111111111,
+          0.1632071111111111
+        ],
+        "cluster_ci_95": [
+          4.567666327686155,
+          8.97900033898051
+        ],
+        "cluster_ci_half": 2.2056670056471774,
+        "cluster_p_raw": 5.334877559166923e-09,
+        "cluster_t_stat": 6.048206589053018,
+        "cell_ci_95": [
+          5.359999999999999,
+          8.186666666666666
+        ],
+        "cell_ci_half": 1.413333333333333,
+        "cell_p_raw": 3.089433545546985e-16,
+        "cell_wilcoxon_stat": 44392.5,
+        "n_pairs": 750,
+        "n_clusters": 250,
+        "cell_p_adjusted": 2.1626034818828897e-15,
+        "cluster_p_adjusted": 3.734414291416846e-08,
+        "cell_sig": true,
+        "cluster_sig": true,
+        "cell_sensitivity": {
+          "test": "paired_wilcoxon",
+          "stat": 44392.5,
+          "raw_p": 3.089433545546985e-16,
+          "adjusted_p": 2.1626034818828897e-15,
+          "sig": true,
+          "ci_95": [
+            5.359999999999999,
+            8.186666666666666
+          ],
+          "ci_half": 1.413333333333333
+        }
+      },
+      "H2_ctp": {
+        "contrast_id": "H2_ctp",
+        "test_method": "aca",
+        "baseline_method": "ctp_replan",
+        "metric": "completion_rate_pct",
+        "primary_estimator": "cluster_mean_difference",
+        "cluster_unit": "graph_family:seed",
+        "test": "cluster_paired_t_test",
+        "family": "pre_registered_hypotheses",
+        "correction": "Holm-Bonferroni",
+        "mean_diff": -5.475555555555557,
+        "hl_median_diff": -3.333333333333343,
+        "cliffs_delta": [
+          -0.2787946666666667,
+          -0.2787946666666667,
+          -0.2787946666666667
+        ],
+        "cluster_ci_95": [
+          -6.6333584530377525,
+          -4.317752658073362
+        ],
+        "cluster_ci_half": 1.1578028974821954,
+        "cluster_p_raw": 6.741815546003204e-18,
+        "cluster_t_stat": -9.314459793568831,
+        "cell_ci_95": [
+          -6.337777777777778,
+          -4.65777777777778
+        ],
+        "cell_ci_half": 0.839999999999999,
+        "cell_p_raw": 6.5144194391448385e-34,
+        "cell_wilcoxon_stat": 11211.0,
+        "n_pairs": 750,
+        "n_clusters": 250,
+        "cell_p_adjusted": 5.8629774952303544e-33,
+        "cluster_p_adjusted": 6.067633991402884e-17,
+        "cell_sig": true,
+        "cluster_sig": true,
+        "cell_sensitivity": {
+          "test": "paired_wilcoxon",
+          "stat": 11211.0,
+          "raw_p": 6.5144194391448385e-34,
+          "adjusted_p": 5.8629774952303544e-33,
+          "sig": true,
+          "ci_95": [
+            -6.337777777777778,
+            -4.65777777777778
+          ],
+          "ci_half": 0.839999999999999
+        }
+      },
+      "H2_implicit": {
+        "contrast_id": "H2_implicit",
+        "test_method": "aca",
+        "baseline_method": "implicit",
+        "metric": "completion_rate_pct",
+        "primary_estimator": "cluster_mean_difference",
+        "cluster_unit": "graph_family:seed",
+        "test": "cluster_paired_t_test",
+        "family": "pre_registered_hypotheses",
+        "correction": "Holm-Bonferroni",
+        "mean_diff": -3.555555555555557,
+        "hl_median_diff": -3.3333333333333286,
+        "cliffs_delta": [
+          -0.1883751111111111,
+          -0.1883751111111111,
+          -0.1883751111111111
+        ],
+        "cluster_ci_95": [
+          -4.768120464491549,
+          -2.3429906466195654
+        ],
+        "cluster_ci_half": 1.2125649089359918,
+        "cluster_p_raw": 2.282142947953356e-08,
+        "cluster_t_stat": -5.775194136000737,
+        "cell_ci_95": [
+          -4.426666666666668,
+          -2.6666666666666683
+        ],
+        "cell_ci_half": 0.8799999999999997,
+        "cell_p_raw": 6.0575769839632694e-15,
+        "cell_wilcoxon_stat": 19666.5,
+        "n_pairs": 750,
+        "n_clusters": 250,
+        "cell_p_adjusted": 3.634546190377962e-14,
+        "cluster_p_adjusted": 1.3692857687720137e-07,
+        "cell_sig": true,
+        "cluster_sig": true,
+        "cell_sensitivity": {
+          "test": "paired_wilcoxon",
+          "stat": 19666.5,
+          "raw_p": 6.0575769839632694e-15,
+          "adjusted_p": 3.634546190377962e-14,
+          "sig": true,
+          "ci_95": [
+            -4.426666666666668,
+            -2.6666666666666683
+          ],
+          "ci_half": 0.8799999999999997
+        }
+      },
+      "H3_welfare": {
+        "contrast_id": "H3_welfare",
+        "test_method": "aca",
+        "baseline_method": "cbba_partial_lr",
+        "metric": "net_welfare",
+        "primary_estimator": "cluster_mean_difference",
+        "cluster_unit": "graph_family:seed",
+        "test": "cluster_paired_t_test",
+        "family": "pre_registered_hypotheses",
+        "correction": "Holm-Bonferroni",
+        "mean_diff": -2.738073099900922,
+        "hl_median_diff": 6.575362870498992,
+        "cliffs_delta": [
+          0.029048888888888888,
+          0.029048888888888888,
+          0.029048888888888888
+        ],
+        "cluster_ci_95": [
+          -21.34595819969487,
+          15.869811999893024
+        ],
+        "cluster_ci_half": 18.607885099793947,
+        "cluster_p_raw": 0.7722034075005624,
+        "cluster_t_stat": -0.2898091796905379,
+        "cell_ci_95": [
+          -16.11850129675077,
+          11.01063315490404
+        ],
+        "cell_ci_half": 13.564567225827407,
+        "cell_p_raw": 0.5729360859763544,
+        "cell_wilcoxon_stat": 136730.5,
+        "n_pairs": 750,
+        "n_clusters": 250,
+        "cell_p_adjusted": 1.0,
+        "cluster_p_adjusted": 1.0,
+        "cell_sig": false,
+        "cluster_sig": false,
+        "cell_sensitivity": {
+          "test": "paired_wilcoxon",
+          "stat": 136730.5,
+          "raw_p": 0.5729360859763544,
+          "adjusted_p": 1.0,
+          "sig": false,
+          "ci_95": [
+            -16.11850129675077,
+            11.01063315490404
+          ],
+          "ci_half": 13.564567225827407
+        }
+      },
+      "H4_safe_conflicts": {
+        "contrast_id": "H4_safe_conflicts",
+        "test_method": "aca",
+        "baseline_method": "aca_no_margin",
+        "metric": "safe_claim_conflicts",
+        "primary_estimator": "cluster_mean_difference",
+        "cluster_unit": "graph_family:seed",
+        "test": "cluster_paired_t_test",
+        "family": "pre_registered_hypotheses",
+        "correction": "Holm-Bonferroni",
+        "mean_diff": -4.846666666666667,
+        "hl_median_diff": -5.0,
+        "cliffs_delta": [
+          -0.9820551111111111,
+          -0.9820551111111111,
+          -0.9820551111111111
+        ],
+        "cluster_ci_95": [
+          -5.046959852922755,
+          -4.646373480410577
+        ],
+        "cluster_ci_half": 0.20029318625608877,
+        "cluster_p_raw": 3.723543247712774e-127,
+        "cluster_t_stat": -47.65857922373362,
+        "cell_ci_95": [
+          -4.966666666666667,
+          -4.721333333333333
+        ],
+        "cell_ci_half": 0.12266666666666692,
+        "cell_p_raw": 1.4916046354220028e-123,
+        "cell_wilcoxon_stat": 0.0,
+        "n_pairs": 750,
+        "n_clusters": 250,
+        "cell_p_adjusted": 1.6407650989642032e-122,
+        "cluster_p_adjusted": 4.0958975724840514e-126,
+        "cell_sig": true,
+        "cluster_sig": true,
+        "cell_sensitivity": {
+          "test": "paired_wilcoxon",
+          "stat": 0.0,
+          "raw_p": 1.4916046354220028e-123,
+          "adjusted_p": 1.6407650989642032e-122,
+          "sig": true,
+          "ci_95": [
+            -4.966666666666667,
+            -4.721333333333333
+          ],
+          "ci_half": 0.12266666666666692
+        }
+      },
+      "H4_completion": {
+        "contrast_id": "H4_completion",
+        "test_method": "aca",
+        "baseline_method": "aca_no_margin",
+        "metric": "completion_rate_pct",
+        "primary_estimator": "cluster_mean_difference",
+        "cluster_unit": "graph_family:seed",
+        "test": "cluster_paired_t_test",
+        "family": "pre_registered_hypotheses",
+        "correction": "Holm-Bonferroni",
+        "mean_diff": 0.22222222222222188,
+        "hl_median_diff": 0.0,
+        "cliffs_delta": [
+          0.007324444444444444,
+          0.007324444444444444,
+          0.007324444444444444
+        ],
+        "cluster_ci_95": [
+          -0.7312848536621133,
+          1.175729298106557
+        ],
+        "cluster_ci_half": 0.9535070758843351,
+        "cluster_p_raw": 0.6466232183874467,
+        "cluster_t_stat": 0.4590158484870584,
+        "cell_ci_95": [
+          -0.6311111111111107,
+          1.022222222222222
+        ],
+        "cell_ci_half": 0.8266666666666663,
+        "cell_p_raw": 0.5487509963296142,
+        "cell_wilcoxon_stat": 35286.0,
+        "n_pairs": 750,
+        "n_clusters": 250,
+        "cell_p_adjusted": 1.0,
+        "cluster_p_adjusted": 1.0,
+        "cell_sig": false,
+        "cluster_sig": false,
+        "cell_sensitivity": {
+          "test": "paired_wilcoxon",
+          "stat": 35286.0,
+          "raw_p": 0.5487509963296142,
+          "adjusted_p": 1.0,
+          "sig": false,
+          "ci_95": [
+            -0.6311111111111107,
+            1.022222222222222
+          ],
+          "ci_half": 0.8266666666666663
+        }
+      },
+      "H5_inference": {
+        "contrast_id": "H5_inference",
+        "test_method": "aca",
+        "baseline_method": "aca_no_inference",
+        "metric": "completion_rate_pct",
+        "primary_estimator": "cluster_mean_difference",
+        "cluster_unit": "graph_family:seed",
+        "test": "cluster_paired_t_test",
+        "family": "pre_registered_hypotheses",
+        "correction": "Holm-Bonferroni",
+        "mean_diff": -0.02666666666666663,
+        "hl_median_diff": 0.0,
+        "cliffs_delta": [
+          0.0023217777777777776,
+          0.0023217777777777776,
+          0.0023217777777777776
+        ],
+        "cluster_ci_95": [
+          -0.8440169810539453,
+          0.7906836477206121
+        ],
+        "cluster_ci_half": 0.8173503143872787,
+        "cluster_p_raw": 0.9488166566331186,
+        "cluster_t_stat": -0.0642576166088925,
+        "cell_ci_95": [
+          -0.7822222222222224,
+          0.7466666666666667
+        ],
+        "cell_ci_half": 0.7644444444444445,
+        "cell_p_raw": 0.9684171647489395,
+        "cell_wilcoxon_stat": 29942.0,
+        "n_pairs": 750,
+        "n_clusters": 250,
+        "cell_p_adjusted": 1.0,
+        "cluster_p_adjusted": 1.0,
+        "cell_sig": false,
+        "cluster_sig": false,
+        "cell_sensitivity": {
+          "test": "paired_wilcoxon",
+          "stat": 29942.0,
+          "raw_p": 0.9684171647489395,
+          "adjusted_p": 1.0,
+          "sig": false,
+          "ci_95": [
+            -0.7822222222222224,
+            0.7466666666666667
+          ],
+          "ci_half": 0.7644444444444445
+        }
+      },
+      "H6_messages": {
+        "contrast_id": "H6_messages",
+        "test_method": "aca",
+        "baseline_method": "cbba",
+        "metric": "total_messages",
+        "primary_estimator": "cluster_mean_difference",
+        "cluster_unit": "graph_family:seed",
+        "test": "cluster_paired_t_test",
+        "family": "pre_registered_hypotheses",
+        "correction": "Holm-Bonferroni",
+        "mean_diff": -76.064,
+        "hl_median_diff": -72.0,
+        "cliffs_delta": [
+          -0.3009173333333333,
+          -0.3009173333333333,
+          -0.3009173333333333
+        ],
+        "cluster_ci_95": [
+          -90.95616268232648,
+          -61.1718373176735
+        ],
+        "cluster_ci_half": 14.892162682326491,
+        "cluster_p_raw": 3.377676323016108e-20,
+        "cluster_t_stat": -10.059710969846412,
+        "cell_ci_95": [
+          -87.38853333333333,
+          -64.138
+        ],
+        "cell_ci_half": 11.625266666666661,
+        "cell_p_raw": 5.37433085023933e-34,
+        "cell_wilcoxon_stat": 64359.0,
+        "n_pairs": 750,
+        "n_clusters": 250,
+        "cell_p_adjusted": 5.3743308502393304e-33,
+        "cluster_p_adjusted": 3.377676323016108e-19,
+        "cell_sig": true,
+        "cluster_sig": true,
+        "cell_sensitivity": {
+          "test": "paired_wilcoxon",
+          "stat": 64359.0,
+          "raw_p": 5.37433085023933e-34,
+          "adjusted_p": 5.3743308502393304e-33,
+          "sig": true,
+          "ci_95": [
+            -87.38853333333333,
+            -64.138
+          ],
+          "ci_half": 11.625266666666661
+        }
+      }
+    },
+    "heldout_v5": {
       "H1_aca_plus_vs_aca_welfare": {
         "contrast_id": "H1_aca_plus_vs_aca_welfare",
         "test_method": "aca_plus",

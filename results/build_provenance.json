@@ -33,12 +33,12 @@
       "bytes": 12762
     },
     "results/result_model_v1.json": {
-      "sha256": "a9034e91e52414854c67f26673a8b7c6869a49591bdbf388f2773a7f244e52d8",
-      "bytes": 138240
+      "sha256": "20a550fa96bdc374a99f9ff28863355224667ac016003d5f020259b6f29b7db5",
+      "bytes": 256590
     },
     "results/numbers.tex": {
-      "sha256": "f1fa4e0c9a4122550d4675e220e5fe2da2fffcdc34f4e6bddbefe3798a987618",
-      "bytes": 11411
+      "sha256": "bbfade0326573a515938d56e3232630d417830346bf3ba67bb09f278973ee7e3",
+      "bytes": 11488
     },
     "results/table_main_results.tex": {
       "sha256": "a6e63d337754b6d31d72901c9b425aead04bcd3d832785376948ac063798d357",

@@ -113,8 +113,12 @@ def run_pipeline(protocol: str = "v5", strict: bool = False) -> bool:
     log_step("Step 4: Generating Result Model, Tables, Numbers Macros, and README Synchronization")
     import tools.build_result_model as brm
     brm.main()
+    import tools.generate_numbers_from_model as gnm
+    gnm.generate_numbers()
     import experiments.make_tables as mt
     mt.main()
+    import tools.render_readme as rr
+    rr.render_readme()
     provenance["steps"]["step4_tables"] = "PASS"
 
     # Step 5: Figure Suite Generation

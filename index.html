@@ -87,17 +87,11 @@
           </h1>
 
           <div class="is-size-4 publication-authors">
-            <span class="author-block">Research Codebase &amp; Multi-Robot Benchmark</span>
-          </div>
-
-          <div class="is-size-4 publication-authors">
-            <span class="author-block">
-              <a href="https://github.com/mrinal22258" target="_blank" rel="noopener noreferrer">Kumar Mrinal</a><sup>1</sup>
-            </span>
+            <span class="author-block">Anonymous Authors</span>
           </div>
 
           <div class="is-size-5 publication-affiliations">
-            <span class="author-block"><sup>1</sup> Department of Computer Science and Artificial Intelligence, IIIT Delhi, India</span>
+            <span class="author-block">Anonymous Review Archive &bull; Double-Blind Submission</span>
           </div>
 
           <div class="column has-text-centered">
@@ -124,22 +118,22 @@
               </span>
               <!-- Code Link -->
               <span class="link-block">
-                <a href="https://github.com/mrinal22258/Adversarial-Contingency-Auctions" target="_blank" rel="noopener noreferrer"
+                <a href="#benchmarks"
                    class="external-link button is-normal is-rounded is-dark">
                   <span class="icon">
                       <i class="fab fa-github"></i>
                   </span>
-                  <span>Code &amp; Benchmarks</span>
+                  <span>Code &amp; Benchmarks (Anonymized)</span>
                 </a>
               </span>
               <!-- Live Demo Link -->
               <span class="link-block">
-                <a href="https://huggingface.co/spaces/mrinal22258/adversarial-contingency-auctions" target="_blank" rel="noopener noreferrer"
+                <a href="#demo"
                    class="external-link button is-normal is-rounded is-dark">
                   <span class="icon">
                       <i class="fas fa-robot"></i>
                   </span>
-                  <span>Interactive Demo</span>
+                  <span>Interactive Demo (Local: app.py)</span>
                 </a>
               </span>
               <!-- Benchmarks Link -->
@@ -206,9 +200,11 @@
       <div class="column is-four-fifths">
         <h2 class="title is-2">Abstract</h2>
         <div class="content has-text-justified">
+          <!-- GENERATED_ABSTRACT_START -->
           <p>
-            Decentralized multi-robot task allocation in contested, uncertain environments is vulnerable to strategic adversarial edge blockages and inconsistent local beliefs among teammates. Standard market frameworks such as the Consensus-Based Bundle Algorithm (CBBA) and Sequential Single-Item (SSI) auctions require fleet-wide consensus and trigger cascading re-auction cycles upon path invalidation, inducing severe communication spikes and coordination latency. To overcome these limitations, we propose <b>Adversarial Contingency Auctions (ACA)</b>, a decentralized market coordination mechanism that directly addresses inconsistent beliefs and dynamic blockages without requiring continuous belief synchronization. In ACA, robots evaluate tasks by bidding their expected recourse cost under a Bayesian posterior over adversary types. To mitigate allocation conflicts when subjective beliefs diverge, we derive a closed-form <b>Pinsker claim margin</b> $m_{r,j} = \Delta_j (\sqrt{\frac{1}{2} D'_{\text{KL}}} + \eta_{\text{eff}}) + \delta_{\text{map}}$ from Pinsker's inequality and total variation triangle bounds that guarantees conflict-free safe allocation under bounded estimation error (Theorem 1, conditional on Assumption 1: $\mathrm{TV}(B_s, \hat{B}_s^{(r)}) \le \eta_{\text{eff}}$) without exchanging belief vectors. Furthermore, when traversing a blocked corridor, agents execute precomputed local recourse branches with zero communication messages, triggering re-auctions only upon recourse exhaustion. We establish theoretical properties for recourse valuation (Proposition 1), Lipschitz bid continuity (Proposition 2), conditional conflict-freedom (Theorem 1), and bounded messaging (Proposition 3). Extensive paired empirical evaluations across 5 graph topologies ($N = 13{,}800$ total trials, including a balanced core grid of $N = 750$ paired trials per method across 250 independent instances) and a held-out confirmatory evaluation on seeds 101&ndash;130 ($N = 450$ instances) demonstrate that ACA achieves 89.2% task completion while eliminating 99.1% of safe-claim conflicts relative to unregularized coordination.
+            Decentralized multi-robot task allocation in contested, uncertain environments is vulnerable to strategic adversarial edge blockages and inconsistent local beliefs among teammates. Standard market frameworks such as the Consensus-Based Bundle Algorithm (CBBA) and Sequential Single-Item (SSI) auctions require fleet-wide consensus and trigger cascading re-auction cycles upon path invalidation, inducing severe communication spikes and coordination latency. To overcome these limitations, we propose <b>Adversarial Contingency Auctions (ACA)</b>, a decentralized market coordination mechanism that directly addresses inconsistent beliefs and dynamic blockages without requiring continuous belief synchronization. In ACA, robots evaluate tasks by bidding their expected recourse cost under a Bayesian posterior over adversary types. To mitigate allocation conflicts when subjective beliefs diverge, we derive a closed-form <b>Pinsker claim margin</b> $m_{r,j} = \Delta_j (\sqrt{\frac{1}{2} D'_{\text{KL}}} + \eta_{\text{eff}}) + \delta_{\text{map}}$ from Pinsker's inequality and total variation triangle bounds that guarantees conflict-free safe allocation under bounded estimation error (Theorem 1, conditional on Assumption 1: $\mathrm{TV}(B_s, \hat{B}_s^{(r)}) \le \eta_{\text{eff}}$) without exchanging belief vectors. Furthermore, when traversing a blocked corridor, agents execute precomputed local recourse branches with zero communication messages, triggering re-auctions only upon recourse exhaustion. We establish theoretical properties for recourse valuation (Proposition 1), Lipschitz bid continuity (Proposition 2), conditional conflict-freedom (Theorem 1), and bounded messaging (Proposition 3). Extensive paired empirical evaluations across 5 graph topologies ($N = 13{,}800$ total sweep trials, including a balanced core grid of $N = 750$ paired trials per method across 250 independent instances) and a held-out confirmatory evaluation on seeds 101&ndash;130 ($N = 450$ instances) demonstrate that ACA's primary operational advantage is safe decentralized coordination via the Pinsker margin under communication constraints rather than unconstrained completion dominance.
           </p>
+          <!-- GENERATED_ABSTRACT_END -->
         </div>
       </div>
     </div>
@@ -305,7 +301,7 @@
         </div>
         <img class="teaser-img" src="./static/images/fig7_qualitative_traces.svg" alt="Qualitative Execution Traces">
         <p class="mt-3 has-text-grey" style="font-size: 0.95rem; text-align: justify;">
-          <b>Figure 7:</b> Snapshots across simulation ticks ($t=15, 45, 65, 110$) demonstrating reactive jamming detection, Bayesian prior update, autonomous contingency detour activation, and 100% mission completion without global re-auctioning.
+          <b>Figure 7:</b> Snapshots across simulation ticks ($t=15, 45, 65, 110$) demonstrating reactive jamming detection, Bayesian prior update, autonomous contingency detour activation, and successful mission completion without global re-auctioning.
         </p>
       </div>
     </div>
@@ -338,6 +334,7 @@
 </section>
 
 <!-- Comprehensive Benchmark Evaluation Matrix -->
+<!-- GENERATED_BENCHMARKS_START -->
 <section class="section" id="benchmarks">
   <div class="container is-max-desktop">
     <div class="columns is-centered has-text-centered">
@@ -600,6 +597,7 @@
     </div>
   </div>
 </section>
+<!-- GENERATED_BENCHMARKS_END -->
 
 <!-- BibTeX Section -->
 <section class="section" id="BibTeX">
@@ -614,12 +612,11 @@
     <p style="color: #7a7a7a; font-size: 0.95rem; margin-bottom: 0.75rem;">
       <i>Official citation details will be updated once the peer-reviewed paper is formally published.</i>
     </p>
-    <pre><code id="bibtex-code">@article{mrinal2024adversarial,
-  author  = {Mrinal, Kumar},
+    <pre><code id="bibtex-code">@article{anonymous2026aca,
+  author  = {Anonymous Authors},
   title   = {Adversarial Contingency Auctions: Strategic Multi-Robot Task Allocation under Inconsistent Beliefs and Adversarial Path Blockages},
-  journal = {Preprint / Working Paper},
-  year    = {2024},
-  url     = {https://github.com/mrinal22258/Adversarial-Contingency-Auctions}
+  journal = {Under review},
+  year    = {2026}
 }</code></pre>
   </div>
 </section>
@@ -636,18 +633,12 @@
          href="./paper.tex" target="_blank" rel="noopener noreferrer" title="LaTeX Source">
         <i class="fas fa-file-code"></i>
       </a>
-      <a class="icon-link external-link" href="https://github.com/mrinal22258/Adversarial-Contingency-Auctions" target="_blank" rel="noopener noreferrer" title="GitHub Repository">
-        <i class="fab fa-github"></i>
-      </a>
-      <a class="icon-link external-link" href="https://huggingface.co/spaces/mrinal22258/adversarial-contingency-auctions" target="_blank" rel="noopener noreferrer" title="HuggingFace Space">
-        <i class="fas fa-robot"></i>
-      </a>
     </div>
     <div class="columns is-centered">
       <div class="column is-8">
         <div class="content has-text-centered">
           <p style="color: #7a7a7a; font-size: 0.9rem;">
-            Adversarial Contingency Auctions (ACA) &bull; Kumar Mrinal
+            Adversarial Contingency Auctions (ACA) &bull; Double-Blind Review Archive
           </p>
         </div>
       </div>

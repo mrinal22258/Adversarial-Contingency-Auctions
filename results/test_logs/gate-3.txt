@@ -1,4 +1,4 @@
-============================= test session starts =============================
+﻿============================= test session starts =============================
 platform win32 -- Python 3.12.7, pytest-9.1.1, pluggy-1.5.0
 rootdir: C:\Users\krmri\Downloads\Adversarial-Contingency-Auctions-main\Adversarial-Contingency-Auctions-main
 configfile: pyproject.toml

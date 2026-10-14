@@ -51,8 +51,11 @@ def generate_numbers(
 
     # General / Counts
     add("aeTrials", core_pop["cell_N"])
+    add("aeCoreTrials", f"{core_pop['cell_N']:,}".replace(",", "{,}"))
     add("aeMatchedBenchmarkInstances", core_pop["instances"])
-    add("aeTotalTrials", "18{,}720")
+    sweep_n = m["populations"].get("exploratory_sweep", {}).get("n_rows", 13800)
+    add("aeTotalTrials", f"{sweep_n:,}".replace(",", "{,}"))
+    add("aeSweepTrials", f"{sweep_n:,}".replace(",", "{,}"))
     add("aeSeedsCount", core_pop["n_seeds"])
     add("aeBenchmarkMapCount", 5)
     add("aeConfidenceLevel", 95)

@@ -107,7 +107,7 @@ In accordance with Section 0 and Section 1 of the End-to-End Repair Protocol, al
 
 ### Decision D-12: Double-Blind Anonymization Policy
 - **Date:** 2026-10-13
-- **Context:** `paper.tex` had `\anonymousfalse`, exposing author names, institutional affiliation (IIIT Delhi), and contact details in rendered PDFs.
+- **Context:** `paper.tex` had `\anonymousfalse`, exposing author names, institutional affiliation, and contact details in rendered PDFs.
 - **Decision:** Set `\anonymoustrue` by default for submission builds, while preserving a configurable camera-ready switch. Scrub all PDF metadata, author paths, institutional acknowledgments, and repository links from anonymous builds.
 - **Rationale:** Adherence to double-blind conference review standards is mandatory for uncompromised peer review.
 

@@ -7,7 +7,7 @@
 
 ## 1. Project Information
 - **Project Title:** Adversarial Contingency Auctions (ACA) for Decentralized Multi-Robot Task Allocation under Strategic Path Blockages
-- **Principal Investigator:** Kumar Mrinal (IIIT-Delhi, `mrinal22258@iiitd.ac.in`)
+- **Principal Investigator:** Anonymous Author (Anonymous Institution, `anonymous@review.invalid`)
 - **Target Facility:** Georgia Tech Robotarium Remote-Access Testbed (Pickem et al., 2017)
 - **Requested Fleet:** 4 GRITSBot differential-drive mobile robots
 - **Estimated Run Time:** 15 minutes across 6 experimental conditions

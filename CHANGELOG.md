@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Highlights
 - **Gate 1 (Runner Protocol & Single Source of Truth)**: Registered authoritative 50 confirmatory seeds (`09638b69...`) and 15 development seeds (`19a8aabd...`) in `experiments/configs/protocol_v6.yaml`; fixed trial identity hashing in `experiments/run_sweep.py`; guaranteed isolated output directories; added atomic file locking.
-- **Gate 2 (Policy Equivalence & Active Pruning)**: Implemented full recursive recourse trees with stable node and branch IDs; unified `plan_hash` across valuation, Lipschitz bound, cache, and executor; defined active pruning with explicit recovery cost leaves; calibrated active threshold $\tau_{\text{prune}} = 0.20 > 0.12$; removed default marginal fallbacks.
+- **Gate 2 (Policy Equivalence & Active Pruning)**: Implemented full recursive recourse trees with stable node and branch IDs; unified `plan_hash` across valuation, Lipschitz bound, cache, and executor; defined active pruning with explicit recovery cost leaves; calibrated active threshold $\tau_{\text{prune}} = 0.15 > 0.12$; removed default marginal fallbacks.
 - **Gate 3 (Hazard Event Contract & Grounded Beliefs)**: Formulated explicit sensing contract in `docs/HAZARD_CONTRACT.md`; eliminated all ungrounded default-state marginal queries; added held-out Brier calibration reporting.
 - **Gate 4 (Cluster-Aware Statistics & Claim Ledger V2)**: Standardized on cluster-level (`graph_family × seed`) primary estimands; rewrote `audit/CLAIM_LEDGER_V2.csv` with executable verification; linked Theorem 1 commitment evidence into the cryptographic hash chain.
 - **Gate 5 (Protocol v6 Preparation & Smoke Validation)**: Built `tools/verify_protocol.py`; authored execution guide `RUN_V6.md`; created reproducible smoke test pipeline in `results/smoke/`; tagged `prereg-v6.1`.
@@ -16,6 +16,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+<!-- GENERATED_CHANGELOG_START -->
 ## [2.0.0] - 2026-10-11: Complete Repository Overhaul, Rigorous Evaluation & Mission Control
 
 ### Highlights
@@ -104,3 +105,5 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - **H6 (Superiority over SSI)**: ACA+ achieves +11.96 pp completion superiority over SSI (+LR) ($p < 0.001$, Cohen's $d_z = 0.584$).
   - **H7 (Margin Conflict Reduction Confirmed)**: ACA reduces total conflicts by 20.6% vs `aca_no_margin` (39.66 vs 49.93, $p < 0.001$) without significant completion penalty ($p = 0.0906$).
 - Logged confirmatory artifacts: `results/confirmatory/heldout_v5_results.csv`, `heldout_v5_summary.csv`, and `heldout_v5_statistical_tests.json`.
+<!-- GENERATED_CHANGELOG_END -->
+
