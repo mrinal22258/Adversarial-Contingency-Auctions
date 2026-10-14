@@ -8,4 +8,4 @@ tests/test_stage1_provenance_and_stats.py::test_compute_paired_statistics_indepe
     res = hypotest_fun_out(*samples, **kwds)
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
-173 passed, 54 deselected, 2 warnings in 35.51s
+173 passed, 54 deselected, 2 warnings in 52.39s

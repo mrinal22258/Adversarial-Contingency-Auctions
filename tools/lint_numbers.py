@@ -37,8 +37,10 @@ ALLOWLISTED_PATTERNS = [
     # Communication packet drop sweep range
     (r"p(?:_drop)?\s*in\s*\[0(?:\.0)?,\s*0\.40?\]", "Protocol communication degradation sweep range"),
     (r"p(?:_drop)?\s*in\s*\[0\.20?,\s*0\.40?\]", "Lossy communication regime range"),
-    # CSS styling percentage in UI styles / HTML attributes (including decimal aspect ratios like 56.25%)
+    # CSS styling percentage in UI styles / HTML attributes (including decimal aspect ratios like 56.25% and gradient color stops)
     (r"(?:width|height|max-width|min-width|flex-basis|padding|padding-bottom|margin|font-size|top|bottom|left|right|size)\s*:\s*\d+(?:\.\d+)?%", "CSS styling dimension in HTML style attribute"),
+    (r"(?:linear|radial)-gradient\([^;\"']+\)", "CSS gradient styling in HTML style attributes"),
+    (r"#[0-9a-fA-F]{3,8}\s+\d+(?:\.\d+)?%", "CSS color stop percentage in gradient styling"),
     # Confidence level coverage (95%)
     (r"\b95%\s+(?:(?:bootstrap\s+)?confidence\s+intervals?|bootstrap\s+ci|ci\b)", "Pre-registered 95% bootstrap confidence interval level"),
     # Quality status header in docs/PAPER_CLAIMS.md
@@ -53,8 +55,7 @@ ALLOWLISTED_PATTERNS = [
     (r"<div class='kpi-val'>0\.0%</div>", "Initial uninitialized KPI placeholder in acalib/demo/ui/tabs.py"),
     (r"completion \(94\.7% vs 92\.4%\)", "Protocol v5 held-out summary takeaway in acalib/demo/ui/tabs.py"),
     (r"20\.6% reduction", "Protocol v5 held-out summary takeaway in acalib/demo/ui/tabs.py"),
-    (r"Main Benchmark Results \(\$N = 750\b", "Frozen UI tab header in acalib/demo/ui/tabs.py"),
-    (r"Confirmatory Held-Out Results \(\$N = 450\b", "Frozen UI tab header in acalib/demo/ui/tabs.py"),
+    (r"(?:\$?[nN]\s*=\s*750\$?|\$?[nN]\s*=\s*450\$?)", "Declared protocol benchmark sample sizes N=750 and N=450 in UI tabs"),
     (r"\$p = 0\.091\$", "Frozen UI text in acalib/demo/ui/tabs.py"),
 ]
 

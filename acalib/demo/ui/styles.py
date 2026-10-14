@@ -1,10 +1,10 @@
 """
-Styling and design system tokens for ACA Mission Control.
-Calm indigo aesthetic, system fonts, tabular figures, and zero emojis.
-Strict responsive layout for 1440px, 1024px, and 390px viewports.
+Styling and design system tokens for ACA Mission Control — Clash of Clans (Oct 13, 2026 UI Revamp) Edition.
+Features clean orange-yellow 3D beveled buttons, center-stage live base viewport,
+4-tab Builder Menu 2.0 drawer, top-right resource/shield counters, and scrollable parchment cards.
 """
 
-# Inline SVG icons (Clean, semantic, accessible, zero emoji)
+# Inline SVG icons (Clean, semantic, accessible)
 SVG_ICONS = {
     "overview": """<svg class="nav-svg" viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>""",
     "simulate": """<svg class="nav-svg" viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>""",
@@ -18,178 +18,241 @@ SVG_ICONS = {
 
 MISSION_CONTROL_CSS = """
 :root {
+    --font-display: "Trebuchet MS", "Arial Rounded MT Bold", "Segoe UI", system-ui, -apple-system, sans-serif;
     --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-    --indigo-50: #eef2ff;
-    --indigo-100: #e0e7ff;
-    --indigo-200: #c7d2fe;
-    --indigo-600: #4f46e5;
-    --indigo-700: #4338ca;
-    --slate-50: #f8fafc;
-    --slate-100: #f1f5f9;
-    --slate-200: #e2e8f0;
-    --slate-300: #cbd5e1;
-    --slate-600: #475569;
+
+    /* Clash of Clans Oct 13, 2026 Palette Tokens */
+    --coc-bg-deep: #0f172a;
+    --coc-bg-hud: #1e293b;
+    --coc-parchment: #fdf8ee;
+    --coc-parchment-card: #fffdf9;
+    --coc-parchment-border: #decbb1;
+    --coc-rim-gold: #e09f3e;
+    --coc-gold-bright: #ffe169;
+    --coc-orange-top: #ffb703;
+    --coc-orange-mid: #fb8500;
+    --coc-orange-bot: #e85d04;
+    --coc-orange-lip: #8a3600;
+    --coc-green-top: #9ef01a;
+    --coc-green-mid: #38b000;
+    --coc-green-bot: #007200;
+    --coc-green-lip: #004b23;
+    --coc-blue-top: #90e0ef;
+    --coc-blue-mid: #0096c7;
+    --coc-blue-bot: #023e8a;
+    --coc-blue-lip: #011f4b;
+    --slate-900: #1e1b18;
     --slate-700: #334155;
-    --slate-800: #1e293b;
-    --slate-900: #0f172a;
-    --emerald-600: #059669;
-    --rose-600: #e11d48;
-    --amber-600: #d97706;
+    --slate-600: #475569;
 }
 
 body, .gradio-container {
     font-family: var(--font-sans) !important;
-    background-color: #f8fafc !important;
+    background: radial-gradient(circle at 50% 20%, #1e293b 0%, #0b1120 100%) !important;
     color: var(--slate-900) !important;
+    max-width: 1560px !important;
+    margin: 0 auto !important;
+    padding: 10px 16px !important;
 }
 
-/* Header & Shell Title */
+/* ==================== TOP CHIEF PROFILE & HUD HEADER BAR ==================== */
 .header-container {
-    margin-bottom: 12px !important;
-    padding-bottom: 8px !important;
-    border-bottom: 1px solid var(--slate-200) !important;
+    background: linear-gradient(180deg, #243046 0%, #151d2c 100%) !important;
+    border: 3px solid var(--coc-rim-gold) !important;
+    border-radius: 18px !important;
+    padding: 12px 18px !important;
+    margin-bottom: 14px !important;
+    box-shadow: 0 10px 26px rgba(0, 0, 0, 0.55), inset 0 1.5px 0 rgba(255, 255, 255, 0.22) !important;
+    color: #ffffff !important;
 }
 
 .header-container h1 {
+    font-family: var(--font-display) !important;
     font-size: 22px !important;
-    font-weight: 700 !important;
-    color: var(--slate-900) !important;
-    margin: 0 0 6px 0 !important;
-    line-height: 1.2 !important;
+    font-weight: 900 !important;
+    color: #ffe169 !important;
+    text-shadow: 0 2px 0 #000000, -1px -1px 0 #000000, 1px -1px 0 #000000 !important;
+    margin: 0 0 4px 0 !important;
+    letter-spacing: 0.02em !important;
 }
 
-/* Shell Navigation Tabs: High visual hierarchy */
+.header-container p, .header-container blockquote {
+    color: #e2e8f0 !important;
+    margin: 2px 0 !important;
+    border-left-color: #ffb703 !important;
+}
+
+/* ==================== CLASH OF CLANS BEVELED NAVIGATION TABS ==================== */
 .tab-nav, div[role="tablist"], .tab-wrapper, .tab-container:not(.visually-hidden) {
     display: flex !important;
     flex-wrap: wrap !important;
     overflow: visible !important;
-    max-width: 100% !important;
-    gap: 6px !important;
-    border-bottom: 2px solid var(--slate-200) !important;
-    background: transparent !important;
-    margin-bottom: 12px !important;
+    gap: 8px !important;
+    border-bottom: 3px solid var(--coc-rim-gold) !important;
+    background: rgba(15, 23, 42, 0.85) !important;
+    padding: 8px 12px 6px 12px !important;
+    border-radius: 16px 16px 0 0 !important;
+    margin-bottom: 0 !important;
 }
 
 div[role="tablist"] > button, .tab-nav button, .tab-wrapper button, .tab-container button, .tabs button {
     display: inline-flex !important;
     align-items: center !important;
+    justify-content: center !important;
     gap: 6px !important;
-    font-family: var(--font-sans) !important;
-    font-size: 12px !important;
-    font-weight: 600 !important;
+    font-family: var(--font-display) !important;
+    font-size: 12.5px !important;
+    font-weight: 900 !important;
     text-transform: uppercase !important;
     letter-spacing: 0.04em !important;
-    padding: 7px 12px !important;
-    white-space: nowrap !important;
-    color: var(--slate-600) !important;
-    border: none !important;
-    border-bottom: 2px solid transparent !important;
-    margin-bottom: -2px !important;
-    border-radius: 4px 4px 0 0 !important;
-    transition: all 0.15s ease !important;
-    background: transparent !important;
+    padding: 8px 16px !important;
+    color: #e2e8f0 !important;
+    text-shadow: 0 1.5px 0 #000000 !important;
+    background: linear-gradient(180deg, #334155 0%, #1e293b 100%) !important;
+    border: 2px solid #0f172a !important;
+    border-radius: 12px !important;
+    box-shadow: inset 0 1.5px 0 rgba(255,255,255,0.25), 0 3px 0 #090d16 !important;
+    transition: transform 0.08s ease, filter 0.12s ease, box-shadow 0.08s ease !important;
+    margin-bottom: 2px !important;
 }
 
 div[role="tablist"] > button:hover, .tab-nav button:hover {
-    color: var(--indigo-600) !important;
-    background: var(--indigo-50) !important;
+    filter: brightness(1.12) !important;
+    color: #ffe169 !important;
 }
 
+/* Active Selected Tab = Signature Clash of Clans Orange-Yellow Glossy Bevel Button */
 div[role="tablist"] > button.selected, .tab-nav button.selected, .tab-container button.selected, .tabs button.selected {
-    color: var(--indigo-600) !important;
-    border-bottom: 2.5px solid var(--indigo-600) !important;
-    background: #ffffff !important;
-}
-
-.nav-svg {
-    display: inline-block !important;
-    vertical-align: middle !important;
-}
-
-/* Form inputs & labels */
-.gradio-container label,
-.gradio-container .block label,
-.gradio-container .block > span,
-.gradio-container .form > label {
-    font-family: var(--font-sans) !important;
-    text-transform: uppercase !important;
-    font-size: 11px !important;
-    letter-spacing: 0.05em !important;
-    font-weight: 600 !important;
-    color: var(--slate-600) !important;
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-}
-
-/* Buttons */
-.btn-indigo-primary {
-    background: var(--indigo-600) !important;
     color: #ffffff !important;
-    border: 1px solid var(--indigo-700) !important;
-    font-weight: 600 !important;
+    text-shadow: 0 2px 0 #000000, -1px -1px 0 #000000, 1px -1px 0 #000000 !important;
+    background: linear-gradient(180deg, #ffe169 0%, #ffa200 48%, #e85d04 100%) !important;
+    border: 2.5px solid #2b1400 !important;
+    box-shadow:
+        inset 0 2.5px 0 rgba(255, 255, 255, 0.75),
+        0 4px 0 var(--coc-orange-lip),
+        0 6px 12px rgba(0, 0, 0, 0.45) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* Main Tab Content Panel (Warm Parchment-Framed Command Board) */
+.tabitem, div[role="tabpanel"] {
+    background: var(--coc-parchment) !important;
+    border: 3px solid var(--coc-rim-gold) !important;
+    border-top: none !important;
+    border-radius: 0 0 20px 20px !important;
+    padding: 16px !important;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.65) !important;
+}
+
+/* ==================== SIGNATURE ORANGE-YELLOW BEVELED ACTION BUTTONS ==================== */
+.btn-indigo-primary, button.primary {
+    font-family: var(--font-display) !important;
+    font-weight: 900 !important;
+    font-size: 14px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.04em !important;
+    color: #ffffff !important;
+    text-shadow: 0 2px 0 #000000, -1px -1px 0 #000000, 1px -1px 0 #000000 !important;
+    background: linear-gradient(180deg, #ffe169 0%, #ffa200 45%, #e85d04 100%) !important;
+    border: 2.5px solid #2b1400 !important;
+    border-radius: 14px !important;
+    padding: 11px 18px !important;
+    box-shadow:
+        inset 0 2.5px 0 rgba(255, 255, 255, 0.75),
+        inset 0 -2px 0 rgba(0, 0, 0, 0.25),
+        0 5px 0 var(--coc-orange-lip),
+        0 8px 16px rgba(0, 0, 0, 0.4) !important;
+    transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.12s ease !important;
+    cursor: pointer !important;
+}
+
+.btn-indigo-primary:hover, button.primary:hover {
+    filter: brightness(1.08) !important;
+}
+
+.btn-indigo-primary:active, button.primary:active {
+    transform: translateY(4px) !important;
+    box-shadow:
+        inset 0 2px 0 rgba(255, 255, 255, 0.6),
+        0 1px 0 var(--coc-orange-lip),
+        0 3px 6px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* Secondary Beveled Button (Royal Blue / Emerald Clash Style) */
+.btn-indigo-outline, button.secondary {
+    font-family: var(--font-display) !important;
+    font-weight: 900 !important;
     font-size: 13px !important;
-    border-radius: 6px !important;
-    padding: 8px 16px !important;
-    transition: background-color 0.15s ease !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.03em !important;
+    color: #ffffff !important;
+    text-shadow: 0 1.5px 0 #000000, -1px -1px 0 #000000, 1px -1px 0 #000000 !important;
+    background: linear-gradient(180deg, #9ef01a 0%, #38b000 50%, #007200 100%) !important;
+    border: 2.5px solid #002911 !important;
+    border-radius: 14px !important;
+    padding: 10px 16px !important;
+    box-shadow:
+        inset 0 2.5px 0 rgba(255, 255, 255, 0.72),
+        0 5px 0 var(--coc-green-lip),
+        0 7px 14px rgba(0, 0, 0, 0.35) !important;
+    transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.12s ease !important;
 }
 
-.btn-indigo-primary:hover {
-    background: var(--indigo-700) !important;
+.btn-indigo-outline:hover, button.secondary:hover {
+    filter: brightness(1.08) !important;
 }
 
-.btn-indigo-outline {
-    background: #ffffff !important;
-    color: var(--indigo-600) !important;
-    border: 1.5px solid var(--indigo-600) !important;
-    font-weight: 600 !important;
-    font-size: 13px !important;
-    border-radius: 6px !important;
-    padding: 7px 14px !important;
-    transition: all 0.15s ease !important;
+.btn-indigo-outline:active, button.secondary:active {
+    transform: translateY(4px) !important;
+    box-shadow: inset 0 2px 0 rgba(255,255,255,0.6), 0 1px 0 var(--coc-green-lip) !important;
 }
 
-.btn-indigo-outline:hover {
-    background: var(--indigo-50) !important;
-}
-
+/* Step & Scrubber Control Buttons (Gold-Trimmed Tactical Controls) */
 .btn-control {
-    background: #ffffff !important;
-    color: var(--slate-700) !important;
-    border: 1px solid var(--slate-200) !important;
-    font-weight: 600 !important;
-    font-size: 12px !important;
-    border-radius: 6px !important;
+    font-family: var(--font-display) !important;
+    font-weight: 900 !important;
+    font-size: 12.5px !important;
+    text-transform: uppercase !important;
+    color: #ffffff !important;
+    text-shadow: 0 1.5px 0 #000000 !important;
+    background: linear-gradient(180deg, #48cae4 0%, #0096c7 52%, #023e8a 100%) !important;
+    border: 2px solid #011638 !important;
+    border-radius: 12px !important;
+    padding: 8px 14px !important;
+    box-shadow:
+        inset 0 2px 0 rgba(255, 255, 255, 0.68),
+        0 4px 0 var(--coc-blue-lip),
+        0 5px 10px rgba(0, 0, 0, 0.3) !important;
 }
 
 .btn-control:hover {
-    background: var(--slate-100) !important;
+    filter: brightness(1.1) !important;
 }
 
-/* KPI Ribbon: Responsive CSS Grid with minmax and wrapping labels to prevent clipping at 390px, 768px, 1440px */
+.btn-control:active {
+    transform: translateY(3px) !important;
+    box-shadow: inset 0 1.5px 0 rgba(255,255,255,0.5), 0 1px 0 var(--coc-blue-lip) !important;
+}
+
+/* ==================== TOP RESOURCE & SHIELD KPI STRIP (COC RESOURCE PILLS) ==================== */
 .kpi-row {
     display: grid !important;
-    grid-template-columns: repeat(auto-fit, minmax(85px, 1fr)) !important;
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)) !important;
     gap: 8px !important;
     width: 100% !important;
     margin-bottom: 12px !important;
 }
 
-.kpi-row > div {
-    min-width: 0 !important;
-}
-
 .kpi-card {
     height: 100% !important;
-    min-width: 0 !important;
-    background: #ffffff !important;
-    border: 1px solid var(--slate-200) !important;
-    border-top: 2.5px solid var(--indigo-600) !important;
-    border-radius: 8px !important;
-    padding: 8px 6px !important;
+    background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%) !important;
+    border: 2px solid var(--coc-rim-gold) !important;
+    border-top: 3.5px solid #ffb703 !important;
+    border-radius: 12px !important;
+    padding: 8px 8px !important;
     text-align: center !important;
-    box-sizing: border-box !important;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
     display: flex !important;
     flex-direction: column !important;
     justify-content: center !important;
@@ -197,67 +260,105 @@ div[role="tablist"] > button.selected, .tab-nav button.selected, .tab-container 
 }
 
 .kpi-val {
-    font-family: var(--font-mono) !important;
+    font-family: var(--font-display) !important;
     font-variant-numeric: tabular-nums !important;
-    font-size: 15px !important;
-    font-weight: 700 !important;
-    color: var(--slate-900) !important;
-    white-space: normal !important;
-    word-break: break-word !important;
+    font-size: 16px !important;
+    font-weight: 900 !important;
+    color: #ffe169 !important;
+    text-shadow: 0 1.5px 0 #000000 !important;
     line-height: 1.2 !important;
 }
 
 .kpi-sub {
     font-size: 11px !important;
-    color: var(--slate-500) !important;
-    font-weight: 500 !important;
+    color: #94a3b8 !important;
+    font-weight: 700 !important;
 }
 
 .kpi-lbl {
-    font-family: var(--font-sans) !important;
+    font-family: var(--font-display) !important;
     font-size: 10px !important;
-    font-weight: 600 !important;
+    font-weight: 800 !important;
     text-transform: uppercase !important;
-    letter-spacing: 0.04em !important;
-    color: var(--slate-600) !important;
+    letter-spacing: 0.05em !important;
+    color: #cbd5e1 !important;
     margin-top: 3px !important;
-    white-space: normal !important;
-    word-wrap: break-word !important;
-    overflow-wrap: break-word !important;
-    line-height: 1.2 !important;
-    text-align: center !important;
 }
 
-@media (max-width: 480px) {
-    .kpi-row {
-        grid-template-columns: repeat(3, 1fr) !important;
-        gap: 6px !important;
-    }
-    .kpi-card {
-        padding: 6px 4px !important;
-    }
-    .kpi-val {
-        font-size: 13px !important;
-    }
-    .kpi-lbl {
-        font-size: 9px !important;
-    }
+/* ==================== SCROLLABLE BUILDER MENU 2.0 & BATTLE LOG DRAWERS ==================== */
+.coc-drawer-box {
+    background: var(--coc-parchment-card) !important;
+    border: 2.5px solid var(--coc-rim-gold) !important;
+    border-radius: 16px !important;
+    padding: 12px !important;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08) !important;
+}
+
+.coc-scroll-pane {
+    max-height: 520px !important;
+    overflow-y: auto !important;
+    padding-right: 6px !important;
+}
+
+.coc-scroll-pane::-webkit-scrollbar {
+    width: 9px;
+}
+.coc-scroll-pane::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.06);
+    border-radius: 8px;
+}
+.coc-scroll-pane::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #ffb703, #e85d04);
+    border-radius: 8px;
+    border: 1.5px solid #2b1400;
+}
+
+/* Center Stage Base Frame */
+.coc-base-stage {
+    background: #131d31 !important;
+    border: 3px solid var(--coc-rim-gold) !important;
+    border-radius: 18px !important;
+    padding: 12px !important;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35), inset 0 0 40px rgba(0, 0, 0, 0.4) !important;
+}
+
+.coc-base-stage h3 {
+    color: #ffe169 !important;
+    font-family: var(--font-display) !important;
+    text-shadow: 0 1.5px 0 #000000 !important;
+    margin: 0 0 6px 0 !important;
+}
+
+/* Form inputs & labels */
+.gradio-container label,
+.gradio-container .block label,
+.gradio-container .block > span,
+.gradio-container .form > label {
+    font-family: var(--font-display) !important;
+    text-transform: uppercase !important;
+    font-size: 11px !important;
+    letter-spacing: 0.04em !important;
+    font-weight: 800 !important;
+    color: #334155 !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
 }
 
 /* Result Banner */
 .result-banner {
-    background: #ffffff !important;
-    border: 1px solid #cbd5e1 !important;
-    border-left: 4px solid var(--indigo-600) !important;
-    border-radius: 6px !important;
+    background: linear-gradient(90deg, #fffbeb 0%, #fef3c7 100%) !important;
+    border: 2px solid #f59e0b !important;
+    border-left: 6px solid #e85d04 !important;
+    border-radius: 12px !important;
     padding: 10px 14px !important;
     margin-bottom: 10px !important;
 }
 
 .result-sentence {
     font-size: 13px !important;
-    font-weight: 600 !important;
-    color: var(--slate-800) !important;
+    font-weight: 800 !important;
+    color: #78350f !important;
 }
 
 /* Status Badges */
@@ -265,74 +366,50 @@ div[role="tablist"] > button.selected, .tab-nav button.selected, .tab-container 
     display: inline-flex !important;
     align-items: center !important;
     gap: 4px !important;
-    padding: 3px 8px !important;
-    border-radius: 4px !important;
+    padding: 3px 9px !important;
+    border-radius: 8px !important;
+    font-family: var(--font-display) !important;
     font-size: 11px !important;
-    font-weight: 600 !important;
+    font-weight: 900 !important;
     text-transform: uppercase !important;
     letter-spacing: 0.04em !important;
     margin-right: 6px !important;
-    vertical-align: middle !important;
+    text-shadow: 0 1px 0 #000 !important;
 }
 
 .badge-real {
-    background: #e0f2fe !important;
-    color: #0369a1 !important;
-    border: 1px solid #bae6fd !important;
+    background: linear-gradient(180deg, #ffd166, #fb8500) !important;
+    color: #ffffff !important;
+    border: 1.5px solid #2b1400 !important;
 }
 
 .badge-sim {
-    background: #f1f5f9 !important;
-    color: #475569 !important;
-    border: 1px solid #cbd5e1 !important;
+    background: linear-gradient(180deg, #48cae4, #0077b6) !important;
+    color: #ffffff !important;
+    border: 1.5px solid #023e8a !important;
 }
 
 .badge-verified {
-    background: #ecfdf5 !important;
-    color: #047857 !important;
-    border: 1px solid #a7f3d0 !important;
+    background: linear-gradient(180deg, #52b788, #2d6a4f) !important;
+    color: #ffffff !important;
+    border: 1.5px solid #081c15 !important;
 }
 
 /* Accessible focus visible outlines */
 button:focus-visible, input:focus-visible, select:focus-visible {
-    outline: 2px solid var(--indigo-600) !important;
+    outline: 2.5px solid #ffb703 !important;
     outline-offset: 2px !important;
 }
 
-/* Code block formatting */
-pre, code {
-    font-family: var(--font-mono) !important;
-    font-size: 12px !important;
-}
-
-/* Responsive Breakpoints: 1440, 1024, and 390 px */
 @media (max-width: 1024px) {
     .kpi-row {
-        flex-wrap: wrap !important;
-    }
-    .kpi-row > div {
-        flex: 1 1 30% !important;
-    }
-    div[role="tablist"] > button {
-        font-size: 11px !important;
-        padding: 5px 8px !important;
+        grid-template-columns: repeat(4, 1fr) !important;
     }
 }
 
 @media (max-width: 480px) {
-    .header-container h1 {
-        font-size: 17px !important;
-    }
-    .kpi-row > div {
-        flex: 1 1 45% !important;
-    }
-    div[role="tablist"] > button {
-        font-size: 9px !important;
-        padding: 4px 6px !important;
-        letter-spacing: 0 !important;
-    }
-    .kpi-val {
-        font-size: 15px !important;
+    .kpi-row {
+        grid-template-columns: repeat(2, 1fr) !important;
     }
 }
 """

@@ -17,7 +17,6 @@ def generate_event_log(
     events = []
     prev_blocked = set()
     prev_completed_tids = set()
-    prev_bundles = {}
 
     for frame in history:
         tick = frame.get("tick", 1)
@@ -119,14 +118,13 @@ def format_event_log_html(
     filter_category: str = "All",
 ) -> str:
     """
-    Format events into a 360px scrollable container with sticky header,
-    category filtering, and active tick auto-scroll targeting.
+    Format events into a Clash of Clans Battle Log styled 340px scrollable container
+    with sticky gold-trimmed header, category filtering, and active tick highlighting.
     """
     filtered = []
     for ev in events:
         cat = ev.get("category", "Info")
         if filter_category != "All":
-            # Map user filter categories
             f_norm = filter_category.lower()
             c_norm = cat.lower()
             if f_norm == "allocation" and c_norm in ("mechanism", "allocation"):
@@ -138,7 +136,7 @@ def format_event_log_html(
         filtered.append(ev)
 
     if not filtered:
-        rows_html = "<div style='padding: 16px; color: #64748b; font-size: 13px; text-align: center;'>No events matching filter.</div>"
+        rows_html = "<div style='padding: 18px; color: #cbd5e1; font-size: 13px; text-align: center;'>No battle log events matching filter.</div>"
     else:
         rows = []
         for ev in filtered:
@@ -147,30 +145,30 @@ def format_event_log_html(
             msg = ev.get("message", "")
             is_active = (active_tick is not None and tick == active_tick)
 
-            bg = "#eef2ff" if is_active else "#ffffff"
-            border_left = "3px solid #4f46e5" if is_active else "3px solid transparent"
+            bg = "rgba(251, 133, 0, 0.22)" if is_active else "rgba(30, 41, 59, 0.92)"
+            border_left = "4px solid #ffe169" if is_active else "4px solid #fb8500"
             cat_color = {
-                "Adversary": "#dc2626",
-                "Task": "#059669",
-                "Conflict": "#d97706",
-                "Mechanism": "#4f46e5",
-                "Execution": "#0284c7",
-                "Detour": "#0284c7",
-            }.get(cat, "#475569")
+                "Adversary": "#ff595e",
+                "Task": "#52b788",
+                "Conflict": "#ffb703",
+                "Mechanism": "#ffe169",
+                "Execution": "#48cae4",
+                "Detour": "#48cae4",
+            }.get(cat, "#cbd5e1")
 
             rows.append(
-                f"<div id='ev-tick-{tick}' style='padding: 6px 10px; margin-bottom: 2px; font-size: 12px; background: {bg}; border-left: {border_left}; border-bottom: 1px solid #f1f5f9; display: flex; gap: 8px; align-items: baseline;'>"
-                f"<span style='font-family: ui-monospace, monospace; font-size: 11px; font-weight: 600; color: #64748b; min-width: 52px;'>Tick {tick:02d}</span>"
-                f"<span style='font-size: 10px; font-weight: 600; text-transform: uppercase; padding: 1px 6px; border-radius: 4px; background: #f8fafc; border: 1px solid #e2e8f0; color: {cat_color}; min-width: 65px; text-align: center;'>{cat}</span>"
-                f"<span style='color: #1e293b; flex: 1;'>{msg}</span>"
+                f"<div id='ev-tick-{tick}' style='padding: 7px 10px; margin-bottom: 4px; font-size: 12px; background: {bg}; border-left: {border_left}; border-radius: 8px; border-bottom: 1px solid #334155; display: flex; gap: 8px; align-items: baseline;'>"
+                f"<span style='font-family: ui-monospace, monospace; font-size: 11px; font-weight: 800; color: #ffe169; min-width: 54px;'>Tick {tick:02d}</span>"
+                f"<span style='font-size: 10px; font-weight: 900; text-transform: uppercase; padding: 2px 6px; border-radius: 6px; background: #0f172a; border: 1px solid {cat_color}; color: {cat_color}; min-width: 68px; text-align: center;'>{cat}</span>"
+                f"<span style='color: #f8fafc; flex: 1;'>{msg}</span>"
                 f"</div>"
             )
         rows_html = "\n".join(rows)
 
-    return f"""<div style="height: 360px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 8px; background: #ffffff; position: relative; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
-<div style="position: sticky; top: 0; background: #f8fafc; border-bottom: 1px solid #e2e8f0; padding: 6px 10px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #475569; z-index: 5; display: flex; justify-content: space-between;">
-    <span>Chronological Event Stream</span>
-    <span style="font-size: 10px; color: #94a3b8;">Showing {len(filtered)} events</span>
+    return f"""<div style="height: 340px; overflow-y: auto; border: 2.5px solid #e09f3e; border-radius: 12px; background: #0f172a; padding: 6px; position: relative; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+<div style="position: sticky; top: 0; background: linear-gradient(180deg, #ffb703 0%, #e85d04 100%); border-bottom: 2px solid #2b1400; border-radius: 8px; padding: 6px 10px; margin-bottom: 6px; font-size: 11.5px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; color: #ffffff; text-shadow: 0 1.5px 0 #000; z-index: 5; display: flex; justify-content: space-between;">
+    <span>⚔️ Chronological Mission Battle Log</span>
+    <span style="font-size: 10.5px; color: #fff3b0;">{len(filtered)} Events</span>
 </div>
 {rows_html}
 </div>"""

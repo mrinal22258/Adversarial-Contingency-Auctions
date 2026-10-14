@@ -1,6 +1,7 @@
 """
-Main application layout for ACA Mission Control interface.
-Integrates styles, persistent left shell navigation, tabs, and callbacks.
+Main application layout for ACA Mission Control interface — Clash of Clans (Oct 13, 2026 UI Revamp) Edition.
+Integrates beveled orange-yellow HUD buttons, top Chief Profile & Protocol bar,
+center-stage live robot graph base, 4-tab Builder Menu 2.0, and tabbed Battle Log drawers.
 """
 
 import gradio as gr
@@ -31,8 +32,8 @@ from acalib.demo.ui.callbacks import (
 
 
 def build_app():
-    """Construct Mission Control Gradio interface with persistent navigation shell."""
-    with gr.Blocks(title="Adversarial Contingency Auctions — Mission Control") as demo:
+    """Construct Mission Control Gradio interface with Clash of Clans Oct 13, 2026 HUD navigation shell."""
+    with gr.Blocks(title="Adversarial Contingency Auctions — Mission Control (Clash HUD)") as demo:
         demo.css = MISSION_CONTROL_CSS
 
         # Global Session State
@@ -52,41 +53,55 @@ def build_app():
         # Autoplay timer
         timer = gr.Timer(value=0.25, active=False)
 
-        # Header Section
+        # Top Chief Profile & Protocol HUD Banner
         with gr.Column(elem_classes=["header-container"]):
             gr.Markdown(
                 """
-                # Adversarial Contingency Auctions (ACA) — Mission Control
-                > **Decentralized Multi-Robot Task Allocation under Strategic Blockages & Divergent Beliefs**  
-                <span class="badge-tag badge-real">[Real Maps]</span>
-                <span class="badge-tag badge-sim">[Discrete & Physics Sim]</span>
-
-                <div style="margin-top: 8px; padding: 6px 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 11px; color: #475569; display: flex; flex-wrap: wrap; gap: 16px;">
-                    <span><strong>Protocol:</strong> Protocol v6 registered; execution pending</span>
-                    <span><strong>Displayed results:</strong> protocol v5, data hash <code>a7470feb...</code></span>
-                    <span><strong>Result Model:</strong> <code>v2.0.0</code></span>
+                <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px;">
+                  <div style="display:flex; align-items:center; gap:12px;">
+                    <div style="width:50px; height:50px; border-radius:12px; background:linear-gradient(180deg,#ffd166 0%,#f77f00 60%,#d62828 100%); border:2.5px solid #2b1400; box-shadow:inset 0 2px 0 rgba(255,255,255,0.7), 0 3px 0 #6a1b00; display:flex; flex-direction:column; align-items:center; justify-content:center; font-weight:900; color:#fff; text-shadow:0 1.5px 0 #000;">
+                      <span style="font-size:9px; color:#fff3b0;">PROTO</span>
+                      <span style="font-size:16px; line-height:1;">v5</span>
+                    </div>
+                    <div>
+                      <h1 style="margin:0 !important;">Adversarial Contingency Auctions (ACA) — Mission Control</h1>
+                      <div style="font-size:12.5px; color:#fde68a; font-weight:700;">
+                        Decentralized Multi-Robot Task Allocation under Strategic Blockages &amp; Divergent Beliefs
+                      </div>
+                    </div>
+                  </div>
+                  <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                    <span class="badge-tag badge-real">[Real Maps]</span>
+                    <span class="badge-tag badge-sim">[Discrete &amp; Physics Sim]</span>
+                    <span class="badge-tag badge-verified">[SHA-256 Verified]</span>
+                  </div>
+                </div>
+                <div style="margin-top:8px; padding:6px 12px; background:rgba(15,23,42,0.75); border:1.5px solid #e09f3e; border-radius:10px; font-size:11px; color:#cbd5e1; display:flex; flex-wrap:wrap; gap:16px;">
+                    <span><strong style="color:#ffe169;">Protocol:</strong> Protocol v6 registered; execution pending</span>
+                    <span><strong style="color:#ffe169;">Displayed results:</strong> protocol v5, data hash <code>a7470feb...</code></span>
+                    <span><strong style="color:#ffe169;">Result Model:</strong> <code>v2.0.0</code></span>
                 </div>
                 """
             )
 
-        # Persistent Shell Navigation Tabs (Overview, Simulate, Experiments, Results, Method, Export)
+        # Persistent Shell Navigation Tabs (Beveled Gold/Orange Clash HUD Bar)
         with gr.Tabs(elem_id="main-tabs", selected="tab-simulate") as shell_tabs:
-            with gr.Tab("Overview", id="tab-overview"):
-                build_overview_view()
-
-            with gr.Tab("Simulate", id="tab-simulate"):
+            with gr.Tab("⚔️ Simulate (Base)", id="tab-simulate"):
                 sim_comps = build_simulate_view()
 
-            with gr.Tab("Experiments", id="tab-experiments"):
+            with gr.Tab("🏆 Experiments (Arena)", id="tab-experiments"):
                 exp_comps = build_experiments_view()
 
-            with gr.Tab("Results", id="tab-results"):
+            with gr.Tab("📊 Results (Ranks)", id="tab-results"):
                 res_comps = build_results_view()
 
-            with gr.Tab("Method", id="tab-method"):
+            with gr.Tab("📜 Method (Theory)", id="tab-method"):
                 build_method_view()
 
-            with gr.Tab("Export", id="tab-export"):
+            with gr.Tab("🛡️ Overview (Profile)", id="tab-overview"):
+                build_overview_view()
+
+            with gr.Tab("🧪 Export (Artifacts)", id="tab-export"):
                 exp_file_comps = build_export_view()
 
         # ================= CALLBACK WIRING =================
@@ -223,7 +238,7 @@ def build_app():
         # 8. Autoplay toggle
         def toggle_playback(is_running):
             new_state = not is_running
-            label = "Pause" if new_state else "Auto Play"
+            label = "⏸ Pause" if new_state else "▶ Auto Play"
             return new_state, gr.Timer(active=new_state), label
 
         sim_comps["play_pause_btn"].click(
