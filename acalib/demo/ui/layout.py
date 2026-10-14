@@ -60,13 +60,11 @@ def build_app():
                 > **Decentralized Multi-Robot Task Allocation under Strategic Blockages & Divergent Beliefs**  
                 <span class="badge-tag badge-real">[Real Maps]</span>
                 <span class="badge-tag badge-sim">[Discrete & Physics Sim]</span>
-                <span class="badge-tag badge-verified">[Verified Provenance]</span>
 
                 <div style="margin-top: 8px; padding: 6px 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 11px; color: #475569; display: flex; flex-wrap: wrap; gap: 16px;">
-                    <span><strong>Result Model:</strong> <code>v1.0.0</code></span>
-                    <span><strong>Input Hash:</strong> <code>a7470feb...</code> (heldout v5 CSV)</span>
-                    <span><strong>Protocol:</strong> <code>prereg-v6</code></span>
-                    <span><strong>Audit Status:</strong> Verified Deterministic</span>
+                    <span><strong>Protocol:</strong> Protocol v6 registered; execution pending</span>
+                    <span><strong>Displayed results:</strong> protocol v5, data hash <code>a7470feb...</code></span>
+                    <span><strong>Result Model:</strong> <code>v2.0.0</code></span>
                 </div>
                 """
             )

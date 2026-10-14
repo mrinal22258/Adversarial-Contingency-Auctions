@@ -4,6 +4,16 @@ All notable changes to the Adversarial Contingency Auctions (ACA) project are do
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.1.0] - 2026-10-14: Audit Repairs, Policy Equivalence, and Protocol v6 Pre-Registration
+
+### Highlights
+- **Gate 1 (Runner Protocol & Single Source of Truth)**: Registered authoritative 50 confirmatory seeds (`09638b69...`) and 15 development seeds (`19a8aabd...`) in `experiments/configs/protocol_v6.yaml`; fixed trial identity hashing in `experiments/run_sweep.py`; guaranteed isolated output directories; added atomic file locking.
+- **Gate 2 (Policy Equivalence & Active Pruning)**: Implemented full recursive recourse trees with stable node and branch IDs; unified `plan_hash` across valuation, Lipschitz bound, cache, and executor; defined active pruning with explicit recovery cost leaves; calibrated active threshold $\tau_{\text{prune}} = 0.20 > 0.12$; removed default marginal fallbacks.
+- **Gate 3 (Hazard Event Contract & Grounded Beliefs)**: Formulated explicit sensing contract in `docs/HAZARD_CONTRACT.md`; eliminated all ungrounded default-state marginal queries; added held-out Brier calibration reporting.
+- **Gate 4 (Cluster-Aware Statistics & Claim Ledger V2)**: Standardized on cluster-level (`graph_family × seed`) primary estimands; rewrote `audit/CLAIM_LEDGER_V2.csv` with executable verification; linked Theorem 1 commitment evidence into the cryptographic hash chain.
+- **Gate 5 (Protocol v6 Preparation & Smoke Validation)**: Built `tools/verify_protocol.py`; authored execution guide `RUN_V6.md`; created reproducible smoke test pipeline in `results/smoke/`; tagged `prereg-v6.1`.
+- **Gate 6 (Manuscript, UI, and Documentation Synchronization)**: Reflected three-tier evidence hierarchy (exploratory grid, held-out v5 reversal, pending v6); enforced double-blind anonymity; updated UI telemetry with live hashes and protocol pending status.
+
 ---
 
 ## [2.0.0] - 2026-10-11: Complete Repository Overhaul, Rigorous Evaluation & Mission Control

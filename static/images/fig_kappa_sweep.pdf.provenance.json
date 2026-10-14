@@ -1,6 +1,6 @@
 {
   "figure_file": "static/images\\fig_kappa_sweep.pdf",
-  "git_commit": "166b3d12ac88b491730b04af61acb79c7c4c366b",
+  "git_commit": "da68be270a59eee710c300d6bfdfbd8109150518",
   "source_files": [
     "results/raw_results.csv"
   ],

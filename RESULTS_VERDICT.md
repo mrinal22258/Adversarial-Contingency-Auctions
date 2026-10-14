@@ -1,4 +1,9 @@
-# RESULTS_VERDICT.md: Empirical Verdict for Hypotheses H1-H8 (prereg-v4)
+# RESULTS_VERDICT.md: Empirical Verdict for Hypotheses H1-H8 (Exploratory Grid & Protocol v5 Held-Out)
+
+**Protocol Status**: Protocol v6 is registered and cryptographically locked (`prereg-v6.1`, SHA-256: `09638b69...`), with confirmatory cluster execution pending (see `RUN_V6.md`). Results below report:
+1. **Tier 1 (Exploratory Grid)**: Hypotheses H1–H8 from the nominal balanced core grid ($N=250$ independent clusters, 750 paired trials).
+2. **Tier 2 (Held-Out v5 Confirmatory)**: Pre-registered out-of-sample evaluation on un-tuned seeds 101–130 ($N=450$ instances, 3600 trials), confirming the Pinsker margin's conflict reduction and revealing the CBBA+LR performance reversal.
+3. **Tier 3 (Protocol v6 Confirmatory)**: Registered, execution pending.
 
 **Strict Rule R5**: Every empirical claim in the paper maps directly to a verified hypothesis ID below.
 Generated directly from executed raw runs, matched independent instance-level tests, and directional decision rules.

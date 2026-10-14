@@ -403,6 +403,14 @@ def generate_numbers(
     add("aeHeldoutCtpMsgs", get_v5("ctp_replan", "total_messages", 0))
     add("aeHeldoutAcaPlusMsgs", get_v5("aca_plus", "total_messages", 0))
 
+    # Held-out CBBA+LR vs ACA reversal metrics
+    aca_comp_v5 = float(get_v5("aca", "completion_rate_pct", 2))
+    cbba_lr_comp_v5 = float(get_v5("cbba_lr", "completion_rate_pct", 2))
+    add("aeHeldoutDiffCbbaLr", f"{cbba_lr_comp_v5 - aca_comp_v5:+.2f}")
+    add("aeHeldoutWelfareAca", get_v5("aca", "net_welfare", 1))
+    add("aeHeldoutWelfareCbbaLr", get_v5("cbba_lr", "net_welfare", 1))
+    add("aeHeldoutConflictsCbbaLr", get_v5("cbba_lr", "total_conflicts", 1))
+
     # v5 Contrasts
     if "H1_aca_plus_vs_aca_welfare" not in v5_contrasts:
         raise KeyError("Missing required v5 contrast H1_aca_plus_vs_aca_welfare")
@@ -427,6 +435,8 @@ def generate_numbers(
     add("aeHeldoutSsiDiff", "+12.0")
     add("aePvalHeldoutSsi", "< 0.001")
     add("aeHeldoutPruneThreshold", "0.06")
+    add("aePlannerRiskThreshold", "0.12")
+    add("aePruneThresholdSix", "0.20")
     add("aeHeldoutAdaptiveKappa", "0.5")
     add("aeAdaptiveStaticBound", "1.0")
     add("aeAdaptiveBaseFactor", "0.75")

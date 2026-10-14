@@ -1,7 +1,8 @@
 {
-  "timestamp_utc": "2026-10-13T15:52:51.552208+00:00",
+  "timestamp_utc": "2026-10-14T05:59:58.464124+00:00",
   "python_version": "3.12.7 | packaged by Anaconda, Inc. | (main, Oct  4 2024, 13:17:27) [MSC v.1929 64 bit (AMD64)]",
-  "git_commit": "166b3d12ac88b491730b04af61acb79c7c4c366b",
+  "protocol": "v5",
+  "git_commit": "da68be270a59eee710c300d6bfdfbd8109150518",
   "git_dirty": true,
   "repo_root": ".",
   "steps": {
@@ -36,8 +37,8 @@
       "bytes": 138240
     },
     "results/numbers.tex": {
-      "sha256": "3c1a179aafcbe3a980807deee35c0954cae8e48e4cfe72f481a1eb3508ccfc31",
-      "bytes": 11151
+      "sha256": "f1fa4e0c9a4122550d4675e220e5fe2da2fffcdc34f4e6bddbefe3798a987618",
+      "bytes": 11411
     },
     "results/table_main_results.tex": {
       "sha256": "a6e63d337754b6d31d72901c9b425aead04bcd3d832785376948ac063798d357",
@@ -68,9 +69,9 @@
       "bytes": 4890
     },
     "paper.pdf": {
-      "sha256": "846b5ec58543187a0a806ca5cc3f018a908ed90d8e01b43356a2a389de12a9e2",
-      "bytes": 695214
+      "sha256": "843c37fcb88a53d92ad2b545c177140fbea5915d9a23481419bc2fd9daa0e997",
+      "bytes": 693720
     }
   },
-  "duration_sec": 63.02
+  "duration_sec": 67.98
 }

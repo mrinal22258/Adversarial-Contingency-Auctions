@@ -49,13 +49,13 @@ In the SITL synthetic-vision pipeline, overhead camera observations track ArUco 
 All claims and metrics in this repository are partitioned into three explicitly labelled evidence tiers:
 
 1. **Tier 1 (Exploratory / Discovery — Nominal Main Grid, $N = 750$ Matched Trials Across 250 Instances):** Initial benchmark exploration across 14 allocators on seeds 1–250.
-2. **Tier 2 (Pilot Heuristic Search — Stage 4 Pilot, $N = 60$ Instances, Seeds 51–60):** Pilot exploration for adaptive margin calibration and low-hazard pruning.
-3. **Tier 3 (Confirmatory Out-of-Sample — Protocol v5 Held-Out, $N = 450$ Instances, 3,600 Trials, Seeds 101–130):** Frozen pre-registered confirmatory evaluation on un-tuned instances.
+2. **Tier 2 (Confirmatory Out-of-Sample — Protocol v5 Held-Out, $N = 450$ Instances, 3,600 Trials, Seeds 101–130):** Frozen pre-registered confirmatory evaluation on un-tuned instances.
+3. **Tier 3 (Confirmatory Registered Execution Pending — Protocol v6):** Cryptographically frozen executable protocol (`prereg-v6.1`, SHA-256: `09638b69...`) across 50 fresh confirmatory seeds. Full execution pending per `RUN_V6.md`.
 
 ### Key Empirical Takeaways Across Tiers:
-- **Pinsker Margin Trade-Off Confirmed (Tier 3):** On the confirmatory held-out grid, the Pinsker margin reduces total task conflicts by 20.6% ($38.6$ vs. $49.9$, paired difference $-10.27$, $p_{\text{adj}} < 0.001$) relative to unregularized coordination (`no-margin`), with only a modest, non-significant completion difference ($-1.08$ pp, $p_{\text{adj}} = 0.091$).
-- **Stage 4 Pilot Gains Did Not Replicate (Tier 2 vs. Tier 3):** While ACA+ and ACA-Adaptive achieved nominal $+2.67\%$ completion gains in the $N=60$ pilot, they exhibited statistical completion parity with static ACA in the full $N=450$ confirmation ($92.44\%$ vs. $92.40\%$, $\Delta = +0.04$ pp, $p_{\text{adj}} = 0.505$).
-- **Baseline Strengths (Tier 1 & Tier 3):** When CBBA is equipped with local recourse execution (`CBBA+LR`), it achieves higher completion ($94.67\%$), higher net welfare ($958.9$), and lower conflicts ($25.48$) in Protocol v5. On the balanced nominal core, `CTP Replan` achieves higher raw completion ($96.4\%$ vs. $90.9\%$) via continuous global re-auctions, while ACA excels in decentralized communication conservation.
+- **Headline Reversal on Unconstrained Completion (Tier 2):** When baselines are equipped with local recourse execution (`CBBA+LR`), CBBA+LR outperforms ACA on completion ($94.67\%$ vs. $92.40\%$, paired diff $+2.22$ pp) and net welfare ($958.9$ vs. $937.4$) with fewer conflicts ($25.48$ vs. $39.66$), demonstrating that ACA's advantage is safe coordination under communication constraints rather than uniform completion dominance.
+- **Pinsker Margin Trade-Off Confirmed (Tier 2):** On the confirmatory held-out grid, the Pinsker margin reduces total task conflicts by 20.6% ($38.6$ vs. $49.9$, paired difference $-10.27$, $p_{\text{adj}} < 0.001$) relative to unregularized coordination (`no-margin`), with only a modest, non-significant completion difference ($-1.08$ pp, $p_{\text{adj}} = 0.091$).
+- **Inactive Pruning in Protocol v5:** In Protocol v5, ACA+ pruning was functionally inactive ($\tau_{\text{prune}} = 0.06 < \tau_{\text{planner}} = 0.12$). Active pruning with calibrated threshold $\tau = 0.20$ is registered for Protocol v6.
 - **Negative Result on Type Inference (Tier 1):** Online Bayesian adversary type inference shows statistical parity with a static uniform prior ($p = 0.515$), indicating that generic corridor detour structures saturate benefit before fine-grained type identification.
 
 All empirical data is generated automatically with zero hand-typed numbers:
