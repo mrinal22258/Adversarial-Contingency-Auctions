@@ -1,4 +1,4 @@
-.PHONY: all results reproduce sweep tables figures test lint clean
+.PHONY: all results reproduce sweep tables figures test lint clean paper release release-check
 
 all: results
 
@@ -27,4 +27,10 @@ lint:
 
 clean:
 	python -c "import shutil, glob, os; [shutil.rmtree(p, ignore_errors=True) for p in glob.glob('**/__pycache__', recursive=True) + ['.pytest_cache']]; [os.remove(f) for f in glob.glob('paper.*') if not f.endswith(('.tex', '.pdf', '.bbl'))]"
+
+release:
+	python tools/make_release.py
+
+release-check:
+	python tools/check_anonymity.py
 

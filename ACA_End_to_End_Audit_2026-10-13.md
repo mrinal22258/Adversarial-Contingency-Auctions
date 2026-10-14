@@ -255,7 +255,7 @@ Do not call this a fully trace-verified run. Summary-level CSV comparisons can s
 
 ### P1-9. Double-blind review setting is disabled
 
-`paper.tex:54` sets `\anonymousfalse`. The rendered PDF shows the author name, IIIT Delhi affiliation, and email footnote. If the target venue requires double-anonymous review, this PDF is not submission-ready. Set the venue-appropriate anonymous mode and also check PDF metadata, acknowledgments, supplementary material, repository/URL self-identification, and any author-identifying artifact paths.
+`paper.tex:54` sets `\anonymousfalse`. The rendered PDF shows the author name, institutional affiliation, and email footnote. If the target venue requires double-anonymous review, this PDF is not submission-ready. Set the venue-appropriate anonymous mode and also check PDF metadata, acknowledgments, supplementary material, repository/URL self-identification, and any author-identifying artifact paths.
 
 ### P1-10. Supporting paper/docs have stale or contradictory status language
 

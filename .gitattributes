@@ -7,3 +7,21 @@
 *.mp4 binary
 *.parquet binary
 *.map binary
+
+# Double-blind peer review release archive packaging
+.gitattributes export-ignore
+.gitignore export-ignore
+.github export-ignore
+.github/** export-ignore
+docs/history export-ignore
+docs/history/** export-ignore
+audit export-ignore
+audit/** export-ignore
+scratch export-ignore
+scratch/** export-ignore
+results/supplement export-ignore
+results/supplement/** export-ignore
+results/test_logs export-ignore
+results/test_logs/** export-ignore
+*.jsonl export-ignore
+**/*.jsonl export-ignore

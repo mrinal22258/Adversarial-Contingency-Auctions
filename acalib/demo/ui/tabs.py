@@ -393,10 +393,10 @@ def build_export_view():
         gr.Markdown(
             """
             ```bibtex
-            @article{mrinal2026aca,
-              author = {Mrinal, Kumar},
+            @article{anonymous2026aca,
+              author = {Anonymous Authors},
               title  = {Adversarial Contingency Auctions: Strategic Multi-Robot Task Allocation under Inconsistent Beliefs and Adversarial Path Blockages},
-              note   = {Preprint / under review},
+              note   = {Preprint / under review (Double-blind)},
               year   = {2026}
             }
             ```

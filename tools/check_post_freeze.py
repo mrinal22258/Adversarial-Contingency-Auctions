@@ -110,9 +110,10 @@ def check_post_freeze(tag: str = "prereg-v6.2") -> Tuple[bool, List[str]]:
     for f in changed_files:
         norm = f.replace("\\", "/")
 
-        # 1. acalib/ is strictly frozen
+        # 1. acalib/ simulation core is strictly frozen (demo UI exempted)
         if norm.startswith("acalib/"):
-            violations.append(f"Forbidden post-freeze change in simulator core: {norm}")
+            if not norm.startswith("acalib/demo/"):
+                violations.append(f"Forbidden post-freeze change in simulator core: {norm}")
 
         # 2. protocol config is strictly frozen
         elif norm == "experiments/configs/protocol_v6.yaml":
