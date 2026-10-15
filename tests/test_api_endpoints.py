@@ -214,4 +214,62 @@ def test_api_health_and_version(client):
     assert v_data["protocol_full_name"] == PROTOCOL_FULL_NAME
 
 
+def test_security_headers_and_payload_cap(client):
+    """P4, F-25: Security headers present and oversized payloads rejected with 413."""
+    resp = client.get("/api/health")
+    assert resp.status_code == 200
+    assert resp.headers.get("x-content-type-options") == "nosniff"
+    assert resp.headers.get("x-frame-options") == "DENY"
+
+    # Oversized payload rejected
+    large_payload = {"padding": "x" * 1_200_000}
+    resp_large = client.post("/api/simulate", json=large_payload)
+    assert resp_large.status_code == 413
+
+
+def test_rate_limiter_429(client, monkeypatch):
+    """F-25: Exceeding ACA_RATE_LIMIT_PER_MIN returns HTTP 429 with Retry-After header."""
+    from app import _RATE_LIMITER
+    _RATE_LIMITER.reset()
+    monkeypatch.setenv("ACA_RATE_LIMIT_PER_MIN", "2")
+
+    payload = {
+        "topology": "warehouse_small",
+        "numRobots": 2,
+        "numTasks": 2,
+        "maxSteps": 10,
+        "seed": 10001,
+    }
+
+    # Request 1: allowed
+    r1 = client.post("/api/simulate", json=payload)
+    assert r1.status_code == 200
+
+    # Request 2: allowed
+    r2 = client.post("/api/simulate", json=payload)
+    assert r2.status_code == 200
+
+    # Request 3: rate limited
+    r3 = client.post("/api/simulate", json=payload)
+    assert r3.status_code == 429
+    assert "Retry-After" in r3.headers
+    assert int(r3.headers["Retry-After"]) >= 1
+    assert "Rate limit" in r3.json()["detail"]
+
+    # Reset limiter for subsequent tests
+    _RATE_LIMITER.reset()
+
+
+def test_monte_carlo_pydantic_bounds(client):
+    """F-25: Monte Carlo trial count bounded via Pydantic Field(ge=1, le=50)."""
+    # Over max 50
+    r_over = client.post("/api/monte_carlo", json={"numTrials": 100})
+    assert r_over.status_code == 422
+
+    # Under min 1
+    r_under = client.post("/api/monte_carlo", json={"numTrials": 0})
+    assert r_under.status_code == 422
+
+
+
 

@@ -10,6 +10,10 @@ Provides:
 import os
 import sys
 import json
+import time
+import asyncio
+import logging
+import collections
 import threading
 import uuid
 from typing import Dict, Any, List, Literal, Optional
@@ -20,7 +24,8 @@ if REPO_ROOT not in sys.path:
     sys.path.insert(0, REPO_ROOT)
 
 import networkx as nx
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.concurrency import run_in_threadpool
@@ -43,6 +48,8 @@ from acalib.demo.runner import (
 )
 from acalib.demo.narrate import generate_event_log
 
+logger = logging.getLogger("aca.api")
+
 # Canonical Gradio Blocks instance
 demo = build_app()
 demo.queue(default_concurrency_limit=10)
@@ -52,6 +59,133 @@ app = FastAPI(
     description="Strategic Multi-Robot Task Allocation under Inconsistent Beliefs and Adversarial Path Blockages",
     version=__version__,
 )
+
+# CORS configuration (P1)
+allowed_origins_env = os.environ.get("ACA_CORS_ORIGINS", "")
+if allowed_origins_env:
+    allowed_origins = [orig.strip() for orig in allowed_origins_env.split(",") if orig.strip()]
+else:
+    allowed_origins = [
+        "http://localhost:7860",
+        "http://127.0.0.1:7860",
+    ]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=allowed_origins,
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["*"],
+)
+
+
+@app.middleware("http")
+async def security_and_size_middleware(request: Request, call_next):
+    """Enforce body payload size cap and standard security headers (P4, F-25)."""
+    content_length = request.headers.get("content-length")
+    if content_length:
+        try:
+            if int(content_length) > 1_048_576:  # 1MB cap
+                return JSONResponse(
+                    status_code=413,
+                    content={"detail": "Request payload exceeds 1MB limit."},
+                )
+        except ValueError:
+            pass
+    response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    return response
+
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    """Global exception handler preventing stack traces in HTTP responses (P4)."""
+    if isinstance(exc, HTTPException):
+        return JSONResponse(
+            status_code=exc.status_code,
+            content={"detail": exc.detail},
+            headers=exc.headers,
+        )
+    logger.error("Unhandled exception processing %s %s: %s", request.method, request.url.path, exc, exc_info=True)
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "Internal server error. Consult system logs for details."},
+    )
+
+
+class IPRateLimiter:
+    """Sliding-window per-IP rate limiter (F-25)."""
+
+    def __init__(self, default_limit: int = 60):
+        self._lock = threading.Lock()
+        self._records: Dict[str, List[float]] = collections.defaultdict(list)
+        self.default_limit = default_limit
+
+    def get_limit(self) -> int:
+        val = os.environ.get("ACA_RATE_LIMIT_PER_MIN")
+        if val is not None:
+            try:
+                return int(val)
+            except ValueError:
+                pass
+        return self.default_limit
+
+    def check_rate_limit(self, client_ip: str) -> None:
+        limit = self.get_limit()
+        if limit <= 0:
+            return
+
+        now = time.time()
+        cutoff = now - 60.0
+
+        with self._lock:
+            timestamps = self._records[client_ip]
+            valid = [t for t in timestamps if t > cutoff]
+            if len(valid) >= limit:
+                retry_after = int(max(1, 60.0 - (now - valid[0])))
+                self._records[client_ip] = valid
+                raise HTTPException(
+                    status_code=429,
+                    detail=f"Rate limit of {limit} requests per minute exceeded.",
+                    headers={"Retry-After": str(retry_after)},
+                )
+            valid.append(now)
+            self._records[client_ip] = valid
+
+    def reset(self):
+        with self._lock:
+            self._records.clear()
+
+
+class ConcurrencyLimiter:
+    """Bounded concurrency semaphore for heavy simulation endpoints (F-25)."""
+
+    def __init__(self):
+        self._sem: Optional[asyncio.Semaphore] = None
+        self._max: Optional[int] = None
+
+    def get_semaphore(self) -> asyncio.Semaphore:
+        max_sims = int(os.environ.get("ACA_MAX_CONCURRENT_SIMS", "4"))
+        if self._sem is None or self._max != max_sims:
+            self._max = max_sims
+            self._sem = asyncio.Semaphore(max_sims)
+        return self._sem
+
+    async def acquire_slot(self) -> asyncio.Semaphore:
+        sem = self.get_semaphore()
+        if sem._value <= 0:
+            raise HTTPException(
+                status_code=429,
+                detail="Maximum concurrent simulations reached; please retry shortly.",
+                headers={"Retry-After": "2"},
+            )
+        await sem.acquire()
+        return sem
+
+
+_RATE_LIMITER = IPRateLimiter()
+_CONCURRENCY_LIMITER = ConcurrencyLimiter()
 
 
 @app.get("/api/health")
@@ -133,8 +267,8 @@ _LAST_RUN: Dict[str, Any] = {}
 
 class SimulateRequest(BaseModel):
     topology: Literal["boston", "warehouse_small", "warehouse_large"] = "boston"
-    allocator: str = "ACA (Ours)"
-    adversary: str = "Reactive (Corridor Interdiction)"
+    allocator: str = Field(default="ACA (Ours)", max_length=100)
+    adversary: str = Field(default="Reactive (Corridor Interdiction)", max_length=100)
     numRobots: int = Field(default=4, ge=1, le=20)
     numTasks: int = Field(default=15, ge=1, le=100)
     seed: int = Field(default=10001, ge=0)
@@ -146,8 +280,8 @@ class SimulateRequest(BaseModel):
 
 class CompareRequest(BaseModel):
     topology: Literal["boston", "warehouse_small", "warehouse_large"] = "boston"
-    allocator: str = "ACA (Ours)"
-    adversary: str = "Reactive (Corridor Interdiction)"
+    allocator: str = Field(default="ACA (Ours)", max_length=100)
+    adversary: str = Field(default="Reactive (Corridor Interdiction)", max_length=100)
     numRobots: int = Field(default=4, ge=1, le=20)
     numTasks: int = Field(default=15, ge=1, le=100)
     seed: int = Field(default=10001, ge=0)
@@ -155,10 +289,11 @@ class CompareRequest(BaseModel):
 
 class MonteCarloRequest(BaseModel):
     topology: Literal["boston", "warehouse_small", "warehouse_large"] = "boston"
-    allocator: str = "ACA (Ours)"
-    adversary: str = "Reactive (Corridor Interdiction)"
+    allocator: str = Field(default="ACA (Ours)", max_length=100)
+    adversary: str = Field(default="Reactive (Corridor Interdiction)", max_length=100)
     numRobots: int = Field(default=4, ge=1, le=20)
     numTasks: int = Field(default=15, ge=1, le=100)
+    numTrials: int = Field(default=20, ge=1, le=50)
 
 
 @app.get("/hud", include_in_schema=False)
@@ -257,9 +392,15 @@ def _execute_simulation(req: SimulateRequest) -> Dict[str, Any]:
 
 
 @app.post("/api/simulate")
-async def api_simulate(req: SimulateRequest):
+async def api_simulate(req: SimulateRequest, request: Request):
     """Execute high-fidelity simulation engine and return structured JSON."""
-    return await run_in_threadpool(_execute_simulation, req)
+    client_ip = request.client.host if request.client else "127.0.0.1"
+    _RATE_LIMITER.check_rate_limit(client_ip)
+    sem = await _CONCURRENCY_LIMITER.acquire_slot()
+    try:
+        return await run_in_threadpool(_execute_simulation, req)
+    finally:
+        sem.release()
 
 
 def _execute_compare(req: CompareRequest) -> Dict[str, Any]:
@@ -299,9 +440,15 @@ def _execute_compare(req: CompareRequest) -> Dict[str, Any]:
 
 
 @app.post("/api/compare")
-async def api_compare(req: CompareRequest):
+async def api_compare(req: CompareRequest, request: Request):
     """Run paired comparison across ACA and baselines under identical CRN environment."""
-    return await run_in_threadpool(_execute_compare, req)
+    client_ip = request.client.host if request.client else "127.0.0.1"
+    _RATE_LIMITER.check_rate_limit(client_ip)
+    sem = await _CONCURRENCY_LIMITER.acquire_slot()
+    try:
+        return await run_in_threadpool(_execute_compare, req)
+    finally:
+        sem.release()
 
 
 def _execute_monte_carlo(req: MonteCarloRequest) -> Dict[str, Any]:
@@ -320,9 +467,15 @@ def _execute_monte_carlo(req: MonteCarloRequest) -> Dict[str, Any]:
 
 
 @app.post("/api/monte_carlo")
-async def api_monte_carlo(req: MonteCarloRequest):
+async def api_monte_carlo(req: MonteCarloRequest, request: Request):
     """Run 20-seed Monte Carlo sweep under Common Random Numbers."""
-    return await run_in_threadpool(_execute_monte_carlo, req)
+    client_ip = request.client.host if request.client else "127.0.0.1"
+    _RATE_LIMITER.check_rate_limit(client_ip)
+    sem = await _CONCURRENCY_LIMITER.acquire_slot()
+    try:
+        return await run_in_threadpool(_execute_monte_carlo, req)
+    finally:
+        sem.release()
 
 
 @app.get("/api/export_json")
