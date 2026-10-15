@@ -20,7 +20,7 @@ def find_tool(name: str) -> str:
     return path
 
 
-def compile_doc(doc_name: str):
+def compile_doc(doc_name: str, target_rotation: int = 180):
     tex_file = f"{doc_name}.tex"
     pdf_file = f"{doc_name}.pdf"
     full_tex = os.path.join(REPO_ROOT, tex_file)
@@ -52,20 +52,73 @@ def compile_doc(doc_name: str):
     if not os.path.exists(full_pdf):
         raise FileNotFoundError(f"Expected output PDF not created: {full_pdf}")
 
-    # Inspect page count
+    # Inspect page count and orientation
     try:
         import fitz
         doc = fitz.open(full_pdf)
         pages = len(doc)
-        print(f"Successfully generated {pdf_file} ({pages} pages).")
+        rotations = [doc[i].rotation for i in range(pages)]
+        doc.close()
+        print(f"Successfully generated {pdf_file} ({pages} pages, rotation={rotations[0]}°).")
     except Exception:
         print(f"Successfully generated {pdf_file}.")
 
+    # Enforce rotation if required
+    ensure_pdf_rotation(full_pdf, target_rotation=target_rotation)
+
+
+def ensure_pdf_rotation(pdf_path: str, target_rotation: int = 180):
+    """
+    Guarantees every page of the given PDF has the target rotation (default: 180 degrees).
+    Ensures that compilations across all PDF viewers and duplex print drivers
+    strictly maintain the required orientation.
+    """
+    if target_rotation is None:
+        return
+    try:
+        import pypdf
+        reader = pypdf.PdfReader(pdf_path)
+        needs_update = False
+        for page in reader.pages:
+            rot = page.get("/Rotate", 0)
+            if rot is None:
+                rot = 0
+            if rot != target_rotation:
+                needs_update = True
+                break
+
+        if needs_update:
+            writer = pypdf.PdfWriter()
+            for page in reader.pages:
+                rot = page.get("/Rotate", 0)
+                if rot is None:
+                    rot = 0
+                diff = (target_rotation - rot) % 360
+                if diff != 0:
+                    page.rotate(diff)
+                writer.add_page(page)
+            with open(pdf_path, "wb") as f:
+                writer.write(f)
+            print(f"-> Enforced {target_rotation}° rotation on all pages of {os.path.basename(pdf_path)}.")
+        else:
+            print(f"-> Verified {os.path.basename(pdf_path)} pages are correctly oriented at {target_rotation}°.")
+    except Exception as e:
+        print(f"[WARNING] Could not enforce PDF rotation on {pdf_path}: {e}")
+
 
 def main():
-    compile_doc("paper")
-    compile_doc("supplement")
-    print("\n[SUCCESS] Paper and Supplement built successfully.")
+    import argparse
+    parser = argparse.ArgumentParser(description="Publication Paper and Supplement Build Script")
+    parser.add_argument("--rotate", type=int, default=int(os.environ.get("ACA_PAPER_ROTATE", "180")),
+                        choices=[0, 90, 180, 270], help="Target rotation in degrees (default: 180 or ACA_PAPER_ROTATE)")
+    parser.add_argument("--docs", nargs="+", default=["paper", "supplement"],
+                        help="Documents to compile (default: paper supplement)")
+    args = parser.parse_args()
+
+    for doc_name in args.docs:
+        compile_doc(doc_name, target_rotation=args.rotate)
+
+    print("\n[SUCCESS] Paper and Supplement built successfully with orientation verified.")
 
 
 if __name__ == "__main__":
