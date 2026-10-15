@@ -11,6 +11,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
+from matplotlib.figure import Figure
 import networkx as nx
 
 ROBOT_COLORS = [
@@ -179,12 +180,15 @@ def plot_simulation_state(
     Collision-avoid labels for tasks/robots. Road nodes on Boston are never labeled.
     Work-zone edges are thin translucent amber and toggleable.
     """
-    if not history or tick_idx >= len(history):
+    if not history or graph is None or pos is None or tick_idx >= len(history):
         return None
 
     frame = history[tick_idx]
     # Figure sized to fit neatly in standard viewport without excessive vertical height
-    fig, ax = plt.subplots(figsize=(9.2, 5.6), dpi=100)
+    # Figure() (not plt.subplots) keeps figures out of pyplot's global registry,
+    # so they are garbage-collected after Gradio serializes them.
+    fig = Figure(figsize=(9.2, 5.6), dpi=100)
+    ax = fig.subplots()
     fig.patch.set_facecolor("#131d31")
     ax.set_facecolor("#182236")  # Calm tactical slate background
 

@@ -2,8 +2,6 @@
 Callback handlers and telemetry computation for ACA Mission Control interface.
 """
 
-import os
-import sys
 import json
 import tempfile
 import pandas as pd
@@ -14,7 +12,7 @@ import matplotlib.pyplot as plt
 import gradio as gr
 
 from acalib.demo.provenance import get_map_provenance, format_provenance_markdown
-from acalib.demo.render import plot_simulation_state, get_boston_work_zone_edges
+from acalib.demo.render import plot_simulation_state
 from acalib.demo.narrate import (
     generate_event_log,
     format_event_log_html,
@@ -30,17 +28,13 @@ from acalib.demo.runner import (
     METHOD_NAME_MAP,
     ADVERSARY_NAME_MAP,
     parse_allocator_name,
-    parse_adversary_name,
     DEFAULT_MAX_STEPS,
 )
 
-# Active spatial graph and layout cache
-CURRENT_MISSION_GRAPH = {
-    "graph": None,
-    "pos": None,
-    "fam": None,
-    "variant": None,
-}
+# NOTE: the active spatial graph and layout are stored per-session inside the
+# gr.State ``env_info`` dict (keys ``_graph`` / ``_pos``), never at module level,
+# so concurrent browser sessions cannot overwrite each other's topology.
+_PRIVATE_ENV_KEYS = ("_graph", "_pos")
 
 MAP_OPTIONS = {
     "Boston Downtown (OSMnx road network, 216 nodes)": ("road_osmnx", 216, "none"),
@@ -237,12 +231,6 @@ def run_sim_action(
     graph = run_res["graph"]
     pos = run_res["pos"]
     summary = run_res["summary"]
-
-    CURRENT_MISSION_GRAPH["graph"] = graph
-    CURRENT_MISSION_GRAPH["pos"] = pos
-    CURRENT_MISSION_GRAPH["fam"] = fam
-    CURRENT_MISSION_GRAPH["variant"] = variant
-
     final_tick_idx = len(history) - 1
     final_frame = history[final_tick_idx]
 
@@ -258,6 +246,8 @@ def run_sim_action(
         "family": fam,
         "variant": variant,
         "n_nodes": n_nodes,
+        "_graph": graph,
+        "_pos": pos,
     }
     narrative = generate_what_happened_narrative(summary, history, env_info)
     failures_df = diagnose_task_failures(run_res)
@@ -334,8 +324,9 @@ def replay_from_start(history, env_info, work_zones_active):
     if not history:
         return gr.Slider(value=1), None, "", "", "", "", "", "", "", ""
     tick_idx = 0
-    graph = CURRENT_MISSION_GRAPH["graph"]
-    pos = CURRENT_MISSION_GRAPH["pos"]
+    graph = (env_info or {}).get("_graph")
+    pos = (env_info or {}).get("_pos")
+    env_info = env_info or {}
     fam = env_info.get("family", "road_osmnx")
     variant = env_info.get("variant", "none")
 
@@ -380,8 +371,9 @@ def scrub_action(tick, history, events, filter_category, env_info, work_zones_ac
     if not history:
         return None, "", "", "", "", "", "", "", "", "", pd.DataFrame()
     tick_idx = max(0, min(len(history) - 1, int(tick) - 1))
-    graph = CURRENT_MISSION_GRAPH["graph"]
-    pos = CURRENT_MISSION_GRAPH["pos"]
+    graph = (env_info or {}).get("_graph")
+    pos = (env_info or {}).get("_pos")
+    env_info = env_info or {}
     fam = env_info.get("family", "road_osmnx")
     variant = env_info.get("variant", "none")
 
@@ -682,7 +674,7 @@ def export_json_action(history, summary, env_meta):
     if not history:
         return None
     export_payload = {
-        "metadata": env_meta,
+        "metadata": {k: v for k, v in (env_meta or {}).items() if k not in _PRIVATE_ENV_KEYS},
         "summary": summary,
         "history": history,
     }

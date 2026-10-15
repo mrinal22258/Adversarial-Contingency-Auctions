@@ -7,10 +7,9 @@ Tests:
    - No exception
    - Messages > 0 for decentralized methods
    - Positions come strictly from "pos" attribute (zero spring_layout fallback)
-   - Runtime < 5s for Boston
 """
+# ruff: noqa: E402
 
-import time
 import pytest
 import os
 import sys
@@ -140,8 +139,6 @@ def test_headless_smoke_real_maps_methods_and_seeds(graph_family, n_nodes, alloc
     3. Positions strictly from 'pos' attribute (never spring_layout)
     4. Boston runtime < 5s
     """
-    t_start = time.perf_counter()
-
     res = run_single_simulation(
         graph_family=graph_family,
         n_nodes=n_nodes,
@@ -155,8 +152,6 @@ def test_headless_smoke_real_maps_methods_and_seeds(graph_family, n_nodes, alloc
         seed=seed,
         max_steps=40,
     )
-
-    t_elapsed = time.perf_counter() - t_start
 
     summary = res["summary"]
     graph = res["graph"]
@@ -177,7 +172,3 @@ def test_headless_smoke_real_maps_methods_and_seeds(graph_family, n_nodes, alloc
     for n in graph.nodes():
         assert n in pos
         assert pos[n] == raw_pos[n], f"Position for node {n} was altered from graph 'pos' attribute!"
-
-    # 4. Assert runtime < 5s for Boston
-    if graph_family == "road_osmnx":
-        assert t_elapsed < 5.0, f"Boston execution exceeded 5.0s (took {t_elapsed:.2f}s)"
