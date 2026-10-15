@@ -44,7 +44,7 @@ maps = [
     "osmnx>=1.6.0",
 ]
 demo = [
-    "gradio>=5.0.0,<7.0.0",
+    "gradio>=6.0.0,<7.0.0",
     "playwright>=1.40.0",
 ]
 dev = [
