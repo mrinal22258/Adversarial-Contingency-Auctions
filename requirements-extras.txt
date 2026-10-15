@@ -1,0 +1,21 @@
+# Optional baseline, physics, vision, and developer dependencies
+# Source of truth: pyproject.toml [project.optional-dependencies]
+
+# Optional solver baseline (CP-SAT)
+ortools>=9.0
+
+# Optional continuous 3D physics & camera sensor (PyBullet)
+pybullet>=3.2.0
+opencv-python-headless>=4.8.0
+imageio>=2.30.0
+
+# Optional OpenStreetMap real map ingestion
+osmnx>=1.6.0
+
+# Optional developer and UI regression testing
+playwright>=1.40.0
+pytest>=7.0
+ruff>=0.1.0
+vulture>=2.10
+typeguard>=4.0.0
+pymupdf>=1.23.0

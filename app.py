@@ -28,7 +28,7 @@ from pydantic import BaseModel, Field
 import uvicorn
 import gradio as gr
 
-from acalib import PROTOCOL_FULL_NAME
+from acalib import __version__, PROTOCOL_FULL_NAME, PROTOCOL_LABEL, PROTOCOL_VERSION
 from acalib.demo.ui.styles import MISSION_CONTROL_CSS
 from acalib.demo.ui.layout import build_app
 from acalib.demo.ui.callbacks import (
@@ -50,8 +50,38 @@ demo.queue(default_concurrency_limit=10)
 app = FastAPI(
     title="Adversarial Contingency Auctions (ACA) — Mission Control",
     description="Strategic Multi-Robot Task Allocation under Inconsistent Beliefs and Adversarial Path Blockages",
-    version="2.0.0",
+    version=__version__,
 )
+
+
+@app.get("/api/health")
+async def api_health():
+    """Healthcheck endpoint for orchestrators and container probes (P3)."""
+    return {"status": "healthy", "service": "aca-mission-control"}
+
+
+@app.get("/api/version")
+async def api_version():
+    """Version and provenance inspection endpoint (P3)."""
+    git_info = None
+    try:
+        from acalib.utils.gitinfo import get_git_info
+        info = get_git_info(REPO_ROOT)
+        git_info = {
+            "commit": info.commit,
+            "is_dirty": info.is_dirty,
+            "source": info.source,
+        }
+    except Exception:
+        pass
+    return {
+        "version": __version__,
+        "protocol_version": PROTOCOL_VERSION,
+        "protocol_label": PROTOCOL_LABEL,
+        "protocol_full_name": PROTOCOL_FULL_NAME,
+        "git": git_info,
+    }
+
 
 # Mount static directory for repository images, diagrams, and assets
 static_dir = os.path.join(REPO_ROOT, "static")

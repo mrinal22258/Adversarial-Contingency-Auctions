@@ -1,2 +1,4 @@
-# Demo dependencies (Gradio mission control explorer)
--r requirements.txt
+# Demo dependencies for interactive ACA Mission Control HUD
+-r requirements-core.txt
+gradio>=6.0.0,<7.0.0
+httpx>=0.24.0

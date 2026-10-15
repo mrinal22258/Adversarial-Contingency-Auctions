@@ -199,3 +199,19 @@ def test_concurrent_simulation_and_exports(client):
             assert export["metadata"]["run_id"] is not None
 
 
+def test_api_health_and_version(client):
+    from acalib import __version__, PROTOCOL_VERSION, PROTOCOL_FULL_NAME
+
+    resp_health = client.get("/api/health")
+    assert resp_health.status_code == 200
+    assert resp_health.json()["status"] == "healthy"
+
+    resp_version = client.get("/api/version")
+    assert resp_version.status_code == 200
+    v_data = resp_version.json()
+    assert v_data["version"] == __version__
+    assert v_data["protocol_version"] == PROTOCOL_VERSION
+    assert v_data["protocol_full_name"] == PROTOCOL_FULL_NAME
+
+
+
