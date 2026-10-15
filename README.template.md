@@ -115,36 +115,72 @@ To ensure scientific honesty and transparency, all project claims are demarcated
 
 ## 6. Quickstart & Reproduction
 
-### 1. Environment Setup
-Install pinned dependencies from the reproducibility lockfile:
-```powershell
-pip install -r repro/requirements.lock
+### 1. Environment Setup & Dependency Profiles
+The repository provides modular dependency profiles:
+- **Core algorithmic benchmarks:** `pip install -r requirements-core.txt` (NumPy, SciPy, NetworkX, Pandas, PyArrow)
+- **Interactive web dashboard & API:** `pip install -r requirements-demo.txt` (Core + Gradio 6, FastAPI, Uvicorn, HTTPX)
+- **Optional solver & physics extras:** `pip install -r requirements-extras.txt` (OR-Tools, PyBullet, OpenCV headless)
+- **Full environment:** `pip install -r requirements.txt` or `pip install -e ".[all]"`
+
+### 2. Docker Deployment
+A hardened, unprivileged container configuration is provided:
+```bash
+# Build the production demo image
+docker build -t aca-mission-control .
+
+# Run container (exposing web dashboard and REST API on port 7860)
+docker run -d -p 7860:7860 --name aca-mission-control aca-mission-control
+
+# Check container healthcheck probe
+curl http://localhost:7860/api/health
 ```
 
-### 2. Run Verification Test Suite
-Run the full test suite (excluding slow SITL physics and external solvers):
-```powershell
+### 3. Running Tests & Test Markers
+The test suite utilizes explicit pytest markers:
+- `core`: Pure algorithmic, game-theoretic, statistical, and auction mechanism tests.
+- `sitl`: Physics-based Software-In-The-Loop PyBullet simulation tests (requires pybullet).
+- `ortools`: Exact combinatorial optimization and CP-SAT benchmark tests (requires ortools).
+- `ui`: Interactive demo, Gradio layout, and Playwright UI regression tests (requires gradio, playwright).
+
+```bash
+# Run core test suite (recommended, zero heavy dependencies required)
 pytest -q -m "not (sitl or ortools or ui)"
+
+# Run demo & API endpoint verification
+pytest -v tests/test_api_endpoints.py
+
+# Run full suite including optional physics and solver tests (if installed)
+pytest -v
 ```
 Saved run log: `results/test_logs/gate-6.txt` ({{test_summary_line}}).
 
-### 3. Run Smoke Pipeline
-Verify end-to-end execution on development seeds with the 2-seed smoke pipeline:
-```powershell
-python experiments/run_sweep.py --smoke-test --workers 4
-```
-
-### 4. Build Empirical Results & Manifests
-Re-derive all tables, numbers, figures, and claim ledgers from raw data:
-```powershell
+### 4. Reproducing Paper Results (Exact Commands)
+To reproduce the published figures, LaTeX macros, and verification manifests bit-for-bit:
+```bash
+# 1. Re-derive all LaTeX tables, numbers.tex macros, and figures from logged data:
 python tools/build_all_results.py
-```
 
-### 5. Build Paper Manuscript
-Compile `paper.pdf` and `supplement.pdf` with BibTeX resolution:
-```powershell
+# 2. Verify Protocol v6 pre-registration constraints and cryptographic hashes:
+python tools/verify_protocol.py --config experiments/configs/protocol_v6.yaml --strict
+
+# 3. Compile the paper manuscript and supplement:
 python tools/build_paper.py
 ```
+
+### 5. Environment Variables Configuration
+
+| Variable | Default | Description |
+|:---|:---:|:---|
+| `HOST` / `GRADIO_SERVER_NAME` | `127.0.0.1` | Network interface for FastAPI/Gradio server binding |
+| `PORT` | `7860` | Listening port for web server |
+| `ACA_LOG_LEVEL` / `LOG_LEVEL` | `info` | Application log level (`debug`, `info`, `warning`, `error`) |
+| `ACA_RATE_LIMIT_PER_MIN` | `60` | Maximum requests per minute per IP on simulation endpoints |
+| `ACA_MAX_CONCURRENT_SIMS` | `4` | Maximum concurrent simulation workloads processed simultaneously |
+| `ACA_RUN_CACHE_SIZE` | `32` | Maximum cached simulation runs held in LRU memory |
+| `ACA_CORS_ORIGINS` | Safe Localhost | Comma-separated allowed CORS origins (no wildcard in default production) |
+
+### 6. Protocol v5 Held-Out Reversal Consistency Note
+In accordance with open-science pre-registration standards, the manuscript and repository explicitly document the **Protocol v5 out-of-sample reversal** where CBBA+LR achieved higher raw completion (94.7% vs. 92.4%) than ACA on held-out seeds 101–130. This finding is mathematically consistent with the paper's theoretical framework: local detour execution (+LR) resolves corridor blockages for any allocator, while ACA's distinct mathematical contribution is the **Pinsker claim margin (Theorem 1)**, which guarantees conflict-free coordination and eliminates 20.6% of inter-robot task conflicts without exchanging private belief vectors.
 
 ---
 

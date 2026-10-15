@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+message: "If you use this software or benchmark, please cite it as below."
+title: "Adversarial Contingency Auctions (ACA): Strategic Multi-Robot Task Allocation under Inconsistent Beliefs and Adversarial Path Blockages"
+authors:
+  - name: "Anonymous Author(s)"
+version: 6.2.0
+date-released: 2026-10-15
+url: "https://github.com/anonymous/adversarial-contingency-auctions"
+license: "MIT"
+keywords:
+  - "multi-robot systems"
+  - "task allocation"
+  - "adversarial robustness"
+  - "contingency planning"
+  - "auction mechanisms"
+  - "bayesian belief"

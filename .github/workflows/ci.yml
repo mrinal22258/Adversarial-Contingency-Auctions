@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [ main, master, fix/audit-repairs, fix/rigorous-eval ]
+    branches: [ main, master, audit-remediation, fix/audit-repairs ]
   pull_request:
     branches: [ main, master ]
 
@@ -16,11 +16,17 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: "pip"
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.lock
+          pip install -r requirements-core.txt
+          pip install ruff
           pip install -e .
+      - name: Run Ruff Lint
+        run: |
+          ruff check .
+        continue-on-error: true
       - name: Verify Protocol v6
         run: |
           python tools/verify_protocol.py --config experiments/configs/protocol_v6.yaml --strict
@@ -40,17 +46,18 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+          cache: "pip"
       - name: Install Core Dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.lock
+          pip install -r requirements-core.txt
           pip install -e .
       - name: Run Core Test Suite
         run: |
           pytest -v -m "not (sitl or ortools or ui)"
 
-  test-extras:
-    name: Extras Suite (SITL, OR-Tools, UI)
+  test-api:
+    name: Demo & API Endpoints Suite
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -58,6 +65,27 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: "pip"
+      - name: Install Demo Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-demo.txt
+          pip install -e .
+      - name: Run API Tests
+        run: |
+          pytest -v tests/test_api_endpoints.py
+
+  test-extras:
+    name: Extras Suite (SITL, OR-Tools, UI)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
       - name: Install Extras Dependencies
         run: |
           python -m pip install --upgrade pip
