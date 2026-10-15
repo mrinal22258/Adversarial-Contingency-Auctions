@@ -162,7 +162,6 @@ class RobotAgent:
                     is_targeted_by_interdiction=is_targeted,
                 )
                 self.known_edge_states[c_e] = curr_state
-                self._cached_marginals = None
 
     def get_edge_marginals(self, fleet_states: Optional[Dict[int, Any]] = None) -> Dict[Tuple[Any, Any], float]:
         """Compute all edge blockage marginals under current Bayesian belief with explicit fleet state."""
