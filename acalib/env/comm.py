@@ -34,6 +34,11 @@ class CommunicationNetwork:
         hop_limit: Optional[int] = None,
         seed: Optional[int] = None,
     ):
+        if hop_limit is not None:
+            raise NotImplementedError(
+                "Topological hop_limit communication constraint is not implemented. "
+                "Only metric disk range communication (comm_range) is supported."
+            )
         self.comm_range = comm_range
         self.p_drop = p_drop
         self.hop_limit = hop_limit
@@ -71,12 +76,7 @@ class CommunicationNetwork:
             if rid == sender_id:
                 continue
             dist = float(np.linalg.norm(np.array(sender_pos) - np.array(pos)))
-            in_range = dist <= self.comm_range
-
-            if in_range and self.hop_limit is not None and graph is not None:
-                # Optional topological constraint check
-                pass
-            if in_range:
+            if dist <= self.comm_range:
                 neighbors.append(rid)
 
         return neighbors

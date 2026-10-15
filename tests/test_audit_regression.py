@@ -251,3 +251,13 @@ def test_f14_broadcast_delivery_invariance():
     assert (len(net_stoch.receive(2)) == 1) == delivered_2
 
 
+def test_f20_hop_limit_not_implemented():
+    """F-20: Supplying a non-None hop_limit must raise NotImplementedError."""
+    import pytest
+    from acalib.env.comm import CommunicationNetwork
+
+    with pytest.raises(NotImplementedError, match="hop_limit"):
+        CommunicationNetwork(hop_limit=2)
+
+
+
