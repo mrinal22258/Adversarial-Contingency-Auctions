@@ -58,13 +58,10 @@ def generate_dev_seeds(n_seeds: int = 15, rng_seed: int = 9992026) -> list[int]:
 
 
 def parse_seeds_from_prereg_md(filepath: str = "protocols/prereg-v6.md") -> list[int]:
-    """Parse the confirmatory seed list from prereg-v6.md."""
-    with open(filepath, "r", encoding="utf-8") as f:
-        content = f.read()
-    match = re.search(r"Confirmatory Seeds.*?`(\[[0-9,\s]+\])`", content, re.DOTALL)
-    if not match:
-        raise ValueError(f"Could not find confirmatory seeds list in {filepath}")
-    return ast.literal_eval(match.group(1))
+    """Parse the confirmatory seed list from prereg-v6.md using robust parsing (F-07)."""
+    from tools.verify_protocol import parse_seeds_from_prereg
+    conf_seeds, _ = parse_seeds_from_prereg(filepath)
+    return conf_seeds
 
 
 def parse_seeds_from_yaml(filepath: str = "experiments/configs/protocol_v6.yaml") -> list[int]:
@@ -102,4 +99,35 @@ def test_v6_seed_exact_protocol_matching():
     # Verify SHA-256 matches frozen hash
     v6_hash = hashlib.sha256(str(gen_seeds).encode()).hexdigest()
     assert v6_hash == EXPECTED_V6_SHA256, f"v6 seed hash {v6_hash} does not match {EXPECTED_V6_SHA256}"
+
+
+@pytest.mark.core
+def test_robust_parse_int_list_edge_cases():
+    """F-07: Verify robust_parse_int_list handles whitespace, comments, trailing commas, and errors."""
+    from tools.verify_protocol import robust_parse_int_list
+
+    # Normal list with backticks
+    assert robust_parse_int_list("`[1, 2, 3]`") == [1, 2, 3]
+
+    # Trailing commas and multiline with inline comments
+    raw_multiline = """
+    [
+        100, # seed 1
+        200, # seed 2
+        300,
+    ]
+    """
+    assert robust_parse_int_list(raw_multiline) == [100, 200, 300]
+
+    # Empty list
+    assert robust_parse_int_list("[]") == []
+
+    # Malformed - missing brackets
+    with pytest.raises(ValueError, match="must be enclosed in brackets"):
+        robust_parse_int_list("1, 2, 3")
+
+    # Malformed - invalid integer
+    with pytest.raises(ValueError, match="Invalid integer"):
+        robust_parse_int_list("[1, foo, 3]")
+
 

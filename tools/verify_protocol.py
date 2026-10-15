@@ -76,21 +76,48 @@ def generate_dev_seeds(n_seeds: int = 15, rng_seed: int = 9992026) -> List[int]:
     return sorted(dev_seeds)
 
 
+def robust_parse_int_list(raw_str: str, label: str = "seed list") -> List[int]:
+    """Robustly parse an integer list from a string formatted as [1, 2, 3, ...] (F-07).
+
+    Handles bracket stripping, whitespace, trailing commas, newlines, and inline comments.
+    Raises ValueError with a clear explanation if parsing fails.
+    """
+    cleaned = raw_str.strip()
+    if cleaned.startswith("`") and cleaned.endswith("`"):
+        cleaned = cleaned[1:-1].strip()
+    if not (cleaned.startswith("[") and cleaned.endswith("]")):
+        raise ValueError(f"Malformed {label}: must be enclosed in brackets '[]', got: {raw_str[:40]}...")
+    inner = cleaned[1:-1].strip()
+    if not inner:
+        return []
+
+    lines = [line.split("#")[0].strip() for line in inner.split("\n")]
+    tokens = [tok.strip() for line in lines for tok in line.split(",") if tok.strip()]
+
+    result = []
+    for tok in tokens:
+        try:
+            result.append(int(tok))
+        except ValueError as exc:
+            raise ValueError(f"Invalid integer '{tok}' in {label}: {exc}") from exc
+    return result
+
+
 def parse_seeds_from_prereg(filepath: str) -> Tuple[List[int], List[int]]:
     if not os.path.exists(filepath):
         raise FileNotFoundError(f"Preregistration file not found: {filepath}")
     with open(filepath, "r", encoding="utf-8") as f:
         content = f.read()
 
-    conf_match = re.search(r"Confirmatory Seeds.*?`(\[[0-9,\s]+\])`", content, re.DOTALL)
+    conf_match = re.search(r"Confirmatory Seeds.*?`(\[[0-9,\s\n#]+\])`", content, re.DOTALL)
     if not conf_match:
         raise ValueError(f"Could not find confirmatory seeds list in {filepath}")
-    conf_seeds = sorted(ast.literal_eval(conf_match.group(1)))
+    conf_seeds = sorted(robust_parse_int_list(conf_match.group(1), label="confirmatory seeds"))
 
-    dev_match = re.search(r"Development.*?Seeds.*?`(\[[0-9,\s]+\])`", content, re.DOTALL)
+    dev_match = re.search(r"Development.*?Seeds.*?`(\[[0-9,\s\n#]+\])`", content, re.DOTALL)
     if not dev_match:
         raise ValueError(f"Could not find development seeds list in {filepath}")
-    dev_seeds = sorted(ast.literal_eval(dev_match.group(1)))
+    dev_seeds = sorted(robust_parse_int_list(dev_match.group(1), label="development seeds"))
 
     return conf_seeds, dev_seeds
 
