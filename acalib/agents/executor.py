@@ -5,8 +5,11 @@ Maintains immutable RecourseTreeNode cursor ensuring priced branch == executed b
 Guarantees identical physical kinematics, edge progression, and multi-depth contingency pivot logic.
 """
 
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, TYPE_CHECKING
 import numpy as np
+
+if TYPE_CHECKING:
+    from .robot import RobotAgent
 
 from ..env.adversaries import canonical_edge
 from ..env.blockage_process import PersistentBlockageProcess
@@ -22,7 +25,7 @@ class LocalRecourseExecutor:
 
     @staticmethod
     def step_execution(
-        robot: Any,
+        robot: "RobotAgent",
         blockage_process: PersistentBlockageProcess,
         tasks_dict: Dict[int, Any],
         dt: float = 1.0,
