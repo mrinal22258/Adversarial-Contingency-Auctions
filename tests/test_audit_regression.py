@@ -207,3 +207,47 @@ def test_f06_edge_bc_cache_bounded():
     assert len(_EDGE_BC_CACHE) <= MAX_BC_CACHE_SIZE
 
 
+def test_f14_broadcast_delivery_invariance():
+    """F-14: Broadcast messages must not do redundant distance checks and must preserve RNG sequence and delivery."""
+    import numpy as np
+    from acalib.env.comm import CommunicationNetwork, Message
+
+    # Set up robots: robot 1 is inside range, robot 2 is exactly on boundary (40.0), robot 3 is outside range (40.1)
+    positions = {
+        0: (0.0, 0.0),
+        1: (10.0, 0.0),
+        2: (40.0, 0.0),  # Exactly comm_range (40.0)
+        3: (40.1, 0.0),  # Out of range
+    }
+
+    # Deterministic delivery
+    net_det = CommunicationNetwork(comm_range=40.0, p_drop=0.0, seed=42)
+    bcast_msg = Message(sender_id=0, recipient_id=-1, msg_type="test", payload="hello", timestamp=0)
+    net_det.send(bcast_msg, positions)
+
+    # Robot 1 and 2 must receive, Robot 3 must not
+    assert len(net_det.receive(1)) == 1
+    assert len(net_det.receive(2)) == 1
+    assert len(net_det.receive(3)) == 0
+
+    # Unicast: in range (2) delivers, out of range (3) does not deliver
+    unicast_msg2 = Message(sender_id=0, recipient_id=2, msg_type="test", payload="to_2", timestamp=1)
+    unicast_msg3 = Message(sender_id=0, recipient_id=3, msg_type="test", payload="to_3", timestamp=2)
+    net_det.send(unicast_msg2, positions)
+    net_det.send(unicast_msg3, positions)
+    assert len(net_det.receive(2)) == 1
+    assert len(net_det.receive(3)) == 0
+
+    # Stochastic delivery with p_drop > 0: verify exact RNG draw consumption order
+    net_stoch = CommunicationNetwork(comm_range=40.0, p_drop=0.3, seed=999)
+    net_stoch.send(bcast_msg, positions)
+
+    rng_control = np.random.default_rng(999)
+    draw1 = rng_control.random()
+    draw2 = rng_control.random()
+    delivered_1 = draw1 >= 0.3
+    delivered_2 = draw2 >= 0.3
+    assert (len(net_stoch.receive(1)) == 1) == delivered_1
+    assert (len(net_stoch.receive(2)) == 1) == delivered_2
+
+

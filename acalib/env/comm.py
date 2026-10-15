@@ -103,16 +103,20 @@ class CommunicationNetwork:
         for rid in recipients:
             if rid not in robot_positions:
                 continue
-            r_pos = robot_positions[rid]
-            dist = float(np.linalg.norm(np.array(sender_pos) - np.array(r_pos)))
+            # For unicast, verify recipient is within communication range;
+            # broadcast neighbors are already verified in get_neighbors.
+            if msg.recipient_id != -1:
+                r_pos = robot_positions[rid]
+                dist = float(np.linalg.norm(np.array(sender_pos) - np.array(r_pos)))
+                if dist > self.comm_range:
+                    continue
 
-            if dist <= self.comm_range:
-                # Stochastic channel drop
-                if self.rng.random() >= self.p_drop:
-                    if rid not in self.inboxes:
-                        self.inboxes[rid] = []
-                    self.inboxes[rid].append(msg)
-                    self.total_messages_delivered += 1
+            # Stochastic channel drop
+            if self.rng.random() >= self.p_drop:
+                if rid not in self.inboxes:
+                    self.inboxes[rid] = []
+                self.inboxes[rid].append(msg)
+                self.total_messages_delivered += 1
 
     def receive(self, robot_id: int) -> List[Message]:
         """Deliver queued messages for robot_id and clear its inbox."""
