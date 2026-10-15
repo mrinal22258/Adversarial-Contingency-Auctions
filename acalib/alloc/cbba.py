@@ -16,6 +16,10 @@ from ..env.comm import CommunicationNetwork
 _ALL_PAIRS_DIST_CACHE: collections.OrderedDict = collections.OrderedDict()
 MAX_ALL_PAIRS_CACHE_SIZE = 64
 
+# F-18: Penalty distance applied in bundle marginal score when a task target is disconnected / unreachable.
+# Note: Retained strictly at 500.0 to preserve scientific and empirical benchmark invariance (G1).
+UNREACHABLE_PENALTY: float = 500.0
+
 
 def get_all_pairs_distances(graph: nx.Graph) -> Dict[Any, Dict[Any, float]]:
     """Retrieve or compute all-pairs Dijkstra path lengths with caching by topology (F-06, F-21)."""
@@ -102,7 +106,7 @@ class CBBAAllocator(BaseAllocator):
                 if d is not None:
                     tot += d
                 else:
-                    tot += 500.0
+                    tot += UNREACHABLE_PENALTY
                 loc = t_node
             return tot
 
