@@ -13,6 +13,13 @@ from ..env.adversaries import (
 )
 from ..env.blockage_process import EdgeState
 
+# Numerical regularization bounds for edge blockage marginals (F-09)
+# Enforces strictly positive and bounded risks [0.01, 0.99] to prevent
+# zero-probability traps and log-likelihood underflow in Bayesian updates.
+MARGINAL_EPS: float = 0.01
+MARGINAL_MIN: float = 0.01
+MARGINAL_MAX: float = 0.99
+
 
 def compute_kl_divergence(p: np.ndarray, q: np.ndarray, eps: float = 1e-9) -> float:
     """Compute Kullback-Leibler divergence D_KL(P || Q) in nats."""
@@ -211,10 +218,10 @@ class BayesianTypeFilter:
             prob_blocked = h / denom
             pi_e += self.beliefs[t] * prob_blocked
 
-        if pi_e < 0.01:
-            return 0.01
-        elif pi_e > 0.99:
-            return 0.99
+        if pi_e < MARGINAL_MIN:
+            return MARGINAL_MIN
+        elif pi_e > MARGINAL_MAX:
+            return MARGINAL_MAX
         return float(pi_e)
 
 

@@ -17,6 +17,7 @@ from ..agents.contingency import (
     prune_recourse_plan,
     _collect_tree_risky_edges,
 )
+from ..agents.belief import MARGINAL_MIN, MARGINAL_MAX
 from ..env.comm import CommunicationNetwork
 from ..env.adversaries import canonical_edge
 
@@ -110,7 +111,7 @@ class ACAAllocator(CBBAAllocator):
                 )
                 denom = max(1e-5, h + robot.type_filter.clearance_rate)
                 pi_e += float(peer_belief_vec[i]) * (h / denom)
-            marginals[c_e] = float(np.clip(pi_e, 0.01, 0.99))
+            marginals[c_e] = float(np.clip(pi_e, MARGINAL_MIN, MARGINAL_MAX))
 
         if hasattr(self, "_round_marginal_cache") and self._round_marginal_cache is not None:
             self._round_marginal_cache[cache_key] = marginals
