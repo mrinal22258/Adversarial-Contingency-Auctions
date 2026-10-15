@@ -60,7 +60,7 @@ def test_safe_claims_per_round_delta():
 
     # Run step 0
     engine.step(0)
-    claims_step_0 = engine.metrics.safe_claims
+    assert engine.metrics.safe_claims >= 1
 
     # Force a second allocation round with no new safe claims
     # (tasks already assigned, so new safe claims in round 2 should be 0)
@@ -140,7 +140,6 @@ def test_common_random_numbers_blockage_stream():
 
 def test_build_crn_environment_reproducibility():
     """Defect C-1: build_crn_environment must be bit-for-bit reproducible across independent calls and processes."""
-    import hashlib
     from experiments.run_sweep import build_crn_environment
 
     env1 = build_crn_environment("warehouse_movingai", 38, 10001, 4, 15, 80)

@@ -13,7 +13,6 @@ from ..env.adversaries import (
     AdversaryType,
     create_adversary,
     CanonicalTypeList,
-    CanonicalTypeSet,
 )
 from ..env.blockage_process import PersistentBlockageProcess
 from ..env.comm import CommunicationNetwork

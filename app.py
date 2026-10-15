@@ -6,6 +6,7 @@ Provides:
 2. Live simulation and paired comparison API endpoints at `/api/...`
 3. Structured JSON/CSV exports from live simulation telemetry
 """
+# ruff: noqa: E402
 
 import os
 import sys
@@ -36,11 +37,6 @@ import gradio as gr
 from acalib import __version__, PROTOCOL_FULL_NAME, PROTOCOL_LABEL, PROTOCOL_VERSION
 from acalib.demo.ui.styles import MISSION_CONTROL_CSS
 from acalib.demo.ui.layout import build_app
-from acalib.demo.ui.callbacks import (
-    run_simulation_wrapper,
-    plot_simulation_state,
-    get_metrics_table,
-)
 from acalib.demo.runner import (
     run_single_simulation,
     run_paired_comparison,

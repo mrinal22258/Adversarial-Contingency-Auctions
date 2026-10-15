@@ -5,7 +5,7 @@ Maintains immutable RecourseTreeNode cursor ensuring priced branch == executed b
 Guarantees identical physical kinematics, edge progression, and multi-depth contingency pivot logic.
 """
 
-from typing import Dict, Any, Optional, TYPE_CHECKING
+from typing import Dict, Any, TYPE_CHECKING
 import numpy as np
 
 if TYPE_CHECKING:

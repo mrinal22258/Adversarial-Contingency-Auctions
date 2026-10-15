@@ -83,7 +83,7 @@ def test_api_export_json_and_csv(client):
     assert resp_json.status_code == 200
     assert "application/json" in resp_json.headers["content-type"]
     json_data = resp_json.json()
-    from acalib import PROTOCOL_FULL_NAME, PROTOCOL_LABEL, PROTOCOL_VERSION
+    from acalib import PROTOCOL_FULL_NAME
     assert json_data["metadata"]["protocol"] == PROTOCOL_FULL_NAME
     assert "history" in json_data
     assert len(json_data["history"]) > 0
@@ -119,7 +119,7 @@ def test_no_duplicate_routes():
 
 
 def test_protocol_version_consistency():
-    from acalib import PROTOCOL_LABEL, PROTOCOL_FULL_NAME
+    from acalib import PROTOCOL_LABEL
     import inspect
     import acalib.demo.ui.layout as layout_module
 
@@ -186,7 +186,7 @@ def test_concurrent_simulation_and_exports(client):
     with concurrent.futures.ThreadPoolExecutor(max_workers=6) as executor:
         sim_futures = [executor.submit(run_sim, 1000 + i) for i in range(4)]
         export_futures = [executor.submit(get_export) for _ in range(6)]
-        sim_results = [f.result() for f in sim_futures]
+        _ = [f.result() for f in sim_futures]
         export_results = [f.result() for f in export_futures]
 
     for export in export_results:

@@ -9,7 +9,6 @@ import numpy as np
 from ..env.adversaries import (
     AdversaryType,
     CanonicalTypeList,
-    CanonicalTypeSet,
     canonical_edge,
 )
 from ..env.blockage_process import EdgeState
