@@ -16,7 +16,7 @@ if __name__ == "__main__":
     if not os.path.exists(csv_path):
         print(f"Results CSV not found at {csv_path}. Running quick benchmark sweep first...")
         import subprocess
-        subprocess.run(["python", "experiments/run_sweep.py", "--fast", "--output", csv_path], check=True)
+        subprocess.run([sys.executable, "experiments/run_sweep.py", "--fast", "--output", csv_path], check=True)
 
     print("Generating LaTeX tables from logged CSV data...")
     generate_tables_main()
