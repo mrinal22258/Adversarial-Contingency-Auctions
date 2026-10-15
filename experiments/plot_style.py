@@ -84,10 +84,16 @@ from acalib.utils.gitinfo import get_git_commit
 def write_figure_provenance(fig_path: str, source_files: list, n_instances: int, extra_meta: dict = None):
     """Write sidecar .provenance.json file."""
     gen_script = os.path.basename(sys.argv[0]) if sys.argv else "experiments/make_figures.py"
+    repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    rel_fig = os.path.relpath(fig_path, repo_root).replace("\\", "/") if os.path.isabs(fig_path) else fig_path.replace("\\", "/")
+    rel_sources = [
+        os.path.relpath(s, repo_root).replace("\\", "/") if os.path.isabs(s) else s.replace("\\", "/")
+        for s in (source_files or [])
+    ]
     provenance = {
-        "figure_file": fig_path,
+        "figure_file": rel_fig,
         "git_commit": get_git_commit(),
-        "source_files": source_files,
+        "source_files": rel_sources,
         "n_instances": n_instances,
         "generator_script": gen_script,
         "metadata": extra_meta or {},

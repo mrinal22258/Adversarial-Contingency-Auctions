@@ -531,9 +531,9 @@ def generate_heldout_v5_table(
     df = pd.read_csv(csv_path)
 
     method_order = [
-        ("aca_plus", "\\textbf{ACA+ (Ours)}"),
-        ("aca_adaptive", "ACA-Adaptive"),
-        ("aca", "ACA (Static Pinsker)"),
+        ("aca", "\\textbf{ACA (Static Pinsker, $\\kappa=1.0$, Ours)}"),
+        ("aca_plus", "ACA+ (Heuristic, Adaptive + Pruning)"),
+        ("aca_adaptive", "ACA-Adaptive (Heuristic)"),
         ("aca_no_margin", "ACA (No Margin)"),
         ("cbba_lr", "CBBA (+LR) \\cite{choi2009cbba}"),
         ("cbba_partial_lr", "CBBA-PR (+LR) \\cite{buckman2019partial}"),

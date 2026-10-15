@@ -1,5 +1,5 @@
 {
-  "video_path": "C:\\Users\\krmri\\Downloads\\Adversarial-Contingency-Auctions-main\\Adversarial-Contingency-Auctions-main\\results\\sitl\\videos\\sitl_warehouse_demo.mp4",
+  "video_path": "results/sitl/videos/sitl_warehouse_demo.mp4",
   "disclaimer": "SIMULATION -- PyBullet SITL -- No Physical Robot",
   "commit": "75f7492d31b530324d85c7f87c869a08b4728d14",
   "seed": 2042,

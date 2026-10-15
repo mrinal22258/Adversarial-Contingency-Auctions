@@ -135,6 +135,7 @@ def run_single_simulation(
     prebuilt_env: Optional[Dict[str, Any]] = None,
     record_history: bool = True,
     record_traces: bool = True,
+    step_callback: Optional[Any] = None,
 ) -> Dict[str, Any]:
     """
     Execute discrete simulation stepping identical to sweep harness.
@@ -144,6 +145,26 @@ def run_single_simulation(
     alloc_type = parse_allocator_name(allocator_str)
     adv_type_str = parse_adversary_name(adversary_str)
     adv_enum = AdversaryType(adv_type_str)
+
+    cache_key = (
+        graph_family,
+        int(n_nodes),
+        adv_type_str,
+        alloc_type,
+        comm_regime,
+        float(comm_range),
+        float(p_drop),
+        int(n_robots),
+        int(n_tasks),
+        int(seed),
+        int(max_steps),
+        int(contingency_depth),
+        str(variant),
+        bool(record_history),
+        bool(record_traces),
+    )
+    if prebuilt_env is None and step_callback is None and cache_key in _RUN_CACHE:
+        return _RUN_CACHE[cache_key]
 
     # 1. Build or use CRN coupled environment
     if prebuilt_env is not None:
@@ -204,6 +225,8 @@ def run_single_simulation(
 
     for step in range(max_steps):
         cont = engine.step(step)
+        if step_callback is not None:
+            step_callback(step, max_steps)
 
         if record_history:
             blocked_edges = list(engine.blockage_process.get_active_blockages())
@@ -297,13 +320,17 @@ def run_single_simulation(
     if not pos:
         pos = {n: (0.0, 0.0) for n in graph.nodes()}
 
-    return {
+    run_output = {
         "history": history,
         "summary": summary,
         "graph": graph,
         "pos": pos,
         "env_components": env_components,
     }
+    if prebuilt_env is None and step_callback is None:
+        _RUN_CACHE[cache_key] = run_output
+
+    return run_output
 
 
 def get_cached_run(

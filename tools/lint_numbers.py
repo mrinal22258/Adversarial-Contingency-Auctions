@@ -92,7 +92,7 @@ def check_readme_sync() -> List[str]:
 
     from tools.render_readme import render_readme
     try:
-        expected = render_readme()
+        expected = render_readme(write_to_file=False)
         with open(readme_path, "r", encoding="utf-8") as f:
             actual = f.read()
 

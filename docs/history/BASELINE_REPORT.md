@@ -14,7 +14,7 @@
 A full hardware and toolchain probe was conducted on the host system:
 - **Operating System:** Windows 11 (AMD64)
 - **CPU Count:** 12 logical cores
-- **Python Version:** 3.12.7 (Anaconda distribution, `C:\Users\krmri\anaconda3\python.exe`)
+- **Python Version:** 3.12.7 (Anaconda distribution, `[REDACTED_USER]\anaconda3\python.exe`)
 - **Key Installed Packages:**
   - `pybullet`: installed (build Oct 7 2026)
   - `ortools`: 9.14.6206

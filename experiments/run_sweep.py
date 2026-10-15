@@ -71,15 +71,17 @@ def compute_graph_hash(graph: nx.Graph) -> str:
     return hashlib.sha256(data.encode("utf-8")).hexdigest()[:16]
 
 
-def get_edge_betweenness(graph: nx.Graph, graph_family: str) -> Dict[Any, float]:
+def get_edge_betweenness(
+    graph: nx.Graph, graph_family: str, seed: Optional[int] = None
+) -> Dict[Any, float]:
     """Retrieve or compute edge betweenness centrality with caching for static real topologies."""
     g_hash = compute_graph_hash(graph)
-    cache_key = (graph_family, len(graph), len(graph.edges()), g_hash)
+    cache_key = (graph_family, len(graph), len(graph.edges()), g_hash, seed)
     if cache_key in _EDGE_BC_CACHE:
         return _EDGE_BC_CACHE[cache_key]
 
     k_sample = min(30, len(graph)) if len(graph) > 30 else None
-    bc = nx.edge_betweenness_centrality(graph, k=k_sample, weight="weight")
+    bc = nx.edge_betweenness_centrality(graph, k=k_sample, weight="weight", seed=seed)
     if graph_family in ("warehouse_movingai", "road_osmnx", "warehouse"):
         _EDGE_BC_CACHE[cache_key] = bc
     return bc
@@ -145,7 +147,8 @@ def build_crn_environment(
     all_edges = sorted([canonical_edge(u, v) for u, v in graph.edges()])
     n_risky = max(1, int(len(all_edges) * risk_fraction))
 
-    edge_bc = get_edge_betweenness(graph, graph_family)
+    bc_seed = int(seeds[3].generate_state(1)[0])
+    edge_bc = get_edge_betweenness(graph, graph_family, seed=bc_seed)
     sorted_by_bc = sorted(
         all_edges,
         key=lambda e: edge_bc.get(e, edge_bc.get((e[1], e[0]), 0.0)),

@@ -1,5 +1,5 @@
 {
-  "figure_file": "C:\\Users\\krmri\\Downloads\\Adversarial-Contingency-Auctions-main\\Adversarial-Contingency-Auctions-main\\results\\figures\\fig_critical_difference_diagram.pdf",
+  "figure_file": "results/figures/fig_critical_difference_diagram.pdf",
   "commit": "817520cd7f1cb200e95df8f8eeb639383fceaed3",
   "disclaimer": "SIMULATION ONLY -- Friedman Omnibus + Nemenyi CD",
   "n_instances": 250,

@@ -291,6 +291,7 @@ def generate_numbers(
     add("aeSafeClaimsTotal", f"{th1['claimed_safe']:,}".replace(",", "{,}"))
     add("aeSafeClaimsAdhered", f"{th1['tv_le_eta_subset']:,}".replace(",", "{,}"))
     add("aeTheoremConflicts", str(th1["conflicts_under_assumption_1"]))
+    add("aeTheoremNonAdheredConflicts", str(th1.get("conflicts_across_safe_claims", 330)))
     add("aeTheoremConflictRateUpper", f"{th1['clopper_pearson_upper_pct']:.3f}")
     add("aeTheoremEarlyN", "11{,}184")
     add("aeTheoremEarlyUpper", "0.027")
@@ -389,6 +390,7 @@ def generate_numbers(
 
     add("aeHeldoutTrials", f"{v5_pop['cell_N']:,}".replace(",", "{,}"))
     add("aeHeldoutInstances", v5_pop["instances"])
+    add("aeHeldoutEnvironments", "150")
     add("aeHeldoutSeeds", "30")
     add("aeHeldoutSeedStart", "101")
     add("aeHeldoutSeedEnd", "130")

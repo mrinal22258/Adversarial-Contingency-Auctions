@@ -12,7 +12,7 @@
 | Environment | Python Executable | Installed Scope | Dependencies Log |
 |---|---|---|---|
 | **Core** | `venv_core/Scripts/python.exe` (3.12.7) | Minimal auction, math, and graph simulation libraries (`numpy`, `scipy`, `networkx`, `pandas`, `statsmodels`, `pytest`) | `repro/env_core.txt` |
-| **Extras** | `C:\Users\krmri\anaconda3\python.exe` (3.12.7) | Core + continuous PyBullet physics, OR-Tools CP-SAT, Gradio web UI, OpenCV ArUco, Playwright | `repro/env_extras.txt` |
+| **Extras** | `[REDACTED_USER]\anaconda3\python.exe` (3.12.7) | Core + continuous PyBullet physics, OR-Tools CP-SAT, Gradio web UI, OpenCV ArUco, Playwright | `repro/env_extras.txt` |
 
 ---
 
@@ -48,7 +48,7 @@ ERROR collecting tools/test_ui_playwright.py: ModuleNotFoundError: No module nam
 ```text
 ============================= test session starts =============================
 platform win32 -- Python 3.12.7, pytest-9.1.1, pluggy-1.6.0
-rootdir: C:\Users\krmri\Downloads\Adversarial-Contingency-Auctions-main\Adversarial-Contingency-Auctions-main
+rootdir: 
 configfile: pyproject.toml
 testpaths: tests
 collected 115 items / 5 skipped

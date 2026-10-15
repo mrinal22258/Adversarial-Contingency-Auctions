@@ -33,7 +33,34 @@ from acalib.demo.ui.callbacks import (
 
 def build_app():
     """Construct Mission Control Gradio interface with Clash of Clans Oct 13, 2026 HUD navigation shell."""
-    with gr.Blocks(title="Adversarial Contingency Auctions — Mission Control (Clash HUD)") as demo:
+    theme = gr.themes.Base(
+        primary_hue="amber",
+        secondary_hue="orange",
+        neutral_hue="slate",
+    ).set(
+        body_background_fill="radial-gradient(circle at 50% 20%, #1e293b 0%, #0b1120 100%)",
+        body_background_fill_dark="radial-gradient(circle at 50% 20%, #1e293b 0%, #0b1120 100%)",
+        block_background_fill="#fffdf9",
+        block_background_fill_dark="#1e293b",
+        block_border_width="2px",
+        block_border_color="#decbb1",
+        block_border_color_dark="#e09f3e",
+        button_primary_background_fill="linear-gradient(180deg, #ffe169 0%, #ffa200 45%, #e85d04 100%)",
+        button_primary_background_fill_dark="linear-gradient(180deg, #ffe169 0%, #ffa200 45%, #e85d04 100%)",
+        button_primary_text_color="#ffffff",
+        button_primary_border_color="#2b1400",
+    )
+    with gr.Blocks(
+        title="Adversarial Contingency Auctions — Mission Control (Clash HUD)",
+        theme=theme,
+        head=f"""
+        <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro" rel="stylesheet">
+        <style id="clash-hud-theme">
+        {MISSION_CONTROL_CSS}
+        </style>
+        """,
+    ) as demo:
+        gr.HTML(f"<style id='inline-clash-theme'>{MISSION_CONTROL_CSS}</style>", visible=False)
         demo.css = MISSION_CONTROL_CSS
 
         # Global Session State
@@ -168,6 +195,23 @@ def build_app():
 
         # 4. Replay from start
         sim_comps["replay_btn"].click(
+            replay_from_start,
+            inputs=[history_state, env_meta_state, sim_comps["work_zones_toggle"]],
+            outputs=[
+                sim_comps["scrubber"],
+                sim_comps["map_plot"],
+                sim_comps["map_title_md"],
+                sim_comps["kpi_done"],
+                sim_comps["kpi_rate"],
+                sim_comps["kpi_conf"],
+                sim_comps["kpi_msgs"],
+                sim_comps["kpi_trav"],
+                sim_comps["kpi_blkd"],
+                sim_comps["kpi_detr"],
+            ],
+            scroll_to_output=False,
+        )
+        sim_comps["banner_replay_btn"].click(
             replay_from_start,
             inputs=[history_state, env_meta_state, sim_comps["work_zones_toggle"]],
             outputs=[

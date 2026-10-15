@@ -184,9 +184,9 @@ def plot_simulation_state(
 
     frame = history[tick_idx]
     # Figure sized to fit neatly in standard viewport without excessive vertical height
-    fig, ax = plt.subplots(figsize=(10, 5.2), dpi=100)
-    fig.patch.set_facecolor("#ffffff")
-    ax.set_facecolor("#f8fafc")  # Calm light slate background
+    fig, ax = plt.subplots(figsize=(9.2, 5.6), dpi=100)
+    fig.patch.set_facecolor("#131d31")
+    ax.set_facecolor("#182236")  # Calm tactical slate background
 
     # Extract coordinates bounds
     xs = [p[0] for p in pos.values()]
@@ -217,9 +217,9 @@ def plot_simulation_state(
         for r in range(h):
             for c in range(w):
                 if flipped[r, c] > 0.5:
-                    rgb_img[r, c] = [0.97, 0.98, 0.99]  # Aisles: #f8fafc
+                    rgb_img[r, c] = [0.10, 0.15, 0.23]  # Aisles: tactical slate
                 else:
-                    rgb_img[r, c] = [0.15, 0.20, 0.28]  # Obstacles / Shelves: #263346
+                    rgb_img[r, c] = [0.04, 0.06, 0.10]  # Shelves: dark navy
         ax.imshow(
             rgb_img,
             extent=[min_x, max_x, min_y, max_y],
@@ -249,12 +249,12 @@ def plot_simulation_state(
         else:
             regular_edges.append((u, v))
 
-    # Draw regular open edges (calm slate)
-    edge_color = "#94a3b8" if not is_road_map else "#64748b"
-    edge_width = 1.0 if num_nodes > 100 else 1.6
+    # Draw regular open edges (tactile dark grid)
+    edge_color = "#38475c" if not is_road_map else "#334155"
+    edge_width = 1.1 if num_nodes > 100 else 1.8
     nx.draw_networkx_edges(
         graph, pos, edgelist=regular_edges,
-        ax=ax, edge_color=edge_color, width=edge_width, alpha=0.6,
+        ax=ax, edge_color=edge_color, width=edge_width, alpha=0.75,
     )
 
     # Draw Boston Permitted Work Zones: thin translucent amber
@@ -401,10 +401,10 @@ def plot_simulation_state(
         loc="upper center",
         bbox_to_anchor=(0.5, -0.03),
         ncol=len(legend_elements),
-        facecolor="#ffffff",
-        edgecolor="#e2e8f0",
-        labelcolor="#0f172a",
-        fontsize=8,
+        facecolor="#182236",
+        edgecolor="#475569",
+        labelcolor="#f1f5f9",
+        fontsize=8.5,
         framealpha=0.98,
         columnspacing=1.2,
         handletextpad=0.4,
@@ -412,5 +412,5 @@ def plot_simulation_state(
     leg.set_zorder(15)
 
     # Note: Axes title is deliberately omitted here so title is OUTSIDE the axes in the UI
-    fig.subplots_adjust(left=0.02, right=0.98, top=0.98, bottom=0.08)
+    fig.subplots_adjust(left=0.01, right=0.99, top=0.98, bottom=0.08)
     return fig

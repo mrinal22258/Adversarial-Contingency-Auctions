@@ -97,7 +97,7 @@ def build_simulate_view():
         with gr.Column(scale=9):
             components["result_sentence_md"] = gr.Markdown(value="", elem_classes=["result-sentence"])
         with gr.Column(scale=3):
-            components["replay_btn"] = gr.Button("⏮ Replay from Start", elem_classes=["btn-indigo-outline"], size="sm")
+            components["banner_replay_btn"] = gr.Button("⏮ Replay from Start", elem_classes=["btn-indigo-outline"], size="sm")
     components["run_result_banner"] = run_result_banner
 
     with gr.Row(elem_classes=["kpi-row"]):
@@ -116,15 +116,16 @@ def build_simulate_view():
             components["map_title_md"] = gr.Markdown("### 🏰 Live Robot Graph Simulation Base — Ready to Launch")
             components["map_plot"] = gr.Plot(show_label=False)
 
-            # Tactile Timeline Scrubber & Step Playback Bar directly under the Base
-            with gr.Row():
-                components["step_back_btn"] = gr.Button("⏮ -1 Tick", scale=1, elem_classes=["btn-control"])
-                components["play_pause_btn"] = gr.Button("▶ Auto Play", scale=2, elem_classes=["btn-control"])
-                components["step_fwd_btn"] = gr.Button("+1 Tick ⏭", scale=1, elem_classes=["btn-control"])
-
             components["scrubber"] = gr.Slider(
                 minimum=1, maximum=DEFAULT_MAX_STEPS, step=1, value=1, label="Mission Timeline Scrubber (Tick)"
             )
+
+            # Tactile Timeline Scrubber & Step Playback Bar directly under the Base
+            with gr.Row():
+                components["replay_btn"] = gr.Button("⏮ Start", scale=1, elem_classes=["btn-control"])
+                components["step_back_btn"] = gr.Button("◀ -1 Tick", scale=1, elem_classes=["btn-control"])
+                components["play_pause_btn"] = gr.Button("▶ Auto Play", scale=2, elem_classes=["btn-control"])
+                components["step_fwd_btn"] = gr.Button("+1 Tick ▶", scale=1, elem_classes=["btn-control"])
 
             # Mirrored Core Loop Action Bar (Oct 13, 2026 CoC Battle vs. Build Action Buttons)
             with gr.Row():
@@ -137,7 +138,7 @@ def build_simulate_view():
             with gr.Group(elem_classes=["coc-drawer-box"]):
                 gr.Markdown("#### 🛠️ Builder Menu 2.0 — Base, Fleet, ACA Gear & Adversary")
                 with gr.Tabs():
-                    with gr.Tab("🏰 1. Base Map"):
+                    with gr.Tab("🏰 Map"):
                         components["map_dropdown"] = gr.Dropdown(
                             choices=list(MAP_OPTIONS.keys()),
                             value="Boston Downtown (OSMnx road network, 216 nodes)",
@@ -157,12 +158,12 @@ def build_simulate_view():
                             value=format_provenance_markdown(get_map_provenance("road_osmnx", 216))
                         )
 
-                    with gr.Tab("🤖 2. Fleet & Army"):
+                    with gr.Tab("🤖 Fleet"):
                         components["robots_slider"] = gr.Slider(minimum=2, maximum=8, step=1, value=4, label="Robot Fleet Count (Scouts & Heavy Lifters)")
                         components["tasks_slider"] = gr.Slider(minimum=5, maximum=30, step=1, value=15, label="Mission Task Nodes")
                         gr.Markdown("*Scouts feature 2.0× speed and 2-hop sensing; Heavy Lifters carry 300 battery units.*")
 
-                    with gr.Tab("⚙️ 3. ACA Gear"):
+                    with gr.Tab("⚙️ Gear"):
                         components["alloc_dropdown"] = gr.Dropdown(
                             choices=ALLOCATOR_OPTIONS,
                             value="ACA (Ours)",
@@ -174,7 +175,7 @@ def build_simulate_view():
                             visible=False,
                         )
 
-                    with gr.Tab("🌩️ 4. Adversary & Comms"):
+                    with gr.Tab("🌩️ Threat"):
                         components["adv_dropdown"] = gr.Dropdown(
                             choices=ADVERSARY_OPTIONS,
                             value="Reactive (Corridor Interdiction)",
@@ -198,7 +199,7 @@ def build_simulate_view():
             with gr.Group(elem_classes=["coc-drawer-box"]):
                 gr.Markdown("#### 💬 Battle Log & Live Telemetry Inspector")
                 with gr.Tabs():
-                    with gr.Tab("💬 1. Event Stream"):
+                    with gr.Tab("💬 Events"):
                         components["event_filter_radio"] = gr.Radio(
                             choices=["All", "Task Claim", "Blockage", "Detour", "Conflict"],
                             value="All",
@@ -208,19 +209,19 @@ def build_simulate_view():
                             value="<div style='height:250px; overflow-y:auto; border:2px solid #e09f3e; border-radius:10px; padding:10px; font-family:monospace; font-size:11.5px; background:#1e293b; color:#f8fafc;'>Click '⚔️ SIMULATE / LAUNCH MISSION' to stream chronological tick events.</div>"
                         )
 
-                    with gr.Tab("📊 2. Step Metrics"):
+                    with gr.Tab("📊 Metrics"):
                         components["telemetry_table"] = gr.DataFrame(
                             headers=["Metric", "Value"],
                             datatype=["str", "str"],
                             interactive=False,
                         )
 
-                    with gr.Tab("📜 3. Mission Narrative & Failures"):
+                    with gr.Tab("📜 Narrative"):
                         with gr.Column(elem_classes=["coc-scroll-pane"]):
                             components["what_happened_box"] = gr.Markdown(value="*Run simulation to synthesize empirical mission narrative.*")
                             components["task_failures_table"] = gr.DataFrame(interactive=False, label="Incomplete Task Root-Cause Diagnostics")
 
-                    with gr.Tab("🧪 4. CLI Repro"):
+                    with gr.Tab("🧪 Repro"):
                         components["reproduce_result_md"] = gr.Markdown(value="*Run simulation to generate exact CLI reproduction command.*")
 
     return components

@@ -68,7 +68,7 @@
 \maketitle
 
 \begin{abstract}
-Decentralized multi-robot task allocation in dynamic, contested domains is vulnerable to adversarial edge blockages and inconsistent subjective beliefs. Standard market mechanisms such as CBBA assume homogeneous environmental estimates and trigger costly fleet-wide re-auctions when traversal paths are invalidated. We propose \textbf{Adversarial Contingency Auctions (ACA)}, a decentralized mechanism coupling expected recourse cost bidding over discrete contingency trees with a closed-form \textbf{Pinsker claim margin}. The margin derives from total variation bounds and provably isolates local safe claims under bounded belief divergence ($\mathrm{TV} \le \eta_{\text{eff}}$), while precomputed local recourse branches resolve corridor blockages with zero communication. Evidence is structured across three distinct tiers: (1)~In exploratory sweeps ($N = \aeMatchedBenchmarkInstances$ matched instances), ACA achieves an exploratory completion gain of \aeHtwoCbbaLrDiff~pp over CBBA+LR (Wilcoxon $p = \aePvalCbbaLr$). (2)~In pre-registered Protocol~v5 held-out evaluation on un-tuned seeds ($N = \aeHeldoutInstances$ instances), a performance reversal occurs: CBBA+LR achieves higher completion (\aeHeldoutCbbaLrComp\% vs.\ \aeHeldoutAcaComp\%, difference \aeHeldoutDiffCbbaLr~pp) and net welfare with fewer conflicts, demonstrating that ACA's primary advantage is safety coordination via the Pinsker margin under communication constraints rather than unconstrained completion dominance. (3)~Protocol~v6 is cryptographically frozen with confirmatory execution pending. Pure software simulation; no physical robots deployed.
+Decentralized multi-robot task allocation in dynamic, contested domains is vulnerable to adversarial edge blockages and inconsistent subjective beliefs. Standard market mechanisms such as CBBA assume homogeneous environmental estimates and trigger costly fleet-wide re-auctions when traversal paths are invalidated. We propose \textbf{Adversarial Contingency Auctions (ACA)}, a decentralized mechanism coupling expected recourse cost bidding over discrete contingency trees with a closed-form \textbf{Pinsker claim margin}. The margin derives from total variation bounds and provably isolates local safe claims when Assumption~1 holds ($\mathrm{TV} \le \eta_{\text{eff}}$, which held for \aeAdherencePerClaim\% of safe claims with zero conflicts; \aeTheoremNonAdheredConflicts\ conflicts occurred when it failed), while precomputed local recourse branches resolve corridor blockages with zero communication. Evidence is structured across three distinct tiers: (1)~In exploratory sweeps ($N = \aeMatchedBenchmarkInstances$ matched instances), ACA achieves an exploratory completion gain of \aeHtwoCbbaLrDiff~pp over CBBA+LR (Wilcoxon $p = \aePvalCbbaLr$). (2)~In pre-registered Protocol~v5 held-out evaluation on un-tuned seeds ($N = \aeHeldoutInstances$ instances), a performance reversal occurs: CBBA+LR achieves higher completion (\aeHeldoutCbbaLrComp\% vs.\ \aeHeldoutAcaComp\%, difference \aeHeldoutDiffCbbaLr~pp) and net welfare with fewer conflicts, demonstrating that ACA's primary advantage is safety coordination via the Pinsker margin under communication constraints rather than unconstrained completion dominance. (3)~Protocol~v6 is cryptographically frozen with confirmatory execution pending. Pure software simulation; no physical robots deployed.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -113,7 +113,7 @@ The primary contributions of this work are:
 \begin{itemize}
     \item \textbf{Type-Aware Expected Recourse Valuation (Proposition~1):} Tractable submodular surrogate computing expected traversal costs of depth-$d$ contingency trees under Bayesian adversary posteriors.
     \item \textbf{Lipschitz Continuity of Expected Recourse Bids (Proposition~2):} Establishing Lipschitz constant $L_j = \Delta_j$ under Total Variation belief distance.
-    \item \textbf{Conditional Conflict-Freedom of Safe Claims (Theorem~1):} Closed-form Pinsker margin $m_{r, j}$ guaranteeing conflict-free safe claims when $\mathrm{TV} \leq \eta_{\text{eff}}$, confirmed empirically (\aeZeroConflicts\ conflicts across \aeSafeClaimsAdhered\ claims, \aeConfidenceLevel\% UB \aeTheoremConflictRateUpper\%).
+    \item \textbf{Conditional Conflict-Freedom of Safe Claims (Theorem~1):} Closed-form Pinsker margin $m_{r, j}$ guaranteeing conflict-free safe claims when $\mathrm{TV} \leq \eta_{\text{eff}}$, confirmed empirically (Assumption~1 held for \aeAdherencePerClaim\% of safe claims with \aeZeroConflicts\ conflicts across \aeSafeClaimsAdhered\ adhered claims, \aeConfidenceLevel\% UB \aeTheoremConflictRateUpper\%; \aeTheoremNonAdheredConflicts\ conflicts occurred across non-adhered claims where $\mathrm{TV} > \eta_{\text{eff}}$).
     \item \textbf{Safe Monotonicity and Recourse (Propositions~3 \& 4):} Safe claims are preserved through consensus; corridor blockages trigger zero-message local detours.
     \item \textbf{Rigorous Benchmark ($N = \aeMatchedBenchmarkInstances$ matched instances, $\aeTotalTrials$ sweep trials):} Demonstrating gains over CBBA+LR (\aeHtwoCbbaLrDiff~pp, $p = \aePvalCbbaLr$), parity with CBBA-PR+LR (\aeHtwoCbbaPrLrDiff~pp, $p = \aePvalCbbaPrLr$), and honest trade-offs against single-agent replanning.
     \item \textbf{Software Simulation ($N = \aeSitlMatchedTrials$ matched trials):} Sim-to-sim continuous physics analysis (pure software simulation; no physical robots deployed).
@@ -189,7 +189,7 @@ To determine whether task $j$ can be safely claimed locally without risking conc
     m_{r, j} = \Delta_j \left( \sqrt{\frac{1}{2} D'_{\text{KL}}} + \eta_{\text{eff}} \right) + \delta_{\text{map}}
 \label{eq:pinsker_margin}
 \end{equation}
-where $\Delta_j = \max_{s, \theta} c_s(j \mid \theta) - \min_{s, \theta} c_s(j \mid \theta)$ captures task type-sensitivity across pure adversary types, and $\delta_{\text{map}}$ bounds map discrepancies.
+where $\Delta_j = \max_{s \in \mathcal{R}} L_{s, j}$ denotes the fleet-wide Lipschitz upper bound on recourse bid sensitivity across agents and adversary types, and $\delta_{\text{map}}$ bounds map discrepancies.
 
 \noindent\textbf{Safe Claim Rule:} Robot $r$ inserts task $j$ into its bundle during Phase~1 without consensus negotiation if and only if:
 \begin{equation}
@@ -220,24 +220,24 @@ By the law of total expectation conditioned on the index of the first blocked ed
 While infinite observations in stationary settings yield martingale convergence $B_r^n(\theta^*) \to 1$ almost surely, actual finite missions ($T = \aeMissionHorizonTicks$ ticks) exhibit partial observability and dynamic switching ($\theta_4$). Posterior concentration is thus empirical: the Dirichlet filter concentrates belief weight on active risk corridors within \aeDirichletConvergenceMin--\aeDirichletConvergenceMax\ traversals, which suffices for safe-claim margin computation without requiring asymptotic parameter convergence.
 
 \begin{proposition}[Lipschitz Continuity of Expected Recourse Bids]
-For any task $j \in \mathcal{T}$, let the pure-type task sensitivity be defined as $L_j = \Delta_j = \max_{\theta \in \Theta} c_r(j \mid \theta) - \min_{\theta \in \Theta} c_r(j \mid \theta)$. The expected recourse bid function $c_r(j \mid B) = \sum_{\theta} B(\theta) c_r(j \mid \theta)$ is $L_j$-Lipschitz continuous with respect to the Total Variation metric on belief space $\Delta(\Theta)$:
+For any robot $r$ and task $j \in \mathcal{T}$ with contingency recourse tree $T_r$, let leaf realized costs lie in range $\Delta c_r(j) = C_{\max}(T_r) - C_{\min}(T_r)$ and edge blockage marginal spreads satisfy $\Delta\pi(e) = \max_\theta \pi(e \mid \theta) - \min_\theta \pi(e \mid \theta)$. Under conditional edge marginal independence (Proposition~\ref{prop:valuation}), the expected recourse bid $c_r(j \mid B) = \sum_{\theta} B(\theta) c_r(j \mid \theta)$ is $L_{r, j}$-Lipschitz continuous with respect to the Total Variation metric on belief space $\Delta(\Theta)$:
 \begin{equation}
-    |c_r(j \mid B) - c_r(j \mid B')| \leq L_j \cdot \mathrm{TV}(B, B')
+    |c_r(j \mid B) - c_r(j \mid B')| \leq L_{r, j} \cdot \mathrm{TV}(B, B')
 \label{eq:bid_lipschitz}
 \end{equation}
+where $L_{r, j} = \Delta c_r(j) \sum_{e \in E_{\text{risk}}(T_r)} \Delta\pi(e)$. Setting $\Delta_j = \max_{s \in \mathcal{R}} L_{s, j}$ yields a uniform sensitivity bound across the fleet.
 \label{prop:lipschitz}
 \end{proposition}
 \begin{proof}
-Let $c_r(j \mid \theta) \in [\min_\theta c_r(j \mid \theta), \max_\theta c_r(j \mid \theta)]$ be bounded in an interval of length $\Delta_j$. By the Kantorovich--Rubinstein duality theorem for total variation distance:
-\begin{align}
-    |c_r(j \mid B) - c_r(j \mid B')| &= \left| \sum_{\theta \in \Theta} (B(\theta) - B'(\theta)) c_r(j \mid \theta) \right| \notag \\
-    &\leq \Delta_j \cdot \mathrm{TV}(B, B')
-\end{align}
-which establishes Eq.~(\ref{eq:bid_lipschitz}) with Lipschitz constant $L_j = \Delta_j$.
+Let leaf realized costs of tree $T_r$ be bounded in an interval of length $\Delta c_r(j)$. Under conditional edge independence, shifts in belief from $B$ to $B'$ alter path execution branch weights by at most $\sum_{e \in E_{\text{risk}}(T_r)} |\pi(e \mid B) - \pi(e \mid B')| \leq \sum_{e} \Delta\pi(e) \mathrm{TV}(B, B')$. By Kantorovich--Rubinstein duality across the policy tree partition:
+\begin{equation}
+    |c_r(j \mid B) - c_r(j \mid B')| \leq \Delta c_r(j) \sum_{e \in E_{\text{risk}}(T_r)} \Delta\pi(e) \cdot \mathrm{TV}(B, B')
+\end{equation}
+which establishes Eq.~(\ref{eq:bid_lipschitz}) with Lipschitz constant $L_{r, j}$, and $\Delta_j = \max_{s \in \mathcal{R}} L_{s, j} \ge L_{r, j}$ holds uniformly.
 \end{proof}
 
 \begin{theorem}[Conditional Conflict-Freedom of Phase-1 Safe Claims]
-Let $L_j = \Delta_j = \max_{s, \theta} c_s(j \mid \theta) - \min_{s, \theta} c_s(j \mid \theta)$ denote the bid Lipschitz constant across adversary types. If Assumption~\ref{ass:tom} holds ($\mathrm{TV}(B_s, \hat{B}_s^{(r)}) \leq \eta_{\text{eff}}$ for all $s \ne r$) and map discrepancy satisfies $|c_r(j) - c_s(j)| \leq \delta_{\text{map}}$, then two robots $r$ and $s$ evaluating the safe-claim rule in Eq.~(\ref{eq:claim_rule}) with Pinsker margin $m_{r, j}$ in Eq.~(\ref{eq:pinsker_margin}) in the same allocation round \textbf{cannot simultaneously claim the same task $j$ in Phase~1}, even though their subjective beliefs are not synchronized.
+Let $\Delta_j = \max_{s \in \mathcal{R}} L_{s, j}$ denote the uniform bid Lipschitz bound across the fleet. If Assumption~\ref{ass:tom} holds ($\mathrm{TV}(B_s, \hat{B}_s^{(r)}) \leq \eta_{\text{eff}}$ for all $s \ne r$) and map discrepancy satisfies $|c_r(j) - c_s(j)| \leq \delta_{\text{map}}$, then two robots $r$ and $s$ evaluating the safe-claim rule in Eq.~(\ref{eq:claim_rule}) with Pinsker margin $m_{r, j}$ in Eq.~(\ref{eq:pinsker_margin}) in the same allocation round \textbf{cannot simultaneously claim the same task $j$ in Phase~1}, even though their subjective beliefs are not synchronized.
 \label{thm:conflict_freedom}
 \end{theorem}
 \begin{proof}
@@ -259,7 +259,7 @@ Applying Pinsker's inequality to the first term and Assumption~\ref{ass:tom} to 
 \begin{equation}
     \mathrm{TV}(B_r, B_s) \leq \sqrt{\frac{1}{2} D_{\text{KL}}(B_r \parallel \hat{B}_s^{(r)})} + \eta_{\text{eff}}
 \end{equation}
-By Proposition~\ref{prop:lipschitz}, the variation in expected cost across subjective beliefs satisfies $|\hat{c}_s^r(j) - \hat{c}_s^s(j)| \leq L_j \mathrm{TV}(B_r, B_s) + \delta_{\text{map}}$. Substituting the Pinsker upper bound yields:
+By Proposition~\ref{prop:lipschitz}, the variation in expected cost across subjective beliefs satisfies $|\hat{c}_s^r(j) - \hat{c}_s^s(j)| \leq \Delta_j \mathrm{TV}(B_r, B_s) + \delta_{\text{map}}$. Substituting the Pinsker upper bound yields:
 \begin{equation}
     |\hat{c}_s^r(j) - \hat{c}_s^s(j)| \leq \Delta_j \left( \sqrt{\frac{1}{2} D'_{\text{KL}}} + \eta_{\text{eff}} \right) + \delta_{\text{map}} = m_{r, j}
 \end{equation}
@@ -386,7 +386,7 @@ Mean per-tick computation time for ACA is $\aeAcaRuntime \pm \aeAcaRuntimeCI$ ms
 
 \subsection{Protocol v5 Confirmatory Evaluation on Held-Out Seeds}
 \label{sec:heldout}
-To eliminate hyperparameter tuning leakage and test out-of-sample generalizability across the entire benchmark universe, Protocol~v5 was executed across all \aeBenchmarkMapCount\ map topologies and \aeAdversaryCount\ adversary profiles on strictly held-out random seeds $\aeHeldoutSeedStart \dots \aeHeldoutSeedEnd$ ($N = \aeHeldoutInstances$ matched independent instances, \aeHeldoutTrials\ total paired trials). Table~\ref{tab:heldout_v5_results} summarizes confirmatory results under family-wide Holm--Bonferroni correction.
+To eliminate hyperparameter tuning leakage and test out-of-sample generalizability across the entire benchmark universe, Protocol~v5 was executed across all \aeBenchmarkMapCount\ map topologies and \aeAdversaryCount\ adversary profiles on strictly held-out random seeds $\aeHeldoutSeedStart \dots \aeHeldoutSeedEnd$ ($N = \aeHeldoutInstances$ matched instances across \aeHeldoutEnvironments\ independent environments, \aeHeldoutTrials\ total paired trials). Table~\ref{tab:heldout_v5_results} summarizes confirmatory results under family-wide Holm--Bonferroni correction.
 
 \input{results/table_heldout_v5.tex}
 

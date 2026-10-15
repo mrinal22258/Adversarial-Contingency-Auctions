@@ -14,8 +14,8 @@ All files in this directory must explicitly include a protocol version tag (`_v5
   - `heldout_v5_runs.jsonl`: 3,541 raw streaming records (concurrent unbuffered write artifact)
   - `heldout_v5_summary.csv`: Summary statistics by method
   - `heldout_v5_statistical_tests.json`: Paired statistical tests under Holm–Bonferroni FWER control
-- **Population:** $N = 450$ instances (30 seeds: 101–130 $\times$ 5 graph families $\times$ 3 adversary regimes), 8 methods.
-- **Scientific Role:** Frozen out-of-sample confirmatory tier. Demonstrates the headline reversal where `CBBA+LR` outperforms `ACA` on completion ($94.67\%$ vs $92.40\%$, difference $+2.22$ pp) and net welfare ($958.9$ vs $937.4$) with fewer conflicts ($25.48$ vs $39.66$), and confirms the Pinsker margin trade-off ($-20.6\%$ conflicts relative to no-margin ablation).
+- **Population:** $N = 450$ matched instances across 150 independent environments (30 seeds: 101–130 $\times$ 5 graph families, evaluated under 3 adversary regimes), 8 methods.
+- **Scientific Role:** Frozen out-of-sample confirmatory tier. Demonstrates the headline reversal where `CBBA+LR` achieves higher completion than `ACA` ($94.67\%$ vs $92.40\%$, difference $+2.27$ pp; mean paired difference $+2.22$ pp) and net welfare ($958.9$ vs $937.4$) with fewer conflicts ($25.48$ vs $39.66$), and confirms the Pinsker margin trade-off ($-20.6\%$ conflicts relative to no-margin ablation).
 - **Status:** Frozen, pinned, and immutable.
 
 ### 2. Protocol v6 Confirmatory Replication (Pending)

@@ -122,9 +122,9 @@ def build_heldout_v5_table(model: Dict[str, Any]) -> str:
     """Synthesize Markdown table for Protocol v5 confirmatory held-out results."""
     v5_metrics = model.get("metrics", {}).get("heldout_v5", {})
     method_order = [
-        ("aca_plus", "**ACA+ (Ours)**", "Adaptive Margin + Pruning (Inactive in v5)"),
-        ("aca_adaptive", "ACA-Adaptive", "Adaptive Margin Only"),
-        ("aca", "ACA (Static Pinsker)", "Constant Pinsker Margin"),
+        ("aca", "**ACA (Static Pinsker, $\\kappa=1.0$, Ours)**", "Canonical Theory Baseline"),
+        ("aca_plus", "ACA+ (Heuristic)", "Adaptive Margin + Pruning (Inactive in v5)"),
+        ("aca_adaptive", "ACA-Adaptive (Heuristic)", "Adaptive Margin Only"),
         ("aca_no_margin", "ACA (No Margin)", "Margin Ablation"),
         ("cbba_lr", "CBBA (+LR) [Choi '09]", "Level Execution (+LR)"),
         ("cbba_partial_lr", "CBBA-PR (+LR) [Buckman '19]", "Partial Release (+LR)"),
@@ -169,7 +169,8 @@ def get_nested(data: Dict[str, Any], path: str) -> Any:
 def render_readme(
     template_path: str = TEMPLATE_PATH,
     model_path: str = RESULT_MODEL_PATH,
-    out_path: str = OUTPUT_README_PATH,
+    out_path: Optional[str] = OUTPUT_README_PATH,
+    write_to_file: bool = True,
 ) -> str:
     """Render README.md from template and result model."""
     if not os.path.exists(template_path):
@@ -299,10 +300,11 @@ def render_readme(
     header = "<!-- GENERATED FILE: DO NOT EDIT DIRECTLY. Edit README.template.md and run tools/render_readme.py -->\n\n"
     final_output = header + rendered
 
-    with open(out_path, "w", encoding="utf-8") as f:
-        f.write(final_output)
+    if write_to_file and out_path:
+        with open(out_path, "w", encoding="utf-8") as f:
+            f.write(final_output)
+        print(f"[*] Successfully rendered {out_path} from {template_path}")
 
-    print(f"[*] Successfully rendered {out_path} from {template_path}")
     return final_output
 
 

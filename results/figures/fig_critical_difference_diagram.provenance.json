@@ -15,5 +15,5 @@
     "ssi_lr": 4.786
   },
   "generator_script": "experiments/make_cd_diagram.py",
-  "figure_file": "C:\\Users\\krmri\\Downloads\\Adversarial-Contingency-Auctions-main\\Adversarial-Contingency-Auctions-main\\results\\figures\\fig_critical_difference_diagram.pdf"
+  "figure_file": "results/figures/fig_critical_difference_diagram.pdf"
 }

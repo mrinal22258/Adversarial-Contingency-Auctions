@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [ main, fix/audit-repairs ]
+    branches: [ main, master, fix/audit-repairs, fix/rigorous-eval ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, master ]
 
 jobs:
   lint-and-protocol:

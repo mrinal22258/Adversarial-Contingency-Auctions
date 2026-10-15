@@ -1,5 +1,5 @@
 {
-  "figure_file": "C:\\Users\\krmri\\Downloads\\Adversarial-Contingency-Auctions-main\\Adversarial-Contingency-Auctions-main\\results\\figures\\fig_map_synthetic_families.png",
+  "figure_file": "results/figures/fig_map_synthetic_families.png",
   "git_commit": "ab18d76df1d3d66cd59ef1799ff54a9d0ec6d92d",
   "source_files": [
     "acalib/env/graph_families.py"

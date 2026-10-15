@@ -6,7 +6,7 @@
 
 [![CI Status](https://github.com/anonymous/adversarial-contingency-auctions/actions/workflows/ci.yml/badge.svg)](https://github.com/anonymous/adversarial-contingency-auctions/actions)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
-[![Tests: Suite Status](https://img.shields.io/badge/tests-173%20passed%20(54%20deselected)-brightgreen.svg)]()
+[![Tests: Suite Status](https://img.shields.io/badge/tests-168%20passed%20(54%20deselected)-brightgreen.svg)]()
 [![Simulation: Pure Software](https://img.shields.io/badge/simulation-pure%20software-informational.svg)]()
 [![Protocol: prereg--v6.2](https://img.shields.io/badge/protocol-prereg--v6.2-blueviolet.svg)](protocols/prereg-v6.md)
 
@@ -82,9 +82,9 @@ All empirical numbers in this repository are tied directly to explicit, named po
 
 | Method | Variant Description | Completion (%) | Net Welfare | Total Conflicts | Messages |
 | :--- | :--- | :---: | :---: | :---: | :---: |
-| **ACA+ (Ours)** | Adaptive Margin + Pruning (Inactive in v5) | 92.4 ± 1.0 | 936 ± 25 | 38.6 ± 2.9 | 221 ± 13 |
-| ACA-Adaptive | Adaptive Margin Only | 91.3 ± 1.1 | 920 ± 26 | 39.0 ± 2.8 | 232 ± 14 |
-| ACA (Static Pinsker) | Constant Pinsker Margin | 92.4 ± 1.0 | 937 ± 24 | 39.7 ± 2.8 | 218 ± 12 |
+| **ACA (Static Pinsker, $\kappa=1.0$, Ours)** | Canonical Theory Baseline | 92.4 ± 1.0 | 937 ± 24 | 39.7 ± 2.8 | 218 ± 12 |
+| ACA+ (Heuristic) | Adaptive Margin + Pruning (Inactive in v5) | 92.4 ± 1.0 | 936 ± 25 | 38.6 ± 2.9 | 221 ± 13 |
+| ACA-Adaptive (Heuristic) | Adaptive Margin Only | 91.3 ± 1.1 | 920 ± 26 | 39.0 ± 2.8 | 232 ± 14 |
 | ACA (No Margin) | Margin Ablation | 93.5 ± 1.0 | 939 ± 24 | 49.9 ± 3.4 | 213 ± 12 |
 | CBBA (+LR) [Choi '09] | Level Execution (+LR) | 94.7 ± 0.9 | 959 ± 22 | 25.5 ± 1.8 | 243 ± 11 |
 | CBBA-PR (+LR) [Buckman '19] | Partial Release (+LR) | 93.4 ± 1.0 | 953 ± 22 | 40.6 ± 2.7 | 239 ± 13 |
@@ -161,7 +161,7 @@ Run the full test suite (excluding slow SITL physics and external solvers):
 ```powershell
 pytest -q -m "not (sitl or ortools or ui)"
 ```
-Saved run log: `results/test_logs/gate-6.txt` (173 passed, 54 deselected, 2 warnings).
+Saved run log: `results/test_logs/gate-6.txt` (168 passed, 54 deselected, 2 warnings).
 
 ### 3. Run Smoke Pipeline
 Verify end-to-end execution on development seeds with the 2-seed smoke pipeline:

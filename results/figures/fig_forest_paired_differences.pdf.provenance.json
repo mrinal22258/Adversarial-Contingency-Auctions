@@ -1,6 +1,6 @@
 {
-  "figure_file": "results/figures\\fig_forest_paired_differences.pdf",
-  "git_commit": "c48b5029bd9c76393e3fc3a7508e64fb58e06256",
+  "figure_file": "results/figures/fig_forest_paired_differences.pdf",
+  "git_commit": "6d8ab98ac026ca708eb26a05eb12bd36c3021885",
   "source_files": [
     "results/stats/instance_aggregated_results.csv"
   ],

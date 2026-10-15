@@ -84,7 +84,9 @@ body, .gradio-container {
 }
 
 /* ==================== CLASH OF CLANS BEVELED NAVIGATION TABS ==================== */
-.tab-nav, div[role="tablist"], .tab-wrapper, .tab-container:not(.visually-hidden) {
+#main-tabs > div[role="tablist"],
+#main-tabs > .tab-nav,
+.header-container + .tabs > div[role="tablist"] {
     display: flex !important;
     flex-wrap: wrap !important;
     overflow: visible !important;
@@ -96,7 +98,8 @@ body, .gradio-container {
     margin-bottom: 0 !important;
 }
 
-div[role="tablist"] > button, .tab-nav button, .tab-wrapper button, .tab-container button, .tabs button {
+#main-tabs > div[role="tablist"] > button,
+#main-tabs > .tab-nav button {
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -117,13 +120,15 @@ div[role="tablist"] > button, .tab-nav button, .tab-wrapper button, .tab-contain
     margin-bottom: 2px !important;
 }
 
-div[role="tablist"] > button:hover, .tab-nav button:hover {
+#main-tabs > div[role="tablist"] > button:hover,
+#main-tabs > .tab-nav button:hover {
     filter: brightness(1.12) !important;
     color: #ffe169 !important;
 }
 
 /* Active Selected Tab = Signature Clash of Clans Orange-Yellow Glossy Bevel Button */
-div[role="tablist"] > button.selected, .tab-nav button.selected, .tab-container button.selected, .tabs button.selected {
+#main-tabs > div[role="tablist"] > button.selected,
+#main-tabs > .tab-nav button.selected {
     color: #ffffff !important;
     text-shadow: 0 2px 0 #000000, -1px -1px 0 #000000, 1px -1px 0 #000000 !important;
     background: linear-gradient(180deg, #ffe169 0%, #ffa200 48%, #e85d04 100%) !important;
@@ -136,13 +141,75 @@ div[role="tablist"] > button.selected, .tab-nav button.selected, .tab-container 
 }
 
 /* Main Tab Content Panel (Warm Parchment-Framed Command Board) */
-.tabitem, div[role="tabpanel"] {
+#main-tabs > div[role="tabpanel"],
+#main-tabs > .tabitem {
     background: var(--coc-parchment) !important;
     border: 3px solid var(--coc-rim-gold) !important;
     border-top: none !important;
     border-radius: 0 0 20px 20px !important;
     padding: 16px !important;
     box-shadow: 0 16px 40px rgba(0, 0, 0, 0.65) !important;
+}
+
+/* ==================== SUB-TABS (BUILDER MENU 2.0 & BATTLE LOG DRAWERS) ==================== */
+.coc-drawer-box div[role="tablist"],
+.coc-drawer-box .tab-nav {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    gap: 4px !important;
+    border-bottom: 2px solid var(--coc-rim-gold) !important;
+    background: #0f172a !important;
+    padding: 5px 6px !important;
+    border-radius: 10px 10px 0 0 !important;
+    overflow: visible !important;
+    margin-bottom: 0 !important;
+    width: 100% !important;
+}
+
+.coc-drawer-box div[role="tablist"] > button,
+.coc-drawer-box .tab-nav button {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-family: var(--font-display) !important;
+    font-size: 11.5px !important;
+    font-weight: 800 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.02em !important;
+    padding: 6px 4px !important;
+    color: #94a3b8 !important;
+    background: #1e293b !important;
+    border: 1.5px solid #334155 !important;
+    border-radius: 8px !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    white-space: nowrap !important;
+    flex: 1 1 0px !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+}
+
+.coc-drawer-box div[role="tablist"] > button:hover {
+    filter: brightness(1.15) !important;
+    color: #fde68a !important;
+}
+
+.coc-drawer-box div[role="tablist"] > button.selected {
+    color: #ffffff !important;
+    background: linear-gradient(180deg, #ffb703 0%, #e85d04 100%) !important;
+    border: 1.5px solid #2b1400 !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.6), 0 2px 4px rgba(0,0,0,0.3) !important;
+    text-shadow: 0 1px 0 #000000 !important;
+}
+
+.coc-drawer-box div[role="tabpanel"],
+.coc-drawer-box .tabitem {
+    background: #ffffff !important;
+    border: 2px solid var(--coc-rim-gold) !important;
+    border-top: none !important;
+    border-radius: 0 0 12px 12px !important;
+    padding: 12px !important;
+    box-shadow: none !important;
 }
 
 /* ==================== SIGNATURE ORANGE-YELLOW BEVELED ACTION BUTTONS ==================== */
@@ -238,19 +305,21 @@ div[role="tablist"] > button.selected, .tab-nav button.selected, .tab-container 
 /* ==================== TOP RESOURCE & SHIELD KPI STRIP (COC RESOURCE PILLS) ==================== */
 .kpi-row {
     display: grid !important;
-    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)) !important;
+    grid-template-columns: repeat(7, 1fr) !important;
     gap: 8px !important;
     width: 100% !important;
     margin-bottom: 12px !important;
 }
 
 .kpi-card {
+    min-width: 0 !important;
+    overflow: hidden !important;
     height: 100% !important;
     background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%) !important;
     border: 2px solid var(--coc-rim-gold) !important;
     border-top: 3.5px solid #ffb703 !important;
     border-radius: 12px !important;
-    padding: 8px 8px !important;
+    padding: 8px 4px !important;
     text-align: center !important;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
     display: flex !important;
@@ -262,15 +331,16 @@ div[role="tablist"] > button.selected, .tab-nav button.selected, .tab-container 
 .kpi-val {
     font-family: var(--font-display) !important;
     font-variant-numeric: tabular-nums !important;
-    font-size: 16px !important;
+    font-size: 15px !important;
     font-weight: 900 !important;
     color: #ffe169 !important;
     text-shadow: 0 1.5px 0 #000000 !important;
     line-height: 1.2 !important;
+    white-space: nowrap !important;
 }
 
 .kpi-sub {
-    font-size: 11px !important;
+    font-size: 10.5px !important;
     color: #94a3b8 !important;
     font-weight: 700 !important;
 }
@@ -280,9 +350,13 @@ div[role="tablist"] > button.selected, .tab-nav button.selected, .tab-container 
     font-size: 10px !important;
     font-weight: 800 !important;
     text-transform: uppercase !important;
-    letter-spacing: 0.05em !important;
+    letter-spacing: 0.04em !important;
     color: #cbd5e1 !important;
     margin-top: 3px !important;
+    white-space: nowrap !important;
+    text-overflow: ellipsis !important;
+    overflow: hidden !important;
+    max-width: 100% !important;
 }
 
 /* ==================== SCROLLABLE BUILDER MENU 2.0 & BATTLE LOG DRAWERS ==================== */

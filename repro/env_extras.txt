@@ -1,4 +1,4 @@
-﻿absl-py @ file:///C:/b/abs_14wchyjaia/croot/absl-py_1714140489450/work
+absl-py @ file:///C:/b/abs_14wchyjaia/croot/absl-py_1714140489450/work
 aiofiles==23.2.1
 aiohappyeyeballs @ file:///C:/b/abs_e9fm5mk6ak/croot/aiohappyeyeballs_1734469429350/work
 aiohttp @ file:///C:/b/abs_d4_gdjffav/croot/aiohttp_1734687146788/work
@@ -98,7 +98,6 @@ filelock @ file:///C:/Users/dev-admin/perseverance-python-buildout/croot/fileloc
 filetype==1.2.0
 Flask==3.1.0
 flatbuffers==25.12.19
--e c:\users\krmri\onedrive\desktop\floorgen
 fonttools @ file:///C:/b/abs_4crkswws2h/croot/fonttools_1737040078745/work
 formulaic==1.2.2
 frozendict @ file:///C:/b/abs_2alamqss6p/croot/frozendict_1713194885124/work

@@ -28,7 +28,7 @@ Two isolated Python environments are established to verify reproducibility and d
 - **Excluded:** `pybullet`, `ortools`, `gradio`, `playwright`, `opencv-python`.
 
 ### 1.2 Extras Environment (`anaconda3 base`)
-- **Python Binary:** `C:\Users\krmri\anaconda3\python.exe` (Python 3.12.7)
+- **Python Binary:** `[REDACTED_USER]\anaconda3\python.exe` (Python 3.12.7)
 - **Dependencies Record:** `repro/env_extras.txt`
 - **Scope:** Core dependencies plus physical simulation and UI demonstration packages:
   - `pybullet==3.2.7`

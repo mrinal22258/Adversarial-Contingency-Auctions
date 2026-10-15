@@ -136,3 +136,26 @@ def test_common_random_numbers_blockage_stream():
         engine_aca.blockage_process.get_blocked_edges() ==
         engine_cbba.blockage_process.get_blocked_edges()
     )
+
+
+def test_build_crn_environment_reproducibility():
+    """Defect C-1: build_crn_environment must be bit-for-bit reproducible across independent calls and processes."""
+    import hashlib
+    from experiments.run_sweep import build_crn_environment
+
+    env1 = build_crn_environment("warehouse_movingai", 38, 10001, 4, 15, 80)
+    env2 = build_crn_environment("warehouse_movingai", 38, 10001, 4, 15, 80)
+
+    assert env1["risky_edges"] == env2["risky_edges"]
+    assert env1["predrawn_clear"] == env2["predrawn_clear"]
+    assert env1["predrawn_onset"] == env2["predrawn_onset"]
+    assert env1["comm_seed"] == env2["comm_seed"]
+
+    # Also test for a synthetic family > 30 nodes (uncached)
+    env3 = build_crn_environment("rgg", 35, 10001, 4, 15, 80)
+    env4 = build_crn_environment("rgg", 35, 10001, 4, 15, 80)
+
+    assert env3["risky_edges"] == env4["risky_edges"]
+    assert env3["predrawn_clear"] == env4["predrawn_clear"]
+    assert env3["predrawn_onset"] == env4["predrawn_onset"]
+

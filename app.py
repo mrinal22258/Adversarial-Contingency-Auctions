@@ -1,37 +1,325 @@
 """
 Adversarial Contingency Auctions (ACA) — Mission Control Explorer.
-Thin launcher for the modularized Gradio web interface.
+
+Provides:
+1. Interactive Gradio Mission Control dashboard mounted at `/`
+2. Live simulation and paired comparison API endpoints at `/api/...`
+3. Structured JSON/CSV exports from live simulation telemetry
 """
 
 import os
 import sys
+import json
+from typing import Dict, Any, List, Literal
 
 # Ensure repository root is in sys.path
 REPO_ROOT = os.path.dirname(os.path.abspath(__file__))
 if REPO_ROOT not in sys.path:
     sys.path.insert(0, REPO_ROOT)
 
-from acalib.demo.ui.layout import build_app, create_app
+import networkx as nx
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import JSONResponse, Response, RedirectResponse
+from fastapi.staticfiles import StaticFiles
+from starlette.concurrency import run_in_threadpool
+from pydantic import BaseModel, Field
+import uvicorn
+import gradio as gr
+
+from acalib.demo.ui.styles import MISSION_CONTROL_CSS
+from acalib.demo.ui.layout import build_app
 from acalib.demo.ui.callbacks import (
     run_simulation_wrapper,
-    get_metrics_table,
     plot_simulation_state,
+    get_metrics_table,
+)
+from acalib.demo.runner import (
+    run_single_simulation,
+    run_paired_comparison,
+    run_20_seeds_paired,
+)
+from acalib.demo.narrate import generate_event_log
+
+# Canonical Gradio Blocks instance
+demo = build_app()
+demo.queue(default_concurrency_limit=10)
+
+app = FastAPI(
+    title="Adversarial Contingency Auctions (ACA) — Mission Control",
+    description="Strategic Multi-Robot Task Allocation under Inconsistent Beliefs and Adversarial Path Blockages",
+    version="2.0.0",
 )
 
-# Canonical application instance
-demo = build_app()
+# Mount static directory for repository images, diagrams, and assets
+static_dir = os.path.join(REPO_ROOT, "static")
+if os.path.isdir(static_dir):
+    app.mount("/static", StaticFiles(directory=static_dir), name="static")
+
+# In-memory storage for real simulation runs
+_LAST_RUN: Dict[str, Any] = {}
+
+
+class SimulateRequest(BaseModel):
+    topology: Literal["boston", "warehouse_small", "warehouse_large"] = "boston"
+    allocator: str = "ACA (Ours)"
+    adversary: str = "Reactive (Corridor Interdiction)"
+    numRobots: int = Field(default=4, ge=1, le=20)
+    numTasks: int = Field(default=15, ge=1, le=100)
+    seed: int = Field(default=10001, ge=0)
+    maxSteps: int = Field(default=80, ge=10, le=500)
+    depth: int = Field(default=1, ge=0, le=3)
+    commRange: float = Field(default=50.0, ge=0.0, le=500.0)
+    pDrop: float = Field(default=0.02, ge=0.0, le=1.0)
+
+
+class CompareRequest(BaseModel):
+    topology: Literal["boston", "warehouse_small", "warehouse_large"] = "boston"
+    allocator: str = "ACA (Ours)"
+    adversary: str = "Reactive (Corridor Interdiction)"
+    numRobots: int = Field(default=4, ge=1, le=20)
+    numTasks: int = Field(default=15, ge=1, le=100)
+    seed: int = Field(default=10001, ge=0)
+
+
+class MonteCarloRequest(BaseModel):
+    topology: Literal["boston", "warehouse_small", "warehouse_large"] = "boston"
+    allocator: str = "ACA (Ours)"
+    adversary: str = "Reactive (Corridor Interdiction)"
+    numRobots: int = Field(default=4, ge=1, le=20)
+    numTasks: int = Field(default=15, ge=1, le=100)
+
+
+@app.get("/hud")
+async def redirect_hud():
+    """Redirect legacy /hud route to main simulator interface."""
+    return RedirectResponse(url="/")
+
+
+def _execute_simulation(req: SimulateRequest) -> Dict[str, Any]:
+    global _LAST_RUN
+
+    if req.topology == "boston":
+        fam, nodes, variant = "road_osmnx", 216, "none"
+    elif req.topology == "warehouse_small":
+        fam, nodes, variant = "warehouse_movingai", 38, "10-20-10-2-1"
+    else:
+        fam, nodes, variant = "warehouse_movingai", 125, "20-40-10-2-1"
+
+    res = run_single_simulation(
+        graph_family=fam,
+        n_nodes=nodes,
+        adversary_str=req.adversary,
+        allocator_str=req.allocator,
+        n_robots=req.numRobots,
+        n_tasks=req.numTasks,
+        seed=req.seed,
+        max_steps=req.maxSteps,
+        contingency_depth=req.depth,
+        comm_range=req.commRange,
+        p_drop=req.pDrop,
+        variant=variant,
+        record_history=True,
+    )
+
+    summary = res["summary"]
+    history = res["history"]
+    graph = res["graph"]
+
+    raw_pos = nx.get_node_attributes(graph, "pos")
+    nodes_list = []
+    if raw_pos:
+        xs = [p[0] for p in raw_pos.values()]
+        ys = [p[1] for p in raw_pos.values()]
+        min_x, max_x = min(xs), max(xs)
+        min_y, max_y = min(ys), max(ys)
+        span_x = max(1e-5, max_x - min_x)
+        span_y = max(1e-5, max_y - min_y)
+
+        for nid in graph.nodes():
+            p = raw_pos.get(nid, (0, 0))
+            nx_norm = (p[0] - min_x) / span_x - 0.5
+            ny_norm = (p[1] - min_y) / span_y - 0.5
+            nodes_list.append({
+                "id": nid,
+                "x": nx_norm * 920,
+                "y": ny_norm * 560,
+            })
+
+    edges_list = [[u, v] for u, v in graph.edges()]
+    final_frame = history[-1] if history else {}
+    blocked_edges = final_frame.get("blocked_edges", [])
+    active_detour_edges = final_frame.get("active_detours", [])
+    narrative_events = generate_event_log(history)
+
+    result_data = {
+        "status": "ok",
+        "summary": summary,
+        "nodes": nodes_list,
+        "edges": edges_list,
+        "blocked_edges": blocked_edges,
+        "detour_edges": active_detour_edges,
+        "events": narrative_events,
+        "max_ticks": len(history),
+    }
+
+    _LAST_RUN = {
+        "metadata": {
+            "application": "ACA Mission Control",
+            "protocol": "Protocol v6 (6.2.0)",
+            "topology": req.topology,
+            "allocator": req.allocator,
+            "adversary": req.adversary,
+            "numRobots": req.numRobots,
+            "numTasks": req.numTasks,
+            "seed": req.seed,
+            "maxSteps": req.maxSteps,
+        },
+        "summary": summary,
+        "history": history,
+    }
+
+    return result_data
+
+
+@app.post("/api/simulate")
+async def api_simulate(req: SimulateRequest):
+    """Execute high-fidelity simulation engine and return structured JSON."""
+    return await run_in_threadpool(_execute_simulation, req)
+
+
+def _execute_compare(req: CompareRequest) -> Dict[str, Any]:
+    if req.topology == "boston":
+        fam, nodes, variant = "road_osmnx", 216, "none"
+    elif req.topology == "warehouse_small":
+        fam, nodes, variant = "warehouse_movingai", 38, "10-20-10-2-1"
+    else:
+        fam, nodes, variant = "warehouse_movingai", 125, "20-40-10-2-1"
+
+    comp_res = run_paired_comparison(
+        graph_family=fam,
+        n_nodes=nodes,
+        adversary_str=req.adversary,
+        selected_allocator_str=req.allocator,
+        n_robots=req.numRobots,
+        n_tasks=req.numTasks,
+        seed=req.seed,
+        variant=variant,
+    )
+
+    s_sel = comp_res["selected"]["summary"]
+    s_lr = comp_res["cbba_partial_lr"]["summary"]
+    s_cbba = comp_res["cbba"]["summary"]
+    s_ctp = comp_res["ctp_replan"]["summary"]
+
+    table = [
+        {"metric": "Completion Rate (%)", "selected": f"{s_sel.get('completion_rate_pct', 0.0):.1f}%", "cbba_lr": f"{s_lr.get('completion_rate_pct', 0.0):.1f}%", "cbba": f"{s_cbba.get('completion_rate_pct', 0.0):.1f}%", "ctp": f"{s_ctp.get('completion_rate_pct', 0.0):.1f}%"},
+        {"metric": "Completed Tasks", "selected": f"{s_sel.get('completed_tasks', 0)}/{req.numTasks}", "cbba_lr": f"{s_lr.get('completed_tasks', 0)}/{req.numTasks}", "cbba": f"{s_cbba.get('completed_tasks', 0)}/{req.numTasks}", "ctp": f"{s_ctp.get('completed_tasks', 0)}/{req.numTasks}"},
+        {"metric": "Cumulative Conflicts", "selected": str(s_sel.get('total_conflicts', 0)), "cbba_lr": str(s_lr.get('total_conflicts', 0)), "cbba": str(s_cbba.get('total_conflicts', 0)), "ctp": str(s_ctp.get('total_conflicts', 0))},
+        {"metric": "Total Messages", "selected": str(s_sel.get('total_messages', 0)), "cbba_lr": str(s_lr.get('total_messages', 0)), "cbba": str(s_cbba.get('total_messages', 0)), "ctp": str(s_ctp.get('total_messages', 0))},
+        {"metric": "Total Travel Distance", "selected": f"{s_sel.get('total_travel_distance', 0.0):.1f}", "cbba_lr": f"{s_lr.get('total_travel_distance', 0.0):.1f}", "cbba": f"{s_cbba.get('total_travel_distance', 0.0):.1f}", "ctp": f"{s_ctp.get('total_travel_distance', 0.0):.1f}"},
+        {"metric": "Net Welfare", "selected": f"{s_sel.get('net_welfare', 0.0):.1f}", "cbba_lr": f"{s_lr.get('net_welfare', 0.0):.1f}", "cbba": f"{s_cbba.get('net_welfare', 0.0):.1f}", "ctp": f"{s_ctp.get('net_welfare', 0.0):.1f}"},
+    ]
+
+    return {"status": "ok", "table": table}
+
+
+@app.post("/api/compare")
+async def api_compare(req: CompareRequest):
+    """Run paired comparison across ACA and baselines under identical CRN environment."""
+    return await run_in_threadpool(_execute_compare, req)
+
+
+def _execute_monte_carlo(req: MonteCarloRequest) -> Dict[str, Any]:
+    fam = "road_osmnx" if req.topology == "boston" else "warehouse_movingai"
+    nodes = 216 if req.topology == "boston" else (38 if req.topology == "warehouse_small" else 125)
+    variant = "none" if req.topology == "boston" else ("10-20-10-2-1" if req.topology == "warehouse_small" else "20-40-10-2-1")
+
+    mc_res = run_20_seeds_paired(
+        graph_family=fam,
+        n_nodes=nodes,
+        adversary_str=req.adversary,
+        allocator_str=req.allocator,
+        variant=variant,
+    )
+    return {"status": "ok", "summary": mc_res.get("summary", {})}
+
+
+@app.post("/api/monte_carlo")
+async def api_monte_carlo(req: MonteCarloRequest):
+    """Run 20-seed Monte Carlo sweep under Common Random Numbers."""
+    return await run_in_threadpool(_execute_monte_carlo, req)
+
+
+@app.get("/api/export_json")
+async def api_export_json():
+    """Download full simulation telemetry run as JSON from the latest real run."""
+    if not _LAST_RUN:
+        req = SimulateRequest()
+        _execute_simulation(req)
+
+    payload = {
+        "metadata": _LAST_RUN.get("metadata", {}),
+        "summary": _LAST_RUN.get("summary", {}),
+        "history": _LAST_RUN.get("history", []),
+    }
+    return Response(
+        content=json.dumps(payload, indent=2),
+        media_type="application/json",
+        headers={"Content-Disposition": "attachment; filename=aca_telemetry_run.json"},
+    )
+
+
+@app.get("/api/export_csv")
+async def api_export_csv():
+    """Download tick-level simulation metrics log as CSV from the latest real run."""
+    if not _LAST_RUN:
+        req = SimulateRequest()
+        _execute_simulation(req)
+
+    history = _LAST_RUN.get("history", [])
+    csv_rows = ["tick,completed_tasks,conflicts,messages,travel,welfare,safe_claims,deferred_claims,reauction_events"]
+    for step in history:
+        csv_rows.append(
+            f"{step.get('tick', 0)},"
+            f"{step.get('completed_tasks', 0)},"
+            f"{step.get('conflicts', 0)},"
+            f"{step.get('messages', 0)},"
+            f"{step.get('travel', 0.0):.2f},"
+            f"{step.get('welfare', 0.0):.2f},"
+            f"{step.get('safe_claims', 0)},"
+            f"{step.get('deferred_claims', 0)},"
+            f"{step.get('reauction_events', 0)}"
+        )
+    csv_text = "\n".join(csv_rows) + "\n"
+    return Response(
+        content=csv_text,
+        media_type="text/csv",
+        headers={"Content-Disposition": "attachment; filename=aca_telemetry_ticks.csv"},
+    )
+
+
+@app.get("/hud")
+async def hud_redirect():
+    """Redirect legacy /hud to primary Clash HUD viewport at /."""
+    return RedirectResponse(url="/")
+
+
+# Mount Gradio Blocks interface at / with full Clash HUD theme and CSS
+app = gr.mount_gradio_app(
+    app,
+    demo,
+    path="/",
+    head=f"""
+    <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro" rel="stylesheet">
+    <style id="clash-hud-theme">
+    {MISSION_CONTROL_CSS}
+    </style>
+    """,
+)
 
 if __name__ == "__main__":
     server_port = int(os.environ.get("PORT", 7860))
-    # Default to 127.0.0.1 for seamless local browser access on Windows/macOS;
-    # containerized deployments can override via HOST=0.0.0.0.
-    server_name = os.environ.get("HOST", "127.0.0.1")
+    server_name = os.environ.get("HOST", os.environ.get("GRADIO_SERVER_NAME", "127.0.0.1"))
     print(f"[*] Starting ACA Mission Control on {server_name}:{server_port}...")
-    print(f"[*] Browser URL: http://localhost:{server_port} or http://127.0.0.1:{server_port}")
-    show_error = os.environ.get("ACA_DEBUG") == "1"
-    demo.launch(
-        server_name=server_name,
-        server_port=server_port,
-        show_error=show_error,
-    )
-
+    print(f"[*] Dashboard Viewport: http://{server_name}:{server_port}/")
+    uvicorn.run(app, host=server_name, port=server_port, log_level="info")

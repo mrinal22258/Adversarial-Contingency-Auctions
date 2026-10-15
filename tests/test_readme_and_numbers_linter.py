@@ -28,7 +28,7 @@ def test_readme_matches_render_output():
     with open(readme_path, "r", encoding="utf-8") as f:
         disk_content = f.read()
 
-    rendered = render_readme()
+    rendered = render_readme(write_to_file=False)
     assert disk_content == rendered, "README.md on disk diverged from rendered template output"
 
 

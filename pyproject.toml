@@ -21,8 +21,15 @@ dependencies = [
     "matplotlib>=3.5",
     "seaborn>=0.11.0",
     "statsmodels>=0.13.0",
-    "pytest>=7.0",
+    "fastapi>=0.100.0",
+    "uvicorn>=0.20.0",
+    "pydantic>=2.0.0",
+    "pyarrow>=12.0.0",
 ]
+
+[tool.setuptools.packages.find]
+include = ["acalib*"]
+
 
 [project.optional-dependencies]
 ortools = [
@@ -45,6 +52,7 @@ dev = [
     "ruff>=0.1.0",
     "vulture>=2.10",
     "typeguard>=4.0.0",
+    "pymupdf>=1.23.0",
 ]
 all = [
     "acalib[ortools,sitl,maps,demo,dev]",

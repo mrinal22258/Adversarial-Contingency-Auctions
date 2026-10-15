@@ -1,8 +1,8 @@
 {
-  "timestamp_utc": "2026-10-14T09:34:22.190686+00:00",
+  "timestamp_utc": "2026-10-15T07:19:48.414351+00:00",
   "python_version": "3.12.7 | packaged by Anaconda, Inc. | (main, Oct  4 2024, 13:17:27) [MSC v.1929 64 bit (AMD64)]",
   "protocol": "v5",
-  "git_commit": "c48b5029bd9c76393e3fc3a7508e64fb58e06256",
+  "git_commit": "6d8ab98ac026ca708eb26a05eb12bd36c3021885",
   "git_dirty": true,
   "repo_root": ".",
   "steps": {
@@ -37,8 +37,8 @@
       "bytes": 256590
     },
     "results/numbers.tex": {
-      "sha256": "bbfade0326573a515938d56e3232630d417830346bf3ba67bb09f278973ee7e3",
-      "bytes": 11488
+      "sha256": "c73bd93da143f38f592e3d23b36755efccf3f748ac7c2b1903935e851f17e6db",
+      "bytes": 11579
     },
     "results/table_main_results.tex": {
       "sha256": "a6e63d337754b6d31d72901c9b425aead04bcd3d832785376948ac063798d357",
@@ -53,8 +53,8 @@
       "bytes": 1164
     },
     "results/table_heldout_v5.tex": {
-      "sha256": "62afe4ad7fcc393749bd5d321af8dcab65fa83b40301b8b4d0eb5da0e95c94e9",
-      "bytes": 1273
+      "sha256": "70d3dce311f0b4bd29064af82b34b99dca1fbaadb6818975a8d088b80a665811",
+      "bytes": 1330
     },
     "results/stats/hypothesis_results.csv": {
       "sha256": "ddf21692ff83617afd382112cbb11623d0fbab4d4452e3e11789eca63ca6ccf7",
@@ -69,13 +69,13 @@
       "bytes": 4890
     },
     "paper.pdf": {
-      "sha256": "20beee6d56cfe2141f4846fcaa5c4e5468bcdfc628e370bd8bc6568f5a7b37dd",
-      "bytes": 690929
+      "sha256": "209c757a0166289266804a516d12b2f55200f49a000fe1a1c5b38c8347098152",
+      "bytes": 694170
     },
     "supplement.pdf": {
-      "sha256": "61a17a7c49fa9ac1d526f2ba7c2603146fc8225f3dd660e402ee46b680e34b3a",
-      "bytes": 816448
+      "sha256": "7dbfba130cdf8373293b9d39cc9647ed3c96958d52f79d2599c2d8c0812728e6",
+      "bytes": 816790
     }
   },
-  "duration_sec": 64.59
+  "duration_sec": 71.91
 }

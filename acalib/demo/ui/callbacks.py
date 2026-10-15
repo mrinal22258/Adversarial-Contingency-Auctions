@@ -197,7 +197,7 @@ def run_sim_action(
     robots, tasks, adv_choice, alloc_choice,
     max_steps, comm_regime, comm_range, p_drop,
     depth, seed,
-    progress=gr.Progress(track_tqdm=True),
+    progress=gr.Progress(track_tqdm=False),
 ):
     fam, n_nodes, variant = MAP_OPTIONS[map_choice]
     if "warehouse" in fam:
@@ -214,7 +214,7 @@ def run_sim_action(
         elif "420" in coarsen_choice:
             n_nodes = 420
 
-    progress(0.1, desc="Building navigation environment...")
+    progress(0.2, desc="Executing Discrete Multi-Agent Simulation...")
     run_res = run_single_simulation(
         graph_family=fam,
         n_nodes=int(n_nodes),
@@ -231,7 +231,7 @@ def run_sim_action(
         variant=variant,
         record_history=True,
     )
-    progress(0.7, desc="Synthesizing telemetry traces...")
+    progress(0.85, desc="Rendering Spatial Canvas & Telemetry...")
 
     history = run_res["history"]
     graph = run_res["graph"]
@@ -435,7 +435,7 @@ def step_tick(delta, current_tick, history_len):
 def run_compare_action(
     map_choice, coarsen_choice, robots, tasks, adv_choice, alloc_choice,
     max_steps, comm_regime, comm_range, p_drop, depth, seed,
-    progress=gr.Progress(track_tqdm=True),
+    progress=gr.Progress(track_tqdm=False),
 ):
     fam, n_nodes, variant = MAP_OPTIONS[map_choice]
     if "warehouse" in fam:
@@ -591,7 +591,7 @@ def run_compare_action(
 def run_20_seeds_action(
     map_choice, coarsen_choice, robots, tasks, adv_choice, alloc_choice,
     max_steps, comm_regime, comm_range, p_drop, seed,
-    progress=gr.Progress(track_tqdm=True),
+    progress=gr.Progress(track_tqdm=False),
 ):
     fam, n_nodes, variant = MAP_OPTIONS[map_choice]
     if "warehouse" in fam:

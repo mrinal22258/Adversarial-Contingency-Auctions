@@ -1,5 +1,5 @@
 {
-  "figure_file": "results/figures\\fig_comm_degradation_diagnostic.pdf",
+  "figure_file": "results/figures/fig_comm_degradation_diagnostic.pdf",
   "git_commit": "ab18d76df1d3d66cd59ef1799ff54a9d0ec6d92d",
   "source_files": [
     "results/raw_results.csv"

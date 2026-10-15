@@ -1,5 +1,5 @@
 {
-  "figure_file": "results/figures\\fig_kappa_sweep.png",
+  "figure_file": "results/figures/fig_kappa_sweep.png",
   "git_commit": "a284e3044b34e4f307eb90b8eaac58250ac2a982",
   "source_files": [
     "results/raw_results.csv"

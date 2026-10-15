@@ -1,14 +1,14 @@
 ﻿EXIT_CODE: 2
 ============================= test session starts =============================
-platform win32 -- Python 3.12.7, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\krmri\Downloads\Adversarial-Contingency-Auctions-main\Adversarial-Contingency-Auctions-main\venv_core\Scripts\python.exe
+platform win32 -- Python 3.12.7, pytest-9.1.1, pluggy-1.6.0 -- venv_core\Scripts\python.exe
 cachedir: .pytest_cache
-rootdir: C:\Users\krmri\Downloads\Adversarial-Contingency-Auctions-main\Adversarial-Contingency-Auctions-main
+rootdir: 
 configfile: pyproject.toml
 collecting ... collected 95 items / 4 errors / 1 skipped
 
 =================================== ERRORS ====================================
 _______________ ERROR collecting experiments/sitl/test_pilot.py _______________
-ImportError while importing test module 'C:\Users\krmri\Downloads\Adversarial-Contingency-Auctions-main\Adversarial-Contingency-Auctions-main\experiments\sitl\test_pilot.py'.
+ImportError while importing test module 'experiments\sitl\test_pilot.py'.
 Hint: make sure your test modules/packages have valid Python names.
 Traceback:
 ..\..\..\anaconda3\Lib\importlib\__init__.py:90: in import_module
@@ -20,7 +20,7 @@ experiments\sitl\world.py:21: in <module>
     import pybullet as p
 E   ModuleNotFoundError: No module named 'pybullet'
 _____________________ ERROR collecting tests/test_demo.py _____________________
-ImportError while importing test module 'C:\Users\krmri\Downloads\Adversarial-Contingency-Auctions-main\Adversarial-Contingency-Auctions-main\tests\test_demo.py'.
+ImportError while importing test module 'tests\test_demo.py'.
 Hint: make sure your test modules/packages have valid Python names.
 Traceback:
 ..\..\..\anaconda3\Lib\importlib\__init__.py:90: in import_module
@@ -36,7 +36,7 @@ acalib\demo\ui\layout.py:6: in <module>
     import gradio as gr
 E   ModuleNotFoundError: No module named 'gradio'
 ________________ ERROR collecting tests/test_foresight_opt.py _________________
-ImportError while importing test module 'C:\Users\krmri\Downloads\Adversarial-Contingency-Auctions-main\Adversarial-Contingency-Auctions-main\tests\test_foresight_opt.py'.
+ImportError while importing test module 'tests\test_foresight_opt.py'.
 Hint: make sure your test modules/packages have valid Python names.
 Traceback:
 ..\..\..\anaconda3\Lib\importlib\__init__.py:90: in import_module
@@ -48,7 +48,7 @@ acalib\alloc\foresight_opt.py:10: in <module>
     from ortools.sat.python import cp_model
 E   ModuleNotFoundError: No module named 'ortools'
 ________________ ERROR collecting tools/test_ui_playwright.py _________________
-ImportError while importing test module 'C:\Users\krmri\Downloads\Adversarial-Contingency-Auctions-main\Adversarial-Contingency-Auctions-main\tools\test_ui_playwright.py'.
+ImportError while importing test module 'tools\test_ui_playwright.py'.
 Hint: make sure your test modules/packages have valid Python names.
 Traceback:
 ..\..\..\anaconda3\Lib\importlib\__init__.py:90: in import_module

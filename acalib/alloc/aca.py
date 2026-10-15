@@ -134,18 +134,23 @@ class ACAAllocator(CBBAAllocator):
         )
         if recourse_plan is None:
             return float("inf")
+        if self.prune_threshold > 0.0 and recourse_plan.tree is not None:
+            recourse_plan = prune_recourse_plan(
+                recourse_plan,
+                self.prune_threshold,
+                peer.planner,
+                edge_marginals,
+            )
         return recourse_plan.expected_cost
 
-    def _compute_lipschitz_L_j(
+    def _compute_lipschitz_for_robot(
         self,
         task: Task,
         robot_id: int,
         recourse_plan: Optional[RecoursePlan] = None,
         fleet_states: Optional[Dict[int, Any]] = None,
     ) -> float:
-        """
-        Proposition 2 Analytical Lipschitz Upper Bound L_j on the active recourse policy.
-        """
+        """Compute Lipschitz bound for a specific robot on task j."""
         robot = self.robots[robot_id]
         if fleet_states is None:
             fleet_states = {r_id: r.get_state_summary() for r_id, r in self.robots.items()}
@@ -209,16 +214,39 @@ class ACAAllocator(CBBAAllocator):
             clearance_rate=mu,
         )
 
+    def _compute_lipschitz_L_j(
+        self,
+        task: Task,
+        robot_id: int,
+        recourse_plan: Optional[RecoursePlan] = None,
+        fleet_states: Optional[Dict[int, Any]] = None,
+    ) -> float:
+        """
+        Proposition 2 Analytical Lipschitz Upper Bound Delta_j = max_{s in Fleet} L_{s, j}.
+        Covers both own bid sensitivity and peer valuation sensitivity under Theory of Mind.
+        """
+        if fleet_states is None:
+            fleet_states = {r_id: r.get_state_summary() for r_id, r in self.robots.items()}
+
+        l_r = self._compute_lipschitz_for_robot(task, robot_id, recourse_plan=recourse_plan, fleet_states=fleet_states)
+        max_l = l_r
+        for p_id in self.robots:
+            if p_id != robot_id:
+                l_p = self._compute_lipschitz_for_robot(task, p_id, recourse_plan=None, fleet_states=fleet_states)
+                if l_p > max_l:
+                    max_l = l_p
+        return max_l
+
     def _build_bundle_aca(
         self,
         robot_id: int,
         tasks: Dict[int, Task],
         robot_positions: Dict[int, Tuple[float, float]],
         current_step: int = 0,
-    ) -> Tuple[int, int]:
+    ) -> Tuple[int, int, float, float]:
         """
         Phase 1: Local bundle construction with Pinsker Margin Claim Rule.
-        Returns (round_safe_claims, round_deferred_tasks) for this robot in this round.
+        Returns (round_safe_claims, round_deferred_tasks, max_tv, eta_eff) for this robot in this round.
         """
         robot = self.robots[robot_id]
         bundle = list(robot.bundle)

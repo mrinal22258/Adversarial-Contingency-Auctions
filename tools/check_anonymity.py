@@ -21,6 +21,9 @@ DEFAULT_FORBIDDEN_IDENTITIES = [
     r"\bindraprastha\b",
     r"spaces/mrinal22258",
     r"github\.com/mrinal22258",
+    r"\bkrmri\b",
+    r"[\\\/]users[\\\/]krmri\b",
+    r"\bonedrive[\\\/]",
 ]
 
 EXCLUDED_FILENAMES = {
@@ -35,6 +38,7 @@ EXCLUDED_EXTENSIONS = {
     ".pyc", ".pyo", ".pyd",
     ".parquet", ".pkl", ".pt", ".pth",
     ".map",
+    ".log", ".aux", ".blg", ".out", ".fls", ".fdb_latexmk", ".synctex.gz",
 }
 
 EXCLUDED_DIRNAMES = {
@@ -91,17 +95,17 @@ def check_directory(dir_path: str, patterns: List[re.Pattern]) -> Dict[str, List
     return results
 
 
-def check_pdf_file(pdf_path: str, patterns: List[re.Pattern]) -> List[str]:
-    """Check PDF text and metadata for identity violations."""
+def check_pdf_file(pdf_path: str, patterns: List[re.Pattern]) -> Tuple[List[str], bool]:
+    """Check PDF text and metadata for identity violations. Returns (errors, is_verified)."""
     if not os.path.exists(pdf_path):
-        return [f"PDF not found: {pdf_path}"]
+        return ([f"PDF not found: {pdf_path}"], False)
 
-    errors = []
     try:
         import fitz
     except ImportError:
-        return ["PyMuPDF (fitz) is not installed; cannot verify PDF anonymity."]
+        return (["PyMuPDF (fitz) is not installed; cannot verify PDF text and metadata."], False)
 
+    errors = []
     doc = fitz.open(pdf_path)
 
     # Check metadata
@@ -121,7 +125,7 @@ def check_pdf_file(pdf_path: str, patterns: List[re.Pattern]) -> List[str]:
             if match:
                 errors.append(f"PDF page {page_idx + 1} leak: detected forbidden string '{match.group(0)}'")
 
-    return errors
+    return (errors, True)
 
 
 def main():
@@ -166,8 +170,12 @@ def main():
 
     for label, path in [("Paper PDF", paper_path), ("Supplement PDF", supplement_path)]:
         if os.path.exists(path):
-            pdf_errs = check_pdf_file(path, compiled_patterns)
-            if pdf_errs:
+            pdf_errs, is_verified = check_pdf_file(path, compiled_patterns)
+            if not is_verified:
+                print(f"[WARN] {label} ({path}): {pdf_errs[0]}")
+                if args.strict:
+                    total_violations += 1
+            elif pdf_errs:
                 print(f"\n[FAIL] Identity leaks detected in {label} ({path}):")
                 for err in pdf_errs:
                     print(f"  - {err}")
@@ -177,6 +185,7 @@ def main():
         else:
             if args.strict:
                 print(f"[WARN] {label} not found at {path}")
+                total_violations += 1
 
     print("-" * 60)
     if total_violations > 0:
