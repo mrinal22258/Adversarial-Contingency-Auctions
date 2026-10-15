@@ -10,7 +10,9 @@ Provides:
 import os
 import sys
 import json
-from typing import Dict, Any, List, Literal
+import threading
+import uuid
+from typing import Dict, Any, List, Literal, Optional
 
 # Ensure repository root is in sys.path
 REPO_ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -56,7 +58,46 @@ static_dir = os.path.join(REPO_ROOT, "static")
 if os.path.isdir(static_dir):
     app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
-# In-memory storage for real simulation runs
+# Thread-safe in-memory storage for real simulation runs (F-04)
+class RunStore:
+    """Thread-safe in-memory store for simulation telemetry runs."""
+
+    def __init__(self, maxsize: int = 32):
+        self._lock = threading.Lock()
+        self._runs: Dict[str, Dict[str, Any]] = {}
+        self._latest_id: Optional[str] = None
+        self._maxsize = maxsize
+
+    def set_run(self, run_data: Dict[str, Any]) -> str:
+        run_id = str(uuid.uuid4())
+        if "metadata" in run_data and isinstance(run_data["metadata"], dict):
+            run_data["metadata"]["run_id"] = run_id
+        with self._lock:
+            self._runs[run_id] = run_data
+            self._latest_id = run_id
+            if len(self._runs) > self._maxsize:
+                oldest_id = next(iter(self._runs))
+                del self._runs[oldest_id]
+        return run_id
+
+    def get_run(self, run_id: Optional[str] = None) -> Optional[Dict[str, Any]]:
+        with self._lock:
+            target_id = run_id if run_id is not None else self._latest_id
+            if target_id is None or target_id not in self._runs:
+                return None
+            return self._runs[target_id]
+
+    def has_runs(self) -> bool:
+        with self._lock:
+            return self._latest_id is not None
+
+    def clear(self):
+        with self._lock:
+            self._runs.clear()
+            self._latest_id = None
+
+
+_RUN_STORE = RunStore()
 _LAST_RUN: Dict[str, Any] = {}
 
 
@@ -163,7 +204,7 @@ def _execute_simulation(req: SimulateRequest) -> Dict[str, Any]:
         "max_ticks": len(history),
     }
 
-    _LAST_RUN = {
+    run_snapshot = {
         "metadata": {
             "application": "ACA Mission Control",
             "protocol": PROTOCOL_FULL_NAME,
@@ -178,6 +219,9 @@ def _execute_simulation(req: SimulateRequest) -> Dict[str, Any]:
         "summary": summary,
         "history": history,
     }
+    run_id = _RUN_STORE.set_run(run_snapshot)
+    _LAST_RUN = run_snapshot
+    result_data["run_id"] = run_id
 
     return result_data
 
@@ -252,16 +296,19 @@ async def api_monte_carlo(req: MonteCarloRequest):
 
 
 @app.get("/api/export_json")
-async def api_export_json():
-    """Download full simulation telemetry run as JSON from the latest real run."""
-    if not _LAST_RUN:
-        req = SimulateRequest()
-        _execute_simulation(req)
+async def api_export_json(run_id: Optional[str] = None):
+    """Download full simulation telemetry run as JSON from the latest or specified run_id."""
+    run = _RUN_STORE.get_run(run_id)
+    if run is None:
+        raise HTTPException(
+            status_code=404,
+            detail="No simulation has been run; POST /api/simulate first",
+        )
 
     payload = {
-        "metadata": _LAST_RUN.get("metadata", {}),
-        "summary": _LAST_RUN.get("summary", {}),
-        "history": _LAST_RUN.get("history", []),
+        "metadata": run.get("metadata", {}),
+        "summary": run.get("summary", {}),
+        "history": run.get("history", []),
     }
     return Response(
         content=json.dumps(payload, indent=2),
@@ -271,13 +318,16 @@ async def api_export_json():
 
 
 @app.get("/api/export_csv")
-async def api_export_csv():
-    """Download tick-level simulation metrics log as CSV from the latest real run."""
-    if not _LAST_RUN:
-        req = SimulateRequest()
-        _execute_simulation(req)
+async def api_export_csv(run_id: Optional[str] = None):
+    """Download tick-level simulation metrics log as CSV from the latest or specified run_id."""
+    run = _RUN_STORE.get_run(run_id)
+    if run is None:
+        raise HTTPException(
+            status_code=404,
+            detail="No simulation has been run; POST /api/simulate first",
+        )
 
-    history = _LAST_RUN.get("history", [])
+    history = run.get("history", [])
     csv_rows = ["tick,completed_tasks,conflicts,messages,travel,welfare,safe_claims,deferred_claims,reauction_events"]
     for step in history:
         csv_rows.append(

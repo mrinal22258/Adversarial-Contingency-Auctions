@@ -128,3 +128,74 @@ def test_protocol_version_consistency():
     assert f">{version_tag}<" in layout_source, f"HUD badge must display {version_tag}"
     assert "Protocol v6 registered" in layout_source, "Protocol notice bar must state Protocol v6 registered"
 
+
+def test_export_empty_store_returns_404(client):
+    from app import _RUN_STORE
+    _RUN_STORE.clear()
+
+    resp_json = client.get("/api/export_json")
+    assert resp_json.status_code == 404
+    assert "No simulation has been run" in resp_json.json()["detail"]
+
+    resp_csv = client.get("/api/export_csv")
+    assert resp_csv.status_code == 404
+    assert "No simulation has been run" in resp_csv.json()["detail"]
+
+
+def test_export_by_run_id(client):
+    resp = client.post("/api/simulate", json={
+        "topology": "warehouse_small",
+        "numRobots": 2,
+        "numTasks": 4,
+        "maxSteps": 15,
+        "seed": 20002,
+    })
+    assert resp.status_code == 200
+    run_id = resp.json()["run_id"]
+    assert run_id is not None
+
+    # Export specific run_id
+    resp_json = client.get(f"/api/export_json?run_id={run_id}")
+    assert resp_json.status_code == 200
+    assert resp_json.json()["metadata"]["run_id"] == run_id
+
+    # Non-existent run_id returns 404
+    resp_404 = client.get("/api/export_json?run_id=non-existent-uuid")
+    assert resp_404.status_code == 404
+
+
+def test_concurrent_simulation_and_exports(client):
+    import concurrent.futures
+
+    def run_sim(seed):
+        resp = client.post("/api/simulate", json={
+            "topology": "warehouse_small",
+            "numRobots": 2,
+            "numTasks": 4,
+            "maxSteps": 15,
+            "seed": seed,
+        })
+        return resp.json()
+
+    def get_export():
+        resp = client.get("/api/export_json")
+        if resp.status_code == 200:
+            return resp.json()
+        return None
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=6) as executor:
+        sim_futures = [executor.submit(run_sim, 1000 + i) for i in range(4)]
+        export_futures = [executor.submit(get_export) for _ in range(6)]
+        sim_results = [f.result() for f in sim_futures]
+        export_results = [f.result() for f in export_futures]
+
+    for export in export_results:
+        if export is not None:
+            assert "metadata" in export
+            assert "summary" in export
+            assert "history" in export
+            # Verify internal snapshot integrity
+            assert len(export["history"]) == export["summary"]["makespan"]
+            assert export["metadata"]["run_id"] is not None
+
+
