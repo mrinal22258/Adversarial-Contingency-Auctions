@@ -4,6 +4,7 @@ Theory of Mind peer tracking, local contingency recourse pivoting, and task exec
 """
 
 from typing import Dict, List, Tuple, Optional, Any, Set
+import logging
 import networkx as nx
 
 from ..env.adversaries import canonical_edge
@@ -11,6 +12,8 @@ from ..env.blockage_process import EdgeState, PersistentBlockageProcess
 from .belief import BayesianTypeFilter
 from .tom import TheoryOfMindTracker, PinskerMarginCalculator
 from .contingency import ContingencyPlanner, RecoursePlan
+
+logger = logging.getLogger(__name__)
 
 
 class RobotAgent:
@@ -229,7 +232,10 @@ class RobotAgent:
                 new_plans[tid] = plan
                 curr_loc = task_node
             else:
-                pass
+                logger.debug(
+                    "Robot %s failed to build recourse plan for task %s from location %s",
+                    self.robot_id, tid, curr_loc,
+                )
 
         self.assigned_plans = new_plans
 
