@@ -20,11 +20,13 @@ class AdversaryType(str, Enum):
     SWITCHING = "theta_6_switching"
 
 
-CanonicalTypeSet = [
+CanonicalTypeList = [
     AdversaryType.STOCHASTIC,
     AdversaryType.REACTIVE,
     AdversaryType.BUDGETED_INTERDICTION,
 ]
+# Deprecated alias preserved for backwards compatibility (F-23)
+CanonicalTypeSet = CanonicalTypeList
 
 
 def canonical_edge(u: Any, v: Any) -> Tuple[Any, Any]:

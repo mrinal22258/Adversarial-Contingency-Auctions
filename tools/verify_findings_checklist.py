@@ -152,7 +152,7 @@ def verify_discovery_theta4_collapse():
     print(f"  Is tracker frozen? {tracker.frozen}")
     is_uniform = all(abs(v - 1.0/3.0) < 1e-6 for v in tracker.beliefs.values())
     print(f"  Did it silently collapse to uniform? {is_uniform}")
-    print("  CONFIRMED: CYCLIC_PATROL is not in CanonicalTypeSet; total is 0.0; _normalize() resets to uniform and freezes!")
+    print("  CONFIRMED: CYCLIC_PATROL is not in CanonicalTypeList; total is 0.0; _normalize() resets to uniform and freezes!")
 
 def verify_j():
     print("\n=== Finding J: SITL Vision Pipeline Trace ===")

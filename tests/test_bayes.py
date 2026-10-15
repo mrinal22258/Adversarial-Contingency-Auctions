@@ -6,7 +6,11 @@ from acalib.agents.belief import (
     BayesianTypeFilter,
     compute_tv_distance,
 )
-from acalib.env.adversaries import AdversaryType, CanonicalTypeSet
+from acalib.env.adversaries import (
+    AdversaryType,
+    CanonicalTypeList,
+    CanonicalTypeSet,
+)
 from acalib.env.blockage_process import EdgeState
 
 
@@ -58,7 +62,7 @@ def test_posterior_concentration():
 
     b_vec = filter_inst.get_belief_vector()
     # Canonical types: [stochastic, reactive, budgeted_interdiction]
-    reactive_idx = CanonicalTypeSet.index(AdversaryType.REACTIVE)
+    reactive_idx = CanonicalTypeList.index(AdversaryType.REACTIVE)
     assert b_vec[reactive_idx] > 0.50, f"Belief should concentrate on reactive type, got {b_vec}"
 
 
@@ -102,11 +106,18 @@ def test_set_oracle_rejects_unsupported_types():
     agent.set_oracle(AdversaryType.STOCHASTIC)
     assert agent.frozen
     b = agent.get_belief_vector()
-    assert b[CanonicalTypeSet.index(AdversaryType.STOCHASTIC)] == 1.0
+    assert b[CanonicalTypeList.index(AdversaryType.STOCHASTIC)] == 1.0
 
     # Unsupported type must raise ValueError, not silently collapse to uniform
     with pytest.raises(ValueError, match="Unsupported oracle adversary type"):
         agent.set_oracle(AdversaryType.CYCLIC_PATROL)
+
+
+def test_canonical_type_alias_compatibility():
+    """Verify F-23: CanonicalTypeSet is an exact alias for CanonicalTypeList."""
+    assert CanonicalTypeSet is CanonicalTypeList
+    assert len(CanonicalTypeList) == 3
+
 
 
 def test_calibration_brier_and_reliability():

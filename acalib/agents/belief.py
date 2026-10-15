@@ -8,6 +8,7 @@ import numpy as np
 
 from ..env.adversaries import (
     AdversaryType,
+    CanonicalTypeList,
     CanonicalTypeSet,
     canonical_edge,
 )
@@ -49,7 +50,7 @@ class BayesianTypeFilter:
         reactive_alpha: float = 0.35,
         interdiction_pcut: float = 0.85,
     ):
-        self.types = list(CanonicalTypeSet)
+        self.types = list(CanonicalTypeList)
         self.clearance_rate = clearance_rate
         self.default_p0 = default_p0
         self.reactive_alpha = reactive_alpha
@@ -93,7 +94,7 @@ class BayesianTypeFilter:
                 self.beliefs[t] /= total
 
     def get_belief_vector(self) -> np.ndarray:
-        """Return beliefs as a 1D numpy array ordered by CanonicalTypeSet."""
+        """Return beliefs as a 1D numpy array ordered by CanonicalTypeList."""
         return np.array([self.beliefs[t] for t in self.types], dtype=float)
 
     def set_belief_vector(self, vec: np.ndarray) -> None:

@@ -12,6 +12,7 @@ import networkx as nx
 from ..env.adversaries import (
     AdversaryType,
     create_adversary,
+    CanonicalTypeList,
     CanonicalTypeSet,
 )
 from ..env.blockage_process import PersistentBlockageProcess
@@ -409,8 +410,8 @@ class SimulationEngine:
             robot.sense_environment(self.blockage_process, fleet_states, step)
 
         # 4. Check Belief Convergence
-        if self.metrics.belief_convergence_step is None and self.adversary_type in CanonicalTypeSet:
-            true_idx = CanonicalTypeSet.index(self.adversary_type)
+        if self.metrics.belief_convergence_step is None and self.adversary_type in CanonicalTypeList:
+            true_idx = CanonicalTypeList.index(self.adversary_type)
             all_converged = True
             for r in self.robots.values():
                 b_vec = r.type_filter.get_belief_vector()
@@ -496,7 +497,7 @@ class SimulationEngine:
             ]
             mean_tv = float(np.mean(tvs)) if tvs else 0.0
             max_tv = float(np.max(tvs)) if tvs else 0.0
-            true_idx = CanonicalTypeSet.index(self.adversary_type) if self.adversary_type in CanonicalTypeSet else -1
+            true_idx = CanonicalTypeList.index(self.adversary_type) if self.adversary_type in CanonicalTypeList else -1
             mean_b_true = float(np.mean([b[true_idx] for b in fleet_b])) if (true_idx >= 0 and fleet_b) else 0.0
 
             # Margin observation
