@@ -100,5 +100,19 @@ def test_api_export_json_and_csv(client):
 
 def test_hud_redirect(client):
     resp = client.get("/hud", follow_redirects=False)
-    assert resp.status_code in (302, 307)
+    assert resp.status_code == 307
     assert resp.headers["location"] == "/"
+
+
+def test_no_duplicate_routes():
+    from starlette.routing import Route
+    seen = set()
+    duplicates = []
+    for route in app.routes:
+        if isinstance(route, Route):
+            for method in route.methods or []:
+                key = (method, route.path)
+                if key in seen:
+                    duplicates.append(key)
+                seen.add(key)
+    assert not duplicates, f"Found duplicate (method, path) route registrations: {duplicates}"

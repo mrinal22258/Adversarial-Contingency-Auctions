@@ -89,10 +89,10 @@ class MonteCarloRequest(BaseModel):
     numTasks: int = Field(default=15, ge=1, le=100)
 
 
-@app.get("/hud")
+@app.get("/hud", include_in_schema=False)
 async def redirect_hud():
     """Redirect legacy /hud route to main simulator interface."""
-    return RedirectResponse(url="/")
+    return RedirectResponse(url="/", status_code=307)
 
 
 def _execute_simulation(req: SimulateRequest) -> Dict[str, Any]:
@@ -296,12 +296,6 @@ async def api_export_csv():
         media_type="text/csv",
         headers={"Content-Disposition": "attachment; filename=aca_telemetry_ticks.csv"},
     )
-
-
-@app.get("/hud")
-async def hud_redirect():
-    """Redirect legacy /hud to primary Clash HUD viewport at /."""
-    return RedirectResponse(url="/")
 
 
 # Mount Gradio Blocks interface at / with full Clash HUD theme and CSS
