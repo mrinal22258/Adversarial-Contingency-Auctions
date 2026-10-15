@@ -37,12 +37,24 @@ import gradio as gr
 from acalib import __version__, PROTOCOL_FULL_NAME, PROTOCOL_LABEL, PROTOCOL_VERSION
 from acalib.demo.ui.styles import MISSION_CONTROL_CSS
 from acalib.demo.ui.layout import build_app
+from acalib.demo.ui.callbacks import (
+    run_simulation_wrapper,
+    plot_simulation_state,
+    get_metrics_table,
+)
 from acalib.demo.runner import (
     run_single_simulation,
     run_paired_comparison,
     run_20_seeds_paired,
 )
 from acalib.demo.narrate import generate_event_log
+
+__all__ = [
+    "app",
+    "run_simulation_wrapper",
+    "plot_simulation_state",
+    "get_metrics_table",
+]
 
 logger = logging.getLogger("aca.api")
 
