@@ -66,3 +66,7 @@ markers = [
     "ortools: Exact combinatorial optimization and CP-SAT benchmark tests",
     "ui: Interactive demo, Gradio layout, and Playwright UI regression tests",
 ]
+filterwarnings = [
+    # F-15: Filter third-party Starlette testclient deprecation notice when imported via fastapi.testclient
+    "ignore:.*Using `httpx` with `starlette.testclient` is deprecated.*:UserWarning",
+]
