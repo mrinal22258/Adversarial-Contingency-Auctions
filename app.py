@@ -26,6 +26,7 @@ from pydantic import BaseModel, Field
 import uvicorn
 import gradio as gr
 
+from acalib import PROTOCOL_FULL_NAME
 from acalib.demo.ui.styles import MISSION_CONTROL_CSS
 from acalib.demo.ui.layout import build_app
 from acalib.demo.ui.callbacks import (
@@ -165,7 +166,7 @@ def _execute_simulation(req: SimulateRequest) -> Dict[str, Any]:
     _LAST_RUN = {
         "metadata": {
             "application": "ACA Mission Control",
-            "protocol": "Protocol v6 (6.2.0)",
+            "protocol": PROTOCOL_FULL_NAME,
             "topology": req.topology,
             "allocator": req.allocator,
             "adversary": req.adversary,
@@ -303,6 +304,7 @@ app = gr.mount_gradio_app(
     app,
     demo,
     path="/",
+    theme=getattr(demo, "theme", None),
     head=f"""
     <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro" rel="stylesheet">
     <style id="clash-hud-theme">

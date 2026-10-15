@@ -83,8 +83,8 @@ def test_api_export_json_and_csv(client):
     assert resp_json.status_code == 200
     assert "application/json" in resp_json.headers["content-type"]
     json_data = resp_json.json()
-    assert "metadata" in json_data
-    assert json_data["metadata"]["protocol"] == "Protocol v6 (6.2.0)"
+    from acalib import PROTOCOL_FULL_NAME, PROTOCOL_LABEL, PROTOCOL_VERSION
+    assert json_data["metadata"]["protocol"] == PROTOCOL_FULL_NAME
     assert "history" in json_data
     assert len(json_data["history"]) > 0
 
@@ -116,3 +116,15 @@ def test_no_duplicate_routes():
                     duplicates.append(key)
                 seen.add(key)
     assert not duplicates, f"Found duplicate (method, path) route registrations: {duplicates}"
+
+
+def test_protocol_version_consistency():
+    from acalib import PROTOCOL_LABEL, PROTOCOL_FULL_NAME
+    import inspect
+    import acalib.demo.ui.layout as layout_module
+
+    layout_source = inspect.getsource(layout_module)
+    version_tag = PROTOCOL_LABEL.split()[-1].lower()  # e.g., 'v6'
+    assert f">{version_tag}<" in layout_source, f"HUD badge must display {version_tag}"
+    assert "Protocol v6 registered" in layout_source, "Protocol notice bar must state Protocol v6 registered"
+

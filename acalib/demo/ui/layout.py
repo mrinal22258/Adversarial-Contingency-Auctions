@@ -7,6 +7,7 @@ center-stage live robot graph base, 4-tab Builder Menu 2.0, and tabbed Battle Lo
 import gradio as gr
 import pandas as pd
 
+from acalib import PROTOCOL_LABEL
 from acalib.demo.ui.styles import MISSION_CONTROL_CSS, SVG_ICONS
 from acalib.demo.ui.tabs import (
     build_overview_view,
@@ -52,14 +53,8 @@ def build_app():
     )
     with gr.Blocks(
         title="Adversarial Contingency Auctions — Mission Control (Clash HUD)",
-        theme=theme,
-        head=f"""
-        <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro" rel="stylesheet">
-        <style id="clash-hud-theme">
-        {MISSION_CONTROL_CSS}
-        </style>
-        """,
     ) as demo:
+        demo.theme = theme
         gr.HTML(f"<style id='inline-clash-theme'>{MISSION_CONTROL_CSS}</style>", visible=False)
         demo.css = MISSION_CONTROL_CSS
 
@@ -88,7 +83,7 @@ def build_app():
                   <div style="display:flex; align-items:center; gap:12px;">
                     <div style="width:50px; height:50px; border-radius:12px; background:linear-gradient(180deg,#ffd166 0%,#f77f00 60%,#d62828 100%); border:2.5px solid #2b1400; box-shadow:inset 0 2px 0 rgba(255,255,255,0.7), 0 3px 0 #6a1b00; display:flex; flex-direction:column; align-items:center; justify-content:center; font-weight:900; color:#fff; text-shadow:0 1.5px 0 #000;">
                       <span style="font-size:9px; color:#fff3b0;">PROTO</span>
-                      <span style="font-size:16px; line-height:1;">v5</span>
+                      <span style="font-size:16px; line-height:1;">v6</span>
                     </div>
                     <div>
                       <h1 style="margin:0 !important;">Adversarial Contingency Auctions (ACA) — Mission Control</h1>
