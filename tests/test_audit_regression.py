@@ -159,3 +159,51 @@ def test_build_crn_environment_reproducibility():
     assert env3["predrawn_clear"] == env4["predrawn_clear"]
     assert env3["predrawn_onset"] == env4["predrawn_onset"]
 
+
+def test_f05_run_cache_bounded_lru():
+    """F-05: _RUN_CACHE must be bounded by maxsize and follow LRU eviction."""
+    from acalib.demo.runner import BoundedLRUCache
+    cache = BoundedLRUCache(maxsize=3)
+    cache["a"] = 1
+    cache["b"] = 2
+    cache["c"] = 3
+    assert len(cache) == 3
+
+    # Access 'a' to make it most recently used
+    _ = cache["a"]
+
+    # Insert 'd', which should evict oldest unaccessed 'b'
+    cache["d"] = 4
+    assert len(cache) == 3
+    assert "b" not in cache
+    assert "a" in cache
+    assert "c" in cache
+    assert "d" in cache
+    assert cache["a"] == 1
+
+
+def test_f06_f21_all_pairs_dist_cache_and_graph_dict():
+    """F-06, F-21: get_all_pairs_distances must store in graph.graph and bound module cache."""
+    import networkx as nx
+    from acalib.alloc.cbba import get_all_pairs_distances, _ALL_PAIRS_DIST_CACHE, MAX_ALL_PAIRS_CACHE_SIZE
+
+    g = nx.path_graph(5)
+    for u, v in g.edges():
+        g[u][v]["weight"] = 1.0
+    g.graph["sha256"] = "test_hash_123"
+
+    dists = get_all_pairs_distances(g)
+    assert dists[0][4] == 4.0
+    assert "all_pairs_dist_cache" in g.graph
+    assert g.graph["all_pairs_dist_cache"] is dists
+    assert len(_ALL_PAIRS_DIST_CACHE) <= MAX_ALL_PAIRS_CACHE_SIZE
+
+
+def test_f06_edge_bc_cache_bounded():
+    """F-06: _EDGE_BC_CACHE in run_sweep.py must be bounded by MAX_BC_CACHE_SIZE."""
+    import collections
+    from experiments.run_sweep import _EDGE_BC_CACHE, MAX_BC_CACHE_SIZE
+    assert isinstance(_EDGE_BC_CACHE, collections.OrderedDict)
+    assert len(_EDGE_BC_CACHE) <= MAX_BC_CACHE_SIZE
+
+

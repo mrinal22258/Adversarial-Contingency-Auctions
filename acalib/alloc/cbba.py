@@ -3,6 +3,7 @@ Consensus-Based Bundle Algorithm (CBBA - Choi, Brunet, How 2009).
 Rigorous implementation with bundle construction, consensus phase, and release rules.
 """
 
+import collections
 from typing import Dict, List, Tuple, Any
 import numpy as np
 import networkx as nx
@@ -12,11 +13,14 @@ from ..agents.robot import RobotAgent
 from ..env.comm import CommunicationNetwork
 
 
-_ALL_PAIRS_DIST_CACHE: Dict[Any, Dict[Any, Dict[Any, float]]] = {}
+_ALL_PAIRS_DIST_CACHE: collections.OrderedDict = collections.OrderedDict()
+MAX_ALL_PAIRS_CACHE_SIZE = 64
 
 
 def get_all_pairs_distances(graph: nx.Graph) -> Dict[Any, Dict[Any, float]]:
-    """Retrieve or compute all-pairs Dijkstra path lengths with caching by topology."""
+    """Retrieve or compute all-pairs Dijkstra path lengths with caching by topology (F-06, F-21)."""
+    if hasattr(graph, "graph") and isinstance(graph.graph, dict) and "all_pairs_dist_cache" in graph.graph:
+        return graph.graph["all_pairs_dist_cache"]
     if hasattr(graph, "_all_pairs_dist_cache") and graph._all_pairs_dist_cache is not None:
         return graph._all_pairs_dist_cache
 
@@ -26,12 +30,17 @@ def get_all_pairs_distances(graph: nx.Graph) -> Dict[Any, Dict[Any, float]]:
     cache_key = (g_hash, n_nodes, n_edges)
 
     if g_hash is not None and cache_key in _ALL_PAIRS_DIST_CACHE:
+        _ALL_PAIRS_DIST_CACHE.move_to_end(cache_key)
         return _ALL_PAIRS_DIST_CACHE[cache_key]
 
     dists = dict(nx.all_pairs_dijkstra_path_length(graph, weight="weight"))
     if g_hash is not None:
         _ALL_PAIRS_DIST_CACHE[cache_key] = dists
+        if len(_ALL_PAIRS_DIST_CACHE) > MAX_ALL_PAIRS_CACHE_SIZE:
+            _ALL_PAIRS_DIST_CACHE.popitem(last=False)
     try:
+        if hasattr(graph, "graph") and isinstance(graph.graph, dict):
+            graph.graph["all_pairs_dist_cache"] = dists
         graph._all_pairs_dist_cache = dists
     except Exception:
         pass

@@ -17,11 +17,62 @@ from experiments.stats import bootstrap_ci
 from acalib.env.adversaries import AdversaryType
 from acalib.sim.engine import SimulationEngine
 
+import collections
+import threading
+
 # Universal shared simulation horizon
 DEFAULT_MAX_STEPS = 80
 
-# In-memory execution cache for fast interactive scrubbing and comparison
-_RUN_CACHE: Dict[Tuple[Any, ...], Dict[str, Any]] = {}
+
+class BoundedLRUCache:
+    """Thread-safe bounded LRU cache mapping keys to values (F-05)."""
+
+    def __init__(self, maxsize: Optional[int] = None):
+        if maxsize is None:
+            maxsize = int(os.environ.get("ACA_RUN_CACHE_SIZE", 32))
+        self.maxsize = maxsize
+        self._cache: collections.OrderedDict = collections.OrderedDict()
+        self._lock = threading.Lock()
+
+    def __getitem__(self, key: Any) -> Any:
+        with self._lock:
+            self._cache.move_to_end(key)
+            return self._cache[key]
+
+    def __setitem__(self, key: Any, value: Any) -> None:
+        with self._lock:
+            if key in self._cache:
+                self._cache.move_to_end(key)
+            self._cache[key] = value
+            if self.maxsize > 0 and len(self._cache) > self.maxsize:
+                self._cache.popitem(last=False)
+
+    def __contains__(self, key: Any) -> bool:
+        with self._lock:
+            return key in self._cache
+
+    def __len__(self) -> int:
+        with self._lock:
+            return len(self._cache)
+
+    def get(self, key: Any, default: Any = None) -> Any:
+        with self._lock:
+            if key in self._cache:
+                self._cache.move_to_end(key)
+                return self._cache[key]
+            return default
+
+    def clear(self) -> None:
+        with self._lock:
+            self._cache.clear()
+
+    def keys(self):
+        with self._lock:
+            return list(self._cache.keys())
+
+
+# In-memory execution cache bounded to ACA_RUN_CACHE_SIZE (default 32)
+_RUN_CACHE = BoundedLRUCache()
 
 REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 PAPER_STATS_CSV = os.path.join(REPO_ROOT, "results", "stats", "instance_aggregated.csv")

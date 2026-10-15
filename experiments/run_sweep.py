@@ -21,6 +21,7 @@ import hashlib
 import subprocess
 import traceback
 import argparse
+import collections
 from typing import Dict, Tuple, Any, Optional, List
 import concurrent.futures
 import yaml
@@ -60,7 +61,8 @@ def compute_trial_hash(condition_dict: Dict[str, Any]) -> str:
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
 
-_EDGE_BC_CACHE: Dict[Tuple[str, int, int, str], Dict[Any, float]] = {}
+_EDGE_BC_CACHE: collections.OrderedDict = collections.OrderedDict()
+MAX_BC_CACHE_SIZE = 64
 
 
 def compute_graph_hash(graph: nx.Graph) -> str:
@@ -78,12 +80,15 @@ def get_edge_betweenness(
     g_hash = compute_graph_hash(graph)
     cache_key = (graph_family, len(graph), len(graph.edges()), g_hash, seed)
     if cache_key in _EDGE_BC_CACHE:
+        _EDGE_BC_CACHE.move_to_end(cache_key)
         return _EDGE_BC_CACHE[cache_key]
 
     k_sample = min(30, len(graph)) if len(graph) > 30 else None
     bc = nx.edge_betweenness_centrality(graph, k=k_sample, weight="weight", seed=seed)
     if graph_family in ("warehouse_movingai", "road_osmnx", "warehouse"):
         _EDGE_BC_CACHE[cache_key] = bc
+        if len(_EDGE_BC_CACHE) > MAX_BC_CACHE_SIZE:
+            _EDGE_BC_CACHE.popitem(last=False)
     return bc
 
 
