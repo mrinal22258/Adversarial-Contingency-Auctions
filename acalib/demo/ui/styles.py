@@ -84,51 +84,63 @@ body, .gradio-container {
 }
 
 /* ==================== CLASH OF CLANS BEVELED NAVIGATION TABS ==================== */
-#main-tabs > div[role="tablist"],
-#main-tabs > .tab-nav,
+#main-tabs,
+.tabs {
+    margin-bottom: 0 !important;
+}
+
+#main-tabs .tab-nav,
+#main-tabs [role="tablist"],
+.tabs > .tab-nav,
+.tabs > [role="tablist"],
 .header-container + .tabs > div[role="tablist"] {
     display: flex !important;
     flex-wrap: wrap !important;
     overflow: visible !important;
     gap: 8px !important;
     border-bottom: 3px solid var(--coc-rim-gold) !important;
-    background: rgba(15, 23, 42, 0.85) !important;
+    background: rgba(15, 23, 42, 0.95) !important;
     padding: 8px 12px 6px 12px !important;
     border-radius: 16px 16px 0 0 !important;
     margin-bottom: 0 !important;
 }
 
-#main-tabs > div[role="tablist"] > button,
-#main-tabs > .tab-nav button {
+#main-tabs .tab-nav button,
+#main-tabs button[role="tab"],
+.tabs > .tab-nav button,
+.tabs > [role="tablist"] button {
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
     gap: 6px !important;
     font-family: var(--font-display) !important;
-    font-size: 12.5px !important;
-    font-weight: 900 !important;
+    font-size: 13px !important;
+    font-weight: 800 !important;
     text-transform: uppercase !important;
     letter-spacing: 0.04em !important;
     padding: 8px 16px !important;
-    color: #e2e8f0 !important;
+    color: #f1f5f9 !important; /* Crisp high-contrast white/slate */
     text-shadow: 0 1.5px 0 #000000 !important;
     background: linear-gradient(180deg, #334155 0%, #1e293b 100%) !important;
-    border: 2px solid #0f172a !important;
+    border: 2px solid #475569 !important;
     border-radius: 12px !important;
     box-shadow: inset 0 1.5px 0 rgba(255,255,255,0.25), 0 3px 0 #090d16 !important;
     transition: transform 0.08s ease, filter 0.12s ease, box-shadow 0.08s ease !important;
     margin-bottom: 2px !important;
+    cursor: pointer !important;
+    opacity: 1 !important;
 }
 
-#main-tabs > div[role="tablist"] > button:hover,
-#main-tabs > .tab-nav button:hover {
-    filter: brightness(1.12) !important;
+#main-tabs .tab-nav button:hover,
+#main-tabs button[role="tab"]:hover {
+    filter: brightness(1.18) !important;
     color: #ffe169 !important;
+    border-color: #e09f3e !important;
 }
 
 /* Active Selected Tab = Signature Clash of Clans Orange-Yellow Glossy Bevel Button */
-#main-tabs > div[role="tablist"] > button.selected,
-#main-tabs > .tab-nav button.selected {
+#main-tabs .tab-nav button.selected,
+#main-tabs button[role="tab"].selected {
     color: #ffffff !important;
     text-shadow: 0 2px 0 #000000, -1px -1px 0 #000000, 1px -1px 0 #000000 !important;
     background: linear-gradient(180deg, #ffe169 0%, #ffa200 48%, #e85d04 100%) !important;
@@ -136,7 +148,7 @@ body, .gradio-container {
     box-shadow:
         inset 0 2.5px 0 rgba(255, 255, 255, 0.75),
         0 4px 0 var(--coc-orange-lip),
-        0 6px 12px rgba(0, 0, 0, 0.45) !important;
+        0 6px 14px rgba(0, 0, 0, 0.45) !important;
     transform: translateY(-1px) !important;
 }
 
@@ -152,9 +164,10 @@ body, .gradio-container {
 }
 
 /* ==================== SUB-TABS (BUILDER MENU 2.0 & BATTLE LOG DRAWERS) ==================== */
-.coc-drawer-box div[role="tablist"],
-.coc-drawer-box .tab-nav {
+.coc-drawer-box .tab-nav,
+.coc-drawer-box [role="tablist"] {
     display: flex !important;
+    flex-direction: row !important;
     flex-wrap: nowrap !important;
     gap: 4px !important;
     border-bottom: 2px solid var(--coc-rim-gold) !important;
@@ -166,8 +179,8 @@ body, .gradio-container {
     width: 100% !important;
 }
 
-.coc-drawer-box div[role="tablist"] > button,
-.coc-drawer-box .tab-nav button {
+.coc-drawer-box .tab-nav button,
+.coc-drawer-box button[role="tab"] {
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -176,8 +189,8 @@ body, .gradio-container {
     font-weight: 800 !important;
     text-transform: uppercase !important;
     letter-spacing: 0.02em !important;
-    padding: 6px 4px !important;
-    color: #94a3b8 !important;
+    padding: 7px 5px !important;
+    color: #cbd5e1 !important;
     background: #1e293b !important;
     border: 1.5px solid #334155 !important;
     border-radius: 8px !important;
@@ -187,14 +200,18 @@ body, .gradio-container {
     flex: 1 1 0px !important;
     min-width: 0 !important;
     margin: 0 !important;
+    cursor: pointer !important;
 }
 
-.coc-drawer-box div[role="tablist"] > button:hover {
-    filter: brightness(1.15) !important;
-    color: #fde68a !important;
+.coc-drawer-box .tab-nav button:hover,
+.coc-drawer-box button[role="tab"]:hover {
+    filter: brightness(1.2) !important;
+    color: #ffe169 !important;
+    border-color: #e09f3e !important;
 }
 
-.coc-drawer-box div[role="tablist"] > button.selected {
+.coc-drawer-box .tab-nav button.selected,
+.coc-drawer-box button[role="tab"].selected {
     color: #ffffff !important;
     background: linear-gradient(180deg, #ffb703 0%, #e85d04 100%) !important;
     border: 1.5px solid #2b1400 !important;
@@ -246,60 +263,233 @@ body, .gradio-container {
         0 3px 6px rgba(0, 0, 0, 0.4) !important;
 }
 
-/* Secondary Beveled Button (Royal Blue / Emerald Clash Style) */
-.btn-indigo-outline, button.secondary {
+/* Secondary Beveled Button (Rich Royal Indigo / Clash Arena Style) */
+.btn-indigo-outline, button.btn-indigo-outline {
     font-family: var(--font-display) !important;
     font-weight: 900 !important;
-    font-size: 13px !important;
+    font-size: 13.5px !important;
     text-transform: uppercase !important;
     letter-spacing: 0.03em !important;
     color: #ffffff !important;
     text-shadow: 0 1.5px 0 #000000, -1px -1px 0 #000000, 1px -1px 0 #000000 !important;
-    background: linear-gradient(180deg, #9ef01a 0%, #38b000 50%, #007200 100%) !important;
-    border: 2.5px solid #002911 !important;
+    background: linear-gradient(180deg, #6366f1 0%, #4338ca 52%, #312e81 100%) !important;
+    border: 2.5px solid #1e1b4b !important;
     border-radius: 14px !important;
-    padding: 10px 16px !important;
+    padding: 11px 18px !important;
     box-shadow:
-        inset 0 2.5px 0 rgba(255, 255, 255, 0.72),
-        0 5px 0 var(--coc-green-lip),
+        inset 0 2.5px 0 rgba(255, 255, 255, 0.5),
+        0 5px 0 #1e1b4b,
         0 7px 14px rgba(0, 0, 0, 0.35) !important;
     transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.12s ease !important;
+    cursor: pointer !important;
 }
 
-.btn-indigo-outline:hover, button.secondary:hover {
-    filter: brightness(1.08) !important;
+.btn-indigo-outline:hover, button.btn-indigo-outline:hover {
+    filter: brightness(1.15) !important;
 }
 
-.btn-indigo-outline:active, button.secondary:active {
+.btn-indigo-outline:active, button.btn-indigo-outline:active {
     transform: translateY(4px) !important;
-    box-shadow: inset 0 2px 0 rgba(255,255,255,0.6), 0 1px 0 var(--coc-green-lip) !important;
+    box-shadow: inset 0 2px 0 rgba(255,255,255,0.4), 0 1px 0 #1e1b4b !important;
 }
 
-/* Step & Scrubber Control Buttons (Gold-Trimmed Tactical Controls) */
-.btn-control {
+/* Step & Scrubber Control Buttons (Tactile Cyan/Blue Navigation Controls in 1 Single Row) */
+.playback-control-row {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    gap: 8px !important;
+    margin: 8px 0 !important;
+    width: 100% !important;
+}
+
+.playback-control-row > div,
+.playback-control-row > button {
+    flex: 1 1 0px !important;
+    min-width: 0 !important;
+}
+
+.btn-control,
+button.btn-control {
     font-family: var(--font-display) !important;
-    font-weight: 900 !important;
-    font-size: 12.5px !important;
+    font-weight: 800 !important;
+    font-size: 12px !important;
     text-transform: uppercase !important;
     color: #ffffff !important;
-    text-shadow: 0 1.5px 0 #000000 !important;
-    background: linear-gradient(180deg, #48cae4 0%, #0096c7 52%, #023e8a 100%) !important;
-    border: 2px solid #011638 !important;
-    border-radius: 12px !important;
-    padding: 8px 14px !important;
+    text-shadow: 0 1px 0 #000000 !important;
+    background: linear-gradient(180deg, #3b82f6 0%, #1d4ed8 52%, #1e3a8a 100%) !important;
+    border: 1.5px solid #172554 !important;
+    border-radius: 10px !important;
+    padding: 8px 6px !important;
     box-shadow:
-        inset 0 2px 0 rgba(255, 255, 255, 0.68),
-        0 4px 0 var(--coc-blue-lip),
-        0 5px 10px rgba(0, 0, 0, 0.3) !important;
+        inset 0 1.5px 0 rgba(255, 255, 255, 0.45),
+        0 3px 0 #0f172a,
+        0 4px 8px rgba(0, 0, 0, 0.25) !important;
+    cursor: pointer !important;
+    white-space: nowrap !important;
+    width: 100% !important;
 }
 
-.btn-control:hover {
-    filter: brightness(1.1) !important;
+.btn-control:hover,
+button.btn-control:hover {
+    filter: brightness(1.15) !important;
 }
 
-.btn-control:active {
-    transform: translateY(3px) !important;
-    box-shadow: inset 0 1.5px 0 rgba(255,255,255,0.5), 0 1px 0 var(--coc-blue-lip) !important;
+.btn-control:active,
+button.btn-control:active {
+    transform: translateY(2px) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 0 1px 0 #0f172a !important;
+}
+
+/* ==================== HIGH-CONTRAST FORM CONTROLS (ELIMINATE WHITISH MERGED BLOBS) ==================== */
+
+/* Dropdowns */
+.gradio-dropdown,
+.gradio-dropdown .wrap,
+.gradio-dropdown input,
+.gradio-dropdown .container,
+.gradio-dropdown select {
+    background: #1e293b !important;
+    color: #f8fafc !important;
+    border: 1.5px solid #475569 !important;
+    border-radius: 10px !important;
+    font-family: var(--font-sans) !important;
+    font-size: 12.5px !important;
+    font-weight: 600 !important;
+}
+
+.gradio-dropdown .wrap:focus-within,
+.gradio-dropdown:focus-within {
+    border-color: #e09f3e !important;
+    box-shadow: 0 0 0 2px rgba(224, 159, 62, 0.35) !important;
+}
+
+.gradio-dropdown ul.options,
+.gradio-dropdown .options,
+div[role="listbox"] {
+    background: #0f172a !important;
+    border: 2px solid #e09f3e !important;
+    border-radius: 10px !important;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.7) !important;
+    color: #f8fafc !important;
+    z-index: 100 !important;
+}
+
+.gradio-dropdown li,
+div[role="option"] {
+    color: #e2e8f0 !important;
+    padding: 8px 12px !important;
+    font-size: 12.5px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+}
+
+.gradio-dropdown li:hover,
+.gradio-dropdown li.selected,
+div[role="option"]:hover,
+div[role="option"][aria-selected="true"] {
+    background: #334155 !important;
+    color: #ffe169 !important;
+}
+
+/* Tactical Radio Buttons (Pill Format with High Contrast) */
+.gradio-radio,
+.radio-group,
+fieldset.wrap,
+.gradio-radio .wrap {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+    padding: 4px 0 !important;
+    border: none !important;
+    background: transparent !important;
+}
+
+.gradio-radio label,
+fieldset.wrap label,
+.gradio-radio .wrap label {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    background: #1e293b !important;
+    border: 1.5px solid #475569 !important;
+    border-radius: 8px !important;
+    padding: 6px 12px !important;
+    color: #f1f5f9 !important;
+    font-family: var(--font-display) !important;
+    font-size: 11.5px !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+    transition: all 0.12s ease !important;
+}
+
+.gradio-radio label:hover,
+fieldset.wrap label:hover {
+    border-color: #e09f3e !important;
+    color: #ffe169 !important;
+    background: #283548 !important;
+}
+
+.gradio-radio label.selected,
+fieldset.wrap label:has(input:checked),
+.gradio-radio label:has(input:checked) {
+    background: linear-gradient(180deg, #f59e0b 0%, #d97706 100%) !important;
+    border-color: #b45309 !important;
+    color: #0f172a !important;
+    font-weight: 900 !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 2px 4px rgba(0,0,0,0.25) !important;
+}
+
+.gradio-radio label.selected span,
+fieldset.wrap label:has(input:checked) span,
+.gradio-radio label:has(input:checked) span {
+    color: #0f172a !important;
+    font-weight: 900 !important;
+}
+
+.gradio-radio input[type="radio"],
+fieldset.wrap input[type="radio"] {
+    accent-color: #d97706 !important;
+}
+
+/* Sliders & Numerical Inputs */
+.gradio-slider input[type="range"] {
+    accent-color: #f59e0b !important;
+}
+
+.gradio-slider input[type="number"],
+input[type="number"] {
+    background: #1e293b !important;
+    color: #ffe169 !important;
+    border: 1.5px solid #475569 !important;
+    border-radius: 8px !important;
+    font-family: var(--font-mono) !important;
+    font-weight: 800 !important;
+    font-size: 12.5px !important;
+    padding: 4px 8px !important;
+}
+
+.gradio-slider input[type="number"]:focus,
+input[type="number"]:focus {
+    border-color: #e09f3e !important;
+    outline: none !important;
+}
+
+/* Checkbox (e.g. Work zones toggle) */
+.gradio-checkbox label,
+fieldset label:has(input[type="checkbox"]) {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    color: #1e293b !important;
+    font-family: var(--font-display) !important;
+    font-size: 11.5px !important;
+    font-weight: 800 !important;
+}
+input[type="checkbox"] {
+    accent-color: #d97706 !important;
+    width: 16px !important;
+    height: 16px !important;
 }
 
 /* ==================== TOP RESOURCE & SHIELD KPI STRIP (COC RESOURCE PILLS) ==================== */

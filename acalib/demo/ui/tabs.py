@@ -9,8 +9,6 @@ Replaces vertical accordion/page clutter with:
 import os
 import pandas as pd
 import gradio as gr
-
-from acalib.demo.ui.styles import SVG_ICONS
 from acalib.demo.ui.callbacks import (
     MAP_OPTIONS,
     ALLOCATOR_OPTIONS,
@@ -18,6 +16,7 @@ from acalib.demo.ui.callbacks import (
     COMM_REGIMES,
     create_empty_comparison_plot,
 )
+from acalib.demo.render import create_initial_base_plot
 from acalib.demo.provenance import get_map_provenance, format_provenance_markdown
 from acalib.demo.runner import DEFAULT_MAX_STEPS
 
@@ -114,17 +113,20 @@ def build_simulate_view():
         # CENTER STAGE: THE ROBOT GRAPH SIMULATION BASE
         with gr.Column(scale=7, elem_classes=["coc-base-stage"]):
             components["map_title_md"] = gr.Markdown("### 🏰 Live Robot Graph Simulation Base — Ready to Launch")
-            components["map_plot"] = gr.Plot(show_label=False)
+            components["map_plot"] = gr.Plot(
+                value=create_initial_base_plot("road_osmnx", 216),
+                show_label=False,
+            )
 
             components["scrubber"] = gr.Slider(
                 minimum=1, maximum=DEFAULT_MAX_STEPS, step=1, value=1, label="Mission Timeline Scrubber (Tick)"
             )
 
             # Tactile Timeline Scrubber & Step Playback Bar directly under the Base
-            with gr.Row():
+            with gr.Row(elem_classes=["playback-control-row"]):
                 components["replay_btn"] = gr.Button("⏮ Start", scale=1, elem_classes=["btn-control"])
                 components["step_back_btn"] = gr.Button("◀ -1 Tick", scale=1, elem_classes=["btn-control"])
-                components["play_pause_btn"] = gr.Button("▶ Auto Play", scale=2, elem_classes=["btn-control"])
+                components["play_pause_btn"] = gr.Button("▶ Auto Play", scale=1, elem_classes=["btn-control"])
                 components["step_fwd_btn"] = gr.Button("+1 Tick ▶", scale=1, elem_classes=["btn-control"])
 
             # Mirrored Core Loop Action Bar (Oct 13, 2026 CoC Battle vs. Build Action Buttons)
@@ -145,7 +147,7 @@ def build_simulate_view():
                             label="Navigation Base Topology",
                         )
                         components["coarsen_radio"] = gr.Radio(
-                            choices=["~38 nodes (B=8)", "~56 nodes (B=10)", "~420 nodes (B=4)"],
+                            choices=["~38 nodes (B=8)", "~56 nodes (B=10)", "~420 nodes (B=4) (Detailed: ~15s)"],
                             value="~38 nodes (B=8)",
                             label="Warehouse Grid Coarsening",
                             visible=False,
@@ -169,7 +171,7 @@ def build_simulate_view():
                             value="ACA (Ours)",
                             label="Market Allocation Mechanism",
                         )
-                        components["depth_slider"] = gr.Slider(minimum=0, maximum=3, step=1, value=1, label="Contingency Recourse Depth (d)")
+                        components["depth_slider"] = gr.Slider(minimum=0, maximum=2, step=1, value=1, label="Contingency Recourse Depth (d)")
                         components["ablation_note"] = gr.Markdown(
                             value="",
                             visible=False,

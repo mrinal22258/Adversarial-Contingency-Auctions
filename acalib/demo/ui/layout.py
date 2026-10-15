@@ -5,10 +5,8 @@ center-stage live robot graph base, 4-tab Builder Menu 2.0, and tabbed Battle Lo
 """
 
 import gradio as gr
-import pandas as pd
 
-from acalib import PROTOCOL_LABEL
-from acalib.demo.ui.styles import MISSION_CONTROL_CSS, SVG_ICONS
+from acalib.demo.ui.styles import MISSION_CONTROL_CSS
 from acalib.demo.ui.tabs import (
     build_overview_view,
     build_simulate_view,
@@ -19,6 +17,8 @@ from acalib.demo.ui.tabs import (
 )
 from acalib.demo.ui.callbacks import (
     update_map_choice,
+    update_coarsen_choice,
+    update_comm_regime,
     update_alloc_choice,
     run_sim_action,
     replay_from_start,
@@ -115,7 +115,7 @@ def build_app():
                 exp_comps = build_experiments_view()
 
             with gr.Tab("📊 Results (Ranks)", id="tab-results"):
-                res_comps = build_results_view()
+                build_results_view()
 
             with gr.Tab("📜 Method (Theory)", id="tab-method"):
                 build_method_view()
@@ -128,11 +128,32 @@ def build_app():
 
         # ================= CALLBACK WIRING =================
 
-        # 1. Map dropdown change
+        # 1. Map dropdown change (updates coarsening options, provenance, and live base preview)
         sim_comps["map_dropdown"].change(
             update_map_choice,
             inputs=[sim_comps["map_dropdown"]],
-            outputs=[sim_comps["coarsen_radio"], sim_comps["prov_card"]],
+            outputs=[
+                sim_comps["coarsen_radio"],
+                sim_comps["prov_card"],
+                sim_comps["map_plot"],
+                sim_comps["map_title_md"],
+            ],
+            scroll_to_output=False,
+        )
+
+        # 1b. Warehouse coarsening resolution change (updates live base preview)
+        sim_comps["coarsen_radio"].change(
+            update_coarsen_choice,
+            inputs=[sim_comps["map_dropdown"], sim_comps["coarsen_radio"]],
+            outputs=[sim_comps["map_plot"], sim_comps["map_title_md"]],
+            scroll_to_output=False,
+        )
+
+        # 1c. Wireless regime preset change (automatically syncs comm range and p_drop sliders)
+        sim_comps["comm_regime_dropdown"].change(
+            update_comm_regime,
+            inputs=[sim_comps["comm_regime_dropdown"]],
+            outputs=[sim_comps["comm_range_slider"], sim_comps["p_drop_slider"]],
             scroll_to_output=False,
         )
 
@@ -393,6 +414,16 @@ def build_app():
             inputs=[history_state],
             outputs=[exp_file_comps["export_file"]],
             scroll_to_output=False,
+        )
+
+        def on_app_load():
+            from acalib.demo.render import create_initial_base_plot
+            return create_initial_base_plot("road_osmnx", 216)
+
+        demo.load(
+            on_app_load,
+            inputs=None,
+            outputs=[sim_comps["map_plot"]],
         )
 
     return demo

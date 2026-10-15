@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 import gradio as gr
 
 from acalib.demo.provenance import get_map_provenance, format_provenance_markdown
-from acalib.demo.render import plot_simulation_state
+from acalib.demo.render import plot_simulation_state, create_initial_base_plot
 from acalib.demo.narrate import (
     generate_event_log,
     format_event_log_html,
@@ -149,14 +149,14 @@ def run_simulation_wrapper(
 
 
 def update_map_choice(map_choice):
-    """Update map dropdown choice, coarsening visibility, and provenance card."""
+    """Update map dropdown choice, coarsening visibility, provenance card, and live preview."""
     fam, n_nodes, variant = MAP_OPTIONS[map_choice]
     if "warehouse" in fam:
         if "20-40" in variant:
-            coarsen_choices = ["~125 nodes (B=8)", "~208 nodes (B=10)", "~1,681 nodes (B=4) (slow: ~15s)"]
+            coarsen_choices = ["~125 nodes (B=8)", "~208 nodes (B=10)", "~1,681 nodes (B=4) (Heavy: ~2.5 min)"]
             default_coarsen = "~125 nodes (B=8)"
         else:
-            coarsen_choices = ["~38 nodes (B=8)", "~56 nodes (B=10)", "~420 nodes (B=4)"]
+            coarsen_choices = ["~38 nodes (B=8)", "~56 nodes (B=10)", "~420 nodes (B=4) (Detailed: ~15s)"]
             default_coarsen = "~38 nodes (B=8)"
         coarsen_vis = True
         prov_md = format_provenance_markdown(get_map_provenance(fam, n_nodes, variant))
@@ -166,22 +166,62 @@ def update_map_choice(map_choice):
         coarsen_vis = False
         prov_md = format_provenance_markdown(get_map_provenance("road_osmnx", 216))
 
+    preview_fig = create_initial_base_plot(fam, n_nodes, variant)
+    title_name = map_choice.split("(")[0].strip()
+    map_title = f"### 🏰 {title_name} Base — Ready to Launch"
+
     return (
         gr.Radio(choices=coarsen_choices, value=default_coarsen, visible=coarsen_vis),
         prov_md,
+        preview_fig,
+        map_title,
     )
 
 
+def update_coarsen_choice(map_choice, coarsen_choice):
+    """Update base map preview when coarsening resolution is changed."""
+    fam, n_nodes, variant = MAP_OPTIONS[map_choice]
+    if "warehouse" in fam and coarsen_choice:
+        c_str = str(coarsen_choice)
+        if "125" in c_str:
+            n_nodes = 125
+        elif "208" in c_str:
+            n_nodes = 208
+        elif "1,681" in c_str or "1681" in c_str:
+            n_nodes = 1681
+        elif "38" in c_str:
+            n_nodes = 38
+        elif "56" in c_str:
+            n_nodes = 56
+        elif "420" in c_str:
+            n_nodes = 420
+    preview_fig = create_initial_base_plot(fam, n_nodes, variant)
+    title_name = map_choice.split("(")[0].strip()
+    map_title = f"### 🏰 {title_name} ({n_nodes} Nodes) — Ready to Launch"
+    return preview_fig, map_title
+
+
+def update_comm_regime(regime_choice):
+    """Sync comm range and packet loss sliders with selected wireless regime preset."""
+    if regime_choice in COMM_REGIMES:
+        rng, p_drop = COMM_REGIMES[regime_choice]
+        return gr.Slider(value=rng), gr.Slider(value=p_drop)
+    return gr.Slider(), gr.Slider()
+
+
 def update_alloc_choice(alloc_choice):
-    """Display UI note for ablation identity."""
+    """Display UI note for ablation identity and performance advisories."""
     if alloc_choice == "ACA (Depth-2)":
-        note = "Depth-2 is identical to ACA on these graphs because single-level contingency recourse branches bypass primary corridor interdictions, and recursive detours saturate on these horizons and topologies."
+        note = "ℹ️ **ACA (Depth-2)**: Single-level contingency recourse branches bypass primary corridor interdictions; recursive detours saturate on these horizons and topologies."
         return gr.Markdown(value=note, visible=True)
     elif alloc_choice == "ACA-Adaptive (Entropy Calibrated)":
-        note = "ACA-Adaptive automatically calibrates the Pinsker margin scaling factor based on Dirichlet entropy of the adversary belief distribution."
+        note = "ℹ️ **ACA-Adaptive**: Automatically calibrates Pinsker margin scaling factor based on Dirichlet entropy of the adversary belief distribution."
         return gr.Markdown(value=note, visible=True)
     elif alloc_choice == "ACA+ (Adaptive + Corridor Pruning)":
-        note = "ACA+ combines entropy-calibrated adaptive margin with Bayesian corridor probability pruning (pruning threshold = 0.06)."
+        note = "ℹ️ **ACA+**: Combines entropy-calibrated adaptive margin with Bayesian corridor probability pruning (threshold = 0.06)."
+        return gr.Markdown(value=note, visible=True)
+    elif "foresight" in alloc_choice.lower():
+        note = "⚠️ **Foresight Optimal (CP-SAT MILP)**: Solves global vehicle routing via OR-Tools CP-SAT with a 5.0s solver timeout per tick. For interactive speeds, recommend ≤ 4 robots, ≤ 10 tasks."
         return gr.Markdown(value=note, visible=True)
     return gr.Markdown(value="", visible=False)
 
@@ -194,21 +234,26 @@ def run_sim_action(
     progress=gr.Progress(track_tqdm=False),
 ):
     fam, n_nodes, variant = MAP_OPTIONS[map_choice]
-    if "warehouse" in fam:
-        if "125" in coarsen_choice:
+    if "warehouse" in fam and coarsen_choice:
+        c_str = str(coarsen_choice)
+        if "125" in c_str:
             n_nodes = 125
-        elif "208" in coarsen_choice:
+        elif "208" in c_str:
             n_nodes = 208
-        elif "1,681" in coarsen_choice:
+        elif "1,681" in c_str or "1681" in c_str:
             n_nodes = 1681
-        elif "38" in coarsen_choice:
+        elif "38" in c_str:
             n_nodes = 38
-        elif "56" in coarsen_choice:
+        elif "56" in c_str:
             n_nodes = 56
-        elif "420" in coarsen_choice:
+        elif "420" in c_str:
             n_nodes = 420
 
-    progress(0.2, desc="Executing Discrete Multi-Agent Simulation...")
+    def on_step(current_step: int, total_steps: int):
+        frac = 0.15 + 0.70 * ((current_step + 1) / max(1, total_steps))
+        progress(frac, desc=f"Simulating: Tick {current_step + 1}/{total_steps}")
+
+    progress(0.12, desc=f"Configuring {fam} simulation base...")
     run_res = run_single_simulation(
         graph_family=fam,
         n_nodes=int(n_nodes),
@@ -224,8 +269,9 @@ def run_sim_action(
         contingency_depth=int(depth),
         variant=variant,
         record_history=True,
+        step_callback=on_step,
     )
-    progress(0.85, desc="Rendering Spatial Canvas & Telemetry...")
+    progress(0.88, desc="Rendering spatial canvas & telemetry...")
 
     history = run_res["history"]
     graph = run_res["graph"]

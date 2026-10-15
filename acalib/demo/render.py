@@ -418,3 +418,74 @@ def plot_simulation_state(
     # Note: Axes title is deliberately omitted here so title is OUTSIDE the axes in the UI
     fig.subplots_adjust(left=0.01, right=0.99, top=0.98, bottom=0.08)
     return fig
+
+
+def create_initial_base_plot(
+    graph_family: str = "road_osmnx",
+    n_nodes: int = 216,
+    variant: str = "10-20-10-2-1",
+) -> Optional[Figure]:
+    """
+    Render clean initial spatial layout for first-time visitors before simulation is run.
+    Shows topology, node connections, and tactical prompt.
+    """
+    from acalib.env.graph_families import generate_graph
+    try:
+        fam = "road_osmnx" if "road" in graph_family.lower() else "warehouse_movingai"
+        g = generate_graph(fam, n_nodes=n_nodes, seed=10001, variant=variant)
+        pos = nx.get_node_attributes(g, "pos")
+        if not pos:
+            return None
+        fig = Figure(figsize=(9.2, 5.6), dpi=100)
+        ax = fig.subplots()
+        fig.patch.set_facecolor("#131d31")
+        ax.set_facecolor("#182236")
+
+        xs = [p[0] for p in pos.values()]
+        ys = [p[1] for p in pos.values()]
+        min_x, max_x = min(xs), max(xs)
+        min_y, max_y = min(ys), max(ys)
+        max_span = max(max_x - min_x, max_y - min_y)
+        cx, cy = 0.5 * (min_x + max_x), 0.5 * (min_y + max_y)
+        h = 0.53 * max_span
+        ax.set_xlim(cx - h, cx + h)
+        ax.set_ylim(cy - h, cy + h)
+        ax.set_aspect("equal", adjustable="box")
+        ax.axis("off")
+
+        # Warehouse background if warehouse
+        if "warehouse" in fam:
+            grid_array, gh, gw = load_warehouse_ascii_grid(variant=variant)
+            flipped = grid_array[::-1, :]
+            rgb_img = np.zeros((gh, gw, 3), dtype=float)
+            for r in range(gh):
+                for c in range(gw):
+                    if flipped[r, c] > 0.5:
+                        rgb_img[r, c] = [0.10, 0.15, 0.23]
+                    else:
+                        rgb_img[r, c] = [0.04, 0.06, 0.10]
+            ax.imshow(rgb_img, extent=[min_x, max_x, min_y, max_y], origin="lower", zorder=0, aspect="equal")
+
+        for u, v in g.edges():
+            p1, p2 = pos[u], pos[v]
+            ax.plot([p1[0], p2[0]], [p1[1], p2[1]], color="#334155", lw=1.2, zorder=1)
+
+        ax.scatter(xs, ys, s=20, color="#64748b", edgecolors="#1e293b", lw=0.6, zorder=2)
+
+        title_name = "Boston Downtown Road Network (216 Nodes)" if "road" in fam else f"MovingAI Warehouse {variant} ({len(g.nodes())} Nodes)"
+        ax.text(
+            0.5, 0.95,
+            f"{title_name} — Base Ready to Launch",
+            transform=ax.transAxes, ha="center", va="top",
+            fontsize=12, fontweight="bold", color="#ffe169",
+        )
+        ax.text(
+            0.5, 0.04,
+            "Click '⚔️ SIMULATE / LAUNCH MISSION' to deploy robot fleet and start auction rounds",
+            transform=ax.transAxes, ha="center", va="bottom",
+            fontsize=10.5, color="#cbd5e1",
+        )
+        fig.subplots_adjust(left=0.01, right=0.99, top=0.98, bottom=0.08)
+        return fig
+    except Exception:
+        return None

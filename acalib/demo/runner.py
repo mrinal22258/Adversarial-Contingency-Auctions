@@ -214,7 +214,9 @@ def run_single_simulation(
         bool(record_history),
         bool(record_traces),
     )
-    if prebuilt_env is None and step_callback is None and cache_key in _RUN_CACHE:
+    if prebuilt_env is None and cache_key in _RUN_CACHE:
+        if step_callback is not None:
+            step_callback(max_steps - 1, max_steps)
         return _RUN_CACHE[cache_key]
 
     # 1. Build or use CRN coupled environment
@@ -720,12 +722,12 @@ def run_20_seeds_paired(
         m_mean_comp = float(np.mean(m_comps))
 
         # Paired win / tie / loss vs ACA
-        w, t, l = 0, 0, 0
+        w, t, loss_cnt = 0, 0, 0
         for i in range(len(main_comps)):
             if main_comps[i] > m_comps[i] + 0.01:
                 w += 1
             elif m_comps[i] > main_comps[i] + 0.01:
-                l += 1
+                loss_cnt += 1
             else:
                 # Tie-breaker on net welfare
                 m_wel = m_list[i].get("net_welfare", 0.0)
@@ -733,14 +735,14 @@ def run_20_seeds_paired(
                 if main_wel > m_wel + 0.01:
                     w += 1
                 elif m_wel > main_wel + 0.01:
-                    l += 1
+                    loss_cnt += 1
                 else:
                     t += 1
 
         stats_table.append({
             "Baseline": METHOD_NAME_MAP.get(m, m),
             "Completion (%)": f"{m_mean_comp:.1f}% ± {ci_m_comp[1] - m_mean_comp:.1f}%",
-            "Paired W/T/L (ACA vs Baseline)": f"{w}W / {t}T / {l}L",
+            "Paired W/T/L (ACA vs Baseline)": f"{w}W / {t}T / {loss_cnt}L",
         })
 
     main_comps = np.array([x["completion_rate_pct"] for x in results_by_method[alloc_main]])

@@ -118,6 +118,11 @@ class ContingencyPlanner:
         self.max_depth = max_depth
         self.exhaustion_penalty = exhaustion_penalty
         self.risk_weight = risk_weight
+        self._path_cache: Dict[Tuple[Any, Any, Tuple[Tuple[Any, Any], ...], int], Optional[List[Any]]] = {}
+
+    def clear_cache(self) -> None:
+        """Clear internal shortest path memoization cache."""
+        self._path_cache.clear()
 
     def find_risk_aware_path(
         self,
@@ -134,14 +139,18 @@ class ContingencyPlanner:
         if start_node == target_node:
             return [start_node]
 
+        canon_key: Tuple[Tuple[Any, Any], ...] = ()
         # Use subgraph view excluding impassable edges
         if excluded_edges:
             excluded_canon = set()
+            canon_list = []
             for u, v in excluded_edges:
                 c_e = canonical_edge(u, v)
                 excluded_canon.add(c_e)
                 excluded_canon.add((u, v))
                 excluded_canon.add((v, u))
+                canon_list.append(c_e)
+            canon_key = tuple(sorted(list(set(canon_list))))
 
             def edge_filter(u: Any, v: Any) -> bool:
                 c_e = canonical_edge(u, v)
@@ -150,6 +159,11 @@ class ContingencyPlanner:
             sub_g = nx.subgraph_view(self.graph, filter_edge=edge_filter)
         else:
             sub_g = self.graph
+
+        cache_key = (start_node, target_node, canon_key, id(edge_marginals))
+        if cache_key in self._path_cache:
+            hit = self._path_cache[cache_key]
+            return list(hit) if hit is not None else None
 
         def edge_weight_fn(u: Any, v: Any, d: Dict[str, Any]) -> float:
             c_e = canonical_edge(u, v)
@@ -164,8 +178,14 @@ class ContingencyPlanner:
                 target=target_node,
                 weight=edge_weight_fn,
             )
+            if len(self._path_cache) > 8000:
+                self._path_cache.clear()
+            self._path_cache[cache_key] = list(path)
             return path
         except (nx.NetworkXNoPath, nx.NodeNotFound):
+            if len(self._path_cache) > 8000:
+                self._path_cache.clear()
+            self._path_cache[cache_key] = None
             return None
 
     def compute_path_length(self, path: List[Any]) -> float:
