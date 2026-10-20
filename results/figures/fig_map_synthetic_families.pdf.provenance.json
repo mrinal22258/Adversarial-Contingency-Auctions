@@ -1,6 +1,6 @@
 {
   "figure_file": "results/figures/fig_map_synthetic_families.pdf",
-  "git_commit": "f9ae4f9ab98b7653da15d8394e3c337784d4874e",
+  "git_commit": "183e20f79257aee70e5b271ef8aa3c421961644a",
   "source_files": [
     "acalib/env/graph_families.py"
   ],
