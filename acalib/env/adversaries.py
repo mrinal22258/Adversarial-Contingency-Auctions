@@ -224,24 +224,32 @@ def compute_interdiction_cut(
         if (od_key, budget_k) in cut_cache:
             return set(cut_cache[(od_key, budget_k)])
 
-    def baseline_cost(g_sub: nx.Graph) -> float:
-        tot = 0.0
-        for u, v in od_pairs:
-            try:
-                tot += nx.shortest_path_length(g_sub, u, v, weight="weight")
-            except (nx.NetworkXNoPath, nx.NodeNotFound):
-                tot += 1000.0
-        return tot
-
-    base_val = baseline_cost(graph)
+    from ..agents.contingency import canonical_edge
     selected_cuts = set()
     g_temp = graph.copy()
 
     for _ in range(budget_k):
+        cur_paths = []
+        od_edges_union = set()
+        for u_od, v_od in od_pairs:
+            try:
+                p = nx.shortest_path(g_temp, u_od, v_od, weight="weight")
+                cost = nx.shortest_path_length(g_temp, u_od, v_od, weight="weight")
+                edges_in_p = {canonical_edge(p[i], p[i + 1]) for i in range(len(p) - 1)}
+                cur_paths.append((u_od, v_od, edges_in_p, cost))
+                od_edges_union.update(edges_in_p)
+            except (nx.NetworkXNoPath, nx.NodeNotFound):
+                cur_paths.append((u_od, v_od, set(), 1000.0))
+
+        base_val = sum(c for _, _, _, c in cur_paths)
+
         best_e = None
         best_increase = -1.0
         for e in risky_edges:
             if e in selected_cuts:
+                continue
+            c_e = canonical_edge(e[0], e[1])
+            if c_e not in od_edges_union:
                 continue
             u, v = e
             if not g_temp.has_edge(u, v):
@@ -249,8 +257,17 @@ def compute_interdiction_cut(
             w = g_temp[u][v].get("weight", 1.0)
             g_temp.remove_edge(u, v)
 
-            new_cost = baseline_cost(g_temp)
-            increase = new_cost - base_val
+            new_tot = 0.0
+            for u_od, v_od, edges_in_p, old_cost in cur_paths:
+                if c_e in edges_in_p:
+                    try:
+                        new_tot += nx.shortest_path_length(g_temp, u_od, v_od, weight="weight")
+                    except (nx.NetworkXNoPath, nx.NodeNotFound):
+                        new_tot += 1000.0
+                else:
+                    new_tot += old_cost
+
+            increase = new_tot - base_val
             if increase > best_increase:
                 best_increase = increase
                 best_e = e
