@@ -2,7 +2,7 @@
 
 > **DISCLAIMER**: Everything reported herein is SOFTWARE SIMULATION in PyBullet rigid-body physics. No physical robots were used.
 
-- **Git Commit**: `ef65b7dbd87f26912eed57d707b3f59fc9a1849e`
+- **Git Commit**: `908f09638dadf9ba686b85b966442bb3ba94d6e0`
 - **Matched Paired Instances**: 2160 trials across 18 cells (warehouse_movingai & road_osmnx, 3 adversaries, 3 regimes: nominal, constrained, lossy)
 
 ## 1. Method Performance in Physical SITL vs. Discrete Graph Simulation

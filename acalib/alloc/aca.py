@@ -683,7 +683,7 @@ class ACAAllocator(CBBAAllocator):
                     "task_id": tid,
                     "tv_at_claim": r_tv,
                     "eta_eff": r_eta,
-                    "claimed_safe": bool(self.enable_margin and len(self.fleet_ids) > 1),
+                    "claimed_safe": bool(self.enable_margin and self.margin_kappa > 0.0 and len(self.fleet_ids) > 1),
                     "tv_le_eta": bool(tv_adhered),
                     "conflicted": bool(is_conflicted),
                 })

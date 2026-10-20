@@ -20,7 +20,7 @@ In decentralized multi-robot task allocation, strategic adversarial path blockag
 
 | Tier | Evaluation Population | Instances ($N$) & Scope | Status | Headline Finding |
 |:---|:---|:---:|:---:|:---|
-| **Tier 1** | **Exploratory Main Grid** | $N = 750$ matched instances (50 seeds $\times$ 5 families $\times$ 3 adversaries; 10500 primary trials) | **Exploratory** | ACA achieves an exploratory completion gain of +6.42 pp over CBBA+LR ($p = < 0.001$ under cluster-level Holm adjustment). |
+| **Tier 1** | **Exploratory Main Grid** | $N = 750$ matched instances (50 seeds $\times$ 5 families $\times$ 3 adversaries; 10500 primary trials) | **Exploratory** | ACA achieves an exploratory completion gain of +6.43 pp over CBBA+LR ($p = < 0.001$ under cluster-level Holm adjustment). |
 | **Tier 2** | **Protocol v5 Confirmatory Held-Out** | $N = 450$ un-tuned instances (30 seeds, 3600 trials) | **Confirmatory (Reversal)** | **Out-of-sample reversal**: CBBA+LR outperforms ACA on completion (94.67% vs. 92.40%, diff +2.27 pp) and net welfare (958.9 vs. 937.4) with fewer conflicts (25.48 vs. 39.66). ACA's primary scientific advantage is safe decentralized coordination via the Pinsker margin under communication constraints rather than uniform completion dominance. |
 | **Tier 3** | **Protocol v6 Confirmatory Replication** | $N = 750$ instances (50 confirmatory seeds $\times$ 5 families $\times$ 3 adversaries $\times$ 9 allocators = 6,750 trials) | **Execution Pending** | Protocol v6.2 is cryptographically frozen (`prereg-v6.2`). Pre-execution dev-seed tuning selected $\tau_{\text{prune}} = 0.15$. Confirmatory execution is pending per [RUN_V6.md](RUN_V6.md). |
 
@@ -61,11 +61,11 @@ All empirical numbers in this repository are tied directly to explicit, named po
 
 | Method | Completion (%) | Net Welfare | Distinct Conflicts | Total Conflicts | Messages | Tick RT (ms) |
 |:-------|:--------------:|:-----------:|:------------------:|:---------------:|:--------:|:------------:|
-| **ACA (Ours)** | 95.9 ± 0.9 | 960 ± 33 | 7.4 ± 0.4 | 44.5 ± 3.9 | 192 ± 14 | 47.79 ± 4.62 |
-| ACA (No Margin Ablation) | 95.5 ± 1.0 | 959 ± 32 | 7.6 ± 0.4 † | 44.0 ± 3.7 | 186 ± 14 | 30.76 ± 3.05 † |
-| ACA (Depth-0 Ablation) | 96.1 ± 0.9 | 967 ± 32 | 7.7 ± 0.4 † | 48.0 ± 4.2 † | 207 ± 14 † | 46.00 ± 4.13 † |
-| ACA (Depth-2) | 95.7 ± 1.0 | 959 ± 33 | 7.4 ± 0.4 † | 44.3 ± 3.9 | 192 ± 14 | 52.79 ± 6.02 † |
-| ACA (No Inference) | 95.9 ± 1.0 | 967 ± 33 | 7.7 ± 0.4 † | 49.8 ± 4.2 † | 219 ± 15 † | 32.19 ± 3.08 † |
+| **ACA (Ours)** | 95.9 ± 0.9 | 960 ± 33 | 7.4 ± 0.4 | 44.5 ± 4.0 | 192 ± 14 | 100.60 ± 10.75 |
+| ACA (No Margin Ablation) | 95.5 ± 1.0 | 959 ± 32 | 7.6 ± 0.4 † | 44.0 ± 3.7 | 186 ± 14 | 39.85 ± 4.42 † |
+| ACA (Depth-0 Ablation) | 95.3 ± 0.9 † | 972 ± 31 † | 7.3 ± 0.4 † | 45.4 ± 3.9 | 212 ± 14 † | 97.32 ± 10.04 † |
+| ACA (Depth-2) | 95.7 ± 0.9 | 959 ± 33 | 7.4 ± 0.4 † | 44.3 ± 4.0 | 193 ± 14 | 111.63 ± 13.18 † |
+| ACA (No Inference) | 95.9 ± 1.0 | 966 ± 32 | 7.7 ± 0.4 † | 49.7 ± 4.3 † | 218 ± 15 † | 80.74 ± 8.52 † |
 | CBBA [Choi '09] | 87.0 ± 1.5 † | 927 ± 27 † | 8.0 ± 0.4 † | 50.7 ± 4.2 † | 287 ± 15 † | 21.13 ± 2.19 † |
 | CBBA (+LR) | 89.4 ± 1.4 † | 934 ± 29 † | 8.0 ± 0.4 † | 49.9 ± 4.3 † | 258 ± 17 † | 21.75 ± 2.26 † |
 | CBBA-PR (Adapted) [Buckman '19] | 90.9 ± 1.4 † | 973 ± 27 | 8.0 ± 0.4 † | 56.7 ± 4.8 † | 275 ± 18 † | 21.90 ± 2.26 † |

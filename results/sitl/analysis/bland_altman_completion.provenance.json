@@ -1,6 +1,6 @@
 {
   "figure_path": "results/sitl/analysis/bland_altman_completion.pdf",
-  "commit": "ef65b7dbd87f26912eed57d707b3f59fc9a1849e",
+  "commit": "908f09638dadf9ba686b85b966442bb3ba94d6e0",
   "disclaimer": "SIMULATION -- PyBullet SITL vs Discrete Graph Simulation",
   "sample_size": 2160,
   "bias": -21.77662037037037,

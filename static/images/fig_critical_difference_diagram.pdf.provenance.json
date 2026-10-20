@@ -1,18 +1,18 @@
 {
-  "commit": "86c8f68fc0485b83730fac7628cc33fe3ca8a5cd",
+  "commit": "908f09638dadf9ba686b85b966442bb3ba94d6e0",
   "disclaimer": "SIMULATION ONLY -- Friedman Omnibus + Nemenyi CD",
   "n_instances": 250,
-  "friedman_stat": 340.0989935956082,
-  "p_value": 2.0590663430991246e-70,
+  "friedman_stat": 339.9078694817658,
+  "p_value": 2.2630129067300782e-70,
   "nemenyi_cd": 0.5696695485647248,
   "mean_ranks": {
-    "aca": 3.54,
+    "aca": 3.542,
     "aca_no_margin": 3.424,
     "ctp_replan": 3.632,
-    "implicit": 2.692,
-    "cbba_lr": 5.178,
-    "cbba_partial_lr": 4.802,
-    "ssi_lr": 4.732
+    "implicit": 2.69,
+    "cbba_lr": 5.176,
+    "cbba_partial_lr": 4.806,
+    "ssi_lr": 4.73
   },
   "generator_script": "experiments/make_cd_diagram.py",
   "figure_file": "static/images/fig_critical_difference_diagram.pdf"

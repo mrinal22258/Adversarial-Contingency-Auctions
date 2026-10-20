@@ -6,8 +6,8 @@
       "losses": 0
     },
     "aca_no_margin": {
-      "wins": 58,
-      "ties": 139,
+      "wins": 59,
+      "ties": 138,
       "losses": 53
     },
     "ctp_replan": {
@@ -39,8 +39,8 @@
   "aca_no_margin": {
     "aca": {
       "wins": 53,
-      "ties": 139,
-      "losses": 58
+      "ties": 138,
+      "losses": 59
     },
     "aca_no_margin": {
       "wins": 0,

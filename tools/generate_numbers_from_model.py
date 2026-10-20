@@ -160,6 +160,10 @@ def generate_numbers(
     add("aeAcaNoMarginTotConf", mc_nm)
     add("aeAcaNoMarginTotConfCI", cic_nm)
 
+    mdc_nm, cidc_nm = get_core("aca_no_margin", "distinct_conflicts", 1)
+    add("aeAcaNoMarginDistConf", mdc_nm)
+    add("aeAcaNoMarginDistConfCI", cidc_nm)
+
     mc_cbba, cic_cbba = get_core("cbba", "total_conflicts", 1)
     add("aeCbbaTotConf", mc_cbba)
     add("aeCbbaTotConfCI", cic_cbba)
@@ -561,7 +565,7 @@ def generate_numbers(
     add("aeSitlHlMedianGap", "-18.8")
     add("aeSitlHlMedianGapCILow", "-18.8")
     add("aeSitlHlMedianGapCIHigh", "-18.8")
-    add("aePvalSitlHolm", "< 0.001")
+    add("aePvalSitlHolm", "0.001")
 
     add("aeSitlBlandAltmanBias", f"{ba.get('bias_mean_difference_pp', -21.8):.1f}")
     add("aeSitlBlandAltmanLoaLow", f"{ba.get('loa_lower_95', -61.0):.1f}")

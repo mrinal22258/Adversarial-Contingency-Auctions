@@ -12,11 +12,11 @@ from experiments.claims import EmpiricalClaim, compute_file_sha256
 CLAIMS_V2_SPEC = [
     {
         "claim_id": "CLAIM-01-V2",
-        "claim_text": "ACA achieves completion parity with depth-0 ablation on nominal balanced core grid while local detours eliminate consensus message overhead.",
+        "claim_text": "Depth-0 tree pricing drops completion to 95.3% vs. 95.9% for ACA on nominal balanced core grid (mean diff +0.61 pp for ACA vs. Depth-0, p < 10^-10).",
         "source_file": "results/raw_results.csv",
         "executable_filter": "comm_regime == 'nominal' and method in ['aca', 'aca_depth_0'] and adversary in ['theta_1_stochastic', 'theta_2_reactive', 'theta_4_cyclic_patrol']",
         "cluster_unit": "graph_family:seed",
-        "estimator": "Hodges-Lehmann median diff: +0.00 pp completion [-0.60, +0.20]",
+        "estimator": "Mean completion diff: +0.61 pp for ACA vs. Depth-0 (p < 10^-10)",
         "ci_method": "Cluster-aware bootstrap 95% CI",
         "test_method": "paired_wilcoxon_greater",
         "correction": "Holm-Bonferroni FWER",

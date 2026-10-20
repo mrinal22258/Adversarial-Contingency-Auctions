@@ -111,7 +111,10 @@ def check_strict_claims(tex_content: str) -> List[str]:
         if re.search(r"\bOSMnx\b", clean_text, re.IGNORECASE):
             errors.append(f"Claim of 'OSMnx' forbidden without verified data files: {map_prov_msg}")
 
-    # 2. 'strictly 0' and unconditional 'guarantee' claims when measured safe conflicts > 0
+    # 2. 'strictly 0' and unconditional 'guarantee' claims
+    if re.search(r"\bstrictly\s+0\b", clean_text, re.IGNORECASE) or re.search(r"\bstrictly\s+zero\b", clean_text, re.IGNORECASE):
+        errors.append("Forbidden claim 'strictly 0' / 'strictly zero' conflicts found")
+
     measured_safe_conflicts = 0.0
     raw_csv = os.path.join(REPO_ROOT, "results", "raw_results.csv")
     if os.path.exists(raw_csv):
@@ -124,8 +127,6 @@ def check_strict_claims(tex_content: str) -> List[str]:
             pass
 
     if measured_safe_conflicts > 0:
-        if re.search(r"\bstrictly\s+0\b", clean_text, re.IGNORECASE) or re.search(r"\bstrictly\s+zero\b", clean_text, re.IGNORECASE):
-            errors.append(f"Forbidden claim 'strictly 0' / 'strictly zero' conflicts found (measured safe-claim conflicts = {measured_safe_conflicts:.0f} > 0)")
         for m in re.finditer(r"\bguarantees?\s+(?:conflict-free|zero\s+conflicts?)\b", clean_text, re.IGNORECASE):
             snippet = clean_text[max(0, m.start() - 60): min(len(clean_text), m.end() + 60)].lower()
             if not any(cond in snippet for cond in ["under assumption", "when", "provided", "if", "conditioned on", "bounded-error model"]):
