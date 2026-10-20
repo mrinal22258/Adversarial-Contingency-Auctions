@@ -1,9 +1,9 @@
 {
   "figure_file": "results/figures/fig_ablation_suite.png",
-  "git_commit": "f9ae4f9ab98b7653da15d8394e3c337784d4874e",
+  "git_commit": "3dca70a62f5cbe670ecde560ca21accf042ef196",
   "source_files": [
     "results/raw_results.csv",
-    "results/confirmatory/partitioned_adversary_eval.csv"
+    "results/confirmatory/partitioned_v5_adversary_eval.csv"
   ],
   "n_instances": 8400,
   "generator_script": "make_figures.py",

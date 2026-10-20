@@ -1,6 +1,6 @@
 {
   "figure_file": "results/figures/fig_effect_size_heatmap.png",
-  "git_commit": "f9ae4f9ab98b7653da15d8394e3c337784d4874e",
+  "git_commit": "3dca70a62f5cbe670ecde560ca21accf042ef196",
   "source_files": [
     "results/stats/instance_aggregated_results.csv"
   ],
