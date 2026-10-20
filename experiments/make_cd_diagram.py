@@ -154,14 +154,16 @@ def plot_critical_difference_diagram(
         out_png = os.path.splitext(out_pdf)[0] + ".png"
         fig.savefig(out_pdf, bbox_inches="tight", pad_inches=0.08)
         fig.savefig(out_png, dpi=400, bbox_inches="tight", pad_inches=0.08)
-        sidecar = {**prov, "figure_file": out_pdf}
-        for path_to_sidecar in [
-            out_pdf + ".provenance.json",
-            out_png + ".provenance.json",
-            os.path.splitext(out_pdf)[0] + ".provenance.json",
-        ]:
-            with open(path_to_sidecar, "w", encoding="utf-8") as f:
-                json.dump(sidecar, f, indent=2)
+        rel_pdf = os.path.relpath(out_pdf, REPO_ROOT).replace("\\", "/")
+        rel_png = os.path.relpath(out_png, REPO_ROOT).replace("\\", "/")
+        sidecar_pdf = {**prov, "figure_file": rel_pdf}
+        sidecar_png = {**prov, "figure_file": rel_png}
+        with open(out_pdf + ".provenance.json", "w", encoding="utf-8") as f:
+            json.dump(sidecar_pdf, f, indent=2)
+        with open(out_png + ".provenance.json", "w", encoding="utf-8") as f:
+            json.dump(sidecar_png, f, indent=2)
+        with open(os.path.splitext(out_pdf)[0] + ".provenance.json", "w", encoding="utf-8") as f:
+            json.dump(sidecar_pdf, f, indent=2)
 
     plt.close(fig)
     print(f"CD diagram generated in {out_dirs}: {output_filename}")
