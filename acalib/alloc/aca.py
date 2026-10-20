@@ -403,11 +403,18 @@ class ACAAllocator(CBBAAllocator):
                         peer_costs.append(peer_cost_cache[pc_key])
 
                     min_peer_cost = min(peer_costs) if peer_costs else float("inf")
-                    if tid not in lipschitz_cache:
-                        lipschitz_cache[tid] = self._compute_lipschitz_L_j(
-                            task, robot_id, recourse_plan=recourse_plan, fleet_states=fleet_states
+                    L_r = self._compute_lipschitz_for_robot(
+                        task, robot_id, recourse_plan=recourse_plan, fleet_states=fleet_states
+                    )
+                    peer_Ls = [
+                        self._compute_lipschitz_for_robot(
+                            task, peer_id, recourse_plan=None, fleet_states=fleet_states
                         )
-                    L_j = lipschitz_cache[tid]
+                        for peer_id in self.fleet_ids
+                        if peer_id != robot_id
+                    ]
+                    max_peer_L = max(peer_Ls) if peer_Ls else 0.0
+                    L_j = max(L_r, max_peer_L)
 
                     if self.fixed_margin is not None:
                         margin = float(self.fixed_margin)
@@ -418,9 +425,9 @@ class ACAAllocator(CBBAAllocator):
                         max_entropy = float(np.log(len(b))) if len(b) > 1 else 1.0
                         norm_entropy = float(np.clip(entropy / max(eps, max_entropy), 0.0, 1.0))
                         effective_kappa = self.margin_kappa * (1.0 + 0.15 * norm_entropy)
-                        margin = float(effective_kappa * robot.pinsker_calc.compute_margin(L_j, max_kl, eta=eta_eff, max_peer_L=L_j))
+                        margin = float(effective_kappa * robot.pinsker_calc.compute_margin(L_j, max_kl, eta=eta_eff, max_peer_L=max_peer_L))
                     else:
-                        margin = float(self.margin_kappa * robot.pinsker_calc.compute_margin(L_j, max_kl, eta=eta_eff, max_peer_L=L_j))
+                        margin = float(self.margin_kappa * robot.pinsker_calc.compute_margin(L_j, max_kl, eta=eta_eff, max_peer_L=max_peer_L))
 
                     # Condition: my_cost + m_{r, j} < min_{s != r} peer_cost
                     if not robot.pinsker_calc.can_claim_safely(my_cost, min_peer_cost, margin):
@@ -547,11 +554,18 @@ class ACAAllocator(CBBAAllocator):
                 return 0.0
 
             robot = self.robots[receiver_id]
-            L_j = self._compute_lipschitz_L_j(task, receiver_id)
+            L_r = self._compute_lipschitz_for_robot(task, receiver_id)
+            peer_Ls = [
+                self._compute_lipschitz_for_robot(task, p_id)
+                for p_id in self.fleet_ids
+                if p_id != receiver_id
+            ]
+            max_peer_L = max(peer_Ls) if peer_Ls else 0.0
+            L_j = max(L_r, max_peer_L)
             my_belief = robot.type_filter.get_belief_vector()
             max_kl = robot.tom_tracker.get_max_kl(my_belief)
             eta_eff = robot.tom_tracker.get_effective_eta(current_step)
-            base_m = robot.pinsker_calc.compute_margin(L_j, max_kl, eta=eta_eff, max_peer_L=L_j)
+            base_m = robot.pinsker_calc.compute_margin(L_j, max_kl, eta=eta_eff, max_peer_L=max_peer_L)
             return float(self.kappa_hyst * base_m)
 
         return execute_consensus_exchange(
@@ -643,19 +657,26 @@ class ACAAllocator(CBBAAllocator):
             phase1_claims[rid] = [tid for tid in self.robots[rid].bundle if tid not in prev_bundles[rid]]
             robot_tv_eta[rid] = (r_tv, r_eta)
 
-        # Check safe-claim conflicts against all robots holding tid at end of Phase 1
-        claimed_in_phase1 = {tid for claims in phase1_claims.values() for tid in claims}
-        safe_claim_holders = {
-            tid: [rid for rid in self.fleet_ids if tid in self.robots[rid].bundle]
-            for tid in claimed_in_phase1
-        }
-        safe_claim_conflicts = sum(1 for tid in claimed_in_phase1 if len(safe_claim_holders.get(tid, [])) > 1)
+        # Check safe-claim conflicts: simultaneous Phase-1 claims in current round (Theorem 1)
+        safe_claim_holders: Dict[int, List[int]] = {}
+        for rid in self.fleet_ids:
+            for tid in phase1_claims[rid]:
+                safe_claim_holders.setdefault(tid, []).append(rid)
+
+        safe_claim_conflicts = sum(1 for tid, claimants in safe_claim_holders.items() if len(claimants) > 1)
 
         # Log per-claim evaluations (Theorem 1 verification)
         for rid in self.fleet_ids:
             r_tv, r_eta = robot_tv_eta.get(rid, (0.0, 0.0))
             for tid in phase1_claims[rid]:
-                is_conflicted = len(safe_claim_holders.get(tid, [])) > 1
+                claimants = safe_claim_holders.get(tid, [rid])
+                is_conflicted = len(claimants) > 1
+                # Under Theorem 1, Assumption 1 holds for this claim event iff all claimants satisfy tv <= eta
+                tv_adhered = (
+                    all(robot_tv_eta[h][0] <= robot_tv_eta[h][1] for h in claimants)
+                    if is_conflicted
+                    else bool(r_tv <= r_eta)
+                )
                 self.per_claim_logs.append({
                     "step": current_step,
                     "robot_id": rid,
@@ -663,7 +684,7 @@ class ACAAllocator(CBBAAllocator):
                     "tv_at_claim": r_tv,
                     "eta_eff": r_eta,
                     "claimed_safe": bool(self.enable_margin and len(self.fleet_ids) > 1),
-                    "tv_le_eta": bool(r_tv <= r_eta),
+                    "tv_le_eta": bool(tv_adhered),
                     "conflicted": bool(is_conflicted),
                 })
 

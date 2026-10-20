@@ -110,8 +110,6 @@ def resolve_task_consensus(
             # Sender claims to have outbid m
             if k_beats_m(y_k, sender_id, y_i, m, deadband):
                 return y_k, sender_id, True
-            elif s_k.get(m, 0) > s_i.get(m, 0) and y_k > y_i + 1e-9:
-                return y_k, sender_id, True
             return y_i, m, False
         elif z_k == receiver_id:
             # Sender thinks receiver won, but receiver thought m won: reset
@@ -121,8 +119,6 @@ def resolve_task_consensus(
         elif z_k != -1: # z_k == m' (different third party)
             m_prime = z_k
             if k_beats_m(y_k, m_prime, y_i, m, deadband):
-                return y_k, m_prime, True
-            elif s_k.get(m, 0) > s_i.get(m, 0) and y_k > y_i + 1e-9:
                 return y_k, m_prime, True
             return y_i, m, False
         else: # z_k == -1 (sender says no winner)

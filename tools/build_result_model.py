@@ -92,6 +92,8 @@ def build_result_model() -> Dict[str, Any]:
                 if not line.strip():
                     continue
                 rec = json.loads(line)
+                if rec.get("method") not in ("aca", None):
+                    continue
                 is_nominal_regime = (rec.get("comm_regime") == "nominal")
                 for c in rec.get("claims", []):
                     tot_claims += 1

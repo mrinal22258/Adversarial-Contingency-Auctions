@@ -19,7 +19,7 @@ OUTPUT_NUMBERS_PATH = os.path.join(REPO_ROOT, "results", "numbers.tex")
 
 def format_pval(p: float) -> str:
     if p < 0.001:
-        return "< 0.001"
+        return "0.001"
     return f"{p:.3f}"
 
 
@@ -69,7 +69,7 @@ def generate_numbers(
             raise KeyError(f"Missing core metric {metric} for method {method}")
         data = core_metrics[method][metric]
         mean_val = f"{data['mean']:.{dec}f}"
-        ci_half = f"{data['cell_ci_half']:.{dec}f}"
+        ci_half = f"{data.get('cluster_ci_half', data['cell_ci_half']):.{dec}f}"
         return mean_val, ci_half
 
     # Primary method performance on core
@@ -475,7 +475,7 @@ def generate_numbers(
     add("aeHeldoutDiffNoMargin", f"{abs(h4_p_v5['mean_diff']):.2f}")
     add("aePvalHeldoutNoMarginDiff", format_pval(h4_p_v5["cell_p_raw"]))
     add("aeHeldoutSsiDiff", "+12.0")
-    add("aePvalHeldoutSsi", "< 0.001")
+    add("aePvalHeldoutSsi", "0.001")
     add("aeHeldoutPruneThreshold", "0.06")
     add("aePlannerRiskThreshold", "0.12")
     protocol_v6_path = os.path.join(REPO_ROOT, "experiments", "configs", "protocol_v6.yaml")

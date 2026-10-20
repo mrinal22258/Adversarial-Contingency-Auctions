@@ -442,6 +442,7 @@ def run_extended_sweep():
                             tv_rec = {
                                 "commit": rec.get("commit"),
                                 "graph_family": rec.get("graph_family"),
+                                "method": rec.get("method"),
                                 "seed": rec.get("seed"),
                                 "adversary": rec.get("adversary"),
                                 "comm_regime": rec.get("comm_regime"),
@@ -457,6 +458,7 @@ def run_extended_sweep():
                             claim_rec = {
                                 "commit": rec.get("commit"),
                                 "graph_family": rec.get("graph_family"),
+                                "method": rec.get("method"),
                                 "seed": rec.get("seed"),
                                 "adversary": rec.get("adversary"),
                                 "comm_regime": rec.get("comm_regime"),

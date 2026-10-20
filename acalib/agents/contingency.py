@@ -327,6 +327,30 @@ class ContingencyPlanner:
                         is_recovery=True,
                         recovery_cost=eff_exhaustion_penalty,
                     )
+        elif current_depth == 0 and max_depth == 0:
+            seen_canon = set()
+            for i in range(len(path) - 1):
+                u_entry, v_exit = path[i], path[i + 1]
+                c_e = canonical_edge(u_entry, v_exit)
+                if c_e not in seen_canon:
+                    seen_canon.add(c_e)
+                    pi_val = get_edge_marginal_strict(edge_marginals, u_entry, v_exit)
+                    eff_thresh = max(risky_edge_threshold, getattr(self, "prune_threshold", 0.0))
+                    if pi_val >= eff_thresh:
+                        risky.append(c_e)
+                        child_branch_id = f"{branch_id}->({c_e[0]},{c_e[1]})_d0"
+                        detours[c_e] = RecourseTreeNode(
+                            node_id=f"recovery_{node_id}_{c_e}",
+                            path=[],
+                            cost=eff_exhaustion_penalty,
+                            risky_edges=[],
+                            detours={},
+                            depth=1,
+                            branch_id=f"{child_branch_id}_recovery",
+                            is_leaf=True,
+                            is_recovery=True,
+                            recovery_cost=eff_exhaustion_penalty,
+                        )
 
         return RecourseTreeNode(
             node_id=node_id,

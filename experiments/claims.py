@@ -200,8 +200,8 @@ class EmpiricalClaim:
                 detail = "Missing ACA or depth-0 rows"
             else:
                 m_diff = sub_aca["completion_rate_pct"].mean() - sub_d0["completion_rate_pct"].mean()
-                # Expected: ACA achieves completion parity / competitive performance with depth-0 ([-1.0, +10.0] pp)
-                min_diff = self.tolerance.get("min_diff", -1.0)
+                # Expected: ACA outperforms depth-0 by ~ +4.1 pp (> 1.0 pp)
+                min_diff = self.tolerance.get("min_diff", 1.0)
                 max_diff = self.tolerance.get("max_diff", 10.0)
                 passed = (m_diff >= min_diff) and (m_diff <= max_diff)
                 detail = f"Mean completion diff: {m_diff:+.2f} pp (expected in [{min_diff:+.2f}, {max_diff:+.2f}])"
