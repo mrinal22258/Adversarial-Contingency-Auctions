@@ -147,6 +147,10 @@ class RobotAgent:
         rx, ry = self.pos
         sr_sq = self.sensor_range * self.sensor_range
 
+        from ..env.adversaries import compute_edge_robot_count, compute_interdiction_cut
+        all_known = set(self.known_edge_states.keys()) or set(canonical_edge(x, y) for x, y in self.graph.edges())
+        targeted_cut = compute_interdiction_cut(self.graph, all_known, fleet_states)
+
         for (u, v), (mx, my) in edge_midpoints.items():
             dx = rx - mx
             dy = ry - my
@@ -156,10 +160,8 @@ class RobotAgent:
                 curr_state = EdgeState.BLOCKED if is_blocked else EdgeState.OPEN
                 prior_state = self.known_edge_states.get(c_e)
 
-                from ..env.adversaries import compute_edge_robot_count, compute_interdiction_cut
                 edge_robot_count = compute_edge_robot_count(self.graph, c_e, fleet_states)
-                all_known = set(self.known_edge_states.keys()) or set(canonical_edge(x, y) for x, y in self.graph.edges())
-                is_targeted = c_e in compute_interdiction_cut(self.graph, all_known, fleet_states)
+                is_targeted = c_e in targeted_cut
                 v_class = get_edge_vulnerability_class(self.graph, c_e)
 
                 self.type_filter.update_observation(

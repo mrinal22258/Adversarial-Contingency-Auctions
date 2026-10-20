@@ -249,6 +249,7 @@ def check_unmacroed_literal_numbers(tex_content: str) -> List[str]:
         masked = re.sub(r"\b0\s*<\s*\|", " ", masked)
         masked = re.sub(r"[<>=]\s*0\b", " ", masked)
         masked = re.sub(r"<\s*1\b", " ", masked)
+        masked = re.sub(r"\\gg\s*1\b", " ", masked)
         masked = re.sub(r"\b[0-9]+\s*\\Delta\s*t\b", " ", masked)
         masked = re.sub(r"\b\d+\s*(?:floats|baselines|ablations)\b", " ", masked)
 
