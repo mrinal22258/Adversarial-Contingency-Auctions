@@ -131,12 +131,12 @@ def build_release_archive(ref: str = "HEAD", output_dir: str = "release") -> Dic
 
         paper_in_archive = os.path.join(extract_root, "paper.pdf")
         if os.path.exists(paper_in_archive):
-            pdf_errs = check_pdf_file(paper_in_archive, compiled_patterns)
+            pdf_errs, _ = check_pdf_file(paper_in_archive, compiled_patterns)
             violations.extend(pdf_errs)
 
         supp_in_archive = os.path.join(extract_root, "supplement.pdf")
         if os.path.exists(supp_in_archive):
-            supp_errs = check_pdf_file(supp_in_archive, compiled_patterns)
+            supp_errs, _ = check_pdf_file(supp_in_archive, compiled_patterns)
             violations.extend(supp_errs)
 
     uncomp_mb = total_uncompressed_bytes / (1024 * 1024)
