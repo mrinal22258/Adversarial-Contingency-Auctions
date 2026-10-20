@@ -1,6 +1,6 @@
 {
   "figure_file": "results/figures/fig_theorem1_assumption1.png",
-  "git_commit": "920eea512c9acc0de6cc32e8df55d768c7e71be0",
+  "git_commit": "86c8f68fc0485b83730fac7628cc33fe3ca8a5cd",
   "source_files": [
     "results/per_claim_evaluations.jsonl"
   ],

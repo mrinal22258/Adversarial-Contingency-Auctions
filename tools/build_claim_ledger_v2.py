@@ -12,11 +12,11 @@ from experiments.claims import EmpiricalClaim, compute_file_sha256
 CLAIMS_V2_SPEC = [
     {
         "claim_id": "CLAIM-01-V2",
-        "claim_text": "ACA outperforms depth-0 ablation by local contingency detour execution on nominal balanced core grid.",
+        "claim_text": "ACA achieves completion parity with depth-0 ablation on nominal balanced core grid while local detours eliminate consensus message overhead.",
         "source_file": "results/raw_results.csv",
-        "executable_filter": "comm_regime == 'nominal' and method in ['aca', 'aca_depth_zero'] and adversary in ['theta_1_stochastic', 'theta_2_reactive', 'theta_4_cyclic_patrol']",
+        "executable_filter": "comm_regime == 'nominal' and method in ['aca', 'aca_depth_0'] and adversary in ['theta_1_stochastic', 'theta_2_reactive', 'theta_4_cyclic_patrol']",
         "cluster_unit": "graph_family:seed",
-        "estimator": "Hodges-Lehmann median diff: +4.1 pp completion",
+        "estimator": "Hodges-Lehmann median diff: +0.00 pp completion [-0.60, +0.20]",
         "ci_method": "Cluster-aware bootstrap 95% CI",
         "test_method": "paired_wilcoxon_greater",
         "correction": "Holm-Bonferroni FWER",
@@ -77,11 +77,11 @@ CLAIMS_V2_SPEC = [
     },
     {
         "claim_id": "CLAIM-06-V2",
-        "claim_text": "CTP Replan achieves higher completion than ACA on the balanced core grid (96.4% vs 90.9%) due to continuous reactive replanning without consensus deferrals.",
+        "claim_text": "CTP Replan achieves higher completion than ACA on the balanced core grid (97.1% vs 95.9%) due to continuous reactive replanning without consensus deferrals.",
         "source_file": "results/raw_results.csv",
         "executable_filter": "comm_regime == 'nominal' and method in ['aca', 'ctp_replan'] and adversary in ['theta_1_stochastic', 'theta_2_reactive', 'theta_4_cyclic_patrol']",
         "cluster_unit": "graph_family:seed",
-        "estimator": "Mean completion diff: +5.5 pp for CTP Replan",
+        "estimator": "Mean completion diff: +1.2 pp for CTP Replan",
         "ci_method": "Bootstrap 95% CI",
         "test_method": "paired_wilcoxon_greater",
         "correction": "Holm-Bonferroni FWER",

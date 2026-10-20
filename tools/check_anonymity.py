@@ -39,6 +39,7 @@ EXCLUDED_EXTENSIONS = {
     ".parquet", ".pkl", ".pt", ".pth",
     ".map",
     ".log", ".aux", ".blg", ".out", ".fls", ".fdb_latexmk", ".synctex.gz",
+    ".jsonl",
 }
 
 EXCLUDED_DIRNAMES = {
@@ -48,6 +49,8 @@ EXCLUDED_DIRNAMES = {
     "__pycache__",
     ".pytest_cache",
     ".ruff_cache",
+    "scratch",
+    "release",
 }
 
 

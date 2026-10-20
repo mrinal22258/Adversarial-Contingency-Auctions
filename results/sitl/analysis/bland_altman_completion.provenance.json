@@ -1,5 +1,5 @@
 {
-  "figure_path": "C:\\Users\\krmri\\Downloads\\Adversarial-Contingency-Auctions-main\\Adversarial-Contingency-Auctions-main\\results\\sitl\\analysis\\bland_altman_completion.pdf",
+  "figure_path": "results/sitl/analysis/bland_altman_completion.pdf",
   "commit": "ef65b7dbd87f26912eed57d707b3f59fc9a1849e",
   "disclaimer": "SIMULATION -- PyBullet SITL vs Discrete Graph Simulation",
   "sample_size": 2160,

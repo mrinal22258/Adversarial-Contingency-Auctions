@@ -131,6 +131,10 @@ def run_pipeline(protocol: str = "v5", strict: bool = False) -> bool:
     if res_fig.returncode != 0:
         print("[FAIL] make_figures.py failed")
         return False
+    res_diag = subprocess.run([sys.executable, os.path.join(REPO_ROOT, "experiments", "plot_comm_degradation_diagnostic.py")], cwd=REPO_ROOT)
+    if res_diag.returncode != 0:
+        print("[FAIL] plot_comm_degradation_diagnostic.py failed")
+        return False
     provenance["steps"]["step5_figures"] = "PASS"
 
     # Step 6: Claim Ledger Auditing

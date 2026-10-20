@@ -307,7 +307,7 @@ def analyze_sitl_vs_graph(
     plt.close(fig)
 
     fig_prov = {
-        "figure_path": plot_path_pdf,
+        "figure_path": os.path.relpath(plot_path_pdf, REPO_ROOT).replace("\\", "/"),
         "commit": get_git_commit(),
         "disclaimer": "SIMULATION -- PyBullet SITL vs Discrete Graph Simulation",
         "sample_size": len(merged),
