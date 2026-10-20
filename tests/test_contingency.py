@@ -31,7 +31,12 @@ def test_theorem_1_expected_cost_vs_monte_carlo():
     risky_edge = canonical_edge(1, 3)
     pi_blockage = 0.35  # 35% probability of blockage on (1, 3)
 
-    marginals = {risky_edge: pi_blockage}
+    marginals = {
+        risky_edge: pi_blockage,
+        canonical_edge(0, 1): 0.0,
+        canonical_edge(1, 2): 0.0,
+        canonical_edge(2, 3): 0.0,
+    }
 
     plan = planner.build_recourse_plan(
         task_id=1,

@@ -1,0 +1,19 @@
+{
+  "commit": "f9ae4f9ab98b7653da15d8394e3c337784d4874e",
+  "disclaimer": "SIMULATION ONLY -- Friedman Omnibus + Nemenyi CD",
+  "n_instances": 250,
+  "friedman_stat": 189.76073467361607,
+  "p_value": 2.8605967872186687e-38,
+  "nemenyi_cd": 0.5696695485647248,
+  "mean_ranks": {
+    "aca": 4.262,
+    "aca_no_margin": 3.968,
+    "ctp_replan": 3.14,
+    "implicit": 2.968,
+    "cbba_lr": 4.74,
+    "cbba_partial_lr": 4.136,
+    "ssi_lr": 4.786
+  },
+  "generator_script": "experiments/make_cd_diagram.py",
+  "figure_file": "C:\\Users\\krmri\\Downloads\\Adversarial-Contingency-Auctions-main\\Adversarial-Contingency-Auctions-main\\static\\images\\fig_critical_difference_diagram.pdf"
+}

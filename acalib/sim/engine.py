@@ -62,6 +62,7 @@ class SimulationEngine:
         predrawn_clear_uniforms: Optional[Dict[Tuple[Tuple[Any, Any], int], float]] = None,
         predrawn_onset_uniforms: Optional[Dict[Tuple[Tuple[Any, Any], int], float]] = None,
         custom_risky_edges: Optional[Set[Tuple[Any, Any]]] = None,
+        custom_blocked_edges: Optional[Set[Tuple[Any, Any]]] = None,
         comm_net_seed: Optional[int] = None,
         record_traces: bool = False,
         **kwargs: Any,
@@ -99,6 +100,7 @@ class SimulationEngine:
             clearance_rate=clearance_rate,
             seed=int(self.rng.integers(0, 1000000)) if comm_net_seed is None else comm_net_seed,
             custom_risky_edges=custom_risky_edges,
+            initial_blocked_edges=custom_blocked_edges,
             predrawn_clear_uniforms=predrawn_clear_uniforms,
             predrawn_onset_uniforms=predrawn_onset_uniforms,
         )
@@ -121,10 +123,11 @@ class SimulationEngine:
         elif self.allocator_type == "aca_depth_2":
             r_depth = 2
         elif self.allocator_type.endswith("_lr") or self.allocator_type.startswith("aca"):
-            r_depth = contingency_depth if contingency_depth > 0 else 1
+            r_depth = max(0, int(contingency_depth)) if contingency_depth is not None else 1
         else:
             r_depth = 0
 
+        deep_branches = kwargs.get("max_deep_branches", 2)
         for rid in range(n_robots):
             if custom_start_nodes is not None and len(custom_start_nodes) > 0:
                 start_node = custom_start_nodes[rid % len(custom_start_nodes)]
@@ -139,6 +142,8 @@ class SimulationEngine:
                 speed=spd,
                 contingency_depth=r_depth,
                 risky_edges=self.blockage_process.risky_edges,
+                max_deep_branches=deep_branches,
+                partition_mode=kwargs.get("partition_mode", False),
             )
 
         # 4. Allocator
@@ -182,6 +187,7 @@ class SimulationEngine:
                 contingency_depth=self.contingency_depth,
                 delta_map=kwargs.get("delta_map", 0.0),
                 enable_margin=True,
+                partition_mode=kwargs.get("partition_mode", False),
             )
             for r in self.robots.values():
                 r.type_filter.frozen = True
@@ -194,6 +200,7 @@ class SimulationEngine:
                 contingency_depth=self.contingency_depth,
                 delta_map=kwargs.get("delta_map", 0.0),
                 enable_margin=True,
+                partition_mode=kwargs.get("partition_mode", False),
             )
             for r in self.robots.values():
                 r.type_filter.set_oracle(self.adversary_type)
@@ -210,6 +217,7 @@ class SimulationEngine:
                 prune_threshold=kwargs.get("prune_threshold", 0.0),
                 margin_kappa=kwargs.get("margin_kappa", 1.0),
                 bundle_limit=kwargs.get("bundle_limit", 4),
+                partition_mode=kwargs.get("partition_mode", False),
             )
         elif alloc_type in ("aca_plus", "aca_pruned"):
             alloc = ACAAllocator(
@@ -223,6 +231,7 @@ class SimulationEngine:
                 prune_threshold=kwargs.get("prune_threshold", 0.20),
                 margin_kappa=kwargs.get("margin_kappa", 1.0),
                 bundle_limit=kwargs.get("bundle_limit", 4),
+                partition_mode=kwargs.get("partition_mode", False),
             )
             for r in self.robots.values():
                 r.prune_threshold = alloc.prune_threshold
@@ -237,6 +246,7 @@ class SimulationEngine:
                 enable_margin=kwargs.get("enable_margin", True),
                 margin_kappa=kwargs.get("margin_kappa", 1.0),
                 bundle_limit=kwargs.get("bundle_limit", 4),
+                partition_mode=kwargs.get("partition_mode", False),
             )
         elif alloc_type in ("aca_no_margin", "aca_nomargin"):
             return ACAAllocator(
@@ -247,6 +257,7 @@ class SimulationEngine:
                 delta_map=kwargs.get("delta_map", 0.0),
                 enable_margin=False,
                 bundle_limit=kwargs.get("bundle_limit", 4),
+                partition_mode=kwargs.get("partition_mode", False),
             )
         elif alloc_type in ("aca_depth_0", "aca_d0"):
             return ACAAllocator(
@@ -402,11 +413,13 @@ class SimulationEngine:
 
         # 2. Advance Markov Blockage Process
         fleet_states = {rid: r.get_state_summary() for rid, r in self.robots.items()}
-        self.blockage_process.step(fleet_states, step)
+        if step > 0:
+            self.blockage_process.step(fleet_states, step)
 
         # 3. Robots Sense Local Environment & Bayesian Update
-        for rid, robot in self.robots.items():
-            robot.sense_environment(self.blockage_process, fleet_states, step)
+        if step > 0:
+            for rid, robot in self.robots.items():
+                robot.sense_environment(self.blockage_process, fleet_states, step)
 
         # 4. Check Belief Convergence
         if self.metrics.belief_convergence_step is None and self.adversary_type in CanonicalTypeList:
@@ -424,9 +437,15 @@ class SimulationEngine:
         assigned_tids = {t for r in self.robots.values() for t in r.bundle}
         unassigned = any(tid not in assigned_tids for tid in active_available_tasks)
         replans_pending = any(len(r.replan_requests) > 0 for r in self.robots.values())
+        new_cleared = getattr(self.blockage_process, "newly_cleared", set())
+        new_blocked = getattr(self.blockage_process, "newly_blocked", set())
+        stranded_replan = (
+            any(r.status == "EXHAUSTED_NEEDS_REPLAN" for r in self.robots.values())
+            and (len(new_cleared) > 0 or len(new_blocked) > 0)
+        )
         robot_pos_dict = {rid: r.pos for rid, r in self.robots.items()}
 
-        if unassigned or replans_pending or step % 10 == 0:
+        if unassigned or replans_pending or stranded_replan or step % 10 == 0:
             alloc_res = self.allocator.allocate_round(
                 tasks=active_available_tasks,
                 current_step=step,
@@ -545,5 +564,18 @@ class SimulationEngine:
     def get_trace_df(self) -> pd.DataFrame:
         """Return recorded per-step telemetry traces as a pandas DataFrame."""
         return pd.DataFrame(self.traces)
+
+    def block_edge(self, u: Any, v: Any) -> bool:
+        """Explicitly block edge (u, v) in the simulation environment."""
+        return self.blockage_process.block_edge(u, v)
+
+    def unblock_edge(self, u: Any, v: Any) -> bool:
+        """Explicitly unblock edge (u, v) in the simulation environment."""
+        return self.blockage_process.unblock_edge(u, v)
+
+    def set_edge_blocked(self, u: Any, v: Any, blocked: bool) -> bool:
+        """Explicitly set whether edge (u, v) is blocked in the simulation environment."""
+        return self.blockage_process.set_edge_blocked(u, v, blocked)
+
 
 

@@ -27,6 +27,7 @@ from acalib.alloc.implicit import ImplicitCoordinationAllocator
 from acalib.alloc.ssi import SSIAllocator
 from acalib.agents.robot import RobotAgent
 from acalib.env.adversaries import canonical_edge
+from acalib.env.blockage_process import EdgeState
 
 
 
@@ -228,3 +229,40 @@ class SITLAllocatorAdapter:
             if d_first < 1.0:
                 waypoints = waypoints[1:]
         return waypoints
+
+    def update_perception_observation(
+        self,
+        robot_id: int,
+        edge: Tuple[int, int],
+        observed_status: int,
+        step: int = 0,
+    ) -> None:
+        """
+        Feed in-the-loop ArUco vision observation directly into robot's Bayesian Type Filter.
+        """
+        agent = self.robot_agents.get(robot_id)
+        if agent is None:
+            return
+        c_e = canonical_edge(edge[0], edge[1])
+        if observed_status == 1:
+            agent.blocked_edges.add(c_e)
+        elif c_e in agent.blocked_edges:
+            agent.blocked_edges.discard(c_e)
+
+        v_class = getattr(self.graph, "graph", {}).get("_edge_vulnerability_class", {}).get(c_e, 1)
+        obs_state = EdgeState.BLOCKED if observed_status == 1 else EdgeState.OPEN
+        agent.type_filter.update_observation(step, c_e, obs_state, vulnerability_class=v_class)
+
+    def compute_recourse_detour(
+        self,
+        robot_id: int,
+        target_task_id: Optional[int],
+        start_pos: Tuple[float, float],
+        blocked_edge: Tuple[int, int],
+        known_blocked: Set[Tuple[int, int]],
+    ) -> List[Tuple[float, float]]:
+        """
+        Autonomous detour trigger: compute pre-planned contingency recourse detour around blocked_edge.
+        """
+        all_blocked = set(known_blocked).union({canonical_edge(blocked_edge[0], blocked_edge[1]), blocked_edge})
+        return self.compute_waypoint_path(robot_id, target_task_id, start_pos, all_blocked)

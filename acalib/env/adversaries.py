@@ -59,6 +59,66 @@ class Adversary:
         raise NotImplementedError
 
 
+def partition_risky_edges(
+    graph: nx.Graph,
+    risky_edges: Set[Tuple[Any, Any]],
+) -> Dict[str, Set[Tuple[Any, Any]]]:
+    """
+    Partition E_risk into three structurally distinct topological vulnerability classes:
+    - E_risk^(1) (clutter): peripheral/aisle edges (low betweenness, low detour penalty)
+    - E_risk^(2) (collector): collector corridors / thoroughfares (intermediate betweenness)
+    - E_risk^(3) (cut): topological bridges / cut edges (highest betweenness, max detour penalty)
+    """
+    if not risky_edges:
+        return {"clutter": set(), "collector": set(), "cut": set()}
+
+    edge_bc = graph.graph.get("_edge_bc") if hasattr(graph, "graph") else None
+    if edge_bc is None:
+        try:
+            edge_bc = nx.edge_betweenness_centrality(graph, weight="weight")
+        except Exception:
+            edge_bc = {}
+        if hasattr(graph, "graph"):
+            graph.graph["_edge_bc"] = edge_bc
+
+    sorted_risky = sorted(
+        list(risky_edges),
+        key=lambda e: edge_bc.get(e, edge_bc.get((e[1], e[0]), 0.0)),
+        reverse=True,
+    )
+    n = len(sorted_risky)
+    n_cut = max(1, n // 3)
+    n_col = max(1, (n - n_cut) // 2)
+
+    cut_edges = {canonical_edge(e[0], e[1]) for e in sorted_risky[:n_cut]}
+    collector_edges = {canonical_edge(e[0], e[1]) for e in sorted_risky[n_cut : n_cut + n_col]}
+    clutter_edges = {canonical_edge(e[0], e[1]) for e in sorted_risky[n_cut + n_col :]}
+
+    # Cache on graph if available
+    if hasattr(graph, "graph"):
+        v_class = graph.graph.setdefault("_edge_vulnerability_class", {})
+        for e in cut_edges:
+            v_class[canonical_edge(e[0], e[1])] = 3
+        for e in collector_edges:
+            v_class[canonical_edge(e[0], e[1])] = 2
+        for e in clutter_edges:
+            v_class[canonical_edge(e[0], e[1])] = 1
+
+    return {
+        "clutter": clutter_edges,
+        "collector": collector_edges,
+        "cut": cut_edges,
+    }
+
+
+def get_edge_vulnerability_class(graph: nx.Graph, edge: Tuple[Any, Any]) -> int:
+    """Return vulnerability class 1 (clutter), 2 (collector), or 3 (cut). Default 0."""
+    c_e = canonical_edge(edge[0], edge[1])
+    if hasattr(graph, "graph") and "_edge_vulnerability_class" in graph.graph:
+        return graph.graph["_edge_vulnerability_class"].get(c_e, 0)
+    return 0
+
+
 class StochasticAdversary(Adversary):
     """theta_1: Stochastic i.i.d. onset hazard p_0 across all risky edges."""
 
@@ -74,7 +134,20 @@ class StochasticAdversary(Adversary):
         fleet_states: Dict[int, Any],
         step: int,
     ) -> Dict[Tuple[Any, Any], float]:
-        return {e: self.p0 for e in risky_edges}
+        v_classes = graph.graph.get("_edge_vulnerability_class") if hasattr(graph, "graph") else None
+        if v_classes:
+            hazards = {}
+            for e in risky_edges:
+                c_e = canonical_edge(e[0], e[1])
+                cls = v_classes.get(c_e, 0)
+                if cls == 1:
+                    hazards[c_e] = 0.75
+                elif cls in (2, 3):
+                    hazards[c_e] = 0.03
+                else:
+                    hazards[c_e] = self.p0
+            return hazards
+        return {canonical_edge(e[0], e[1]): self.p0 for e in risky_edges}
 
 
 def compute_fleet_edge_robot_counts(
@@ -226,10 +299,19 @@ class ReactiveAdversary(Adversary):
     ) -> Dict[Tuple[Any, Any], float]:
         hazards = {}
         edge_counts = compute_fleet_edge_robot_counts(graph, risky_edges, fleet_states)
+        v_classes = graph.graph.get("_edge_vulnerability_class") if hasattr(graph, "graph") else None
         for e in risky_edges:
-            count = edge_counts.get(e, 0.0)
-            h = min(1.0, self.p0 + self.alpha * count)
-            hazards[e] = float(h)
+            c_e = canonical_edge(e[0], e[1])
+            cls = v_classes.get(c_e, 0) if v_classes else 0
+            count = edge_counts.get(c_e, 0.0)
+            if cls == 2:
+                # Collector corridors: high-traffic targeted blockage
+                h = 0.75
+            elif cls in (1, 3):
+                h = 0.03
+            else:
+                h = min(1.0, self.p0 + self.alpha * count)
+            hazards[c_e] = float(h)
         return hazards
 
 
@@ -271,16 +353,29 @@ class BudgetedInterdictionAdversary(Adversary):
         fleet_states: Dict[int, Any],
         step: int,
     ) -> Dict[Tuple[Any, Any], float]:
+        v_classes = graph.graph.get("_edge_vulnerability_class") if hasattr(graph, "graph") else None
+        if v_classes:
+            cut_candidates = {e for e in risky_edges if v_classes.get(canonical_edge(e[0], e[1]), 0) == 3}
+            if not cut_candidates:
+                cut_candidates = risky_edges
+        else:
+            cut_candidates = risky_edges
+
         if step - self.last_epoch_step >= self.epoch_length or not self.targeted_edges:
-            self.targeted_edges = self._compute_interdiction_cut(graph, risky_edges, fleet_states)
+            self.targeted_edges = self._compute_interdiction_cut(graph, cut_candidates, fleet_states)
             self.last_epoch_step = step
 
         hazards = {}
         for e in risky_edges:
-            if e in self.targeted_edges:
-                hazards[e] = self.p_cut
+            c_e = canonical_edge(e[0], e[1])
+            cls = v_classes.get(c_e, 0) if v_classes else 0
+            if cls == 3:
+                # Strategic cuts on topological bridges
+                hazards[c_e] = 0.75
+            elif cls in (1, 2):
+                hazards[c_e] = 0.03
             else:
-                hazards[e] = self.p0
+                hazards[c_e] = self.p_cut if c_e in self.targeted_edges else self.p0
         return hazards
 
 
@@ -445,21 +540,21 @@ def create_adversary(
 ) -> Adversary:
     """Factory for adversaries."""
     if adv_type == AdversaryType.STOCHASTIC:
-        p0 = kwargs.get("p0", 0.15)
+        p0 = kwargs.pop("p0", 0.15)
         return StochasticAdversary(p0=p0, budget_k=budget_k, clearance_rate=clearance_rate)
     elif adv_type == AdversaryType.REACTIVE:
-        p0 = kwargs.get("p0", 0.05)
-        alpha = kwargs.get("alpha", 0.35)
+        p0 = kwargs.pop("p0", 0.05)
+        alpha = kwargs.pop("alpha", 0.35)
         return ReactiveAdversary(p0=p0, alpha=alpha, budget_k=budget_k, clearance_rate=clearance_rate)
     elif adv_type == AdversaryType.BUDGETED_INTERDICTION:
-        p0 = kwargs.get("p0", 0.05)
-        p_cut = kwargs.get("p_cut", 0.85)
-        epoch = kwargs.get("epoch_length", 5)
+        p0 = kwargs.pop("p0", 0.05)
+        p_cut = kwargs.pop("p_cut", 0.85)
+        epoch = kwargs.pop("epoch_length", 5)
         return BudgetedInterdictionAdversary(
             p0=p0, p_cut=p_cut, epoch_length=epoch, budget_k=budget_k, clearance_rate=clearance_rate
         )
     elif adv_type == AdversaryType.CYCLIC_PATROL:
-        period = kwargs.get("cycle_period", 4)
+        period = kwargs.pop("cycle_period", 4)
         return CyclicPatrolAdversary(
             cycle_period=period, budget_k=budget_k, clearance_rate=clearance_rate
         )
@@ -468,7 +563,7 @@ def create_adversary(
             budget_k=budget_k, clearance_rate=clearance_rate, **kwargs
         )
     elif adv_type == AdversaryType.SWITCHING or str(adv_type) in ("theta_6_switching", "switching"):
-        switch_step = kwargs.get("switch_step", 40)
+        switch_step = kwargs.pop("switch_step", 40)
         return SwitchingAdversary(
             switch_step=switch_step, budget_k=budget_k, clearance_rate=clearance_rate, **kwargs
         )

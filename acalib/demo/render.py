@@ -5,6 +5,7 @@ contingency detours, and adversary blockages without spring_layout distortion.
 """
 
 import os
+import functools
 from typing import Dict, List, Tuple, Any, Optional, Set
 import numpy as np
 import matplotlib
@@ -30,6 +31,7 @@ MAPS_DIR = os.path.abspath(
 )
 
 
+@functools.lru_cache(maxsize=16)
 def load_warehouse_ascii_grid(variant: str = "10-20-10-2-1") -> Tuple[np.ndarray, int, int]:
     """Parse MovingAI .map ASCII grid into a 2D numpy mask (1=aisle/passable, 0=obstacle)."""
     map_file = os.path.join(MAPS_DIR, f"warehouse-{variant}.map")
@@ -60,8 +62,29 @@ def load_warehouse_ascii_grid(variant: str = "10-20-10-2-1") -> Tuple[np.ndarray
     return grid_array, height, width
 
 
+@functools.lru_cache(maxsize=16)
+def get_warehouse_rgb_backdrop(variant: str = "10-20-10-2-1") -> Tuple[np.ndarray, int, int]:
+    """Precompute and cache flipped RGB image backdrop for MovingAI warehouse."""
+    grid_array, h, w = load_warehouse_ascii_grid(variant=variant)
+    flipped = grid_array[::-1, :]
+    rgb_img = np.zeros((h, w, 3), dtype=float)
+    for r in range(h):
+        for c in range(w):
+            if flipped[r, c] > 0.5:
+                rgb_img[r, c] = [0.10, 0.15, 0.23]  # Aisles: tactical slate
+            else:
+                rgb_img[r, c] = [0.04, 0.06, 0.10]  # Shelves: dark navy
+    return rgb_img, h, w
+
+
+_BOSTON_WZ_CACHE: Dict[int, Set[Tuple[int, int]]] = {}
+
+
 def get_boston_work_zone_edges(graph: nx.Graph) -> Set[Tuple[int, int]]:
     """Identify real work zone edges from boston_work_zones.csv matching graph street names."""
+    g_id = id(graph)
+    if g_id in _BOSTON_WZ_CACHE:
+        return _BOSTON_WZ_CACHE[g_id]
     wz_file = os.path.join(MAPS_DIR, "boston_work_zones.csv")
     if not os.path.exists(wz_file):
         return set()
@@ -91,9 +114,34 @@ def get_boston_work_zone_edges(graph: nx.Graph) -> Set[Tuple[int, int]]:
                 names = [normalize_street(raw_name)] if raw_name else []
             if any(n in wz_names for n in names):
                 matched.add(tuple(sorted([u, v])))
+        _BOSTON_WZ_CACHE[g_id] = matched
         return matched
     except Exception:
         return set()
+
+
+_STATIC_BOUNDS_CACHE: Dict[int, Tuple[float, float, float, float, float, float, float]] = {}
+
+
+def _get_static_bounds(graph: nx.Graph, pos: Dict[int, Tuple[float, float]]) -> Tuple[float, float, float, float, float, float, float]:
+    g_id = id(graph)
+    if g_id in _STATIC_BOUNDS_CACHE:
+        return _STATIC_BOUNDS_CACHE[g_id]
+    xs = [p[0] for p in pos.values()]
+    ys = [p[1] for p in pos.values()]
+    min_x, max_x = (min(xs), max(xs)) if xs else (0.0, 100.0)
+    min_y, max_y = (min(ys), max(ys)) if ys else (0.0, 100.0)
+    span_x = max(1.0, max_x - min_x)
+    span_y = max(1.0, max_y - min_y)
+    max_span = max(span_x, span_y)
+    center_x = 0.5 * (min_x + max_x)
+    center_y = 0.5 * (min_y + max_y)
+    half_span = 0.53 * max_span
+    bounds = (center_x, center_y, half_span, min_x, max_x, min_y, max_y)
+    if len(_STATIC_BOUNDS_CACHE) > 100:
+        _STATIC_BOUNDS_CACHE.clear()
+    _STATIC_BOUNDS_CACHE[g_id] = bounds
+    return bounds
 
 
 def _stagger_labels(
@@ -192,18 +240,10 @@ def plot_simulation_state(
     fig.patch.set_facecolor("#131d31")
     ax.set_facecolor("#182236")  # Calm tactical slate background
 
-    # Extract coordinates bounds
-    xs = [p[0] for p in pos.values()]
-    ys = [p[1] for p in pos.values()]
-    min_x, max_x = (min(xs), max(xs)) if xs else (0.0, 100.0)
-    min_y, max_y = (min(ys), max(ys)) if ys else (0.0, 100.0)
+    # Extract cached coordinates bounds
+    center_x, center_y, half_span, min_x, max_x, min_y, max_y = _get_static_bounds(graph, pos)
     span_x = max(1.0, max_x - min_x)
     span_y = max(1.0, max_y - min_y)
-    max_span = max(span_x, span_y)
-
-    center_x = 0.5 * (min_x + max_x)
-    center_y = 0.5 * (min_y + max_y)
-    half_span = 0.53 * max_span
 
     ax.set_xlim(center_x - half_span, center_x + half_span)
     ax.set_ylim(center_y - half_span, center_y + half_span)
@@ -213,17 +253,9 @@ def plot_simulation_state(
     num_nodes = len(graph.nodes())
     is_road_map = "road" in graph_family.lower()
 
-    # 1. Base Layer: Real ASCII Grid Backdrop for MovingAI
+    # 1. Base Layer: Real ASCII Grid Backdrop for MovingAI (Cached RGB Image)
     if not is_road_map:
-        grid_array, h, w = load_warehouse_ascii_grid(variant=variant)
-        flipped = grid_array[::-1, :]
-        rgb_img = np.zeros((h, w, 3), dtype=float)
-        for r in range(h):
-            for c in range(w):
-                if flipped[r, c] > 0.5:
-                    rgb_img[r, c] = [0.10, 0.15, 0.23]  # Aisles: tactical slate
-                else:
-                    rgb_img[r, c] = [0.04, 0.06, 0.10]  # Shelves: dark navy
+        rgb_img, h, w = get_warehouse_rgb_backdrop(variant=variant)
         ax.imshow(
             rgb_img,
             extent=[min_x, max_x, min_y, max_y],

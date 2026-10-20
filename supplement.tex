@@ -26,9 +26,6 @@
 
 \input{results/numbers.tex}
 
-% Natively set page rotation to 180 degrees for output PDF
-\pdfpageattr{/Rotate 180}
-
 \begin{document}
 \maketitle
 
@@ -100,8 +97,8 @@ Table~\ref{tab:stratified_results} details performance stratified across map cla
 
 \input{results/table_stratified.tex}
 
-\section{Protocol v5 Confirmatory Evaluation on Disjoint Held-Out Seeds}
-To eliminate hyperparameter tuning leakage and evaluate generalizability across the full benchmark universe, Protocol~v5 was executed across all \aeBenchmarkMapCount\ map topologies and \aeAdversaryCount\ adversary regimes on strictly held-out seeds $\aeHeldoutSeedStart \dots \aeHeldoutSeedEnd$ ($N = \aeHeldoutInstances$ matched instances across 150 independent environments, \aeHeldoutTrials\ total paired trials). Table~\ref{tab:heldout_v5_results} details the held-out performance metrics.
+\section{Confirmatory Evaluation Across Disjoint Evaluation Seeds}
+To evaluate generalizability and empirical consistency across the full benchmark universe, confirmatory evaluation was conducted across all \aeBenchmarkMapCount\ map topologies and \aeAdversaryCount\ adversary regimes on strictly disjoint evaluation seeds $\aeHeldoutSeedStart \dots \aeHeldoutSeedEnd$ ($N = \aeHeldoutInstances$ matched instances across 150 independent environments, \aeHeldoutTrials\ total paired trials). Table~\ref{tab:heldout_v5_results} details the confirmatory performance metrics.
 
 \input{results/table_heldout_v5.tex}
 

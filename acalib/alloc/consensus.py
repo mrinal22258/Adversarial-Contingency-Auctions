@@ -20,23 +20,25 @@ def resolve_task_consensus(
     z_k: int,
     s_i: Dict[int, int],
     s_k: Dict[int, int],
+    deadband: float = 0.0,
 ) -> Tuple[float, int, bool]:
     """
-    Apply Choi 2009 Table 1 consensus conflict resolution for a single task tid.
+    Apply Choi 2009 Table 1 consensus conflict resolution for a single task tid,
+    with optional belief-consistent hysteresis deadband (Theorem 2).
     Returns (new_y_i, new_z_i, changed).
     """
     # Helper for tie-breaking: strictly lowest agent ID wins equal bids
-    def k_beats_i(bid_k: float, id_k: int, bid_i: float, id_i: int) -> bool:
-        if bid_k > bid_i + 1e-9:
+    def k_beats_i(bid_k: float, id_k: int, bid_i: float, id_i: int, db: float = 0.0) -> bool:
+        if bid_k > bid_i + db + 1e-9:
             return True
-        elif abs(bid_k - bid_i) <= 1e-9 and id_k < id_i:
+        elif abs(bid_k - bid_i) <= 1e-9 and db <= 1e-9 and id_k < id_i:
             return True
         return False
 
-    def k_beats_m(bid_k: float, id_k: int, bid_m: float, id_m: int) -> bool:
-        if bid_k > bid_m + 1e-9:
+    def k_beats_m(bid_k: float, id_k: int, bid_m: float, id_m: int, db: float = 0.0) -> bool:
+        if bid_k > bid_m + db + 1e-9:
             return True
-        elif abs(bid_k - bid_m) <= 1e-9 and id_k < id_m:
+        elif abs(bid_k - bid_m) <= 1e-9 and db <= 1e-9 and id_k < id_m:
             return True
         return False
 
@@ -47,15 +49,33 @@ def resolve_task_consensus(
             new_y = max(y_i, y_k)
             return new_y, receiver_id, (new_y != y_i)
         elif z_k == sender_id:
-            # Sender claims to have won: outbid check
-            if k_beats_i(y_k, sender_id, y_i, receiver_id):
-                return y_k, sender_id, True
+            # Cross-claims: determine incumbent by timestamp seniority
+            t_i = s_i.get(receiver_id, 0)
+            t_k = s_k.get(sender_id, 0)
+            if t_i < t_k:
+                # Receiver i is established incumbent; sender k is challenger
+                if k_beats_i(y_k, sender_id, y_i, receiver_id, deadband):
+                    return y_k, sender_id, True
+                else:
+                    return y_i, receiver_id, False
+            elif t_k < t_i:
+                # Sender k was established incumbent; receiver i was challenger
+                if y_i > y_k + deadband + 1e-9:
+                    return y_i, receiver_id, False
+                elif abs(y_i - y_k) <= 1e-9 and deadband <= 1e-9 and receiver_id < sender_id:
+                    return y_i, receiver_id, False
+                else:
+                    return y_k, sender_id, True
             else:
-                return y_i, receiver_id, False
+                # Simultaneous claims at exact same step: tie-break deterministically without deadband bias
+                if k_beats_i(y_k, sender_id, y_i, receiver_id, 0.0):
+                    return y_k, sender_id, True
+                else:
+                    return y_i, receiver_id, False
         elif z_k != -1:
             # Sender claims third party m won
             m = z_k
-            if s_k.get(m, 0) > s_i.get(m, 0) and k_beats_i(y_k, m, y_i, receiver_id):
+            if s_k.get(m, 0) > s_i.get(m, 0) and k_beats_i(y_k, m, y_i, receiver_id, deadband):
                 return y_k, m, True
             else:
                 return y_i, receiver_id, False
@@ -88,7 +108,9 @@ def resolve_task_consensus(
             return y_i, m, False
         elif z_k == sender_id:
             # Sender claims to have outbid m
-            if k_beats_m(y_k, sender_id, y_i, m) or (s_k.get(m, 0) > s_i.get(m, 0)):
+            if k_beats_m(y_k, sender_id, y_i, m, deadband):
+                return y_k, sender_id, True
+            elif s_k.get(m, 0) > s_i.get(m, 0) and y_k > y_i + 1e-9:
                 return y_k, sender_id, True
             return y_i, m, False
         elif z_k == receiver_id:
@@ -98,7 +120,9 @@ def resolve_task_consensus(
             return y_i, m, False
         elif z_k != -1: # z_k == m' (different third party)
             m_prime = z_k
-            if k_beats_m(y_k, m_prime, y_i, m) or (s_k.get(m, 0) > s_i.get(m, 0)):
+            if k_beats_m(y_k, m_prime, y_i, m, deadband):
+                return y_k, m_prime, True
+            elif s_k.get(m, 0) > s_i.get(m, 0) and y_k > y_i + 1e-9:
                 return y_k, m_prime, True
             return y_i, m, False
         else: # z_k == -1 (sender says no winner)
@@ -126,6 +150,7 @@ def execute_consensus_exchange(
     msg_type: str = "CBBA_CONSENSUS",
     extra_payload_fn: Optional[Any] = None,
     handle_extra_payload_fn: Optional[Any] = None,
+    deadband_fn: Optional[Any] = None,
 ) -> bool:
     """
     Execute one full consensus round (broadcast + conflict resolution).
@@ -184,6 +209,10 @@ def execute_consensus_exchange(
                 y_k_j = y_k.get(tid, 0.0)
                 z_k_j = z_k.get(tid, -1)
 
+                deadband = 0.0
+                if deadband_fn is not None:
+                    deadband = float(deadband_fn(rid, sender_k, tid))
+
                 new_y, new_z, task_changed = resolve_task_consensus(
                     receiver_id=rid,
                     sender_id=sender_k,
@@ -194,6 +223,7 @@ def execute_consensus_exchange(
                     z_k=z_k_j,
                     s_i=s[rid],
                     s_k=s_k,
+                    deadband=deadband,
                 )
 
                 if task_changed:

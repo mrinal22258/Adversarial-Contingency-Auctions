@@ -216,9 +216,103 @@ class DiffDriveRobotSITL:
                 return True
         return False
 
-    def update_controller(self, dt: float = 0.05) -> Tuple[float, float]:
+    def compute_rvo_velocity(
+        self,
+        pref_vx: float,
+        pref_vy: float,
+        my_pos: Tuple[float, float],
+        other_robots: Optional[List[Tuple[float, float, float, float]]] = None,
+        barrier_positions: Optional[List[Tuple[float, float]]] = None,
+        r_combined: float = 0.55,
+        time_horizon: float = 1.8,
+    ) -> Tuple[float, float]:
         """
-        Execute one step of local path following controller.
+        Reciprocal Velocity Obstacles (RVO) velocity filter for multi-robot collision avoidance.
+        Smoothly steers differential-drive robots around each other and physical barricades.
+        """
+        if not other_robots and not barrier_positions:
+            return pref_vx, pref_vy
+
+        best_vx, best_vy = pref_vx, pref_vy
+        min_penalty = float("inf")
+
+        # Sample candidate velocities around preferred velocity
+        v_candidates = [(pref_vx, pref_vy), (0.0, 0.0)]
+        speeds = [0.25 * self.v_max, 0.5 * self.v_max, 0.75 * self.v_max, 1.0 * self.v_max]
+        angles = np.linspace(0, 2 * math.pi, 16, endpoint=False)
+        for s in speeds:
+            for a in angles:
+                v_candidates.append((s * math.cos(a), s * math.sin(a)))
+
+        for cand_vx, cand_vy in v_candidates:
+            cand_speed = math.hypot(cand_vx, cand_vy)
+            if cand_speed > self.v_max + 1e-5:
+                continue
+
+            pref_dist = math.hypot(cand_vx - pref_vx, cand_vy - pref_vy)
+            collision_cost = 0.0
+
+            # Check other dynamic robots
+            if other_robots:
+                for ox, oy, ovx, ovy in other_robots:
+                    rel_x = ox - my_pos[0]
+                    rel_y = oy - my_pos[1]
+                    dist = math.hypot(rel_x, rel_y)
+                    if dist > 4.0:
+                        continue
+
+                    # RVO relative velocity: 2 * v_cand - (v_pref + v_other)
+                    rvo_vx = 2.0 * cand_vx - (pref_vx + ovx)
+                    rvo_vy = 2.0 * cand_vy - (pref_vy + ovy)
+
+                    dot = rel_x * rvo_vx + rel_y * rvo_vy
+                    v_sq = rvo_vx**2 + rvo_vy**2
+                    if v_sq > 1e-6 and dot > 0:
+                        t_c = dot / v_sq
+                        if 0 < t_c < time_horizon:
+                            d_closest = math.hypot(rel_x - rvo_vx * t_c, rel_y - rvo_vy * t_c)
+                            if d_closest < r_combined:
+                                collision_cost += 120.0 / max(0.1, t_c) * (r_combined - d_closest + 0.1)
+
+                    if dist < r_combined:
+                        collision_cost += 600.0 * (r_combined - dist)
+
+            # Check static barriers
+            if barrier_positions:
+                for bx, by in barrier_positions:
+                    rel_x = bx - my_pos[0]
+                    rel_y = by - my_pos[1]
+                    dist = math.hypot(rel_x, rel_y)
+                    if dist > 3.0:
+                        continue
+
+                    dot = rel_x * cand_vx + rel_y * cand_vy
+                    v_sq = cand_vx**2 + cand_vy**2
+                    if v_sq > 1e-6 and dot > 0:
+                        t_c = dot / v_sq
+                        if 0 < t_c < time_horizon:
+                            d_closest = math.hypot(rel_x - cand_vx * t_c, rel_y - cand_vy * t_c)
+                            if d_closest < r_combined:
+                                collision_cost += 150.0 / max(0.1, t_c) * (r_combined - d_closest + 0.1)
+
+                    if dist < r_combined:
+                        collision_cost += 800.0 * (r_combined - dist)
+
+            total_penalty = pref_dist + collision_cost
+            if total_penalty < min_penalty:
+                min_penalty = total_penalty
+                best_vx, best_vy = cand_vx, cand_vy
+
+        return best_vx, best_vy
+
+    def update_controller(
+        self,
+        dt: float = 0.05,
+        other_robots: Optional[List[Tuple[float, float, float, float]]] = None,
+        barrier_positions: Optional[List[Tuple[float, float]]] = None,
+    ) -> Tuple[float, float]:
+        """
+        Execute one step of local path following controller with RVO collision avoidance.
         Calculates differential-drive wheel velocities and commands motors.
         Returns (linear_velocity_cmd, angular_velocity_cmd).
         """
@@ -232,6 +326,11 @@ class DiffDriveRobotSITL:
             return 0.0, 0.0
 
         gt_x, gt_y, gt_yaw = self.get_ground_truth_pose()
+        curr_pt = np.array([gt_x, gt_y])
+        d_step = float(np.linalg.norm(curr_pt - self.last_gt_pos))
+        self.total_distance_traveled += d_step
+        self.last_gt_pos = curr_pt
+
         target = self.current_path[self.current_waypoint_idx]
 
         dx = target[0] - gt_x
@@ -251,25 +350,44 @@ class DiffDriveRobotSITL:
             dy = target[1] - gt_y
             dist = math.hypot(dx, dy)
 
-        # Proportional heading control
+        # Proportional heading control towards waypoint
         target_yaw = math.atan2(dy, dx)
         heading_err = (target_yaw - gt_yaw + math.pi) % (2.0 * math.pi) - math.pi
 
-        # Angular velocity command
-        k_omega = 2.5
-        omega_cmd = float(np.clip(k_omega * heading_err, -self.omega_max, self.omega_max))
-
-        # Linear velocity command: slow down when turning sharply
+        # Preferred velocity points toward the goal
         k_v = 1.0
-        v_factor = max(0.0, math.cos(heading_err))
-        v_cmd = float(np.clip(k_v * dist * v_factor, 0.0, self.v_max))
+        v_pref = float(np.clip(k_v * dist, 0.0, self.v_max))
+        pref_vx = v_pref * math.cos(target_yaw)
+        pref_vy = v_pref * math.sin(target_yaw)
+
+        # Apply Reciprocal Velocity Obstacles (RVO) collision avoidance filter
+        vx_cmd, vy_cmd = self.compute_rvo_velocity(
+            pref_vx,
+            pref_vy,
+            (gt_x, gt_y),
+            other_robots=other_robots,
+            barrier_positions=barrier_positions,
+        )
+
+        # Compute effective speed and steering towards filtered velocity
+        eff_speed = math.hypot(vx_cmd, vy_cmd)
+        if eff_speed > 0.05:
+            filtered_yaw = math.atan2(vy_cmd, vx_cmd)
+            steer_err = (filtered_yaw - gt_yaw + math.pi) % (2.0 * math.pi) - math.pi
+        else:
+            steer_err = heading_err
+
+        k_omega = 2.5
+        omega_cmd = float(np.clip(k_omega * steer_err, -self.omega_max, self.omega_max))
+        v_factor = max(0.0, math.cos(steer_err))
+        v_cmd = float(np.clip(eff_speed * v_factor, 0.0, self.v_max))
 
         # Command rigid body velocity in PyBullet
-        vx = v_cmd * math.cos(gt_yaw)
-        vy = v_cmd * math.sin(gt_yaw)
+        vx_rb = v_cmd * math.cos(gt_yaw)
+        vy_rb = v_cmd * math.sin(gt_yaw)
         p.resetBaseVelocity(
             self.body_id,
-            linearVelocity=[vx, vy, 0.0],
+            linearVelocity=[vx_rb, vy_rb, 0.0],
             angularVelocity=[0.0, 0.0, omega_cmd],
             physicsClientId=self.client_id,
         )

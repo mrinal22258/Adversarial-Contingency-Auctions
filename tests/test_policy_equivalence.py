@@ -52,6 +52,9 @@ class MockRobot:
     def plan_task_bundle(self, tasks_dict):
         pass
 
+    def get_edge_marginals(self):
+        return getattr(self, "edge_marginals", {})
+
 
 class MockBlockageProcess:
     """Deterministically controls blocked edges during test stepping."""
@@ -169,6 +172,7 @@ def test_two_level_deep_blockage_matches_tree_predicted_cost():
     G.add_edge(4, 3, weight=1.0)
 
     marginals = {
+        **{canonical_edge(u, v): 0.0 for u, v in G.edges()},
         canonical_edge(1, 3): 0.40,
         canonical_edge(2, 3): 0.50,
     }
@@ -219,6 +223,7 @@ def test_monte_carlo_analytic_tree_cost_matches_empirical():
     p1 = 0.30
     p2 = 0.40
     marginals = {
+        **{canonical_edge(u, v): 0.0 for u, v in G.edges()},
         canonical_edge(1, 3): p1,
         canonical_edge(2, 3): p2,
     }
@@ -283,6 +288,7 @@ def test_pruning_at_threshold_preserves_failure_probability_and_recovery_cost():
 
     # Edge marginal 0.15 is >= planner threshold 0.12, but < prune threshold 0.20
     marginals = {
+        **{canonical_edge(u, v): 0.0 for u, v in G.edges()},
         canonical_edge(1, 2): 0.15,
     }
 
@@ -394,6 +400,7 @@ def test_trace_shows_priced_branch_equals_executed_branch(capsys):
     G.add_edge(4, 3, weight=1.0)
 
     marginals = {
+        **{canonical_edge(u, v): 0.0 for u, v in G.edges()},
         canonical_edge(1, 3): 0.40,
         canonical_edge(2, 3): 0.50,
     }

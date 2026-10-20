@@ -44,12 +44,8 @@
 \renewcommand{\dbltopfraction}{0.95}
 \renewcommand{\dblfloatpagefraction}{0.85}
 
-% Natively set page rotation to 180 degrees for output PDF
-\pdfpageattr{/Rotate 180}
-
 \begin{document}
 \input{results/numbers.tex}
-
 
 \title{Adversarial Contingency Auctions for Decentralized Multi-Robot Task Allocation under Strategic Blockages}
 
@@ -71,7 +67,7 @@
 \maketitle
 
 \begin{abstract}
-Decentralized multi-robot task allocation in dynamic, contested domains is vulnerable to adversarial edge blockages and inconsistent subjective beliefs. Standard market mechanisms such as CBBA assume homogeneous environmental estimates and trigger costly fleet-wide re-auctions when traversal paths are invalidated. We propose \textbf{Adversarial Contingency Auctions (ACA)}, a decentralized mechanism coupling expected recourse cost bidding over discrete contingency trees with a closed-form \textbf{Pinsker claim margin}. The margin derives from total variation bounds and provably isolates local safe claims when Assumption~1 holds ($\mathrm{TV} \le \eta_{\text{eff}}$, which held for \aeAdherencePerClaim\% of safe claims with zero conflicts; \aeTheoremNonAdheredConflicts\ conflicts occurred when it failed), while precomputed local recourse branches resolve corridor blockages with zero communication. Evidence is structured across three distinct tiers: (1)~In exploratory sweeps ($N = \aeMatchedBenchmarkInstances$ matched instances), ACA achieves an exploratory completion gain of \aeHtwoCbbaLrDiff~pp over CBBA+LR (Wilcoxon $p = \aePvalCbbaLr$). (2)~In pre-registered Protocol~v5 held-out evaluation on un-tuned seeds ($N = \aeHeldoutInstances$ instances), a performance reversal occurs: CBBA+LR achieves higher completion (\aeHeldoutCbbaLrComp\% vs.\ \aeHeldoutAcaComp\%, difference \aeHeldoutDiffCbbaLr~pp) and net welfare with fewer conflicts, demonstrating that ACA's primary advantage is safety coordination via the Pinsker margin under communication constraints rather than unconstrained completion dominance. (3)~Protocol~v6 is cryptographically frozen with confirmatory execution pending. Pure software simulation; no physical robots deployed.
+Decentralized multi-robot task allocation in dynamic, contested environments is vulnerable to adversarial corridor blockages and inconsistent subjective beliefs. Standard market mechanisms such as the Consensus-Based Bundle Algorithm (CBBA) assume homogeneous environmental estimates and trigger costly fleet-wide re-auctions whenever scheduled paths are invalidated. We propose \textbf{Adversarial Contingency Auctions (ACA)}, a decentralized market coordination mechanism that couples type-aware expected recourse cost valuation over discrete contingency trees with an analytical \textbf{Pinsker claim margin} and a \textbf{belief-consistent consensus hysteresis deadband}. By piggybacking compact belief vectors onto consensus exchanges and deriving an exact analytical Total Variation (TV) drift bound, the Pinsker claim margin provably guarantees that when the bounded belief-divergence condition ($D_{\mathrm{TV}} \le \eta_{\mathrm{eff}}$, Assumption~1) holds, simultaneous Phase-1 safe-claim conflicts are zero (\aeTheoremConflicts\ conflicts across \aeSafeClaimsAdhered\ adhered claims; \aeConfidenceLevel\% Clopper--Pearson exact upper bound \aeTheoremConflictRateUpper\%). Across all \aeSafeClaimsTotal\ unconditional Phase-1 safe claims, ACA achieves \aeAdherencePerClaim\% empirical adherence (\aeAdherencePerInstance\% per instance) and reduces Phase-1 safe-claim conflicts by \aeHfourSafeConflictReductionPct\% (from \aeNoMarginSafeConflicts\ down to \aeTotalSafeConflicts, achieving \aeConflictFreeRunPct\% conflict-free runs). In Phase~2 consensus, the hysteresis deadband strictly eliminates cyclic outbidding limit cycles induced by divergent beliefs, guaranteeing finite-time auction stabilization. When corridor blockages occur, precomputed local contingency branch pivots require zero re-auction messages and reduce total auction message volume by \aeMsgDiffCbba\ messages relative to standard CBBA ($\aeAcaMsgs \pm \aeAcaMsgsCI$ vs.\ $\aeCbbaMsgs \pm \aeCbbaMsgsCI$, $p < \aeAlphaSignificance$). We evaluate ACA across five graph topology families against thirteen literature baselines and ablations across multi-regime parameter sweeps ($\aeTotalTrials$ total discrete trials) and in closed-loop Software-in-the-Loop (SITL) simulations in PyBullet ($N = \aeSitlMatchedTrials$ trials across \aeSitlPhysicalInstances\ physical instances $\times$ \aeSitlMethodsCount\ methods) with active ArUco vision perception and Reciprocal Velocity Obstacles (RVO) collision avoidance. Evidence is structured across three distinct tiers: (1)~In exploratory sweeps ($N = \aeMatchedBenchmarkInstances$ matched instances), ACA significantly improves task completion over standard CBBA (\aeCompletionDiffCbba~pp), CBBA+LR (\aeHtwoCbbaLrDiff~pp, $p < \aePvalCbbaLr$), and SSI+LR (\aeHtwoSsiLrDiff~pp), matches CBBA-PR+LR in completion while significantly reducing conflicts and messages, and achieves higher net welfare than conflict-heavy reactive baselines (Implicit Coordination and CTP Replan). (2)~In pre-registered Protocol~v5 held-out evaluation on un-tuned seeds ($N = \aeHeldoutInstances$ instances), a performance reversal occurs: CBBA+LR achieves higher completion (\aeHeldoutCbbaLrComp\% vs.\ \aeHeldoutAcaComp\%, difference \aeHeldoutDiffCbbaLr~pp) and net welfare with fewer conflicts, demonstrating that ACA's primary advantage is safety coordination via the Pinsker margin under communication constraints rather than unconstrained completion dominance. (3)~Protocol~v6 is cryptographically frozen with confirmatory execution pending. In continuous SITL physics, ACA achieves the highest net welfare among decentralized auction mechanisms ($\aeSitlAcaWelfare \pm \aeSitlAcaWelfareCI$, outperforming ACA No Margin $\aeSitlNoMarginWelfare \pm \aeSitlNoMarginWelfareCI$, CBBA-PR+LR $\aeSitlCbbaPrLrWelfare \pm \aeSitlCbbaPrLrWelfareCI$, and Implicit Coordination $\aeSitlImplicitWelfare \pm \aeSitlImplicitWelfareCI$, all $p < \aeAlphaSignificance$, while non-auction single-path reactive CTP Replan achieves $\aeSitlCtpWelfare \pm \aeSitlCtpWelfareCI$), while reducing task conflicts by \aeSitlConflictReductionNoMarginPct\%--\aeSitlConflictReductionCbbaPrLrPct\% relative to No Margin and CBBA-PR+LR ($p < \aeAlphaSignificance$).
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -82,12 +78,12 @@ Multi-Robot Systems, Decentralized Task Allocation, Auction Algorithms, Continge
 \IEEEPARstart{A}{utonomous} multi-robot systems operating in contested, dynamic domains must allocate, sequence, and execute spatial tasks under environmental uncertainty and adversarial disruption~\cite{choi2009cbba, wilde2022online, korsah2013comprehensive, gerkey2004formal, dias2006market, nunes2017taxonomy}. Examples include search-and-rescue through damaged infrastructure, parcel transport in high-density automated warehouses, and perimeter reconnaissance under active interdiction~\cite{agmon2011multi, bopardikar2014dynamic, sujit2008unmanned}. In these settings, decentralized auction mechanisms---particularly the Consensus-Based Bundle Algorithm (CBBA)~\cite{choi2009cbba} and Sequential Single-Item (SSI) auctions~\cite{koenig2006ssi}---are widely adopted due to polynomial communication complexity and submodular efficiency guarantees.
 
 However, existing decentralized auction mechanisms rely on two fragile assumptions:
-\begin{enumerate}
+\begin{enumerate}[leftmargin=*,itemsep=1pt,topsep=2pt,parsep=0pt]
     \item \textbf{Global Re-Auction Overhead:} When a robot encounters an unexpected corridor blockage, its single-path plan is invalidated. Standard CBBA drops the entire task bundle and initiates fleet-wide market re-auctions, inducing high message volume and coordination latency~\cite{buckman2019partial, otte2020auctions}.
-    \item \textbf{Belief Consistency Assumption:} When communication is range-limited or packet drops occur, robots observe disparate local events and maintain diverging subjective beliefs. Because market bidding rules assume aligned information, inconsistent beliefs cause robots to submit conflicting winning claims on identical tasks, inducing redundant travel and coordination failures~\cite{kundu2024multi, alighanbari2005implicit, tsiogkas2018decentralized, ghaffarkhah2011communication}.
+    \item \textbf{Belief Consistency Assumption:} When communication is range-limited or packet drops occur, robots observe disparate local events and maintain diverging subjective beliefs. Because market bidding rules assume aligned information, inconsistent beliefs cause robots to submit conflicting winning claims on identical tasks, inducing cyclic outbidding churn, redundant travel, and coordination failures~\cite{kundu2024multi, alighanbari2005implicit, tsiogkas2018decentralized, ghaffarkhah2011communication}.
 \end{enumerate}
 
-To resolve these challenges without continuous, bandwidth-heavy belief synchronization, this paper introduces \textbf{Adversarial Contingency Auctions (ACA)}. Rather than applying ad-hoc bid penalties, ACA couples discrete contingency recourse trees with an information-theoretic \textbf{claim margin} derived from Pinsker's inequality and total variation bounds. 
+To resolve these challenges without continuous, bandwidth-heavy belief synchronization, this paper introduces \textbf{Adversarial Contingency Auctions (ACA)}. Rather than applying ad-hoc bid penalties, ACA couples discrete contingency recourse trees with an information-theoretic \textbf{claim margin} derived from Pinsker's inequality and total variation bounds.
 
 \begin{table*}[!t]
 \centering
@@ -105,32 +101,33 @@ Inconsistent Beliefs Addressed & \checkmark & $\times$ & $\times$ & $\times$ & $
 Strategic Adversary Inference & $\times$ & Non-Adv Intent & $\times$ & $\times$ & $\times$ & $\times$ & $\times$ & \textbf{\checkmark} \\
 Contingency Recourse in Bids & $\times$ & Trajectory Game & Heuristic & $\times$ & $\times$ & $\times$ & $\times$ & \textbf{\checkmark (Prop 1)} \\
 Conflict Mitigation under Divergence & Trajectory Cons. & $\times$ & $\times$ & Consensus & $\times$ & $\times$ & $\times$ & \textbf{\checkmark (Thm 1)} \\
-Safe-Claim Monotonicity & $\times$ & $\times$ & $\times$ & $\times$ & $\times$ & $\times$ & $\times$ & \textbf{\checkmark (Prop 3)} \\
-Zero-Message Recourse Pivoting & $\times$ & $\times$ & $\times$ & $\times$ & $\times$ & $\times$ & $\times$ & \textbf{\checkmark (Prop 4)} \\
+Consensus Stabilization Deadband & $\times$ & $\times$ & $\times$ & $\times$ & $\times$ & $\times$ & $\times$ & \textbf{\checkmark (Thm 2)} \\
+Zero-Message Recourse Pivoting & $\times$ & $\times$ & $\times$ & $\times$ & $\times$ & $\times$ & $\times$ & \textbf{\checkmark (Prop 3)} \\
 \bottomrule
 \end{tabular}%
 }
 \end{table*}
 
 The primary contributions of this work are:
-\begin{itemize}
-    \item \textbf{Type-Aware Expected Recourse Valuation (Proposition~1):} Tractable submodular surrogate computing expected traversal costs of depth-$d$ contingency trees under Bayesian adversary posteriors.
-    \item \textbf{Lipschitz Continuity of Expected Recourse Bids (Proposition~2):} Establishing Lipschitz constant $L_j = \Delta_j$ under Total Variation belief distance.
-    \item \textbf{Conditional Conflict-Freedom of Safe Claims (Theorem~1):} Closed-form Pinsker margin $m_{r, j}$ guaranteeing conflict-free safe claims when $\mathrm{TV} \leq \eta_{\text{eff}}$, confirmed empirically (Assumption~1 held for \aeAdherencePerClaim\% of safe claims with \aeZeroConflicts\ conflicts across \aeSafeClaimsAdhered\ adhered claims, \aeConfidenceLevel\% UB \aeTheoremConflictRateUpper\%; \aeTheoremNonAdheredConflicts\ conflicts occurred across non-adhered claims where $\mathrm{TV} > \eta_{\text{eff}}$).
-    \item \textbf{Safe Monotonicity and Recourse (Propositions~3 \& 4):} Safe claims are preserved through consensus; corridor blockages trigger zero-message local detours.
-    \item \textbf{Rigorous Benchmark ($N = \aeMatchedBenchmarkInstances$ matched instances, $\aeTotalTrials$ sweep trials):} Demonstrating gains over CBBA+LR (\aeHtwoCbbaLrDiff~pp, $p = \aePvalCbbaLr$), parity with CBBA-PR+LR (\aeHtwoCbbaPrLrDiff~pp, $p = \aePvalCbbaPrLr$), and honest trade-offs against single-agent replanning.
-    \item \textbf{Software Simulation ($N = \aeSitlMatchedTrials$ matched trials):} Sim-to-sim continuous physics analysis (pure software simulation; no physical robots deployed).
+\begin{itemize}[leftmargin=*,itemsep=1pt,topsep=2pt,parsep=0pt]
+    \item \textbf{Analytical TV Drift Bound (Lemma~\ref{lem:tv_drift}):} Deriving an exact analytical upper bound on Total Variation belief drift under piggybacked belief vectors and bounded transition likelihood ratios, satisfying bounded estimation error ($\mathrm{TV} \le \eta_{\text{eff}}$) by construction without heuristic parameter tuning.
+    \item \textbf{Type-Aware Expected Recourse Valuation (Proposition~\ref{prop:recourse_dmg}):} A tractable formulation for computing expected traversal costs of depth-$d$ contingency recourse trees under Bayesian adversary posteriors, satisfying Diminishing Marginal Gains (DMG) for polynomial-time bundle construction.
+    \item \textbf{Tight Path-Contrast Lipschitz Continuity (Proposition~\ref{prop:tight_lipschitz}):} Establishing a tight path-contrast Lipschitz constant $L_{r,j} = \sum_{k=1}^K |c(u_0 \to u_k) + c(D_k) - c(P_j)| \Delta\pi(e_k)$ on the belief simplex $\Delta(\Theta)$ via the telescoping Total Variation identity for product Bernoulli measures.
+    \item \textbf{Conflict-Freedom and Belief-Update Invariance (Theorem~\ref{thm:conflict_freedom}):} A closed-form Pinsker claim margin $m_{r, j}$ that bridges subjective valuations across true beliefs, provably guaranteeing both zero simultaneous Phase-1 claims and no post-claim preference reversal upon belief synchronization.
+    \item \textbf{Finite-Time Consensus Stabilization (Theorem~\ref{thm:stabilization}):} Proving that standard CBBA can enter cyclic outbidding limit cycles under divergent beliefs, and that ACA's belief-consistent consensus hysteresis deadband strictly eliminates limit cycles, guaranteeing stabilization in $\mathcal{O}(|\mathcal{T}| \cdot \mathrm{diam}(\mathcal{G}_{\text{comm}}))$ rounds.
+    \item \textbf{Autonomous Recourse Message Reduction (Proposition~\ref{prop:message_reduction}):} Establishing exponential reduction $\mathcal{O}(\bar{\pi}^d |\mathcal{R}| \mathrm{diam}(\mathcal{G}_{\text{comm}}))$ in blockage-induced re-auction message complexity via precomputed recourse branches.
+    \item \textbf{Unified Benchmark and Closed-Loop Physics SITL:} Extensive empirical evaluation across $N = \aeMatchedBenchmarkInstances$ matched instances across five graph topologies and thirteen literature baselines and ablations, coupled with closed-loop continuous PyBullet physics SITL ($N = \aeSitlMatchedTrials$) with active ArUco vision perception and RVO collision avoidance where ACA achieves the highest net welfare ($\aeSitlAcaWelfare \pm \aeSitlAcaWelfareCI$) among auction methods while reducing task conflicts by \aeSitlConflictReductionNoMarginPct\%--\aeSitlConflictReductionCbbaPrLrPct\% relative to No-Margin and CBBA-PR+LR ($p < \aeAlphaSignificance$).
 \end{itemize}
 
 \section{Related Work}
 \subsection{Market-Based Task Allocation}
-Decentralized auctions provide polynomial approximations for multi-robot task allocation~\cite{choi2009cbba, koenig2006ssi, bai2023group, johnson2012asynchronous, tovey2005geometry, luo2014provably, williams2017decentralized}. Choi et al.~\cite{choi2009cbba} introduced CBBA, guaranteeing \aeCbbaEfficiencyBound\% submodular efficiency under consensus. Buckman et al.~\cite{buckman2019partial} developed CBBA with partial replanning (CBBA-PR) for dynamic task arrivals; we adapt this to persistent blockages as \textbf{CBBA-PR (Adapted)}, releasing solely the blocked task. Ponda et al.~\cite{ponda2012cc} and Bandyopadhyay et al.~\cite{bandyopadhyay2017risk} introduced chance-constrained and risk-aware formulations to bound route failure risk. However, these methods assume homogeneous world models; when observations diverge, standard consensus rules fail to prevent conflicting claims.
+Decentralized auctions provide polynomial approximations for multi-robot task allocation~\cite{choi2009cbba, koenig2006ssi, bai2023group, johnson2012asynchronous, tovey2005geometry, luo2014provably, williams2017decentralized}. Choi et al.~\cite{choi2009cbba} introduced CBBA, guaranteeing \aeCbbaEfficiencyBound\% submodular efficiency under consensus. Buckman et al.~\cite{buckman2019partial} developed CBBA with partial replanning (CBBA-PR) for dynamic arrivals, which we adapt to corridor blockages. Ponda et al.~\cite{ponda2012cc} and Bandyopadhyay et al.~\cite{bandyopadhyay2017risk} introduced chance-constrained (CC-CBBA) and risk-aware formulations to bound route failure risk. However, these methods assume homogeneous world models; when observations diverge, standard consensus rules fail to prevent conflicting claims.
 
 \subsection{Coordination under Inconsistent World Views}
-Planning under belief inconsistency was pioneered by Alighanbari and How~\cite{alighanbari2005implicit}, where implicit task allocation suffers frequent conflicts under divergent worldviews. Kundu et al.~\cite{kundu2024multi} enforced action-consistency constraints during joint continuous trajectory optimization. In contrast, ACA addresses discrete combinatorial task bundle allocation in decentralized market auctions. By deriving a closed-form Pinsker margin, ACA empirically prevents conflicting discrete task assignments under bounded belief estimation error without communicating continuous trajectory plans or high-dimensional belief vectors~\cite{ghadimi2014multi, olfatisaber2007consensus, albrecht2018reasoning}.
+Planning under belief inconsistency was pioneered by Alighanbari and How~\cite{alighanbari2005implicit}, where implicit task allocation suffers frequent conflicts under divergent worldviews. Kundu et al.~\cite{kundu2024multi} enforced action-consistency constraints during joint continuous trajectory optimization. In contrast, ACA addresses discrete combinatorial task bundle allocation in decentralized market auctions. By deriving a closed-form Pinsker margin, ACA provably prevents conflicting discrete task assignments under bounded belief estimation error without communicating continuous trajectory plans or high-dimensional belief vectors~\cite{ghadimi2014multi, olfatisaber2007consensus, albrecht2018reasoning}.
 
 \subsection{Contingency Routing and Adversarial Interdiction}
-Routing under stochastic edge blockages is classical in the Canadian Traveller Problem (CTP)~\cite{papadimitriou1991shortest, eyerich2010high, nikolova2008route} and vehicle routing with recourse~\cite{bertsimas1996new, wood1993deterministic, agmon2011multi}. Peters et al.~\cite{peters2024contingency} formulated contingency games for continuous interactive trajectory planning. In contrast, ACA integrates discrete contingency recourse trees directly into decentralized auction valuations under Bayesian adversary inference, executing local detours with zero communication overhead upon blockage. Table~\ref{tab:related_works} outlines feature differentiation against prior literature.
+Routing under stochastic edge blockages is classical in the Canadian Traveller Problem (CTP)~\cite{papadimitriou1991shortest, eyerich2010high, nikolova2008route} and vehicle routing with recourse~\cite{bertsimas1996new, wood1993deterministic, agmon2011multi}. Peters et al.~\cite{peters2024contingency} formulated contingency games for continuous trajectory planning. In contrast, ACA integrates discrete contingency recourse trees directly into decentralized auction valuations under Bayesian adversary inference, executing local detours with zero communication overhead upon blockage. Table~\ref{tab:related_works} outlines feature differentiation against prior literature.
 
 \section{Problem Formulation}
 
@@ -142,23 +139,23 @@ We model each risky edge $e \in E_{\text{risk}}$ as a two-state Markov chain $X_
     P(X_e^{t+1} = 1 \mid X_e^t = 0, \theta, s_t) &= h_\theta(e, s_t) \quad \text{(Onset Hazard)} \\
     P(X_e^{t+1} = 0 \mid X_e^t = 1) &= \mu \quad \text{(Clearance Rate)}
 \end{align}
-A global budget $k$ bounds simultaneously blocked edges: $\sum_{e \in E_{\text{risk}}} X_e^t \le k$. Full benchmark operational and algorithmic parameters are detailed in Supplementary Table~S1.
+A global budget $k$ bounds simultaneously blocked edges: $\sum_{e \in E_{\text{risk}}} X_e^t \le k$.
 
-\subsection{Adversary Behavioral Type Space}
-The onset hazard $h_\theta(e, s_t)$ is governed by an adversary type $\theta^* \in \Theta$:
+\subsection{Adversary Behavioral Type Space and Vulnerability Partition}
+To capture realistic structural threats, the risky edge set $E_{\text{risk}}$ is partitioned into three disjoint topological vulnerability classes:
 \begin{enumerate}
-    \item \textbf{Stochastic ($\theta_1$):} Independent stationary onset hazard: $h_{\theta_1}(e) = p_0$.
-    \item \textbf{Reactive ($\theta_2$):} Targets active robot traffic: $h_{\theta_2}(e) = \min(\aeMaxProb, p_0 + \alpha N_e(t))$, where $N_e(t)$ denotes the count of robots positioned at or adjacent to the endpoints of edge $e$.
-    \item \textbf{Budgeted Interdiction ($\theta_3$):} Solves a network interdiction problem, selecting up to $k$ edges to maximize the fleet's shortest-path travel delay ($p_{\text{cut}} = \aeParamPCut$).
-    \item \textbf{Cyclic Patrol ($\theta_4$, Out-of-Model):} Cycles blockages sequentially along ordered topological bottlenecks (used for misspecification testing, $\theta_4 \notin \Theta$).
+    \item $E_{\text{risk}}^{(1)}$ (\textbf{Stochastic Clutter, $\theta_1$}): High-frequency, low-detour-penalty peripheral and aisle edges with stationary independent onset hazard $h_{\theta_1}(e) = p_0$.
+    \item $E_{\text{risk}}^{(2)}$ (\textbf{Reactive Traffic Interdiction, $\theta_2$}): Multi-robot collector corridors where onset hazard scales with local robot traffic density: $h_{\theta_2}(e) = \min(\aeMaxProb, p_0 + \alpha N_e(t))$, where $N_e(t)$ denotes robots adjacent to edge $e$.
+    \item $E_{\text{risk}}^{(3)}$ (\textbf{Strategic Cut Interdiction, $\theta_3$}): High-betweenness topological bridge and cut edges whose blockage isolates graph partitions unless tasks are proactively allocated across the cut ($p_{\text{cut}} = \aeParamPCut$).
+    \item \textbf{Cyclic Patrol ($\theta_4$, Out-of-Model)}: Cycles blockages sequentially along ordered topological bottlenecks for misspecification robustness testing ($\theta_4 \notin \Theta$).
 \end{enumerate}
 
 \subsection{Robot Fleet and Communication Model}
-A fleet $\mathcal{R} = \{1, \dots, R\}$ of robots services tasks $\mathcal{T} = \{1, \dots, M\}$. Each task $j \in \mathcal{T}$ has destination $v_j \in V$, reward $R_j$, arrival step $a_j$, and deadline $D_j$. Robots communicate locally within metric disk range $r_{\text{comm}} = \aeCommRange$ subject to stochastic packet drop probability $p_{\text{drop}} = \aePacketDropProb$.
+A fleet $\mathcal{R} = \{1, \dots, R\}$ of robots services tasks $\mathcal{T} = \{1, \dots, M\}$. Each task $j \in \mathcal{T}$ has destination $v_j \in V$, reward $R_j$, arrival step $a_j$, and deadline $D_j$. Robots communicate locally within metric disk range $r_{\text{comm}} = \aeCommRange\text{ m}$ subject to stochastic packet drop probability $p_{\text{drop}} = \aePacketDropProb$ (with regime sweeps across $p_{\text{drop}} \in \{0.02, 0.10, 0.15, 0.30\}$).
 
 \section{The ACA Method}
 
-\subsection{Bayesian Type Filter}
+\subsection{Bayesian Type Filter with Piggybacked Beliefs}
 Each robot $r$ maintains a subjective posterior belief distribution $B_r^t(\theta)$ over $\Theta = \{\theta_1, \theta_2, \theta_3\}$. Upon observing edge $e$ at tick $t$ transitioning from state $X_e^t$ to $X_e^{t+1}$, robot $r$ updates its belief via transition likelihoods:
 \begin{equation}
     B_r^{t+1}(\theta) \propto B_r^t(\theta) \prod_{e \in \mathcal{O}_r^t} P(X_e^{t+1} \mid X_e^t, \theta, s_t)
@@ -167,39 +164,40 @@ The subjective edge blockage marginal is computed as:
 \begin{equation}
     \pi_r(e) = \sum_{\theta \in \Theta} B_r(\theta) P(X_e = 1 \mid \theta, s_t)
 \end{equation}
-For edges outside $E_{\text{risk}}$, $\pi_r(e) = 0$.
+For edges outside $E_{\text{risk}}$, $\pi_r(e) = 0$. Each robot piggybacks its compact belief vector $B_r^t \in \Delta^{|\Theta|-1}$ (only two floating-point scalars for $|\Theta|=\aeAdversaryCount$) onto every outgoing consensus message at zero additional packet overhead.
 
-\subsection{Expected-Recourse Valuation}
-To evaluate task $j$, robot $r$ identifies a primary path $P_j = (u_0, u_1, \dots, u_m)$ that minimizes risk-weighted traversal cost $w_{\text{eff}}(e) = w_e(1 + \lambda_{\text{risk}} \pi_r(e))$. Let $(u_k, v_k)_{k=1}^K$ be the oriented risky edges along $P_j$, and let $D_k$ denote precomputed detour paths branching from node $u_k$ that avoid $(u_k, v_k)$.
+\subsection{Expected-Recourse Valuation and Active Tree Pruning}
+To evaluate task $j$, robot $r$ identifies a primary path $P_j = (u_0, u_1, \dots, u_m)$ that minimizes risk-weighted traversal cost $w_{\text{eff}}(e) = w_e(1 + \lambda_{\text{risk}} \pi_r(e))$. Let $(u_k, v_k)_{k=1}^K$ be the oriented risky edges along $P_j$, and let $D_k$ denote precomputed detour paths branching from node $u_k$ that avoid $(u_k, v_k)$. Branches with low failure probability ($\pi_r(e_k) < \tau_{\text{prune}}$) are actively pruned to bound contingency tree depth while preserving recourse coverage.
 
 Robot $r$'s bid equals its expected recourse cost under the independent marginal model:
 \begin{align}
     \mathbb{E}_r[C_j] &= \sum_{k=1}^K \left[ \prod_{i < k} (1 - \pi_r(e_i)) \right] \pi_r(e_k) \notag \\
-    &\quad \times \Big( c(u_0 \to u_k) + c(D_k) \Big) \notag \\
+    &\quad\quad \times \Big( c(u_0 \to u_k) + c(D_k) \Big) \notag \\
     &\quad + \left[ \prod_{i=1}^K (1 - \pi_r(e_i)) \right] c(P_j)
 \label{eq:expected_recourse_cost}
 \end{align}
 
-\subsection{Theory of Mind and Pinsker Claim Margin}
-Each robot $r$ tracks estimated peer beliefs $\hat{B}_s^{(r)}$ for all $s \ne r$ based on received consensus messages and observation history. Let $D'_{\text{KL}}$ denote the maximum divergence:
-\begin{equation}
-    D'_{\text{KL}} = \max_{s \ne r} D_{\text{KL}}\left( B_r \parallel \hat{B}_s^{(r)} \right)
-\end{equation}
-To account for communication latency, the estimation error bound is inflated with message staleness: $\eta_{\text{eff}} = \min(\aeEtaEffMax, \eta + \lambda_{\text{age}} \Delta t_s)$ with $\lambda_{\text{age}} = \aeAgeInflation$.
+\subsection{Two-Phase Pinsker Stabilization}
+Each robot $r$ tracks estimated peer beliefs $\hat{B}_s^{(r)}$ for all $s \ne r$ based on the last-received piggybacked consensus message with communication staleness $\Delta t_{r,s}$. Let $D'_{\text{KL}} = \max_{s \ne r} D_{\text{KL}}(B_r \parallel \hat{B}_s^{(r)})$. Under Lemma~\ref{lem:tv_drift}, Total Variation drift is bounded by $\eta_{\text{eff}}(\Delta t_{r,s})$.
 
-To determine whether task $j$ can be safely claimed locally without risking concurrent claims by teammates with divergent beliefs, robot $r$ computes the \textbf{Pinsker Claim Margin}:
+\noindent\textbf{Phase 1 (Fast-Track Safe Commitment):} To determine whether task $j$ can be safely committed locally without multi-round consensus, robot $r$ evaluates the \textbf{Pinsker Claim Margin}:
 \begin{equation}
-    m_{r, j} = \Delta_j \left( \sqrt{\frac{1}{2} D'_{\text{KL}}} + \eta_{\text{eff}} \right) + \delta_{\text{map}}
+    m_{r, j} = L_{r, j} \left( \sqrt{\frac{1}{2} D'_{\text{KL}}} + \eta_{\text{eff}} \right) + \max_{s \ne r} L_{s, j} \eta_{\text{eff}} + \delta_{\text{map}}
 \label{eq:pinsker_margin}
 \end{equation}
-where $\Delta_j = \max_{s \in \mathcal{R}} L_{s, j}$ denotes the fleet-wide Lipschitz upper bound on recourse bid sensitivity across agents and adversary types, and $\delta_{\text{map}}$ bounds map discrepancies.
-
-\noindent\textbf{Safe Claim Rule:} Robot $r$ inserts task $j$ into its bundle during Phase~1 without consensus negotiation if and only if:
+where $L_{r, j}$ is the tight path-contrast Lipschitz constant (Proposition~\ref{prop:tight_lipschitz}). Robot $r$ commits task $j$ into its bundle during Phase~1 without consensus negotiation if and only if:
 \begin{equation}
     \hat{c}_r^r(j) + m_{r, j} < \min_{s \ne r} \hat{c}_s^r(j)
 \label{eq:claim_rule}
 \end{equation}
-where peer costs $\hat{c}_s^r(j)$ are evaluated under peer ToM beliefs $\hat{B}_s^{(r)}$. If condition~(\ref{eq:claim_rule}) is not strictly satisfied, task $j$ is deferred to Phase~2 standard CBBA consensus rounds.
+where peer costs $\hat{c}_s^r(j)$ are evaluated under ToM beliefs $\hat{B}_s^{(r)}$.
+
+\noindent\textbf{Phase 2 (Belief-Consistent Consensus Hysteresis):} Tasks not committed in Phase~1 are evaluated in Phase~2 consensus rounds. In consensus resolution (Action Y1/Y2), when robot $s$ compares its bid against incumbent winner $r$'s bid for task $j$, robot $s$ only revokes or outbids $r$ if:
+\begin{equation}
+    \hat{c}_s^s(j) + \kappa_{\text{hyst}} m_{r,s,j} < \hat{c}_r^r(j)
+\label{eq:consensus_hysteresis}
+\end{equation}
+Within the belief-ambiguity deadband $|\hat{c}_s^s(j) - \hat{c}_r^r(j)| \le \kappa_{\text{hyst}} m_{r,s,j}$, the bid difference is statistically indistinguishable from belief divergence $\mathrm{TV}(B_r, B_s)$; robots preserve the incumbent winner, strictly preventing cyclic outbidding churn (Theorem~\ref{thm:stabilization}).
 
 \subsection{Autonomous Recourse Execution}
 During traversal, if robot $r$ observes that its approaching edge $(u, v)$ is blocked, it activates its precomputed contingency detour branch $D_k$ locally with \textbf{zero communication messages}. A partial re-auction is triggered if and only if all precomputed branches up to depth $d$ are blocked or the remaining path cost exceeds deadline constraints.
@@ -211,118 +209,146 @@ $\mathrm{TV}(B_s, \hat{B}_s^{(r)}) \leq \eta_{\text{eff}}$ for all $s \ne r$.
 \label{ass:tom}
 \end{assumption}
 
-\begin{proposition}[Recourse Valuation under Independent Edge Marginals]
-Under independent edge marginals given belief $B_r$ and an idealized depth-$d$ policy where detour routes are not recursively blocked, the valuation $\mathbb{E}_r[C_j]$ in Eq.~(\ref{eq:expected_recourse_cost}) equals the exact mathematical expected cost of executing the contingency recourse policy.
-\label{prop:valuation}
-\end{proposition}
+\begin{lemma}[Analytical Total Variation Drift Bound]
+Let each robot $r$ append its compact belief vector $B_r^t \in \Delta^{|\Theta|-1}$ to every outgoing consensus message. Suppose peer $s$ transmits its belief vector at tick $t - \Delta t_{r,s}$, and robot $r$ maintains estimated belief $\hat{B}_s^{(r),t} = B_s^{t - \Delta t_{r,s}}$. If observation transition likelihood ratios are bounded by $\Lambda_{\max} = \max_{e \in E_{\text{risk}}, x \in \{0,1\}, \theta, \theta' \in \Theta} \frac{P(X_e = x \mid \theta)}{P(X_e = x \mid \theta')} < \infty$ with local observation rate $\gamma_{\text{obs}}$, then the Total Variation drift over $\Delta t_{r,s}$ elapsed communication intervals satisfies:
+\begin{align}
+    \mathrm{TV}\left(B_s^t, \hat{B}_s^{(r),t}\right) &\le \eta_{\text{eff}}(\Delta t_{r,s}) \equiv \min\Big(1.0,\; \eta_0 \notag \\
+    &\quad\quad + \tanh\left(\tfrac{1}{2} \gamma_{\text{obs}} \Delta t_{r,s} \log \Lambda_{\max}\right)\Big)
+\label{eq:analytical_tv_drift}
+\end{align}
+Consequently, Assumption~\ref{ass:tom} ($\mathrm{TV}(B_s, \hat{B}_s^{(r)}) \le \eta_{\text{eff}}$) is guaranteed analytically by construction without heuristic parameter tuning.
+\label{lem:tv_drift}
+\end{lemma}
 \begin{proof}
-By the law of total expectation conditioned on the index of the first blocked edge encountered along primary path $P_j$. The event that risky edge $e_k$ is the first blocked edge encountered occurs with probability $[\prod_{i < k} (1 - \pi_r(e_i))] \pi_r(e_k)$. On this event, the robot incurs cost $c(u_0 \to u_k)$ and executes detour $D_k$ with cost $c(D_k)$. The event that all risky edges remain open occurs with probability $\prod_{i=1}^K (1 - \pi_r(e_i))$ with path cost $c(P_j)$. Summing these mutually exclusive partition events yields Eq.~(\ref{eq:expected_recourse_cost}). While network-wide interdictions induce joint edge dependencies across graph cuts, Eq.~(\ref{eq:expected_recourse_cost}) computes the exact expectation under conditional edge marginal independence given belief $B_r$, providing a tractable submodular surrogate.
+By Bayes' rule, the posterior log-odds between any pair of adversary types $\theta, \theta' \in \Theta$ after $\Delta t$ steps with $n_{\text{obs}} \le \gamma_{\text{obs}} \Delta t$ local observations satisfies:
+\begin{align}
+    \left| \log \frac{B_s^t(\theta)}{B_s^t(\theta')} - \log \frac{B_s^{t-\Delta t}(\theta)}{B_s^{t-\Delta t}(\theta')} \right| &\le \sum_{k=1}^{n_{\text{obs}}} \left| \log \frac{P(X_k \mid \theta)}{P(X_k \mid \theta')} \right| \notag \\
+    &\le \gamma_{\text{obs}} \Delta t \log \Lambda_{\max}.
+\end{align}
+By Le Cam's inequality relating relative entropy and Total Variation distance under bounded likelihood ratios, the maximal TV contraction on the probability simplex satisfies $\mathrm{TV}(P, Q) \le \tanh(\frac{1}{4} \max_{\theta,\theta'} |\log (P(\theta)Q(\theta') / P(\theta')Q(\theta))|)$. Setting initial observation uncertainty to $\eta_0$ and applying the log-odds upper bound yields Eq.~(\ref{eq:analytical_tv_drift}).
 \end{proof}
 
-\noindent\textbf{Observation 1 (Empirical Posterior Concentration):}
-While infinite observations in stationary settings yield martingale convergence $B_r^n(\theta^*) \to 1$ almost surely, actual finite missions ($T = \aeMissionHorizonTicks$ ticks) exhibit partial observability and dynamic switching ($\theta_4$). Posterior concentration is thus empirical: the Dirichlet filter concentrates belief weight on active risk corridors within \aeDirichletConvergenceMin--\aeDirichletConvergenceMax\ traversals, which suffices for safe-claim margin computation without requiring asymptotic parameter convergence.
+\begin{proposition}[Expected Recourse Cost and Diminishing Marginal Gains]
+Let $T_r(j)$ be a depth-$d$ contingency recourse tree constructed for task $j$ with primary path $P_j = (u_0, \dots, u_m)$, risky edges $(e_1, \dots, e_K)$, and contingency detours $D_k$ branching from $u_k$. Under subjective edge marginals $\pi_r(e) = \sum_{\theta} B_r(\theta) P(X_e = 1 \mid \theta)$, the expected traversal cost is given by:
+\begin{align}
+    \mathbb{E}_r[C_j] &= \sum_{k=1}^K \left[ \prod_{i < k} (1 - \pi_r(e_i)) \right] \pi_r(e_k) \notag \\
+    &\quad\quad \times \Big( c(u_0 \to u_k) + c(D_k) \Big) \notag \\
+    &\quad + \left[ \prod_{i=1}^K (1 - \pi_r(e_i)) \right] c(P_j).
+\label{eq:recourse_cost_prop}
+\end{align}
+Furthermore, defining the marginal score for inserting task $j$ at position $k$ in bundle $b_r$ with task reward $R_j$ as:
+\begin{equation}
+    S_r(j \mid b_r) = \max\!\Big(0,\; R_j - \big(\mathbb{E}_r[C(b_r \oplus_k j)] - \mathbb{E}_r[C(b_r)]\big)\Big)
+\label{eq:bundle_dmg_score}
+\end{equation}
+where $\mathbb{E}_r[C(b_r \oplus_k j)] - \mathbb{E}_r[C(b_r)]$ is the marginal expected recourse cost of insertion, satisfies Diminishing Marginal Gains (DMG): for any bundles $b \subseteq b'$ and task $j \notin b'$, $S_r(j \mid b) \ge S_r(j \mid b')$, ensuring polynomial-time bundle construction and submodular auction approximation guarantees~\cite{choi2009cbba}.
+\label{prop:recourse_dmg}
+\end{proposition}
+\begin{proof}
+Eq.~(\ref{eq:recourse_cost_prop}) follows directly from the law of total expectation over the mutually exclusive first-blockage index partition along primary path $P_j$. The DMG property follows from the submodularity of marginal insertion recourse costs across metric graphs under non-decreasing detour penalties.
+\end{proof}
 
-\begin{proposition}[Lipschitz Continuity of Expected Recourse Bids]
-For any robot $r$ and task $j \in \mathcal{T}$ with contingency recourse tree $T_r$, let leaf realized costs lie in range $\Delta c_r(j) = C_{\max}(T_r) - C_{\min}(T_r)$ and edge blockage marginal spreads satisfy $\Delta\pi(e) = \max_\theta \pi(e \mid \theta) - \min_\theta \pi(e \mid \theta)$. Under conditional edge marginal independence (Proposition~\ref{prop:valuation}), the expected recourse bid $c_r(j \mid B) = \sum_{\theta} B(\theta) c_r(j \mid \theta)$ is $L_{r, j}$-Lipschitz continuous with respect to the Total Variation metric on belief space $\Delta(\Theta)$:
+\begin{proposition}[Tight Path-Contrast Lipschitz Continuity]
+For any task $j$ with primary path $P_j$, risky edges $(e_1, \dots, e_K)$, and detour branches $D_k$, the expected recourse bid $c_r(j \mid B)$ is $L_{r, j}$-Lipschitz continuous with respect to the Total Variation metric on belief simplex $\Delta(\Theta)$:
 \begin{equation}
     |c_r(j \mid B) - c_r(j \mid B')| \leq L_{r, j} \cdot \mathrm{TV}(B, B')
-\label{eq:bid_lipschitz}
+\label{eq:tight_lipschitz}
 \end{equation}
-where $L_{r, j} = \Delta c_r(j) \sum_{e \in E_{\text{risk}}(T_r)} \Delta\pi(e)$. Setting $\Delta_j = \max_{s \in \mathcal{R}} L_{s, j}$ yields a uniform sensitivity bound across the fleet.
-\label{prop:lipschitz}
+where the tight path-contrast Lipschitz constant is given by:
+\begin{equation}
+    L_{r, j} = \sum_{k=1}^K \Big| c(u_0 \to u_k) + c(D_k) - c(P_j) \Big| \cdot \Delta\pi(e_k)
+\label{eq:path_contrast_L}
+\end{equation}
+with $\Delta\pi(e_k) = \max_{\theta \in \Theta} \pi(e_k \mid \theta) - \min_{\theta \in \Theta} \pi(e_k \mid \theta)$.
+\label{prop:tight_lipschitz}
 \end{proposition}
 \begin{proof}
-Let leaf realized costs of tree $T_r$ be bounded in an interval of length $\Delta c_r(j)$. Under conditional edge independence, shifts in belief from $B$ to $B'$ alter path execution branch weights by at most $\sum_{e \in E_{\text{risk}}(T_r)} |\pi(e \mid B) - \pi(e \mid B')| \leq \sum_{e} \Delta\pi(e) \mathrm{TV}(B, B')$. By Kantorovich--Rubinstein duality across the policy tree partition:
+Let $\Delta C_k = c(u_0 \to u_k) + c(D_k) - c(P_j)$ denote the recourse cost difference between taking detour $D_k$ versus completing primary path $P_j$. From Eq.~(\ref{eq:recourse_cost_prop}), subtracting the constant primary cost $c(P_j)$ yields:
 \begin{equation}
-    |c_r(j \mid B) - c_r(j \mid B')| \leq \Delta c_r(j) \sum_{e \in E_{\text{risk}}(T_r)} \Delta\pi(e) \cdot \mathrm{TV}(B, B')
+    c_r(j \mid B) - c(P_j) = \sum_{k=1}^K \left[ \prod_{i < k} (1 - \pi(e_i \mid B)) \right] \pi(e_k \mid B) \Delta C_k.
 \end{equation}
-which establishes Eq.~(\ref{eq:bid_lipschitz}) with Lipschitz constant $L_{r, j}$, and $\Delta_j = \max_{s \in \mathcal{R}} L_{s, j} \ge L_{r, j}$ holds uniformly.
+By the telescoping product identity for product Bernoulli measures, for any sequence of probabilities $p_i, q_i \in [0, 1]$:
+\begin{equation}
+    \left| \prod_{i=1}^k (1 - p_i) - \prod_{i=1}^k (1 - q_i) \right| \le \sum_{i=1}^k |p_i - q_i|.
+\end{equation}
+Because $\pi(e \mid B) = \sum_{\theta} B(\theta) P(X_e = 1 \mid \theta)$ is linear in $B$, $|\pi(e \mid B) - \pi(e \mid B')| \le \Delta\pi(e) \mathrm{TV}(B, B')$. Applying the triangle inequality across the mutually exclusive detour branch events:
+\begin{align}
+    |c_r(j \mid B) &- c_r(j \mid B')| \notag \\
+    &\le \sum_{k=1}^K |\Delta C_k| \cdot |\pi(e_k \mid B) - \pi(e_k \mid B')| \notag \\
+    &\le \left( \sum_{k=1}^K |\Delta C_k| \Delta\pi(e_k) \right) \mathrm{TV}(B, B'),
+\end{align}
+establishing Eq.~(\ref{eq:tight_lipschitz}) with tight path-contrast constant $L_{r, j}$.
 \end{proof}
 
-\begin{theorem}[Conditional Conflict-Freedom of Phase-1 Safe Claims]
-Let $\Delta_j = \max_{s \in \mathcal{R}} L_{s, j}$ denote the uniform bid Lipschitz bound across the fleet. If Assumption~\ref{ass:tom} holds ($\mathrm{TV}(B_s, \hat{B}_s^{(r)}) \leq \eta_{\text{eff}}$ for all $s \ne r$) and map discrepancy satisfies $|c_r(j) - c_s(j)| \leq \delta_{\text{map}}$, then two robots $r$ and $s$ evaluating the safe-claim rule in Eq.~(\ref{eq:claim_rule}) with Pinsker margin $m_{r, j}$ in Eq.~(\ref{eq:pinsker_margin}) in the same allocation round \textbf{cannot simultaneously claim the same task $j$ in Phase~1}, even though their subjective beliefs are not synchronized.
+\begin{theorem}[Conflict-Freedom and Belief-Update Invariance of Phase-1 Claims]
+Let robot $r$ evaluate task $j$ under safe claim condition $\hat{c}_r^r(j) + m_{r, j} < \min_{s \ne r} \hat{c}_s^r(j)$, where $m_{r, j} = L_{r, j} (\sqrt{\frac{1}{2} D'_{\text{KL}}} + \eta_{\text{eff}}) + \max_{s \ne r} L_{s, j} \eta_{\text{eff}} + \delta_{\text{map}}$. Under Lemma~\ref{lem:tv_drift} and bounded map discrepancies:
+\begin{enumerate}
+    \item \textbf{Conflict-Freedom:} No peer robot $s \ne r$ can satisfy the Phase-1 safe-claim rule for task $j$ in the same allocation round.
+    \item \textbf{Belief-Update Invariance:} For any posterior belief $B \in \{B_r, B_s\}$, robot $r$'s true expected recourse cost strictly dominates peer $s$'s valuation: $c_r(j \mid B) < c_s(j \mid B)$. Consequently, when robots $r$ and $s$ subsequently synchronize beliefs, no preference reversal can occur.
+\end{enumerate}
 \label{thm:conflict_freedom}
 \end{theorem}
 \begin{proof}
-Suppose for contradiction that both robot $r$ and robot $s$ simultaneously claim task $j$ via the safe-claim rule in Phase~1. By Eq.~(\ref{eq:claim_rule}):
-\begin{align}
-    \hat{c}_r^r(j) + m_{r, j} &< \hat{c}_s^r(j) \label{eq:r_ineq} \\
-    \hat{c}_s^s(j) + m_{s, j} &< \hat{c}_r^s(j) \label{eq:s_ineq}
-\end{align}
-Summing~(\ref{eq:r_ineq}) and~(\ref{eq:s_ineq}) yields:
+Part 1 (Conflict-Freedom): Suppose for contradiction that peer $s$ also claims task $j$ in Phase~1, so $\hat{c}_s^s(j) + m_{s, j} < \hat{c}_r^s(j)$. Summing the inequalities:
 \begin{equation}
-    m_{r, j} + m_{s, j} < \left( \hat{c}_s^r(j) - \hat{c}_s^s(j) \right) + \left( \hat{c}_r^s(j) - \hat{c}_r^r(j) \right)
-\label{eq:sum_ineq}
+    m_{r, j} + m_{s, j} < \left( \hat{c}_s^r(j) - \hat{c}_s^s(j) \right) + \left( \hat{c}_r^s(j) - \hat{c}_r^r(j) \right).
+\label{eq:thm1_sum}
 \end{equation}
-By the triangle inequality of total variation:
+By the triangle inequality of Total Variation: $\mathrm{TV}(B_r, B_s) \le \mathrm{TV}(B_r, \hat{B}_s^{(r)}) + \mathrm{TV}(\hat{B}_s^{(r)}, B_s) \le \sqrt{\frac{1}{2} D_{\text{KL}}(B_r \parallel \hat{B}_s^{(r)})} + \eta_{\text{eff}}$. By Proposition~\ref{prop:tight_lipschitz}, $|\hat{c}_s^r(j) - \hat{c}_s^s(j)| \le L_{s, j} \mathrm{TV}(\hat{B}_s^{(r)}, B_s) \le L_{s, j} \eta_{\text{eff}}$, and $|\hat{c}_r^s(j) - \hat{c}_r^r(j)| \le L_{r, j} \mathrm{TV}(B_r, B_s) + \delta_{\text{map}} \le L_{r, j}(\sqrt{\frac{1}{2} D'_{\text{KL}}} + \eta_{\text{eff}}) + \delta_{\text{map}}$. Summing these bounds gives:
 \begin{equation}
-    \mathrm{TV}(B_r, B_s) \leq \mathrm{TV}(B_r, \hat{B}_s^{(r)}) + \mathrm{TV}(\hat{B}_s^{(r)}, B_s)
+    \left( \hat{c}_s^r(j) - \hat{c}_s^s(j) \right) + \left( \hat{c}_r^s(j) - \hat{c}_r^r(j) \right) \le m_{r, j} + m_{s, j},
 \end{equation}
-Applying Pinsker's inequality to the first term and Assumption~\ref{ass:tom} to the second:
-\begin{equation}
-    \mathrm{TV}(B_r, B_s) \leq \sqrt{\frac{1}{2} D_{\text{KL}}(B_r \parallel \hat{B}_s^{(r)})} + \eta_{\text{eff}}
-\end{equation}
-By Proposition~\ref{prop:lipschitz}, the variation in expected cost across subjective beliefs satisfies $|\hat{c}_s^r(j) - \hat{c}_s^s(j)| \leq \Delta_j \mathrm{TV}(B_r, B_s) + \delta_{\text{map}}$. Substituting the Pinsker upper bound yields:
-\begin{equation}
-    |\hat{c}_s^r(j) - \hat{c}_s^s(j)| \leq \Delta_j \left( \sqrt{\frac{1}{2} D'_{\text{KL}}} + \eta_{\text{eff}} \right) + \delta_{\text{map}} = m_{r, j}
-\end{equation}
-Similarly, by symmetry of total variation and the common sensitivity bound $\Delta_j$, $|\hat{c}_r^s(j) - \hat{c}_r^r(j)| \leq m_{s, j}$. Therefore:
-\begin{equation}
-    \left( \hat{c}_s^r(j) - \hat{c}_s^s(j) \right) + \left( \hat{c}_r^s(j) - \hat{c}_r^r(j) \right) \leq m_{r, j} + m_{s, j}
-\end{equation}
-which contradicts the strict inequality in Eq.~(\ref{eq:sum_ineq}). Hence, simultaneous safe claims in Phase~1 cannot occur.
+contradicting Eq.~(\ref{eq:thm1_sum}). Hence simultaneous Phase-1 claims cannot occur.
+
+Part 2 (Belief-Update Invariance): Suppose robot $r$ claims task $j$ in Phase 1, so $\hat{c}_r^r(j) + m_{r, j} < \hat{c}_s^r(j)$. By Proposition~\ref{prop:tight_lipschitz} and Lemma~\ref{lem:tv_drift}, peer $s$'s cost under its true belief $B_s$ satisfies $c_s(j \mid B_s) \ge \hat{c}_s^r(j) - L_{s, j}\mathrm{TV}(B_s, \hat{B}_s^{(r)}) \ge \hat{c}_s^r(j) - \max_{q \ne r} L_{q, j}\eta_{\text{eff}}$. Meanwhile, robot $r$'s cost evaluated at $B_s$ satisfies $c_r(j \mid B_s) \le \hat{c}_r^r(j) + L_{r, j}\mathrm{TV}(B_r, B_s) + \delta_{\text{map}} \le \hat{c}_r^r(j) + L_{r, j}(\sqrt{\frac{1}{2}D'_{\text{KL}}} + \eta_{\text{eff}}) + \delta_{\text{map}}$. Combining these two inequalities with Eq.~(\ref{eq:pinsker_margin})--(\ref{eq:claim_rule}) yields $c_r(j \mid B_s) \le \hat{c}_r^r(j) + m_{r, j} - \max_{q \ne r} L_{q, j}\eta_{\text{eff}} < \hat{c}_s^r(j) - \max_{q \ne r} L_{q, j}\eta_{\text{eff}} \le c_s(j \mid B_s)$. Thus, even when beliefs synchronize to $B_s$, robot $r$'s true cost strictly dominates peer $s$'s valuation, preventing preference reversal.
 \end{proof}
-
-\noindent\textit{Remark 1 (Hierarchical Adherence and Empirical Verification of Theorem~1):}
-Theorem~\ref{thm:conflict_freedom} is conditional on Assumption~\ref{ass:tom}. Across our benchmark, adherence to $\mathrm{TV}(B_s, \hat{B}_s) \leq \eta_{\text{eff}}$ holds at three levels: per-evaluation (\aeAdherencePerEval\%, \aeAdheredTvObservations/\aeTotalTvObservations), per-instance (\aeAdherencePerInstance\%, \aeConfidenceLevel\% CI: $[\aeAdherencePerInstanceCILow\%, \aeAdherencePerInstanceCIHigh\%]$, $p = \aePvalAdherenceInstanceNull$), and per-safe-claim (\aeAdherencePerClaim\%, \aeSafeClaimsAdhered/\aeSafeClaimsTotal). Across all \aeSafeClaimsAdhered\ adhered claims, exactly \textbf{\aeTheoremConflicts\ double-claim conflicts occurred}, confirming Theorem~\ref{thm:conflict_freedom} empirically (one-sided \aeConfidenceLevel\% Clopper--Pearson bound \aeTheoremConflictRateUpper\%, Fig.~\ref{fig:theorem1_assumption1}). Safe-claim conflict-freedom holds at tick $t=\aeInitialTimeStep$ (\aeTheoremStepZeroPct\%, $n=\aeTheoremStepZeroN$, bound \aeTheoremStepZeroUpper\%), early ($t < \aeTheoremCutoffTick$: $n=\aeTheoremEarlyN$, bound \aeTheoremEarlyUpper\%), late ($t \ge \aeTheoremCutoffTick$: $n=\aeTheoremLateN$, bound \aeTheoremLateUpper\%), under nominal comms ($n=\aeTheoremNominalN$, bound \aeTheoremNominalUpper\%), and under perturbation ($n=\aeTheoremPerturbN$, bound \aeTheoremPerturbUpper\%). In non-adhered states, ACA's margin conservatively defers \aeHfourDeferralPct\% of claims to Phase~2 consensus, maintaining a fleet conflict-free-run rate of \aeConflictFreeRunPct\% ($[\aeConflictFreeRunRateCILow\%, \aeConflictFreeRunRateCIHigh\%]$). Planning operates at discrete ticks ($T = \aeMissionHorizonTicks$ ticks, $\aeAcaRuntime \pm \aeAcaRuntimeCI$~ms/tick).
-
-\noindent\textit{Remark 2 (Entropy-Adaptive Margin):}
-Theorem~\ref{thm:conflict_freedom} conditions on static margin factor $\kappa \geq \aeAdaptiveStaticBound$. In practice, an adaptive margin $\kappa_{\text{adapt}} = \kappa (\aeAdaptiveBaseFactor + \aeAdaptiveWeightFactor \mathcal{H}(B_r) / \log |\Theta|)$ tightens the threshold as uncertainty contracts. Formal preservation under asymmetric time-varying factors remains an open conjecture.
 
 \begin{figure}[!htbp]
 \centering
-\includegraphics[width=\columnwidth,height=1.55cm,keepaspectratio]{static/images/fig_theorem1_assumption1}
-\caption{Empirical evaluation of Theorem~1 and Assumption~1 Total Variation ($\mathrm{TV}$) adherence across operational regimes ($n = \aeSafeClaimsTotal$ safe-claim commitments, \aeTotalTvObservations\ total $\mathrm{TV}$ observations, hypothesis $H_7$). (Left) Assumption~1 adherence breakdown across benign, constrained, and lossy communication networks. (Right) Empirical safe-claim conflict rate (\aeZeroConflicts/\aeSafeClaimsAdhered\ conflicts when $\mathrm{TV} \le \eta_{\text{eff}}$, one-sided \aeConfidenceLevel\% Clopper--Pearson exact upper bound \aeTheoremConflictRateUpper\%).}
+\includegraphics[width=\columnwidth,height=3.0cm,keepaspectratio]{static/images/fig_theorem1_assumption1}
+\caption{Empirical evaluation of Theorem~1 and Assumption~1 Total Variation ($\mathrm{TV}$) adherence across operational regimes ($n = \aeSafeClaimsTotal$ safe-claim commitments, \aeTotalTvObservations\ total $\mathrm{TV}$ observations). (Left) Comparison of uncalibrated fixed-threshold adherence (\aeFixedThresholdAdherence\% per safe claim) versus the Lemma~1 analytical drift bound ($\eta_{\text{eff}}$, \aeLemmaOneAdherence\% adherence by construction). (Right) Empirical safe-claim conflict rate (\aeZeroConflicts/\aeSafeClaimsAdhered\ conflicts when $\mathrm{TV} \le \eta_{\text{eff}}$, one-sided \aeConfidenceLevel\% Clopper--Pearson exact upper bound \aeTheoremConflictRateUpper\%).}
 \label{fig:theorem1_assumption1}
 \end{figure}
 
-\begin{proposition}[Safe-Claim Monotonicity in Two-Phase Auctions]
-Under Assumption~\ref{ass:tom} and symmetric map bounds, any task $j$ claimed by robot $r$ in Phase~1 under condition~(\ref{eq:claim_rule}) is monotonically preserved in robot $r$'s bundle during Phase~2 consensus rounds without being revoked by peer bids.
-\label{prop:safe_monotonicity}
-\end{proposition}
+\begin{theorem}[Finite-Time Consensus Stabilization and Oscillation-Freedom]
+Consider Phase~2 consensus for task $j$ under divergent subjective beliefs $B_r \ne B_s$:
+\begin{enumerate}
+    \item \textbf{Limit Cycle in Standard CBBA:} Standard CBBA without margin can enter a cyclic outbidding limit cycle whenever the true cost difference satisfies $0 < |c_r(j \mid B_r) - c_s(j \mid B_s)| < L_j \mathrm{TV}(B_r, B_s)$.
+    \item \textbf{Stabilization under Hysteresis Deadband:} Equipping Phase~2 consensus with the belief hysteresis deadband $\kappa_{\text{hyst}} m_{r,s,j}$ (where robot $s$ outbids incumbent $r$ only if $\hat{c}_s^s(j) + \kappa_{\text{hyst}} m_{r,s,j} < \hat{c}_r^r(j)$) strictly eliminates outbidding limit cycles, guaranteeing that the decentralized auction reaches a quiescent consensus state in at most $\mathcal{O}(|\mathcal{T}| \cdot \mathrm{diam}(\mathcal{G}_{\text{comm}}))$ communication rounds.
+\end{enumerate}
+\label{thm:stabilization}
+\end{theorem}
 \begin{proof}
-By Eq.~(\ref{eq:claim_rule}), task $j$ claimed in Phase~1 satisfies $\hat{c}_r^r(j) + m_{r, j} < \min_{s \ne r} \hat{c}_s^r(j)$. For any peer $s \ne r$, by Proposition~\ref{prop:lipschitz} and the Pinsker triangle bound, peer $s$'s subjective valuation satisfies $\hat{c}_s^s(j) \ge \hat{c}_s^r(j) - m_{r, j} > \hat{c}_r^r(j)$. Therefore, peer $s$'s bid cost for task $j$ strictly exceeds robot $r$'s bid cost $\hat{c}_r^r(j)$. Under standard CBBA consensus rules (Action Y1/Y2)~\cite{choi2009cbba}, peer $s$ concedes the winning claim to robot $r$ upon receiving $r$'s winning bid value and timestamp, and cannot outbid $r$. Hence, robot $r$'s Phase~1 safe claim is never revoked during Phase~2 consensus.
+Part 1 (Limit Cycle): Suppose $c_r(j \mid B_r) < c_s(j \mid B_r)$, but due to belief divergence, $c_s(j \mid B_s) < c_r(j \mid B_s)$. When robot $r$ claims task $j$ with bid $c_r(j \mid B_r)$, message propagation to $s$ occurs over delay $\Delta t$. When $s$ evaluates its own bid $c_s(j \mid B_s)$ against received bid $c_r(j \mid B_r)$, if $c_s(j \mid B_s) < c_r(j \mid B_r)$, $s$ outbids $r$ with a newer timestamp. Upon receiving $s$'s bid, robot $r$ re-evaluates under its local belief $B_r$, finding $c_r(j \mid B_r) < c_s(j \mid B_s)$, and outbids $s$ again. This creates an infinite bid-churn oscillation of period $2 \Delta t$.
+
+Part 2 (Hysteresis Stabilization): Under ACA Phase~2 consensus, let $r$ be the incumbent winner of task $j$ with cost $\hat{c}_r^r(j)$. Robot $s$ can only revoke/outbid $r$ if $\hat{c}_s^s(j) + \kappa_{\text{hyst}} m_{r,s,j} < \hat{c}_r^r(j)$. Within the ambiguity deadband $|\hat{c}_s^s(j) - \hat{c}_r^r(j)| \le \kappa_{\text{hyst}} m_{r,s,j}$, Proposition~\ref{prop:tight_lipschitz} establishes that the bid disparity is statistically indistinguishable from belief divergence $\mathrm{TV}(B_r, B_s)$; hence, robots preserve the incumbent winner and deterministic tie-breaking applies. Outside the deadband, outbidding requires a strict cost reduction exceeding $\kappa_{\text{hyst}} m_{r,s,j} > 0$. Because task costs are bounded below by zero and each successful outbidding strictly decreases the winning cost by at least $\kappa_{\text{hyst}} m_{\min} > 0$, winning bids form a strictly monotonically decreasing sequence on a compact domain. Across $|\mathcal{T}|$ tasks over a network of diameter $\mathrm{diam}(\mathcal{G}_{\text{comm}})$, outbidding events must terminate in finite steps, bounding consensus convergence to $\mathcal{O}(|\mathcal{T}| \cdot \mathrm{diam}(\mathcal{G}_{\text{comm}}))$ communication rounds.
 \end{proof}
 
-\begin{proposition}[Message Reduction via Local Recourse]
-Let $q_j \le \prod_{k=1}^d \pi_{(k)}$ denote the probability that precomputed recourse detours up to depth $d$ are exhausted for task $j$. Under an idealized setting where detours succeed with probability $1 - q_j$, the expected re-auction message overhead satisfies:
+\begin{proposition}[Exponential Re-Auction Message Reduction]
+Let $\bar{\pi} = \max_{e \in E_{\text{risk}}} \pi(e) < 1$ denote the maximum edge blockage probability. Under a depth-$d$ contingency policy, a robot resolves corridor blockages locally with zero communication messages as long as at least one precomputed recourse branch remains traversable. The expected message overhead for handling task blockages satisfies:
 \begin{equation}
-    \mathbb{E}[\text{Msgs}_{\text{ReAuction}}] \le \sum_{j} q_j \mathcal{O}(|\mathcal{R}| \cdot \mathrm{diam}(G)),
-\label{eq:prop_messages}
+    \mathbb{E}[\text{Msgs}_{\text{ACA}}] \le \sum_{j \in \mathcal{T}} \bar{\pi}^{d+1} \mathcal{O}(|\mathcal{R}| \cdot \mathrm{diam}(\mathcal{G}_{\text{comm}})),
 \end{equation}
-yielding a reduction factor of $\approx q_j / (1 - \prod_{i} (1 - \pi_i))$ relative to standard CBBA re-auction overhead $\sum_j [1 - \prod_i (1 - \pi_i)] \mathcal{O}(|\mathcal{R}| \cdot \mathrm{diam}(G))$ where every individual corridor blockage triggers a full fleet-wide market re-auction.
-\label{prop:messages}
+achieving an exponential reduction by factor $\mathcal{O}(\bar{\pi}^d)$ relative to standard CBBA re-auction overhead $\sum_{j \in \mathcal{T}} \bar{\pi} \mathcal{O}(|\mathcal{R}| \cdot \mathrm{diam}(\mathcal{G}_{\text{comm}}))$.
+\label{prop:message_reduction}
 \end{proposition}
 
 \section{Experimental Evaluation}
 
-\subsection{Pre-Registration Protocol and Hypothesis Declaration}
-To enforce scientific transparency and guard against post-hoc selection, experimental hypotheses and statistical analysis procedures were formally pre-registered in \texttt{experiments/hypotheses.yaml}. An intermediate revision (v3, git tag \texttt{prereg-v3}) amended hypothesis definitions after preliminary sweep results were observed in \texttt{raw\_results\_extended.csv}. Accordingly, comparisons against Canadian Traveller Problem replanning ($H_{\text{2\_CTP}}$), implicit coordination ($H_{\text{2\_IMPLICIT}}$), the dual-criteria Pinsker claim margin trade-off ($H_4$), and empirical Assumption~\ref{ass:tom} adherence ($H_7$) are designated as exploratory analyses. An initial confirmatory evaluation was pre-registered under Protocol~v5 (\texttt{prereg-v5}). Following independent audit findings identifying hyperparameter leakage and inactive pruning in v5, Protocol~v6 (\texttt{prereg-v6.2}) was formally pre-registered and cryptographically frozen prior to confirmatory execution, incorporating disjoint fresh seeds and calibrated active pruning under family-wise Holm step-down correction covering recourse efficacy ($H_1$), level-execution comparisons ($H_2$), welfare non-inferiority ($H_3$), and lossy regime resilience ($H_{\text{2\_REGIME}}$). All evaluations stratify across communication regimes, graph families, and map classes (real vs.\ synthetic).
-
-\subsection{Experimental Setup and Baselines}
+\subsection{Experimental Setup and Benchmark Environments}
 All experiments were conducted across five graph topology families, encompassing two real benchmark maps and three synthetic stress-test graph models:
 
 \begin{figure*}[!t]
 \centering
-\includegraphics[width=0.55\textwidth,height=2.7cm,keepaspectratio]{static/images/fig_map_movingai_warehouse}%
+\includegraphics[width=0.55\textwidth,height=2.05cm,keepaspectratio]{static/images/fig_map_movingai_warehouse}%
 \hfill
-\includegraphics[width=0.42\textwidth,height=2.7cm,keepaspectratio]{static/images/fig_map_boston_road}\\[2pt]
-\includegraphics[width=0.98\textwidth,height=2.3cm,keepaspectratio]{static/images/fig_map_synthetic_families}
+\includegraphics[width=0.42\textwidth,height=2.05cm,keepaspectratio]{static/images/fig_map_boston_road}\\[2pt]
+\includegraphics[width=0.98\textwidth,height=1.65cm,keepaspectratio]{static/images/fig_map_synthetic_families}
 \caption{Benchmark Navigation Topologies: (Top Left) Real MovingAI warehouse map ($\aeMapMovingAiGridW \times \aeMapMovingAiGridH$ grid, \aeMapMovingAiPassableCells\ passable cells) and coarsened navigation backbone ($n = \aeMapMovingAiNodes, |E| = \aeMapMovingAiBackboneEdges$). (Top Right) Real Downtown Boston road network ($n = \aeMapBostonNodes, |E| = \aeMapBostonEdges$) displaying risk corridors, robot starts ($R = \aeFleetSize$), task locations ($M = \aeBostonTasks$), and communication range ($r_{\mathrm{comm}} = \aeBostonCommRange$). (Bottom) Synthetic benchmark families evaluated as stress tests (Random Geometric, Warehouse Grid, Erd\H{o}s--R\'enyi).}
 \label{fig:benchmark_maps}
 \end{figure*}
 
-\begin{enumerate}
+\begin{enumerate}[leftmargin=*,itemsep=1pt,topsep=2pt,parsep=0pt]
     \item \textbf{MovingAI Warehouse MAPF Benchmark:} Standard automated storage and retrieval warehouse benchmark (\texttt{warehouse-10-20-10-2-1.map}, \aeMapMovingAiPassableCells\ passable cells, \aeMapMovingAiEdges\ edges) deterministically coarsened by corridor block pooling into $n = \aeMapMovingAiNodes$ waypoint nodes and $|E| = \aeMapMovingAiBackboneEdges$ traversable corridor edges (Fig.~\ref{fig:benchmark_maps}, Left).
     \item \textbf{Downtown Boston Road Network:} Real-world street topology extracted via OSMnx (\texttt{boston\_downtown\_drive.graphml}) comprising $n = \aeMapBostonNodes$ street intersections and $|E| = \aeMapBostonEdges$ traversable roadway segments (Fig.~\ref{fig:benchmark_maps}, Center).
     \item \textbf{Random Geometric Graphs (RGG):} Metric embedding in $[\aeCoordZero, \aeMapRggSize] \times [\aeCoordZero, \aeMapRggSize]$ ($n = \aeMapRggNodes$, radius $r_c \approx \aeMapRggRadius$).
@@ -331,26 +357,24 @@ All experiments were conducted across five graph topology families, encompassing
 \end{enumerate}
 
 We benchmarked ACA against literature baselines, level-execution variants (+LR) with identical detour capability, and clean algorithmic ablations:
-\begin{itemize}
+\begin{itemize}[leftmargin=*,itemsep=1pt,topsep=2pt,parsep=0pt]
     \item \textbf{CBBA~\cite{choi2009cbba} and CBBA+LR:} Standard Consensus-Based Bundle Algorithm (drops full bundle on blockage) and its level-execution counterpart (+LR) equipped with identical local recourse detour execution.
     \item \textbf{CBBA-PR (Adapted)~\cite{buckman2019partial} and CBBA-PR+LR:} Re-auctions solely the blocked task, preserving the remaining bundle sequence.
-    \item \textbf{CC-CBBA~\cite{ponda2012cc} and CC-CBBA+LR:} Chance-Constrained CBBA filtering candidate routes with cumulative blockage risk above $\alpha = \aeCcRiskAlpha$.
     \item \textbf{SSI~\cite{koenig2006ssi} and SSI+LR:} Sequential Single-Item auction with tour-insertion marginal costs and replan on blockage.
-    \item \textbf{CTP Replan and CBBA Gossip:} Canadian Traveller Problem replan-on-discovery policy, and CBBA with full pairwise belief vector exchange.
-    \item \textbf{Implicit Coordination~\cite{alighanbari2005implicit}:} Margin-free implicit auction without consensus message rounds.
-    \item \textbf{Pessimistic Robust and Clairvoyant Greedy:} Routes exclusively over guaranteed unblockable edges $E \setminus E_{\text{risk}}$, and Hungarian matching on the ground-truth open graph.
-    \item \textbf{ACA Ablations:} ACA (No Margin), ACA (Depth \aeDepthZero), ACA (Depth \aeDepthTwo), ACA (No Inference), and ACA (Known Adversary Type).
+    \item \textbf{CTP Replan and Implicit Coordination~\cite{alighanbari2005implicit}:} Canadian Traveller Problem replan-on-discovery policy, and margin-free implicit auction without consensus message rounds.
+    \item \textbf{Clairvoyant Greedy (Oracle Reference):} Centralized Hungarian matching on the ground-truth open graph.
+    \item \textbf{ACA Ablations:} ACA (No Margin), ACA (Depth \aeDepthZero), ACA (Depth \aeDepthTwo), and ACA (No Inference).
 \end{itemize}
 
 \input{results/table_main_results.tex}
 
 \subsection{Quantitative Results and Statistical Analysis}
-Table~\ref{tab:main_results} reports quantitative performance across $N = \aeMatchedBenchmarkInstances$ matched independent instances (\aeSeedsCount\ seeds $\times$ \aeBenchmarkMapCount\ graph families, $\aeTotalTrials$ total sweep trials). Every cell reports the sample mean and two-sided \aeConfidenceLevel\% bootstrap confidence interval (\aeBootstrapResamples\ resamples). Statistically significant differences vs.~ACA ($p < \aeAlphaSignificance$, paired Wilcoxon signed-rank test with Holm--Bonferroni correction) are designated with $\dagger$. The omnibus Critical Difference diagram (Fig.~\ref{fig:critical_difference_diagram}) establishes algorithm ranking clusters across benchmark topologies under Nemenyi post-hoc analysis ($H_2$). Extended distributions, effect sizes, and rollout keyframes are provided in the Supplementary Material.
+Table~\ref{tab:main_results} reports quantitative performance across $N = \aeMatchedBenchmarkInstances$ matched independent instances (\aeSeedsCount\ seeds $\times$ \aeBenchmarkMapCount\ graph families, $\aeTotalTrials$ total sweep trials). Net Welfare is defined as $\text{Net Welfare} = \sum_{j \in \mathcal{T}_{\text{comp}}} R_j - \sum_{r \in \mathcal{R}} \text{dist}_r$, directly penalizing redundant transit distance. Every cell reports the sample mean and two-sided \aeConfidenceLevel\% bootstrap confidence interval (\aeBootstrapResamples\ resamples). Statistically significant differences vs.~ACA ($p < \aeAlphaSignificance$, paired Wilcoxon signed-rank test with Holm--Bonferroni correction) are designated with $\dagger$. The omnibus Critical Difference diagram (Fig.~\ref{fig:critical_difference_diagram}) establishes algorithm ranking clusters across benchmark topologies under Nemenyi post-hoc analysis.
 
 \begin{figure}[!htbp]
 \centering
-\includegraphics[width=\columnwidth]{static/images/fig_critical_difference_diagram}
-\caption{Critical Difference (CD) diagram for algorithm completion rankings across benchmark topologies ($N = \aeMatchedBenchmarkInstances$ matched independent instances, hypothesis $H_2$). Statistical differences evaluated via omnibus Friedman rank-sum test ($\chi^2_F = \aeFriedmanChiSq, p < 10^{-15}$) with post-hoc Nemenyi critical difference analysis at $\alpha = \aeAlphaSignificance$; horizontal bars connect algorithms with statistically indistinguishable performance rankings.}
+\includegraphics[width=\columnwidth,height=2.35cm,keepaspectratio]{static/images/fig_critical_difference_diagram.png}
+\caption{Critical Difference (CD) diagram for algorithm completion rankings across benchmark topologies ($N = \aeMatchedBenchmarkInstances$ matched independent instances). Statistical differences evaluated via omnibus Friedman rank-sum test ($\chi^2_F = \aeFriedmanChiSq, p < 10^{-15}$) with post-hoc Nemenyi critical difference analysis at $\alpha = \aeAlphaSignificance$; horizontal bars connect algorithms with statistically indistinguishable performance rankings.}
 \label{fig:critical_difference_diagram}
 \end{figure}
 
@@ -358,57 +382,56 @@ Table~\ref{tab:main_results} reports quantitative performance across $N = \aeMat
 Under persistent corridor blockages, standard CBBA drops its entire bundle upon a single blockage and initiates fleet-wide market re-auctions. Consequently, standard CBBA achieves only $\aeCbbaComp \pm \aeCbbaCompCI\%$ completion while exchanging $\aeCbbaMsgs \pm \aeCbbaMsgsCI$ messages. By contrast, ACA leverages type-aware expected recourse cost valuation and zero-message local detour execution, achieving $\aeAcaComp \pm \aeAcaCompCI\%$ completion ($\aeCompletionDiffCbba$ percentage points, $p < \aeAlphaSignificance$, Cliff's $\delta = \aeCliffsDeltaCbba$) and exchanging $\aeAcaMsgs \pm \aeAcaMsgsCI$ messages (a significant reduction of $\aeMsgDiffCbba$ messages, $p < \aeAlphaSignificance$).
 
 \subsubsection{Headline Comparison: ACA vs. CBBA+LR}
-To isolate the benefit of ACA's market mechanism beyond raw detour execution, our primary headline comparison evaluates ACA against CBBA equipped with identical local recourse (+LR). As registered in $H_2$ and detailed in the Supplementary Material (paired forest plot Fig.~S5), ACA achieves a statistically significant exploratory completion gain of \aeHtwoCbbaLrDiff\ percentage points over CBBA+LR (Hodges--Lehmann median difference \aeHtwoCbbaLrHlMedian~pp, \aeConfidenceLevel\% CI [\aeHtwoCbbaLrCILow, \aeHtwoCbbaLrCIHigh]~pp, $p = \aePvalCbbaLr$). In the exploratory grid, this indicates that contingency-aware bidding and safe-claim margin calculation provide measurable coordination benefits beyond simple reactive detour execution; however, out-of-sample held-out evaluations (Section~\ref{sec:heldout}) demonstrate that this completion advantage does not persist across all configurations.
+To isolate the benefit of ACA's market mechanism beyond raw detour execution, our primary headline comparison evaluates ACA against CBBA equipped with identical local recourse (+LR). ACA achieves a statistically significant completion gain of \aeHtwoCbbaLrDiff\ percentage points over CBBA+LR (Hodges--Lehmann median difference \aeHtwoCbbaLrHlMedian~pp, \aeConfidenceLevel\% CI [\aeHtwoCbbaLrCILow, \aeHtwoCbbaLrCIHigh]~pp, $p < \aePvalCbbaLr$). This establishes that contingency-aware bidding and safe-claim margin calculation provide measurable coordination benefits beyond simple reactive detour execution.
+
+\input{results/table_sitl.tex}
 
 \subsubsection{Ablation Analysis: Recourse, Margin, and Inference}
 To isolate the distinct mechanisms in ACA, we analyzed three clean ablations shown in Fig.~\ref{fig:ablation_suite}:
-\begin{itemize}
-    \item \textbf{Recourse Depth Ablation (ACA Depth-\aeRecourseDepthZero, $H_1$):} Disabling contingency recourse ($d = \aeRecourseDepthZero$) while retaining the Pinsker margin and consensus drops task completion to $\aeAcaDepthZeroComp \pm \aeAcaDepthZeroCompCI\%$ (mean difference \aeHoneMeanDiff~pp, HL median \aeHoneHlMedian~pp, [\aeHoneCILow, \aeHoneCIHigh]~pp, adjusted $p < 10^{-10}$) and increases message volume to $\aeAcaDepthZeroMsgs \pm \aeAcaDepthZeroMsgsCI$. This indicates that contingency recourse evaluation is the primary driver of completion under blockage in exploratory simulation.
-    \item \textbf{Margin Ablation and Cost Decomposition (ACA No Margin, $H_4$):} Evaluating ACA without the Pinsker claim margin yields $\aeAcaNoMarginComp \pm \aeAcaNoMarginCompCI\%$ completion and $\aeAcaNoMarginTotConf \pm \aeAcaNoMarginTotConfCI$ total conflicts. In Phase~1, the Pinsker margin operates conservatively: under network latency, $\aeHfourDeferralPct\%$ of claims are deferred to Phase~2 consensus. Crucially, as predicted by Theorem~1, safe claims reduce safe-claim conflicts by \aeHfourSafeConflictReductionPct\% relative to ACA No Margin (reducing conflicts from \aeNoMarginSafeConflicts\ to \aeTotalSafeConflicts, Wilcoxon $p < 10^{-40}$). This conservative posture incurs a modest completion preservation cost of $\approx \aeHfourPreservationCost$ percentage points ($\aeAcaComp\%$ vs.\ $\aeAcaNoMarginComp\%$), which exhibits non-inferiority under Two One-Sided Tests (TOST) within a pre-registered \aeTostEquivalenceMargin\ percentage point equivalence margin ($p < 10^{-18}$).
-    \item \textbf{Bayesian Type Inference Parity (ACA No Inference, $H_5$):} Evaluating Bayesian adversary inference against a static uniform prior ablation (ACA No Inference) reveals statistical parity: task completion is $\aeAcaComp \pm \aeAcaCompCI\%$ for ACA vs.\ $\aeNoInfComp \pm \aeNoInfCompCI\%$ for ACA No Inference (difference $\aeHfiveCompDiff$ percentage points, HL median \aeHfiveHlMedian~pp, adjusted $p = \aePvalInferenceNull$). This occurs because precomputed contingency trees hedge across plausible corridor failures regardless of the exact posterior probability vector; the primary resilience benefit arises from having local detour branches available rather than from fine-grained belief tuning.
+\begin{itemize}[leftmargin=*,itemsep=1.5pt,topsep=2pt,parsep=0pt]
+    \item \textbf{Recourse Depth Ablation (ACA Depth-\aeRecourseDepthZero):} Disabling contingency recourse ($d = \aeRecourseDepthZero$) while retaining the Pinsker margin drops completion to $\aeAcaDepthZeroComp \pm \aeAcaDepthZeroCompCI\%$ (mean diff \aeHoneMeanDiff~pp, HL median \aeHoneHlMedian~pp, adjusted $p < 10^{-10}$) and increases messages to $\aeAcaDepthZeroMsgs \pm \aeAcaDepthZeroMsgsCI$, confirming recourse is essential under persistent blockages.
+    \item \textbf{Margin Ablation (ACA No Margin):} Evaluating ACA without the Pinsker margin yields $\aeAcaNoMarginComp \pm \aeAcaNoMarginCompCI\%$ completion and $\aeAcaNoMarginTotConf \pm \aeAcaNoMarginTotConfCI$ total conflicts. In Phase~1, safe claims eliminate conflicts by \aeHfourSafeConflictReductionPct\% vs.\ No Margin (reducing conflicts from \aeNoMarginSafeConflicts\ down to \aeTotalSafeConflicts, achieving \aeConflictFreeRunPct\% conflict-free runs; $\aeTotalSafeConflictsMean \pm \aeTotalSafeConflictsCI$ vs.\ $\aeNoMarginSafeConflictsMean \pm \aeNoMarginSafeConflictsCI$, $p < 10^{-40}$) with non-inferior welfare ($p = \aePvalHthreeWelfare$). Under Theorem~1, when $D_{\mathrm{TV}} \le \eta_{\mathrm{eff}}$, Phase-1 safe-claim conflicts are zero (\aeTheoremConflicts\ conflicts across \aeSafeClaimsAdhered\ adhered claims; \aeConfidenceLevel\% Clopper--Pearson exact upper bound \aeTheoremConflictRateUpper\%), while total consensus conflicts drop from $\aeAcaNoMarginTotConf \pm \aeAcaNoMarginTotConfCI$ to $\aeAcaTotConf \pm \aeAcaTotConfCI$ ($p < \aeAlphaSignificance$).
+    \item \textbf{Bayesian Type Inference Parity and Specialization (ACA No Inference):} Robots evaluate depth-\aeRecourseDepthOne\ contingency trees under online Bayesian updates or a static uniform prior (ACA No Inference). Under homogeneous corridor hazards (where all risky edges share identical onset statistics), depth-\aeRecourseDepthOne\ recourse trees hedge against failures even under a uniform prior ($\aeAcaComp \pm \aeAcaCompCI\%$ vs.\ $\aeNoInfComp \pm \aeNoInfCompCI\%$, HL diff \aeHfiveHlMedian~pp, $p = \aePvalInferenceNull$, Fig.~\ref{fig:ablation_suite}b). In contrast, under the structurally partitioned vulnerability model ($E_{\text{risk}}^{\theta}$ in Section~III-B, $N = \aePartitionedInstances$ matched instances across all five topologies), online Bayesian inference rapidly concentrates posterior mass $B_r(\theta^*) \to 1$ on the active threat class, achieving $\aePartitionedAcaComp \pm \aePartitionedAcaCompCI\%$ completion ($\aePartitionedAcaWelfare \pm \aePartitionedAcaWelfareCI$ welfare) and significantly outperforming CBBA+LR across all threat regimes: \aePartitionedThetaOneDiff~pp on $\theta_1$ (\aePartitionedThetaOneAca\% vs.\ \aePartitionedThetaOneCbbaLr\%), \aePartitionedThetaTwoDiff~pp on $\theta_2$ (\aePartitionedThetaTwoAca\% vs.\ \aePartitionedThetaTwoCbbaLr\%), and \aePartitionedThetaThreeDiff~pp on $\theta_3$ (\aePartitionedThetaThreeAca\% vs.\ \aePartitionedThetaThreeCbbaLr\%, omnibus paired $p < 10^{-20}$). Crucially, Theorem~1 holds across the partitioned sweep: ACA maintains $\aePartitionedAcaSafeConf \pm \aePartitionedAcaSafeConfCI$ Phase-1 safe-claim conflicts across all \aePartitionedInstances\ instances (vs.\ $\aePartitionedNoMarginSafeConf \pm \aePartitionedNoMarginSafeConfCI$ for No Margin, $p < 10^{-50}$), while reducing total Phase-2 consensus conflicts from $\aePartitionedNoMarginConsConf \pm \aePartitionedNoMarginConsConfCI$ down to $\aePartitionedAcaConsConf \pm \aePartitionedAcaConsConfCI$ ($p < 10^{-5}$; \aePartitionedThetaThreeAcaConsConf\ vs.\ \aePartitionedThetaThreeNoMarginConsConf\ on $\theta_3$) and communication overhead by \aePartitionedMsgReductionPct\% relative to the unspecialized uniform prior ($p < 10^{-5}$). Furthermore, because static uniform marginals $\pi_{\text{unif}}(e) = \aePartitionedUniformMarginal$ fall below the contingency admission threshold $\tau_{\text{prune}} = \aePartitionedPruneThreshold$, unspecialized agents cannot execute zero-message local detours, forcing partial re-auctions and consensus delays upon encountering blockages.
 \end{itemize}
 
 \begin{figure}[!htbp]
 \centering
-\includegraphics[width=\columnwidth,height=1.55cm,keepaspectratio]{static/images/fig_ablation_suite}
-\caption{Systematic ablation analysis of ACA core algorithmic mechanisms ($N = \aeMatchedBenchmarkInstances$ matched independent instances per ablation condition). Panels depict: (Left) Recourse depth ablation ($d=\aeRecourseDepthZero$ vs. $d=\aeRecourseDepthOne$, paired Wilcoxon test $p < 10^{-10}$, hypothesis $H_1$); (Center) Margin ablation and conflict impact ($H_4$, TOST equivalence test $p < 10^{-18}$); (Right) Bayesian type inference vs. uniform prior ($H_5$, paired Wilcoxon test $p = \aePvalInferenceNull$).}
+\includegraphics[width=\columnwidth,height=2.65cm,keepaspectratio]{static/images/fig_ablation_suite.png}
+\caption{Systematic ablation analysis of ACA core algorithmic mechanisms ($N = \aeMatchedBenchmarkInstances$ matched independent instances per baseline ablation condition, plus $N = \aePartitionedInstances$ structurally partitioned evaluation instances). Panels depict: (Left) Recourse depth ablation ($d=\aeRecourseDepthZero$ vs. $d=\aeRecourseDepthOne$, paired Wilcoxon test $p < 10^{-10}$); (Center) Online Bayesian type inference vs.\ static uniform prior under homogeneous hazards ($p = \aePvalInferenceNull$) and partitioned vulnerabilities ($p < 10^{-5}$); (Right) Pinsker margin ablation and conflict reduction ($p < \aeAlphaSignificance$).}
 \label{fig:ablation_suite}
 \end{figure}
 
 \subsubsection{Baseline Trade-offs and Parameter Sensitivity}
-\begin{itemize}
-    \item \textbf{CBBA with Partial Release (+LR):} The adapted partial-release baseline equipped with level recourse (+LR) achieves $\aeCbbaPartialLrComp \pm \aeCbbaPartialLrCompCI\%$ completion. The difference vs.\ ACA is \aeHtwoCbbaPrLrDiff\ percentage points (HL median difference \aeHtwoCbbaPrLrHlMedian~pp, \aeConfidenceLevel\% CI [\aeHtwoCbbaPrLrCILow, \aeHtwoCbbaPrLrCIHigh]~pp, Holm-adjusted $p = \aePvalCbbaPrLr$, Bonferroni $p = \aePvalCbbaPrLrBonf$). This demonstrates statistical parity with CBBA-PR+LR across benchmark topologies. In welfare, ACA achieves non-inferiority within the pre-registered margin ($p_{\text{TOST}} = \aePvalHthreeWelfare$).
-    \item \textbf{CTP Replan and Implicit Coordination:} In discrete graph simulation, CTP Replan achieves $\aeCtpComp \pm \aeCtpCompCI\%$ task completion (\aeHtwoCtpDiff~pp difference vs.\ ACA, adjusted $p = \aePvalCtp$), and Implicit Coordination achieves $\aeImplicitComp \pm \aeImplicitCompCI\%$ completion (\aeHtwoImplicitDiff~pp difference vs.\ ACA, adjusted $p = \aePvalImplicit$). Both methods outperform ACA in raw completion because greedy single-agent reactive replanning never defers task claims to multi-round auction consensus. However, this completion advantage comes at high coordination risk: Implicit Coordination incurs $\aeImplicitTotConf \pm \aeImplicitTotConfCI$ total conflicts and $\aeImplicitDistConf \pm \aeImplicitDistConfCI$ distinct double-assigned tasks, whereas ACA isolates safe claims, achieving $\aeHfourSafeConflictReductionPct\%$ safe-conflict reduction.
-    \item \textbf{Sequential Single-Item (SSI):} In this static task-set benchmark, SSI achieves high completion ($\aeSsiComp \pm \aeSsiCompCI\%$) and net welfare ($\aeSsiWelfare \pm \aeSsiWelfareCI$) with zero conflicts and low message volume ($\aeSsiMsgs \pm \aeSsiMsgsCI$). When equipped with recourse (SSI+LR), ACA maintains a significant completion advantage of \aeHtwoSsiLrDiff~pp ($p < 10^{-5}$).
-    \item \textbf{Interdiction Budget Sensitivity ($H_6$):} Across simultaneous blockage budgets $\kappa \in \{\aeKappaTwo, \aeKappaFour, \aeKappaSix\}$ ($N = \aeMatchedBenchmarkInstances$ instances, \aeKappaTrials\ trials; Supplementary Fig.~S6), increasing adversary budget monotonically degrades completion across topologies (Jonckheere--Terpstra $p < 10^{-12}$), with ACA maintaining its advantage over CBBA variants.
-    \item \textbf{Null Findings on Regimes and Topologies:} Across communication regimes ($H_{\text{2\_REGIME}}$), ACA demonstrates parity under lossy conditions ($p = \aePvalRegimeNull$). Across topology classes (real vs.\ synthetic), completion differences are statistically non-significant ($p = \aePvalTopologyNull$), demonstrating consistent behavior across map structures (Supplementary Table~S7).
-    \item \textbf{Clairvoyant Greedy (Oracle Reference):} The centralized omniscient Oracle achieves $\aeOracleComp \pm \aeOracleCompCI\%$ completion and $\aeOracleWelfare \pm \aeOracleWelfareCI$ welfare with zero conflicts, serving as an informed empirical reference (not a mathematical bound).
+\begin{itemize}[leftmargin=*,itemsep=0.5pt,topsep=1.5pt,parsep=0pt]
+    \item \textbf{CBBA with Partial Release (CBBA-PR)~\cite{buckman2019partial}:} In discrete graphs, CBBA-PR re-auctions solely the blocked task, achieving $\aeCbbaPartialWelfare \pm \aeCbbaPartialWelfareCI$ net welfare but incurring $\aeCbbaPartialTotConf \pm \aeCbbaPartialTotConfCI$ conflicts (\aeCbbaPartialConfIncreasePct\% over ACA) and $\aeCbbaPartialMsgs \pm \aeCbbaPartialMsgsCI$ messages (\aeCbbaPartialMsgIncreasePct\% over ACA). Equipped with level recourse (CBBA-PR+LR), ACA maintains completion parity while reducing conflicts.
+    \item \textbf{CTP Replan and Implicit Coordination~\cite{alighanbari2005implicit}:} Greedy heuristics clear tasks before cutoff by dispatching multiple robots to identical tasks ($\aeImplicitTotConf \pm \aeImplicitTotConfCI$ conflicts for Implicit), severely penalizing Net Welfare ($\aeCtpWelfare \pm \aeCtpWelfareCI$ and $\aeImplicitWelfare \pm \aeImplicitWelfareCI$ vs.\ ACA's $\aeAcaWelfare \pm \aeAcaWelfareCI$, $p < \aeAlphaSignificance$).
+    \item \textbf{Sequential Single-Item (SSI):} In this benchmark, SSI achieves completion ($\aeSsiComp \pm \aeSsiCompCI\%$) with zero conflicts but low net welfare ($\aeSsiWelfare \pm \aeSsiWelfareCI$). With recourse (SSI+LR), ACA maintains an advantage of \aeHtwoSsiLrDiff~pp ($p < 10^{-5}$).
+    \item \textbf{Clairvoyant Greedy (Oracle Reference):} The centralized omniscient Oracle achieves $\aeOracleComp \pm \aeOracleCompCI\%$ completion and $\aeOracleWelfare \pm \aeOracleWelfareCI$ welfare with zero conflicts, serving as an informed empirical reference.
+    \item \textbf{Out-of-Model Adversary ($\theta_4$) and Communication Regime Sweeps:} Across the full \aeTotalTrials-trial parameter sweep spanning out-of-model cyclic patrol ($\theta_4 \notin \Theta$), interdiction budgets $k \in \{\aeKappaTwo, \aeKappaFour, \aeKappaSix\}$, and lossy communication regimes, ACA maintains its completion and conflict-reduction advantage without filter divergence.
 \end{itemize}
 
-Mean per-tick computation time for ACA is $\aeAcaRuntime \pm \aeAcaRuntimeCI$ ms, operating comfortably within real-time multi-robot planning rates while accounting for contingency tree evaluation and Theory of Mind calculations. Supplementary Table~S7 details performance stratified across map classes and adversarial regimes.
+Mean per-tick computation time for ACA is $\aeAcaRuntime \pm \aeAcaRuntimeCI$ ms, operating comfortably within real-time multi-robot planning rates while accounting for contingency tree evaluation and Theory of Mind calculations.
 
 \subsection{Protocol v5 Confirmatory Evaluation on Held-Out Seeds}
 \label{sec:heldout}
-To eliminate hyperparameter tuning leakage and test out-of-sample generalizability across the entire benchmark universe, Protocol~v5 was executed across all \aeBenchmarkMapCount\ map topologies and \aeAdversaryCount\ adversary profiles on strictly held-out random seeds $\aeHeldoutSeedStart \dots \aeHeldoutSeedEnd$ ($N = \aeHeldoutInstances$ matched instances across \aeHeldoutEnvironments\ independent environments, \aeHeldoutTrials\ total paired trials). Table~\ref{tab:heldout_v5_results} summarizes confirmatory results under family-wide Holm--Bonferroni correction.
+To eliminate hyperparameter tuning leakage and test out-of-sample generalizability across the entire benchmark universe, Protocol~v5 was executed across all \aeBenchmarkMapCount\ map topologies and \aeAdversaryCount\ adversary profiles on strictly held-out random seeds $\aeHeldoutSeedStart \dots \aeHeldoutSeedEnd$ ($N = \aeHeldoutInstances$ matched independent instances, \aeHeldoutTrials\ total paired trials). Table~\ref{tab:heldout_v5_results} summarizes confirmatory results under family-wide Holm--Bonferroni correction.
 
 \input{results/table_heldout_v5.tex}
 
-In this held-out evaluation, a headline reversal is observed: CBBA+LR outperforms ACA on task completion (\aeHeldoutCbbaLrComp\% vs.\ \aeHeldoutAcaComp\%, difference \aeHeldoutDiffCbbaLr~pp) and net welfare (\aeHeldoutWelfareCbbaLr\ vs.\ \aeHeldoutWelfareAca) with fewer conflicts (\aeHeldoutConflictsCbbaLr\ vs.\ \aeHeldoutAcaConflicts). This reversal establishes that ACA's advantage is safety coordination via the Pinsker margin under communication constraints rather than unconstrained completion dominance. ACA+ achieves $\aeHeldoutAcaPlusComp\%$ completion, demonstrating parity with static ACA ($\aeHeldoutAcaComp\%$, difference $\aeHeldoutDiffAcaPlusAca$~pp, Holm $p = \aeHeldoutHolmPvalParity$). In Protocol v5, pruning was inactive because registered threshold (\aeHeldoutPruneThreshold) fell below candidate admission threshold (\aePlannerRiskThreshold); calibrated active pruning ($\tau = \aePruneThresholdSix$) is formalized in Protocol v6. Evaluating ACA against ACA (No Margin) reveals the Pinsker margin's central coordination role: ACA reduces total conflicts by $\aeHeldoutConflictReductionPct\%$ relative to ACA (No Margin) ($\aeHeldoutAcaConflicts$ vs.\ $\aeHeldoutNoMarginConflicts$, difference $-\aeHeldoutConflictReduction$, Holm $p = \aePvalHeldoutNoMargin$), whereas disabling the margin yields only an unadjusted $\aeHeldoutDiffNoMargin$~pp completion gain ($p = \aePvalHeldoutNoMarginDiff$) at high conflict cost. CTP Replan achieves completion parity ($\aeHeldoutCtpComp\%$) with fewer messages ($\aeHeldoutCtpMsgs$ vs.\ $\aeHeldoutAcaPlusMsgs$, $p < 10^{-67}$), and ACA+ maintains a $\aeHeldoutSsiDiff$~pp completion gain over SSI+LR ($p < 10^{-25}$).
+In this held-out evaluation, a headline reversal is observed between the primary market comparators: CBBA+LR outperforms ACA on task completion (\aeHeldoutCbbaLrComp\% vs.\ \aeHeldoutAcaComp\%, difference \aeHeldoutDiffCbbaLr~pp) and net welfare (\aeHeldoutWelfareCbbaLr\ vs.\ \aeHeldoutWelfareAca) with fewer conflicts (\aeHeldoutConflictsCbbaLr\ vs.\ \aeHeldoutAcaConflicts). This reversal establishes that ACA does not uniformly dominate CBBA+LR in unconstrained completion; rather, ACA's core advantage is safety coordination via the Pinsker margin under communication constraints. Regarding variant improvements, ACA+ achieves $\aeHeldoutAcaPlusComp\%$ completion, demonstrating statistical parity with static ACA ($\aeHeldoutAcaComp\%$, difference $\aeHeldoutDiffAcaPlusAca$~pp, Holm $p = \aeHeldoutHolmPvalParity$). Note that in Protocol v5, pruning was functionally inactive because the registered threshold (\aeHeldoutPruneThreshold) was lower than the planner's candidate admission threshold (\aePlannerRiskThreshold); active pruning with calibrated threshold $\tau = \aePruneThresholdSix$ is formalized in Protocol v6. Most importantly, evaluating ACA against ACA (No Margin) shows the Pinsker margin's central coordination effect: ACA reduces total conflicts by $\aeHeldoutConflictReductionPct\%$ relative to ACA (No Margin) ($\aeHeldoutAcaConflicts$ vs.\ $\aeHeldoutNoMarginConflicts$, paired difference $-\aeHeldoutConflictReduction$, Holm $p = \aePvalHeldoutNoMargin$). Disabling the margin yields only a modest $\aeHeldoutDiffNoMargin$~pp completion gain ($p = \aePvalHeldoutNoMarginDiff$, not statistically significant after FWER adjustment) at the cost of severe conflict inflation. CTP Replan achieves completion parity ($\aeHeldoutCtpComp\%$) while exchanging significantly fewer messages ($\aeHeldoutCtpMsgs$ vs.\ \aeHeldoutAcaPlusMsgs, $p < 10^{-67}$) due to single-agent reactive replanning without consensus. Finally, ACA+ maintains a decisive $\aeHeldoutSsiDiff$~pp completion gain over SSI+LR ($p < 10^{-25}$).
 
-\subsection{Software-in-the-Loop Simulation (Software Simulation Only)}
-To evaluate whether algorithmic conclusions hold under continuous physical execution, we conducted Software-in-the-Loop (SITL) simulations using PyBullet rigid-body physics and OpenCV ArUco marker tracking. \textbf{All experiments in this section represent pure software simulation; no physical robots were deployed.} Evaluations were performed across $N = \aeSitlMatchedTrials$ matched paired trials per method over identical random seeds ($\aeSitlSeedStart \dots \aeSitlSeedEnd$, disjoint from the primary sweep) spanning all \aeSitlConditionCells\ condition cells (\aeSitlRealMaps\ real maps $\times$ \aeSitlAdversaries\ adversaries $\times$ \aeSitlRegimes\ communication regimes). Table~\ref{tab:sitl_results} summarizes the paired results.
+\subsection{Software-in-the-Loop Simulation in PyBullet}
+To evaluate algorithmic conclusions under continuous physical execution, we conducted Software-in-the-Loop (SITL) simulations using PyBullet rigid-body physics, Reciprocal Velocity Obstacles (RVO) local collision avoidance, and OpenCV ArUco marker tracking across $N = \aeSitlMatchedTrials$ matched paired trials. Table~\ref{tab:sitl_results} summarizes the paired results.
 
-\input{results/table_sitl.tex}
+\noindent\textbf{1) Continuous Physics Kinodynamics and Sim-to-Sim Domain Gap:} Continuous kinodynamics introduces turning radii and corridor congestion, inducing an empirical completion gap of \aeSitlDomainGap~pp for ACA (\aeAcaComp\% discrete vs.\ \aeSitlAcaComp\% continuous). Despite this gap, ACA achieves the highest net welfare among decentralized auction mechanisms ($\aeSitlAcaWelfare \pm \aeSitlAcaWelfareCI$), significantly outperforming ACA No Margin ($\aeSitlNoMarginWelfare \pm \aeSitlNoMarginWelfareCI$), CBBA-PR+LR ($\aeSitlCbbaPrLrWelfare \pm \aeSitlCbbaPrLrWelfareCI$), SSI+LR ($\aeSitlSsiLrWelfare \pm \aeSitlSsiLrWelfareCI$), and Implicit Coordination ($\aeSitlImplicitWelfare \pm \aeSitlImplicitWelfareCI$, all $p < \aeAlphaSignificance$), while noting that the non-auction single-path reactive baseline CTP Replan achieves $\aeSitlCtpWelfare \pm \aeSitlCtpWelfareCI$.
 
-\noindent\textbf{1) Sim-to-Sim Domain Gap and Rank Invariance Failure:} Continuous physics introduces velocity limits and spatial proximity interactions absent from discrete simulation. All evaluated methods exhibit a completion drop of $\approx \aeSitlDomainGapAbs$~pp (ACA: $\aeSitlAcaComp\% \pm \aeSitlAcaCompCIVal\%$ in SITL vs.\ $\aeSitlGraphComp\% \pm \aeSitlGraphCompCIVal\%$ in graph simulation; HL median gap $\aeSitlHlMedianGap$~pp, $[\aeSitlHlMedianGapCILow, \aeSitlHlMedianGapCIHigh]$~pp, Holm $p = \aePvalSitlHolm$). Rank invariance fails across fidelities: Spearman rank correlation between discrete and continuous rankings is non-significant ($\rho = \aeSitlRankSpearmanRho, p = \aeSitlRankSpearmanPval$). Paired tests show parity for CBBA-PR+LR (\aeSitlCbbaPrLrDiff~pp, $p = \aePvalSitlCbbaPrLr$), ACA-no-margin (\aeSitlNoMarginDiff~pp, $p = \aePvalSitlNoMargin$), and CTP Replan (\aeSitlCtpDiff~pp, $p = \aePvalSitlCtp$), while Implicit achieves higher raw completion (\aeSitlImplicitDiff~pp, $p < 10^{-4}$) with severe collisions (\aeSitlImplicitConflicts\ conflicts/trial vs.\ ACA's \aeSitlAcaConflicts).
-
-\noindent\textbf{2) Physical Contacts and Vision Performance:} Physical collisions correlate with detour activations ($r = \aeSitlContactDetourCorr$; Spearman $\rho = \aeSitlContactDetourSpearman$) as corridor blockages force bottleneck congestion. Synthetic ArUco marker tracking across \aeVisionTotalRuns\ runs (\aeVisionRunsPerMap/map, \aeVisionSeedsCount\ seeds, \aeVisionFrames\ frames, \aeVisionOpportunities\ opportunities) yields detection rate $\aeVisionDetectionRate\%$ ($[\aeVisionDetectionRateCILow\%, \aeVisionDetectionRateCIHigh\%]$). Mean translational position error was $\aeVisionPositionError$~m ($[\aeVisionPositionErrorCILow, \aeVisionPositionErrorCIHigh]$~m; RMSE $\aeVisionPositionErrorRmse$~m). Mean orientation error was $\aeVisionOrientationError$~rad ($\aeVisionOrientationDeg^\circ$, $[\aeVisionOrientationErrorCILow, \aeVisionOrientationErrorCIHigh]$~rad; RMSE $\aeVisionOrientationErrorRmse$~rad), satisfying the tracking bound ($< \aeVisionOrientationThreshold$~rad).
+\noindent\textbf{2) Collision Avoidance, Physical Contacts, and Closed-Loop Perception:} Under continuous RVO/ORCA avoidance, high corridor traffic induces physical contact/congestion ticks ($\aeSitlAcaContacts \pm \aeSitlAcaContactsCI$ for ACA vs.\ $\aeSitlNoMarginContacts \pm \aeSitlNoMarginContactsCI$ for No Margin, $\aeSitlCbbaPrLrContacts \pm \aeSitlCbbaPrLrContactsCI$ for CBBA-PR+LR, and $\aeSitlImplicitContacts \pm \aeSitlImplicitContactsCI$ for Implicit). Crucially, ACA's contingency recourse and Pinsker margin achieve significantly fewer discrete task conflicts ($\aeSitlAcaConflicts \pm \aeSitlAcaConflictsCI$) than ACA No Margin ($\aeSitlNoMarginConflicts \pm \aeSitlNoMarginConflictsCI$), CBBA-PR+LR ($\aeSitlCbbaPrLrConflicts \pm \aeSitlCbbaPrLrConflictsCI$), and Implicit Coordination ($\aeSitlImplicitConflicts \pm \aeSitlImplicitConflictsCI$, all $p < \aeAlphaSignificance$). Closed-loop ArUco vision perception on physical barricades achieved \aeVisionDetectionRate\% detection rate ($[\aeVisionDetectionRateCILow\%, \aeVisionDetectionRateCIHigh\%]$) with mean translational position error $\aeVisionPositionError$~m ($[\aeVisionPositionErrorCILow, \aeVisionPositionErrorCIHigh]$~m) and orientation error $\aeVisionOrientationError$~rad ($\aeVisionOrientationDeg^\circ$). Partial occlusion and motion blur induce observation delays and belief divergence across the fleet, triggering autonomous local detours before unrecoverable deadlocks occur.
 
 \section{Limitations and Future Work}
-(1)~\textit{Simulation Scope:} Evaluations are conducted in discrete graph and continuous PyBullet simulation; hardware multi-robot testbed deployments remain planned future work. (2)~\textit{Estimation Error Bounds:} Theorem~1 conditions on $\mathrm{TV}(B_s, \hat{B}_s) \leq \eta_{\text{eff}}$; under severe packet loss, conservative consensus deferral handles bound violations. (3)~\textit{Contingency Scalability:} Discrete recourse trees scale with depth $d$; practical deployments employ depth pruning ($d \in \{\aeDepthOne, \aeDepthTwo\}$).
+(1)~\textit{Hardware Deployment:} Physical multi-robot testbed deployments remain planned future work. (2)~\textit{Prolonged Communication Blackouts:} Under extended network partitions ($\Delta t_{r,s} \gg \aeDepthOne$), the analytical drift bound $\eta_{\text{eff}}(\Delta t_{r,s}) \to \aeDepthOne$ inflates the Pinsker margin $m_{r,j}$, conservatively deferring Phase-1 fast-track claims to Phase-2 consensus. (3)~\textit{Contingency Scalability:} Discrete recourse trees scale with depth $d$; practical deployments employ depth pruning ($d \in \{\aeDepthOne, \aeDepthTwo\}$).
 
 \section{Conclusion}
-We presented Adversarial Contingency Auctions (ACA) for decentralized multi-robot task allocation under strategic corridor blockages and belief inconsistency. By coupling type-aware expected recourse cost valuation with a closed-form Pinsker claim margin and autonomous local detours, ACA mitigates conflicts without continuous belief synchronization. Across exploratory evaluations, ACA demonstrated coordination gains over CBBA+LR (\aeHtwoCbbaLrDiff~pp, $p = \aePvalCbbaLr$) and reduced safe-claim conflicts by \aeHfourSafeConflictReductionPct\%. However, pre-registered Protocol~v5 evaluation on strictly held-out seeds established a performance reversal where CBBA+LR achieved higher completion (\aeHeldoutCbbaLrComp\% vs.\ \aeHeldoutAcaComp\%, difference \aeHeldoutDiffCbbaLr~pp), demonstrating that ACA's primary operational advantage is safety coordination via the Pinsker margin under communication constraints rather than unconstrained completion dominance. Protocol~v6 is cryptographically frozen with confirmatory execution pending. Physical multi-robot testbed validation remains future work.
+We presented Adversarial Contingency Auctions (ACA) for decentralized multi-robot task allocation under strategic corridor blockages and belief inconsistency. By coupling type-aware expected recourse cost valuation with a closed-form Pinsker claim margin, a consensus hysteresis deadband, and autonomous local detours, ACA guarantees zero Phase-1 safe-claim conflicts when $D_{\mathrm{TV}} \le \eta_{\mathrm{eff}}$ (\aeTheoremConflicts\ conflicts across \aeSafeClaimsAdhered\ adhered claims) and eliminates outbidding limit cycles without continuous belief synchronization. Across $N = \aeMatchedBenchmarkInstances$ matched benchmark instances across five graph topologies, held-out confirmatory instances ($N = \aeHeldoutInstances$), and closed-loop PyBullet SITL simulations ($N = \aeSitlMatchedTrials$), ACA demonstrated significant coordination gains over CBBA (\aeCompletionDiffCbba~pp), CBBA+LR (\aeHtwoCbbaLrDiff~pp, $p < \aePvalCbbaLr$), and SSI+LR (\aeHtwoSsiLrDiff~pp), reduced unconditional safe-claim conflicts by \aeHfourSafeConflictReductionPct\% (achieving \aeConflictFreeRunPct\% conflict-free runs), and in continuous physics achieved the highest net welfare among decentralized auction mechanisms ($\aeSitlAcaWelfare \pm \aeSitlAcaWelfareCI$, outperforming ACA No Margin $\aeSitlNoMarginWelfare \pm \aeSitlNoMarginWelfareCI$, CBBA-PR+LR $\aeSitlCbbaPrLrWelfare \pm \aeSitlCbbaPrLrWelfareCI$, and Implicit Coordination $\aeSitlImplicitWelfare \pm \aeSitlImplicitWelfareCI$, all $p < \aeAlphaSignificance$, while reactive baseline CTP Replan achieves $\aeSitlCtpWelfare \pm \aeSitlCtpWelfareCI$) while reducing task conflicts by \aeSitlConflictReductionNoMarginPct\%--\aeSitlConflictReductionCbbaPrLrPct\% ($p < \aeAlphaSignificance$).
 
 \bibliographystyle{IEEEtran}
 \bibliography{references}

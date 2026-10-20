@@ -63,8 +63,9 @@ def test_lipschitz_cost_bound_monte_carlo():
             tv = float(compute_tv_distance(b1, b2))
 
             # Compute marginals under b1 and b2
-            pi1 = {e: float(sum(b1[k] * (h / (h + 0.15)) for k, h in enumerate(h_list))) for e, h_list in hazards.items()}
-            pi2 = {e: float(sum(b2[k] * (h / (h + 0.15)) for k, h in enumerate(h_list))) for e, h_list in hazards.items()}
+            base_marg = {canonical_edge(u, v): 0.0 for u, v in graph.edges()}
+            pi1 = {**base_marg, **{e: float(sum(b1[k] * (h / (h + 0.15)) for k, h in enumerate(h_list))) for e, h_list in hazards.items()}}
+            pi2 = {**base_marg, **{e: float(sum(b2[k] * (h / (h + 0.15)) for k, h in enumerate(h_list))) for e, h_list in hazards.items()}}
 
             plan1 = planner.build_recourse_plan(1, start, target, pi1)
             if plan1 is None:
@@ -110,14 +111,15 @@ def test_pure_type_sensitivity_range():
     }
 
     # Base plan
-    nominal_marginals = {e: 0.2 for e in risky_edges}
+    base_marginals = {canonical_edge(u, v): 0.0 for u, v in graph.edges()}
+    nominal_marginals = {**base_marginals, **{e: 0.2 for e in risky_edges}}
     plan = planner.build_recourse_plan(1, start, target, nominal_marginals)
     assert plan is not None
 
     # Compute costs under each pure type
     pure_costs = []
     for theta_idx in range(3):
-        pi_theta = {e: h_list[theta_idx] / (h_list[theta_idx] + 0.15) for e, h_list in hazards.items()}
+        pi_theta = {**base_marginals, **{e: h_list[theta_idx] / (h_list[theta_idx] + 0.15) for e, h_list in hazards.items()}}
         c_theta = planner.compute_expected_cost(plan.primary_path, plan.risky_edges, plan.detours, pi_theta)
         pure_costs.append(c_theta)
 
@@ -127,7 +129,7 @@ def test_pure_type_sensitivity_range():
     # Check 1,000 random beliefs
     for _ in range(1000):
         b = rng.dirichlet(np.ones(3))
-        pi_b = {e: float(sum(b[k] * (h / (h + 0.15)) for k, h in enumerate(h_list))) for e, h_list in hazards.items()}
+        pi_b = {**base_marginals, **{e: float(sum(b[k] * (h / (h + 0.15)) for k, h in enumerate(h_list))) for e, h_list in hazards.items()}}
         c_b = planner.compute_expected_cost(plan.primary_path, plan.risky_edges, plan.detours, pi_b)
         assert c_min - 1e-6 <= c_b <= c_max + 1e-6, f"Cost {c_b} outside pure-type range [{c_min}, {c_max}]"
 
@@ -181,9 +183,10 @@ def test_theorem3_claim_margin_guarantee():
             pinsker_bound = np.sqrt(0.5 * max(0.0, kl)) + eta
 
             # Compute costs
-            pi_r = {e: float(sum(b_r[k] * (h / (h + 0.15)) for k, h in enumerate(h_list))) for e, h_list in hazards.items()}
-            pi_hat_s = {e: float(sum(b_hat_s[k] * (h / (h + 0.15)) for k, h in enumerate(h_list))) for e, h_list in hazards.items()}
-            pi_true_s = {e: float(sum(b_s[k] * (h / (h + 0.15)) for k, h in enumerate(h_list))) for e, h_list in hazards.items()}
+            base_marginals = {canonical_edge(u, v): 0.0 for u, v in graph.edges()}
+            pi_r = {**base_marginals, **{e: float(sum(b_r[k] * (h / (h + 0.15)) for k, h in enumerate(h_list))) for e, h_list in hazards.items()}}
+            pi_hat_s = {**base_marginals, **{e: float(sum(b_hat_s[k] * (h / (h + 0.15)) for k, h in enumerate(h_list))) for e, h_list in hazards.items()}}
+            pi_true_s = {**base_marginals, **{e: float(sum(b_s[k] * (h / (h + 0.15)) for k, h in enumerate(h_list))) for e, h_list in hazards.items()}}
 
             p_r = planner.build_recourse_plan(1, r_node, task_node, pi_r)
             p_hat_s = planner.build_recourse_plan(1, s_node, task_node, pi_hat_s)
@@ -219,7 +222,8 @@ def test_lipschitz_zero_divergence_and_error():
     """When beliefs are identical (TV=0, KL=0) and eta=0, margin is 0."""
     graph = generate_graph("grid", n_nodes=16, seed=42)
     planner = ContingencyPlanner(graph=graph, max_depth=1)
-    plan = planner.build_recourse_plan(1, 0, 15, {})
+    base_marginals = {canonical_edge(u, v): 0.0 for u, v in graph.edges()}
+    plan = planner.build_recourse_plan(1, 0, 15, base_marginals)
     L_j = compute_lipschitz_bound(planner, plan, {})
     assert L_j == 0.0, "Paths with no risky edges must have L_j = 0"
 
@@ -242,7 +246,8 @@ def test_recourse_disabled_depth_zero():
     planner = ContingencyPlanner(graph=graph, max_depth=0)
     edges = list(graph.edges())
     c_e = canonical_edge(edges[0][0], edges[0][1])
-    marginals = {c_e: 0.5}
+    base_marginals = {canonical_edge(u, v): 0.0 for u, v in graph.edges()}
+    marginals = {**base_marginals, c_e: 0.5}
     plan = planner.build_recourse_plan(1, edges[0][0], edges[-1][1], marginals, risky_edge_threshold=0.1)
     if plan is not None and plan.risky_edges:
         hazards = {c_e: [0.1, 0.5, 0.9]}

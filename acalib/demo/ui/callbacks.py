@@ -76,8 +76,11 @@ def get_metrics_table(history: list, tick_idx: int) -> pd.DataFrame:
         return pd.DataFrame()
 
     frame = history[tick_idx]
-    total_tasks = len(frame.get("tasks", []))
+    tasks_list = frame.get("tasks", [])
+    total_tasks = len(tasks_list) if tasks_list else 15
     completed = frame.get("completed_tasks", 0)
+    if completed == 0 and tasks_list:
+        completed = sum(1 for t in tasks_list if t.get("is_completed"))
     pct = (completed / max(1, total_tasks)) * 100.0
 
     data = {
@@ -210,20 +213,25 @@ def update_comm_regime(regime_choice):
 
 
 def update_alloc_choice(alloc_choice):
-    """Display UI note for ablation identity and performance advisories."""
+    """Display UI note for ablation identity and performance advisories, and sync depth slider."""
     if alloc_choice == "ACA (Depth-2)":
         note = "ℹ️ **ACA (Depth-2)**: Single-level contingency recourse branches bypass primary corridor interdictions; recursive detours saturate on these horizons and topologies."
-        return gr.Markdown(value=note, visible=True)
+        return gr.Markdown(value=note, visible=True), gr.Slider(value=2)
+    elif alloc_choice == "ACA (Depth-0 Ablation)":
+        note = "ℹ️ **ACA (Depth-0 Ablation)**: Disables contingency detour precomputation (d=0); robots replan reactively upon encountering path blockages."
+        return gr.Markdown(value=note, visible=True), gr.Slider(value=0)
     elif alloc_choice == "ACA-Adaptive (Entropy Calibrated)":
         note = "ℹ️ **ACA-Adaptive**: Automatically calibrates Pinsker margin scaling factor based on Dirichlet entropy of the adversary belief distribution."
-        return gr.Markdown(value=note, visible=True)
+        return gr.Markdown(value=note, visible=True), gr.Slider(value=1)
     elif alloc_choice == "ACA+ (Adaptive + Corridor Pruning)":
         note = "ℹ️ **ACA+**: Combines entropy-calibrated adaptive margin with Bayesian corridor probability pruning (threshold = 0.06)."
-        return gr.Markdown(value=note, visible=True)
+        return gr.Markdown(value=note, visible=True), gr.Slider(value=1)
     elif "foresight" in alloc_choice.lower():
         note = "⚠️ **Foresight Optimal (CP-SAT MILP)**: Solves global vehicle routing via OR-Tools CP-SAT with a 5.0s solver timeout per tick. For interactive speeds, recommend ≤ 4 robots, ≤ 10 tasks."
-        return gr.Markdown(value=note, visible=True)
-    return gr.Markdown(value="", visible=False)
+        return gr.Markdown(value=note, visible=True), gr.Slider(value=0)
+    elif "cbba" in alloc_choice.lower() or "ssi" in alloc_choice.lower():
+        return gr.Markdown(value="", visible=False), gr.Slider(value=0)
+    return gr.Markdown(value="", visible=False), gr.Slider(value=1)
 
 
 def run_sim_action(
@@ -250,8 +258,9 @@ def run_sim_action(
             n_nodes = 420
 
     def on_step(current_step: int, total_steps: int):
-        frac = 0.15 + 0.70 * ((current_step + 1) / max(1, total_steps))
-        progress(frac, desc=f"Simulating: Tick {current_step + 1}/{total_steps}")
+        if (current_step + 1) % 5 == 0 or current_step == 0 or (current_step + 1) >= total_steps:
+            frac = 0.15 + 0.70 * ((current_step + 1) / max(1, total_steps))
+            progress(frac, desc=f"Simulating: Tick {current_step + 1}/{total_steps}")
 
     progress(0.12, desc=f"Configuring {fam} simulation base...")
     run_res = run_single_simulation(
@@ -298,18 +307,24 @@ def run_sim_action(
     narrative = generate_what_happened_narrative(summary, history, env_info)
     failures_df = diagnose_task_failures(run_res)
 
-    # Render plot at FINAL tick
+    # Render plot at FINAL tick (lazy-cached in frame)
     progress(0.9, desc="Rendering spatial canvas...")
-    fig = plot_simulation_state(
-        history, graph, pos, final_tick_idx,
-        graph_family=fam, variant=variant,
-        show_work_zones=work_zones_active,
-    )
+    fig = final_frame.get("_rendered_fig")
+    if fig is None:
+        fig = plot_simulation_state(
+            history, graph, pos, final_tick_idx,
+            graph_family=fam, variant=variant,
+            show_work_zones=work_zones_active,
+        )
+        final_frame["_rendered_fig"] = fig
 
-    # Build KPI HTML strings
-    completed = final_frame.get("completed_tasks", 0)
-    total_t = len(final_frame.get("tasks", []))
-    pct = (completed / max(1, total_t)) * 100.0
+    # Build KPI HTML strings - strictly unified with summary ground truth
+    total_t = summary.get("total_tasks", len(final_frame.get("tasks", [])))
+    completed = summary.get("completed_tasks", final_frame.get("completed_tasks", 0))
+    if completed == 0 and final_frame.get("tasks"):
+        completed = sum(1 for t in final_frame["tasks"] if t.get("is_completed"))
+    final_frame["completed_tasks"] = completed
+    pct = summary.get("completion_rate_pct", (completed / max(1, total_t)) * 100.0)
     confs = final_frame.get("conflicts", 0)
     msgs = final_frame.get("messages", 0)
     trav = final_frame.get("travel", 0.0)
@@ -372,18 +387,24 @@ def replay_from_start(history, env_info, work_zones_active):
     tick_idx = 0
     graph = (env_info or {}).get("_graph")
     pos = (env_info or {}).get("_pos")
-    env_info = env_info or {}
-    fam = env_info.get("family", "road_osmnx")
-    variant = env_info.get("variant", "none")
-
-    fig = plot_simulation_state(
-        history, graph, pos, tick_idx,
-        graph_family=fam, variant=variant,
-        show_work_zones=work_zones_active,
-    )
+    if graph is None or pos is None:
+        return gr.Slider(value=1), None, "", "", "", "", "", "", "", ""
+    fam = (env_info or {}).get("family", "road_osmnx")
+    variant = (env_info or {}).get("variant", "none")
     final_frame = history[tick_idx]
+    fig = final_frame.get("_rendered_fig")
+    if fig is None:
+        fig = plot_simulation_state(
+            history, graph, pos, tick_idx,
+            graph_family=fam, variant=variant,
+            show_work_zones=work_zones_active,
+        )
+        final_frame["_rendered_fig"] = fig
+    tasks_list = final_frame.get("tasks", [])
+    total_t = len(tasks_list) if tasks_list else 15
     completed = final_frame.get("completed_tasks", 0)
-    total_t = len(final_frame.get("tasks", []))
+    if completed == 0 and tasks_list:
+        completed = sum(1 for t in tasks_list if t.get("is_completed"))
     pct = (completed / max(1, total_t)) * 100.0
     confs = final_frame.get("conflicts", 0)
     msgs = final_frame.get("messages", 0)
@@ -419,18 +440,24 @@ def scrub_action(tick, history, events, filter_category, env_info, work_zones_ac
     tick_idx = max(0, min(len(history) - 1, int(tick) - 1))
     graph = (env_info or {}).get("_graph")
     pos = (env_info or {}).get("_pos")
-    env_info = env_info or {}
-    fam = env_info.get("family", "road_osmnx")
-    variant = env_info.get("variant", "none")
-
-    fig = plot_simulation_state(
-        history, graph, pos, tick_idx,
-        graph_family=fam, variant=variant,
-        show_work_zones=work_zones_active,
-    )
+    if graph is None or pos is None:
+        return None, "", "", "", "", "", "", "", "", "", pd.DataFrame()
+    fam = (env_info or {}).get("family", "road_osmnx")
+    variant = (env_info or {}).get("variant", "none")
     final_frame = history[tick_idx]
+    fig = final_frame.get("_rendered_fig")
+    if fig is None:
+        fig = plot_simulation_state(
+            history, graph, pos, tick_idx,
+            graph_family=fam, variant=variant,
+            show_work_zones=work_zones_active,
+        )
+        final_frame["_rendered_fig"] = fig
+    tasks_list = final_frame.get("tasks", [])
+    total_t = len(tasks_list) if tasks_list else 15
     completed = final_frame.get("completed_tasks", 0)
-    total_t = len(final_frame.get("tasks", []))
+    if completed == 0 and tasks_list:
+        completed = sum(1 for t in tasks_list if t.get("is_completed"))
     pct = (completed / max(1, total_t)) * 100.0
     confs = final_frame.get("conflicts", 0)
     msgs = final_frame.get("messages", 0)
@@ -476,18 +503,19 @@ def run_compare_action(
     progress=gr.Progress(track_tqdm=False),
 ):
     fam, n_nodes, variant = MAP_OPTIONS[map_choice]
-    if "warehouse" in fam:
-        if "125" in coarsen_choice:
+    if "warehouse" in fam and coarsen_choice:
+        c_str = str(coarsen_choice)
+        if "125" in c_str:
             n_nodes = 125
-        elif "208" in coarsen_choice:
+        elif "208" in c_str:
             n_nodes = 208
-        elif "1,681" in coarsen_choice:
+        elif "1,681" in c_str or "1681" in c_str:
             n_nodes = 1681
-        elif "38" in coarsen_choice:
+        elif "38" in c_str:
             n_nodes = 38
-        elif "56" in coarsen_choice:
+        elif "56" in c_str:
             n_nodes = 56
-        elif "420" in coarsen_choice:
+        elif "420" in c_str:
             n_nodes = 420
 
     progress(0.1, desc="Running paired simulation...")
@@ -632,29 +660,30 @@ def run_20_seeds_action(
     progress=gr.Progress(track_tqdm=False),
 ):
     fam, n_nodes, variant = MAP_OPTIONS[map_choice]
-    if "warehouse" in fam:
-        if "125" in coarsen_choice:
+    if "warehouse" in fam and coarsen_choice:
+        c_str = str(coarsen_choice)
+        if "125" in c_str:
             n_nodes = 125
-        elif "208" in coarsen_choice:
+        elif "208" in c_str:
             n_nodes = 208
-        elif "1,681" in coarsen_choice:
+        elif "1,681" in c_str or "1681" in c_str:
             n_nodes = 1681
-        elif "38" in coarsen_choice:
+        elif "38" in c_str:
             n_nodes = 38
-        elif "56" in coarsen_choice:
+        elif "56" in c_str:
             n_nodes = 56
-        elif "420" in coarsen_choice:
+        elif "420" in c_str:
             n_nodes = 420
 
     base_seed = int(seed)
     seeds = [base_seed + i for i in range(20)]
     progress(0.05, desc="Executing 20-seed Monte Carlo sweep...")
 
-    df_20 = run_20_seeds_paired(
+    mc_res = run_20_seeds_paired(
         graph_family=fam,
         n_nodes=int(n_nodes),
         adversary_str=adv_choice,
-        selected_allocator_str=alloc_choice,
+        allocator_str=alloc_choice,
         seeds=seeds,
         comm_regime=comm_regime,
         comm_range=comm_range,
@@ -664,6 +693,7 @@ def run_20_seeds_action(
         max_steps=int(max_steps),
         variant=variant,
     )
+    df_20 = mc_res["details_df"] if isinstance(mc_res, dict) and "details_df" in mc_res else mc_res
     progress(0.85, desc="Computing bootstrap confidence intervals...")
 
     # Plot performance distributions across 20 seeds
@@ -719,10 +749,14 @@ def export_json_action(history, summary, env_meta):
     """Export run history and metadata as downloadable JSON."""
     if not history:
         return None
+    clean_history = [
+        {k: v for k, v in f.items() if not k.startswith("_")}
+        for f in history
+    ]
     export_payload = {
         "metadata": {k: v for k, v in (env_meta or {}).items() if k not in _PRIVATE_ENV_KEYS},
         "summary": summary,
-        "history": history,
+        "history": clean_history,
     }
     tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".json", mode="w", encoding="utf-8")
     json.dump(export_payload, tmp, indent=2)

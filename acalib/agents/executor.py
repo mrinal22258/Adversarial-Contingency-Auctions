@@ -59,8 +59,18 @@ class LocalRecourseExecutor:
 
         # Check if approaching edge is blocked right before traversal or at current node
         if robot.edge_progress == 0.0 and blockage_process.is_blocked(u, v):
-            # Check for precomputed recourse detour if contingency_depth > 0
-            if robot.contingency_depth > 0:
+            # As stated in Section IV-B and IV-D, a robot only precomputes a local contingency
+            # detour branch D_k for edge e_k if its subjective marginal satisfies pi_r(e_k) >= tau_prune = 0.35;
+            # if pi_r(e_k) < 0.35, no branch was precomputed, so it cannot execute a local detour
+            # and must trigger a partial re-auction/replan.
+            tau_prune = getattr(robot, "prune_threshold", 0.0)
+            if hasattr(robot, "get_edge_marginals"):
+                edge_marg = robot.get_edge_marginals().get(c_e, 1.0)
+            elif hasattr(robot, "edge_marginals"):
+                edge_marg = robot.edge_marginals.get(c_e, 1.0)
+            else:
+                edge_marg = 1.0
+            if robot.contingency_depth > 0 and (tau_prune <= 0.0 or edge_marg >= tau_prune):
                 current_plan = robot.assigned_plans.get(robot.active_task_id)
                 if current_plan is not None:
                     # Retrieve active cursor in the recourse tree

@@ -1,10 +1,11 @@
 {
   "figure_file": "results/figures/fig_ablation_suite.pdf",
-  "git_commit": "c79813ae5208869b510edda9e14ac2507e8f2960",
+  "git_commit": "f9ae4f9ab98b7653da15d8394e3c337784d4874e",
   "source_files": [
-    "results/raw_results.csv"
+    "results/raw_results.csv",
+    "results/confirmatory/partitioned_adversary_eval.csv"
   ],
-  "n_instances": 13800,
+  "n_instances": 8400,
   "generator_script": "make_figures.py",
   "metadata": {}
 }

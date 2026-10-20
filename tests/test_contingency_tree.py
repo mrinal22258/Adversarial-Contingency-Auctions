@@ -36,15 +36,19 @@ def test_excluded_edge_returns_none_not_1e9():
     planner = ContingencyPlanner(G, max_depth=1)
     
     # Exclude the only edge
-    path = planner.find_risk_aware_path(0, 1, {}, excluded_edges={(0, 1)})
+    path = planner.find_risk_aware_path(0, 1, {(0, 1): 0.0}, excluded_edges={(0, 1)})
     assert path is None, f"Expected None when only path is blocked, got {path}"
 
 
 def test_recursive_tree_depth_branching():
     G = create_two_level_corridor_graph()
     marginals = {
+        (0, 1): 0.0,
         (1, 3): 0.40,
+        (1, 2): 0.0,
         (2, 3): 0.50,
+        (2, 4): 0.0,
+        (4, 3): 0.0,
     }
     
     planner_d0 = ContingencyPlanner(G, max_depth=0, exhaustion_penalty=10.0)
@@ -88,8 +92,12 @@ def test_pure_type_lipschitz_bound_exact():
     }
     
     nominal_marginals = {
+        (0, 1): 0.0,
         (1, 3): 0.25,
+        (1, 2): 0.0,
         (2, 3): 0.35,
+        (2, 4): 0.0,
+        (4, 3): 0.0,
     }
     plan = planner.build_recourse_plan(1, 0, 3, nominal_marginals, risky_edge_threshold=0.12)
     assert plan is not None
@@ -105,8 +113,20 @@ def test_pure_type_lipschitz_bound_exact():
         b2 = rng.dirichlet(np.ones(3))
         tv = 0.5 * np.sum(np.abs(b1 - b2))
         
-        pi1 = {e: float(sum(b1[k] * (h / (h + 0.15)) for k, h in enumerate(hl))) for e, hl in hazards.items()}
-        pi2 = {e: float(sum(b2[k] * (h / (h + 0.15)) for k, h in enumerate(hl))) for e, hl in hazards.items()}
+        pi1 = {
+            (0, 1): 0.0,
+            (1, 2): 0.0,
+            (2, 4): 0.0,
+            (4, 3): 0.0,
+            **{e: float(sum(b1[k] * (h / (h + 0.15)) for k, h in enumerate(hl))) for e, hl in hazards.items()},
+        }
+        pi2 = {
+            (0, 1): 0.0,
+            (1, 2): 0.0,
+            (2, 4): 0.0,
+            (4, 3): 0.0,
+            **{e: float(sum(b2[k] * (h / (h + 0.15)) for k, h in enumerate(hl))) for e, hl in hazards.items()},
+        }
         
         c1 = planner.compute_expected_cost_for_plan(plan, pi1)
         c2 = planner.compute_expected_cost_for_plan(plan, pi2)
@@ -121,7 +141,8 @@ def test_pure_type_lipschitz_bound_exact():
 def test_missing_hazard_raises_value_error():
     G = create_two_level_corridor_graph()
     planner = ContingencyPlanner(G, max_depth=1)
-    plan = planner.build_recourse_plan(1, 0, 3, {(1, 3): 0.3}, risky_edge_threshold=0.12)
+    marginals = {canonical_edge(*e): (0.3 if canonical_edge(*e) == (1, 3) else 0.0) for e in G.edges()}
+    plan = planner.build_recourse_plan(1, 0, 3, marginals, risky_edge_threshold=0.12)
     
     # Missing hazard entry for risky edge (1, 3) must raise ValueError
     with pytest.raises(ValueError, match="Missing hazard"):

@@ -7,7 +7,7 @@ from typing import Dict, List, Tuple, Optional, Any, Set
 import logging
 import networkx as nx
 
-from ..env.adversaries import canonical_edge
+from ..env.adversaries import canonical_edge, get_edge_vulnerability_class
 from ..env.blockage_process import EdgeState, PersistentBlockageProcess
 from .belief import BayesianTypeFilter
 from .tom import TheoryOfMindTracker, PinskerMarginCalculator
@@ -34,6 +34,8 @@ class RobotAgent:
         contingency_depth: int = 1,
         eta: float = 0.05,
         risky_edges: Optional[Set[Tuple[Any, Any]]] = None,
+        max_deep_branches: Optional[int] = 2,
+        partition_mode: bool = False,
     ):
         self.robot_id = robot_id
         self.current_node = start_node
@@ -44,6 +46,8 @@ class RobotAgent:
         self.contingency_depth = contingency_depth
         self.eta = eta
         self.risky_edges = risky_edges
+        self.max_deep_branches = max_deep_branches
+        self.partition_mode = partition_mode
 
         # Node coordinates
         pos_dict = nx.get_node_attributes(graph, "pos")
@@ -51,9 +55,13 @@ class RobotAgent:
 
         # Core reasoning modules
         self.type_filter = BayesianTypeFilter()
-        self.tom_tracker = TheoryOfMindTracker(robot_id, fleet_ids, eta=eta)
+        self.tom_tracker = TheoryOfMindTracker(robot_id, fleet_ids, eta=eta, partition_mode=partition_mode)
         self.pinsker_calc = PinskerMarginCalculator(eta=eta)
-        self.planner = ContingencyPlanner(graph, max_depth=contingency_depth)
+        self.planner = ContingencyPlanner(
+            graph,
+            max_depth=contingency_depth,
+            max_deep_branches=max_deep_branches,
+        )
 
         # Local task allocation and execution state
         self.bundle: List[int] = []  # Ordered list of task IDs
@@ -152,6 +160,7 @@ class RobotAgent:
                 edge_robot_count = compute_edge_robot_count(self.graph, c_e, fleet_states)
                 all_known = set(self.known_edge_states.keys()) or set(canonical_edge(x, y) for x, y in self.graph.edges())
                 is_targeted = c_e in compute_interdiction_cut(self.graph, all_known, fleet_states)
+                v_class = get_edge_vulnerability_class(self.graph, c_e)
 
                 self.type_filter.update_observation(
                     step=step,
@@ -160,6 +169,7 @@ class RobotAgent:
                     prior_state=prior_state,
                     edge_robot_count=edge_robot_count,
                     is_targeted_by_interdiction=is_targeted,
+                    vulnerability_class=v_class,
                 )
                 self.known_edge_states[c_e] = curr_state
 
@@ -185,10 +195,12 @@ class RobotAgent:
                 continue
             count = edge_counts.get(c_e, 0.0)
             is_tgt = c_e in targeted_cuts
+            v_class = get_edge_vulnerability_class(self.graph, c_e)
             marginals[c_e] = self.type_filter.compute_edge_marginal(
                 c_e,
                 edge_robot_count=count,
                 is_targeted_by_interdiction=is_tgt,
+                vulnerability_class=v_class,
             )
 
         return marginals

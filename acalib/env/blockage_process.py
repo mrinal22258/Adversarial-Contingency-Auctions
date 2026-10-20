@@ -8,7 +8,7 @@ from typing import Dict, Set, Tuple, Optional, Any
 import numpy as np
 import networkx as nx
 
-from .adversaries import Adversary, canonical_edge
+from .adversaries import Adversary, canonical_edge, partition_risky_edges
 
 
 class EdgeState(IntEnum):
@@ -35,6 +35,7 @@ class PersistentBlockageProcess:
         clearance_rate: float = 0.15,
         seed: Optional[int] = None,
         custom_risky_edges: Optional[Set[Tuple[Any, Any]]] = None,
+        initial_blocked_edges: Optional[Set[Tuple[Any, Any]]] = None,
         predrawn_clear_uniforms: Optional[Dict[Tuple[Tuple[Any, Any], int], float]] = None,
         predrawn_onset_uniforms: Optional[Dict[Tuple[Tuple[Any, Any], int], float]] = None,
     ):
@@ -51,10 +52,24 @@ class PersistentBlockageProcess:
         else:
             self.risky_edges = self._select_risky_edges(risk_fraction)
 
-        # Initial blockage state: start all open
+        # Include initial blocked edges in risky edges if specified
+        if initial_blocked_edges:
+            for u, v in initial_blocked_edges:
+                self.risky_edges.add(canonical_edge(u, v))
+
+        # Partition risky edges into structurally distinct topological vulnerability classes
+        self.risky_edge_partitions = partition_risky_edges(self.graph, self.risky_edges)
+
+        # Initial blockage state: start all open, or set initially blocked
         self.edge_states: Dict[Tuple[Any, Any], EdgeState] = {
             e: EdgeState.OPEN for e in self.risky_edges
         }
+        if initial_blocked_edges:
+            for u, v in initial_blocked_edges:
+                self.edge_states[canonical_edge(u, v)] = EdgeState.BLOCKED
+
+        self.newly_cleared: Set[Tuple[Any, Any]] = set()
+        self.newly_blocked: Set[Tuple[Any, Any]] = set()
 
     def _select_risky_edges(self, risk_fraction: float) -> Set[Tuple[Any, Any]]:
         """Select top betweenness edges combined with random edges to form E_risk."""
@@ -75,6 +90,37 @@ class PersistentBlockageProcess:
         self.rng.shuffle(remaining)
         selected = set(top_bc + remaining[: n_risky - n_bc])
         return selected
+
+    def block_edge(self, u: Any, v: Any) -> bool:
+        """Explicitly block edge (u, v). Returns True if edge state transitioned to BLOCKED."""
+        e = canonical_edge(u, v)
+        if not self.graph.has_edge(u, v):
+            return False
+        self.risky_edges.add(e)
+        prev = self.edge_states.get(e, EdgeState.OPEN)
+        self.edge_states[e] = EdgeState.BLOCKED
+        if prev != EdgeState.BLOCKED:
+            self.newly_blocked.add(e)
+            self.newly_cleared.discard(e)
+            return True
+        return False
+
+    def unblock_edge(self, u: Any, v: Any) -> bool:
+        """Explicitly unblock edge (u, v). Returns True if edge state transitioned to OPEN."""
+        e = canonical_edge(u, v)
+        if e not in self.edge_states:
+            return False
+        prev = self.edge_states[e]
+        self.edge_states[e] = EdgeState.OPEN
+        if prev != EdgeState.OPEN:
+            self.newly_cleared.add(e)
+            self.newly_blocked.discard(e)
+            return True
+        return False
+
+    def set_edge_blocked(self, u: Any, v: Any, blocked: bool) -> bool:
+        """Explicitly set whether edge (u, v) is blocked."""
+        return self.block_edge(u, v) if blocked else self.unblock_edge(u, v)
 
     def is_blocked(self, u: Any, v: Any) -> bool:
         """Check if edge (u, v) is currently blocked."""
@@ -142,6 +188,9 @@ class PersistentBlockageProcess:
         for e in sorted(list(accepted_onsets)):
             transitions[e] = (EdgeState.OPEN, EdgeState.BLOCKED)
             self.edge_states[e] = EdgeState.BLOCKED
+
+        self.newly_cleared = {e for e, (o, n) in transitions.items() if o == EdgeState.BLOCKED and n == EdgeState.OPEN}
+        self.newly_blocked = {e for e, (o, n) in transitions.items() if o == EdgeState.OPEN and n == EdgeState.BLOCKED}
 
         return transitions
 

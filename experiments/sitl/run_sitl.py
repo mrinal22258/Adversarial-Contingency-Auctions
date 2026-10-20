@@ -233,19 +233,59 @@ def run_single_sitl_trial(
                     r.set_path([])
 
         # Simultaneous physical stepping across all robots
+        # Simultaneous physical stepping across all robots
         # 100 sub-steps at 1/60s = 1.67 seconds of physical simulation per auction step
-        for _ in range(100):
+        for sub_step in range(100):
+            # Dynamic state gathering for RVO local avoidance
+            r_states = {}
             for rid, r in robots.items():
-                r.update_controller(dt=1.0 / 60.0)
+                x, y, yaw = r.get_ground_truth_pose()
+                vx = r.v_max * math.cos(yaw) if not r.target_reached else 0.0
+                vy = r.v_max * math.sin(yaw) if not r.target_reached else 0.0
+                r_states[rid] = (x, y, vx, vy)
+
+            barrier_positions = [
+                ((pos_dict[e[0]][0] + pos_dict[e[1]][0]) / 2.0, (pos_dict[e[0]][1] + pos_dict[e[1]][1]) / 2.0)
+                for e in curr_blocked if e[0] in pos_dict and e[1] in pos_dict
+            ]
+
+            # In-the-loop Active ArUco Perception: detect blockages before crashing
+            for rid, r in robots.items():
+                curr_xy = r.get_ground_truth_pose()[:2]
+                for e in risky_edges:
+                    if e[0] not in pos_dict or e[1] not in pos_dict:
+                        continue
+                    m_x = (pos_dict[e[0]][0] + pos_dict[e[1]][0]) / 2.0
+                    m_y = (pos_dict[e[0]][1] + pos_dict[e[1]][1]) / 2.0
+                    dist_to_edge = math.hypot(curr_xy[0] - m_x, curr_xy[1] - m_y)
+                    if dist_to_edge < 3.5:
+                        is_blocked = (e in curr_blocked)
+                        if is_blocked and e not in known_blocked_edges:
+                            known_blocked_edges.add(e)
+                            adapter.update_perception_observation(rid, e, 1, step=step)
+                            target_t = current_robot_targets.get(rid)
+                            if target_t is not None and method in ["aca", "aca_no_margin", "cbba_partial_lr", "ssi_lr"]:
+                                waypoints = adapter.compute_recourse_detour(
+                                    rid, target_t, curr_xy, e, known_blocked_edges
+                                )
+                                r.set_path(waypoints)
+                                recourse_detours += 1
+                        elif not is_blocked and e in known_blocked_edges:
+                            known_blocked_edges.discard(e)
+                            adapter.update_perception_observation(rid, e, 0, step=step)
+
+            for rid, r in robots.items():
+                others = [r_states[oid] for oid in robots if oid != rid]
+                r.update_controller(dt=1.0 / 60.0, other_robots=others, barrier_positions=barrier_positions)
+
             world.step_simulation(n_steps=1)
+
             for rid, r in robots.items():
                 hit_barrier = r.check_collisions(barrier_ids)
                 if hit_barrier:
                     physical_collisions += 1
                     for b_edge in curr_blocked:
                         known_blocked_edges.add(b_edge)
-                    if method in ["aca", "aca_no_margin", "cbba_partial_lr", "ssi_lr"]:
-                        recourse_detours += 1
 
             # Check task completion during physical execution
             for rid, r in robots.items():

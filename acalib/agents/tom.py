@@ -9,17 +9,53 @@ import numpy as np
 from .belief import compute_kl_divergence
 
 
+def compute_analytical_eta_eff(
+    staleness: int,
+    eta_0: float = 0.02,
+    gamma_obs: float = 0.35,
+    log_lambda_max: float = 2.8332,
+) -> float:
+    """
+    Exact analytical Total Variation drift bound under Bayesian log-likelihood drift (Lemma 1):
+        eta_eff(Delta t) = min(1.0, eta_0 + tanh(0.5 * gamma_obs * Delta t * log_lambda_max))
+    Derived from worst-case log-likelihood ratio Lambda_max over Delta t unobserved steps
+    with observation rate gamma_obs. Guarantees TV(B_s^t, B_hat_s^(r),t) <= eta_eff(Delta t).
+    """
+    if staleness <= 0:
+        return float(eta_0)
+    drift = 0.5 * gamma_obs * staleness * log_lambda_max
+    return float(min(1.0, eta_0 + np.tanh(drift)))
+
+
 class TheoryOfMindTracker:
     """
     Maintains robot r's internal estimates of peer robots' beliefs B_hat_s^(r).
-    Updated via direct message receptions or common-knowledge observation history.
+    Updated via direct message receptions with piggybacked compact belief vectors.
     """
 
-    def __init__(self, robot_id: int, fleet_ids: List[int], n_types: int = 3, eta: float = 0.05):
+    def __init__(
+        self,
+        robot_id: int,
+        fleet_ids: List[int],
+        n_types: int = 3,
+        eta: float = 0.02,
+        gamma_obs: float = 0.35,
+        log_lambda_max: Optional[float] = None,
+        partition_mode: bool = False,
+    ):
         self.robot_id = robot_id
         self.fleet_ids = [rid for rid in fleet_ids if rid != robot_id]
         self.n_types = n_types
-        self.eta = eta  # Assumed upper bound on ToM TV estimation error
+        self.eta = eta  # eta_0 base measurement error
+        self.gamma_obs = gamma_obs
+        self.partition_mode = partition_mode
+        if log_lambda_max is not None:
+            self.log_lambda_max = float(log_lambda_max)
+        elif partition_mode:
+            # Under partition_mode (p_target=0.75, p_bg=0.03), Lambda_max = 0.75 / 0.03 = 25.0
+            self.log_lambda_max = float(np.log(25.0))  # 3.2188758
+        else:
+            self.log_lambda_max = 2.8332  # Homogeneous Lambda_max = 17.0
 
         # Initialize peer belief estimates to uniform prior
         uniform = np.ones(n_types) / n_types
@@ -55,41 +91,59 @@ class TheoryOfMindTracker:
         """Legacy helper returning max KL divergence."""
         return self.get_max_kl(my_belief)
 
+    def get_peer_effective_eta(self, peer_id: int, current_step: int = 0) -> float:
+        """Exact analytical TV drift bound for a specific peer."""
+        if peer_id not in self.fleet_ids:
+            return float(self.eta)
+        staleness = max(0, current_step - self.last_update_step.get(peer_id, 0))
+        return compute_analytical_eta_eff(
+            staleness,
+            eta_0=self.eta,
+            gamma_obs=self.gamma_obs,
+            log_lambda_max=self.log_lambda_max,
+        )
+
     def get_effective_eta(self, current_step: int = 0) -> float:
         """
-        Compute effective ToM TV bound eta inflated by belief age / staleness:
-        eta_eff = min(0.5, eta + 0.005 * max_staleness).
+        Compute effective ToM TV bound inflated by belief age / staleness via exact analytical drift:
+        eta_eff = max_{s != r} eta_eff(Delta t_{r,s}).
         """
         if not self.fleet_ids:
             return float(self.eta)
-        max_staleness = max(
-            (max(0, current_step - self.last_update_step.get(rid, 0)) for rid in self.fleet_ids),
-            default=0,
+        return float(
+            max(
+                (self.get_peer_effective_eta(rid, current_step) for rid in self.fleet_ids),
+                default=self.eta,
+            )
         )
-        return float(min(0.5, self.eta + 0.005 * max_staleness))
 
 
 class PinskerMarginCalculator:
     """
     Computes the unit-consistent Pinsker claim margin (Theorem 1):
-    m_{r, j} = Delta_j * ( sqrt(0.5 * D'_hat_r) + eta_eff ) + delta_map
-    Derived from: TV(B_r, B_s) <= TV(B_r, B_hat_s) + TV(B_hat_s, B_s)
-                               <= sqrt(0.5 * D_KL(B_r || B_hat_s)) + eta.
+    m_{r, j} = L_{r,j} * ( sqrt(0.5 * D'_hat_r) + eta_eff ) + max_{s != r} L_{s,j} * eta_eff + delta_map
     """
 
-    def __init__(self, delta_map: float = 0.0, default_delta_j: float = 20.0, eta: float = 0.05):
+    def __init__(self, delta_map: float = 0.0, default_delta_j: float = 20.0, eta: float = 0.02):
         self.delta_map = delta_map
         self.default_delta_j = default_delta_j
         self.eta = eta
 
-    def compute_margin(self, delta_j: float, max_kl: float, eta: Optional[float] = None) -> float:
+    def compute_margin(
+        self,
+        delta_j: float,
+        max_kl: float,
+        eta: Optional[float] = None,
+        max_peer_L: Optional[float] = None,
+    ) -> float:
         """
         Compute required margin m_{r, j}.
-        m_{r, j} = Delta_j * ( sqrt(0.5 * max_kl) + eta ) + delta_map
+        m_{r, j} = L_{r,j} * ( sqrt(0.5 * max_kl) + eta ) + max_{s != r} L_{s,j} * eta + delta_map
         """
         eff_eta = self.eta if eta is None else eta
         pinsker_tv = np.sqrt(0.5 * max(0.0, max_kl)) + eff_eta
-        margin = delta_j * pinsker_tv + self.delta_map
+        peer_l = max_peer_L if max_peer_L is not None else delta_j
+        margin = delta_j * pinsker_tv + peer_l * eff_eta + self.delta_map
         return float(margin)
 
     def can_claim_safely(

@@ -231,6 +231,9 @@ body, .gradio-container {
 
 /* ==================== SIGNATURE ORANGE-YELLOW BEVELED ACTION BUTTONS ==================== */
 .btn-indigo-primary, button.primary {
+    position: relative !important;
+    z-index: 30 !important;
+    pointer-events: auto !important;
     font-family: var(--font-display) !important;
     font-weight: 900 !important;
     font-size: 14px !important;
@@ -265,6 +268,9 @@ body, .gradio-container {
 
 /* Secondary Beveled Button (Rich Royal Indigo / Clash Arena Style) */
 .btn-indigo-outline, button.btn-indigo-outline {
+    position: relative !important;
+    z-index: 30 !important;
+    pointer-events: auto !important;
     font-family: var(--font-display) !important;
     font-weight: 900 !important;
     font-size: 13.5px !important;
@@ -295,6 +301,8 @@ body, .gradio-container {
 
 /* Step & Scrubber Control Buttons (Tactile Cyan/Blue Navigation Controls in 1 Single Row) */
 .playback-control-row {
+    position: relative !important;
+    z-index: 28 !important;
     display: flex !important;
     flex-direction: row !important;
     flex-wrap: nowrap !important;
@@ -311,6 +319,9 @@ body, .gradio-container {
 
 .btn-control,
 button.btn-control {
+    position: relative !important;
+    z-index: 30 !important;
+    pointer-events: auto !important;
     font-family: var(--font-display) !important;
     font-weight: 800 !important;
     font-size: 12px !important;
@@ -495,7 +506,7 @@ input[type="checkbox"] {
 /* ==================== TOP RESOURCE & SHIELD KPI STRIP (COC RESOURCE PILLS) ==================== */
 .kpi-row {
     display: grid !important;
-    grid-template-columns: repeat(7, 1fr) !important;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)) !important;
     gap: 8px !important;
     width: 100% !important;
     margin-bottom: 12px !important;
@@ -665,15 +676,154 @@ button:focus-visible, input:focus-visible, select:focus-visible {
     outline-offset: 2px !important;
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 1100px) {
     .kpi-row {
-        grid-template-columns: repeat(4, 1fr) !important;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)) !important;
+        gap: 6px !important;
     }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 640px) {
+    .kpi-row {
+        grid-template-columns: repeat(auto-fit, minmax(105px, 1fr)) !important;
+        gap: 5px !important;
+    }
+    .kpi-val {
+        font-size: 13.5px !important;
+    }
+    .kpi-lbl {
+        font-size: 9px !important;
+    }
+}
+
+@media (max-width: 380px) {
     .kpi-row {
         grid-template-columns: repeat(2, 1fr) !important;
+        gap: 4px !important;
     }
+}
+
+/* ==================== BUTTON & CONTROL PROGRESS CLEANUP ==================== */
+/* 1. Never show progress spinners or loading icons inside ANY button or playback control */
+button svg.animate-spin,
+button svg[class*="spin"],
+button .loading,
+button .loader,
+button [class*="loading"],
+button [class*="loader"],
+.btn-control svg.animate-spin,
+.btn-control svg[class*="spin"],
+.btn-control [class*="loading"],
+.btn-control [class*="loader"],
+.playback-control-row svg.animate-spin,
+.playback-control-row svg[class*="spin"],
+.playback-control-row [class*="loading"],
+.playback-control-row [class*="loader"] {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+/* 2. Stop any button pulsing or vibrating borders when in generating/loading state */
+button.generating,
+button.loading,
+button[class*="generating"],
+button[class*="loading"],
+.btn-control.generating,
+.btn-indigo-primary.generating,
+.btn-indigo-outline.generating {
+    animation: none !important;
+    border-color: inherit !important;
+}
+
+/* 3. Suppress duplicate progress bars and ETA timers on timeline scrubber, battle log, and KPI cards */
+.gradio-slider div[class*="progress-level"],
+.gradio-slider div[class*="progress-bar"],
+.gradio-slider div[class*="meta-text"],
+.gradio-slider div[class*="eta-bar"],
+.gradio-slider span[class*="eta-bar"],
+.gradio-slider svg.animate-spin,
+.coc-drawer-box div[class*="progress-level"],
+.coc-drawer-box div[class*="progress-bar"],
+.coc-drawer-box div[class*="meta-text"],
+.coc-drawer-box div[class*="eta-bar"],
+.coc-drawer-box span[class*="eta-bar"],
+.coc-drawer-box svg.animate-spin,
+.kpi-row div[class*="progress-level"],
+.kpi-row div[class*="progress-bar"],
+.kpi-row div[class*="meta-text"],
+.result-banner div[class*="progress-level"],
+.result-banner div[class*="meta-text"] {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+/* 4. Keep clean, professional progress indicator ONLY in dedicated slot on central stage */
+/* Never allow progress or generating overlays to capture pointer events */
+div[class*="progress-level"],
+div[class*="progress-bar"],
+div[class*="meta-text"],
+div[class*="wrap"][class*="generating"],
+.generating,
+.generating:before,
+.generating:after {
+    pointer-events: none !important;
+}
+
+.coc-base-stage {
+    position: relative !important;
+}
+
+.coc-base-stage .gr-plot {
+    position: relative !important;
+}
+
+.coc-base-stage .gr-plot div[class*="progress-level"],
+.coc-base-stage div[class*="progress-level"] {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: absolute !important;
+    top: 8px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: auto !important;
+    min-width: 260px !important;
+    max-width: 85% !important;
+    height: auto !important;
+    max-height: 40px !important;
+    z-index: 15 !important;
+    pointer-events: none !important;
+    background: rgba(19, 29, 49, 0.92) !important;
+    border: 2px solid var(--coc-rim-gold) !important;
+    border-radius: 20px !important;
+    padding: 4px 16px !important;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45) !important;
+}
+
+.coc-base-stage .gr-plot div[class*="progress-bar"],
+.coc-base-stage div[class*="progress-bar"] {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: none !important;
+}
+
+.coc-base-stage .gr-plot div[class*="meta-text"],
+.coc-base-stage div[class*="meta-text"],
+.coc-base-stage .gr-plot span[class*="meta-text"],
+.coc-base-stage span[class*="meta-text"] {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: none !important;
+    font-family: var(--font-display) !important;
+    font-size: 11.5px !important;
+    font-weight: 800 !important;
+    color: #ffe169 !important;
+    text-shadow: 0 1px 0 #000 !important;
 }
 """

@@ -271,5 +271,88 @@ def test_monte_carlo_pydantic_bounds(client):
     assert r_under.status_code == 422
 
 
+def test_api_simulate_depth_zero(client):
+    """Verify depth=0 ablation can be requested and executed cleanly without crashing."""
+    payload = {
+        "topology": "warehouse_small",
+        "allocator": "ACA (Ours)",
+        "numRobots": 2,
+        "numTasks": 3,
+        "seed": 10001,
+        "maxSteps": 15,
+        "depth": 0,
+    }
+    resp = client.post("/api/simulate", json=payload)
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["status"] == "ok"
+    assert data["summary"]["makespan"] > 0
+
+
+def test_api_simulate_blocked_edges(client):
+    """Verify programmatic obstacle injection via blockedEdges."""
+    payload = {
+        "topology": "warehouse_small",
+        "allocator": "ACA (Ours)",
+        "numRobots": 2,
+        "numTasks": 3,
+        "seed": 10001,
+        "maxSteps": 15,
+        "blockedEdges": [[0, 1]],
+    }
+    resp = client.post("/api/simulate", json=payload)
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["status"] == "ok"
+    assert len(data["blocked_edges"]) > 0
+
+
+def test_api_compare_with_custom_parameters(client):
+    """Verify /api/compare respects maxSteps, depth, commRange, and pDrop."""
+    payload = {
+        "topology": "warehouse_small",
+        "allocator": "ACA (Ours)",
+        "adversary": "Reactive (Corridor Interdiction)",
+        "numRobots": 2,
+        "numTasks": 3,
+        "seed": 10001,
+        "maxSteps": 15,
+        "depth": 0,
+        "commRange": 40.0,
+        "pDrop": 0.05,
+    }
+    resp = client.post("/api/compare", json=payload)
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["status"] == "ok"
+    assert len(data["table"]) >= 5
+
+
+def test_api_monte_carlo_execution(client):
+    """Verify /api/monte_carlo returns real summary with comparison records and verdict."""
+    payload = {
+        "topology": "warehouse_small",
+        "allocator": "ACA (Ours)",
+        "adversary": "Reactive (Corridor Interdiction)",
+        "numRobots": 2,
+        "numTasks": 2,
+        "numTrials": 2,
+        "maxSteps": 10,
+        "seedBase": 10001,
+    }
+    resp = client.post("/api/monte_carlo", json=payload)
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["status"] == "ok"
+    summary = data["summary"]
+    assert "n_seeds" in summary
+    assert summary["n_seeds"] == 2
+    assert "main_method" in summary
+    assert "verdict" in summary
+    assert "comparisons" in summary
+    assert isinstance(summary["comparisons"], list)
+
+
+
 
 

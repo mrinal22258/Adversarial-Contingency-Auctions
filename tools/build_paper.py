@@ -20,7 +20,7 @@ def find_tool(name: str) -> str:
     return path
 
 
-def compile_doc(doc_name: str, target_rotation: int = 180):
+def compile_doc(doc_name: str, target_rotation: int = 0):
     tex_file = f"{doc_name}.tex"
     pdf_file = f"{doc_name}.pdf"
     full_tex = os.path.join(REPO_ROOT, tex_file)
@@ -45,8 +45,18 @@ def compile_doc(doc_name: str, target_rotation: int = 180):
         print(f"Running {step_name}...")
         res = subprocess.run(cmd, cwd=REPO_ROOT, capture_output=True, text=True)
         if res.returncode != 0:
-            print(f"Error during {step_name}:\n{res.stdout[-1500:]}\n{res.stderr}")
-            sys.exit(1)
+            log_file = os.path.join(REPO_ROOT, f"{doc_name}.log")
+            has_fatal = False
+            if os.path.exists(log_file):
+                with open(log_file, "r", encoding="latin-1") as f_log:
+                    content = f_log.read()
+                    if "\n!" in content:
+                        has_fatal = True
+            if has_fatal:
+                print(f"Error during {step_name}:\n{res.stdout[-1500:]}\n{res.stderr}")
+                sys.exit(1)
+            else:
+                print(f"[NOTE] Non-fatal notification during {step_name}; proceeding.")
 
     full_pdf = os.path.join(REPO_ROOT, pdf_file)
     if not os.path.exists(full_pdf):
@@ -67,9 +77,9 @@ def compile_doc(doc_name: str, target_rotation: int = 180):
     ensure_pdf_rotation(full_pdf, target_rotation=target_rotation)
 
 
-def ensure_pdf_rotation(pdf_path: str, target_rotation: int = 180):
+def ensure_pdf_rotation(pdf_path: str, target_rotation: int = 0):
     """
-    Guarantees every page of the given PDF has the target rotation (default: 180 degrees).
+    Guarantees every page of the given PDF has the target rotation (default: 0 degrees).
     Ensures that compilations across all PDF viewers and duplex print drivers
     strictly maintain the required orientation.
     """
@@ -109,8 +119,8 @@ def ensure_pdf_rotation(pdf_path: str, target_rotation: int = 180):
 def main():
     import argparse
     parser = argparse.ArgumentParser(description="Publication Paper and Supplement Build Script")
-    parser.add_argument("--rotate", type=int, default=int(os.environ.get("ACA_PAPER_ROTATE", "180")),
-                        choices=[0, 90, 180, 270], help="Target rotation in degrees (default: 180 or ACA_PAPER_ROTATE)")
+    parser.add_argument("--rotate", type=int, default=int(os.environ.get("ACA_PAPER_ROTATE", "0")),
+                        choices=[0, 90, 180, 270], help="Target rotation in degrees (default: 0 or ACA_PAPER_ROTATE)")
     parser.add_argument("--docs", nargs="+", default=["paper", "supplement"],
                         help="Documents to compile (default: paper supplement)")
     args = parser.parse_args()

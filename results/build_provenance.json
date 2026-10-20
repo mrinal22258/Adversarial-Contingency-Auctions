@@ -1,8 +1,8 @@
 {
-  "timestamp_utc": "2026-10-15T16:08:01.472591+00:00",
+  "timestamp_utc": "2026-10-20T07:39:17.896509+00:00",
   "python_version": "3.12.7 | packaged by Anaconda, Inc. | (main, Oct  4 2024, 13:17:27) [MSC v.1929 64 bit (AMD64)]",
   "protocol": "v5",
-  "git_commit": "c79813ae5208869b510edda9e14ac2507e8f2960",
+  "git_commit": "f9ae4f9ab98b7653da15d8394e3c337784d4874e",
   "git_dirty": true,
   "repo_root": ".",
   "steps": {
@@ -33,12 +33,12 @@
       "bytes": 12762
     },
     "results/result_model_v1.json": {
-      "sha256": "20a550fa96bdc374a99f9ff28863355224667ac016003d5f020259b6f29b7db5",
-      "bytes": 256590
+      "sha256": "8e2a7fb4d9c6adc9f2cb877306c47eadadc07ced68684af27a1fd34bdaf4d773",
+      "bytes": 261282
     },
     "results/numbers.tex": {
-      "sha256": "c73bd93da143f38f592e3d23b36755efccf3f748ac7c2b1903935e851f17e6db",
-      "bytes": 11579
+      "sha256": "36568b06c94c511b362381753d86d7ac7e630955eafbc3d237b147212eb7c3db",
+      "bytes": 14868
     },
     "results/table_main_results.tex": {
       "sha256": "a6e63d337754b6d31d72901c9b425aead04bcd3d832785376948ac063798d357",
@@ -69,13 +69,13 @@
       "bytes": 4890
     },
     "paper.pdf": {
-      "sha256": "d55f60b22b72101b3c816209b45f3848482a372b4996d78462922ff94bc191d1",
-      "bytes": 694266
+      "sha256": "fc62bd7b36d2b1b829c2d7039ce9747ea5ac344153f9385b3e6531863b267a96",
+      "bytes": 895802
     },
     "supplement.pdf": {
-      "sha256": "742a292a6923d0a1ab0a9309a354ce9253bea4c819092aeecf6caef646bfe695",
-      "bytes": 816888
+      "sha256": "1fe90ba7282cc405413c4b17ab8bd692e7f8086440f46554fb59b95b76831263",
+      "bytes": 815256
     }
   },
-  "duration_sec": 76.77
+  "duration_sec": 85.67
 }

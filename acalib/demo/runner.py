@@ -19,6 +19,9 @@ from acalib.sim.engine import SimulationEngine
 
 import collections
 import threading
+import logging
+
+logger = logging.getLogger(__name__)
 
 # Universal shared simulation horizon
 DEFAULT_MAX_STEPS = 80
@@ -184,6 +187,7 @@ def run_single_simulation(
     adversary_budget_k: int = 4,
     variant: str = "10-20-10-2-1",
     prebuilt_env: Optional[Dict[str, Any]] = None,
+    custom_blocked_edges: Optional[List[Tuple[Any, Any]]] = None,
     record_history: bool = True,
     record_traces: bool = True,
     step_callback: Optional[Any] = None,
@@ -197,20 +201,32 @@ def run_single_simulation(
     adv_type_str = parse_adversary_name(adversary_str)
     adv_enum = AdversaryType(adv_type_str)
 
+    # Contingency depth resolution
+    if alloc_type == "aca_depth_0":
+        c_depth = 0
+    elif alloc_type == "aca_depth_2":
+        c_depth = 2
+    elif alloc_type.endswith("_lr") or alloc_type.startswith("aca"):
+        c_depth = max(0, int(contingency_depth)) if contingency_depth is not None else 1
+    else:
+        c_depth = 0
+
+    blocked_key = tuple(sorted(tuple(sorted((u, v))) for u, v in custom_blocked_edges)) if custom_blocked_edges else ()
     cache_key = (
-        graph_family,
+        str(graph_family).lower(),
         int(n_nodes),
-        adv_type_str,
-        alloc_type,
-        comm_regime,
+        str(adv_type_str),
+        str(alloc_type),
+        str(comm_regime),
         float(comm_range),
         float(p_drop),
         int(n_robots),
         int(n_tasks),
         int(seed),
         int(max_steps),
-        int(contingency_depth),
+        int(c_depth),
         str(variant),
+        blocked_key,
         bool(record_history),
         bool(record_traces),
     )
@@ -236,16 +252,7 @@ def run_single_simulation(
             variant=variant,
         )
 
-    # Contingency depth resolution
-    if alloc_type == "aca_depth_0":
-        c_depth = 0
-    elif alloc_type == "aca_depth_2":
-        c_depth = 2
-    elif alloc_type.endswith("_lr") or alloc_type.startswith("aca"):
-        c_depth = contingency_depth if contingency_depth > 0 else 1
-    else:
-        c_depth = 0
-
+    init_blocked = {tuple(sorted((u, v))) for u, v in custom_blocked_edges} if custom_blocked_edges else None
     engine = SimulationEngine(
         graph=env_components["graph"],
         adversary_type=adv_enum,
@@ -265,6 +272,7 @@ def run_single_simulation(
         predrawn_clear_uniforms=env_components["predrawn_clear"],
         predrawn_onset_uniforms=env_components["predrawn_onset"],
         custom_risky_edges=env_components["risky_edges"],
+        custom_blocked_edges=init_blocked,
         comm_net_seed=env_components["comm_seed"],
         record_traces=record_traces,
     )
@@ -380,7 +388,7 @@ def run_single_simulation(
         "pos": pos,
         "env_components": env_components,
     }
-    if prebuilt_env is None and step_callback is None:
+    if prebuilt_env is None:
         _RUN_CACHE[cache_key] = run_output
 
     return run_output
@@ -402,20 +410,34 @@ def get_cached_run(
     variant: str = "10-20-10-2-1",
 ) -> Dict[str, Any]:
     """Retrieve run from cache or execute and populate."""
+    adv_type_str = parse_adversary_name(adversary_str)
+    alloc_type = parse_allocator_name(allocator_str)
+    if alloc_type == "aca_depth_0":
+        c_depth = 0
+    elif alloc_type == "aca_depth_2":
+        c_depth = 2
+    elif alloc_type.endswith("_lr") or alloc_type.startswith("aca"):
+        c_depth = max(0, int(contingency_depth)) if contingency_depth is not None else 1
+    else:
+        c_depth = 0
+
     cache_key = (
-        graph_family,
-        n_nodes,
-        adversary_str,
-        allocator_str,
-        comm_regime,
-        comm_range,
-        p_drop,
-        n_robots,
-        n_tasks,
-        seed,
-        max_steps,
-        contingency_depth,
-        variant,
+        str(graph_family).lower(),
+        int(n_nodes),
+        str(adv_type_str),
+        str(alloc_type),
+        str(comm_regime),
+        float(comm_range),
+        float(p_drop),
+        int(n_robots),
+        int(n_tasks),
+        int(seed),
+        int(max_steps),
+        int(c_depth),
+        str(variant),
+        (),
+        True,
+        False,
     )
     if cache_key in _RUN_CACHE:
         return _RUN_CACHE[cache_key]
@@ -627,7 +649,7 @@ def run_20_seeds_paired(
     graph_family: str,
     n_nodes: int,
     adversary_str: str,
-    allocator_str: str = "aca",
+    allocator_str: Optional[str] = None,
     baseline_str: str = "cbba_partial_lr",  # Fair, execution-matched default baseline
     comm_regime: str = "benign",
     comm_range: float = 50.0,
@@ -639,6 +661,8 @@ def run_20_seeds_paired(
     seed_start: int = 10001,
     num_seeds: int = 20,
     progress: Optional[Any] = None,
+    selected_allocator_str: Optional[str] = None,
+    seeds: Optional[List[int]] = None,
 ) -> Dict[str, Any]:
     """
     Run 20 independent seeds evaluating selected method against:
@@ -648,7 +672,12 @@ def run_20_seeds_paired(
     Streams progress 'seed k/20' and parallelizes across up to 4 worker processes.
     Target: Boston 20 seeds < 15s on 4 cores.
     """
-    alloc_main = parse_allocator_name(allocator_str)
+    resolved_alloc = selected_allocator_str or allocator_str or "aca"
+    if seeds:
+        seed_start = seeds[0]
+        num_seeds = len(seeds)
+
+    alloc_main = parse_allocator_name(resolved_alloc)
     methods = [alloc_main, "cbba_partial_lr", "cbba", "ctp_replan"]
     # De-duplicate while preserving order
     unique_methods = []
@@ -661,6 +690,7 @@ def run_20_seeds_paired(
     cache_key = f"{graph_family}_{n_nodes}_{variant}_{adversary_str}_{seed_start}_{num_seeds}_{max_steps}"
     results_by_method: Dict[str, List[Dict[str, Any]]] = {m: [] for m in unique_methods}
 
+    cached_data: Dict[str, Any] = {}
     if os.path.exists(baseline_cache_file):
         try:
             with open(baseline_cache_file, "r") as f:
@@ -669,8 +699,16 @@ def run_20_seeds_paired(
                 for bm, b_runs in cached_data[cache_key].items():
                     if bm in results_by_method and len(b_runs) >= num_seeds:
                         results_by_method[bm] = list(b_runs[:num_seeds])
-        except Exception:
-            pass
+        except Exception as exc:
+            logger.warning(
+                "Failed to load baseline cache from %s: %s. Falling back to dynamic evaluation.",
+                baseline_cache_file, exc
+            )
+    else:
+        logger.warning(
+            "Baseline cache file %s not found. Proceeding with dynamic evaluation.",
+            baseline_cache_file
+        )
 
     methods_to_run = [m for m in unique_methods if len(results_by_method[m]) < num_seeds]
 
@@ -704,6 +742,20 @@ def run_20_seeds_paired(
                 completed_seeds += 1
                 if progress is not None:
                     progress(completed_seeds / num_seeds, desc=f"Evaluating seed {completed_seeds}/{num_seeds}")
+
+        # Persist the computed fallback results to disk so the penalty never happens twice
+        try:
+            os.makedirs(os.path.dirname(baseline_cache_file), exist_ok=True)
+            if cache_key not in cached_data:
+                cached_data[cache_key] = {}
+            for m in methods_to_run:
+                if m in results_by_method and len(results_by_method[m]) >= num_seeds:
+                    cached_data[cache_key][m] = results_by_method[m]
+            with open(baseline_cache_file, "w") as f:
+                json.dump(cached_data, f, indent=2)
+            logger.info("Persisted computed baseline results to %s", baseline_cache_file)
+        except Exception as exc:
+            logger.warning("Could not persist computed baseline cache to %s: %s", baseline_cache_file, exc)
     elif progress is not None:
         progress(1.0, desc="Evaluation complete")
 
@@ -760,11 +812,27 @@ def run_20_seeds_paired(
     else:
         verdict = f"ACA achieves {main_mean:.1f}% completion rate across {num_seeds} paired seeds."
 
+    # Build detailed per-seed DataFrame for plots and telemetry
+    detail_records = []
+    for m, m_runs in results_by_method.items():
+        m_label = METHOD_NAME_MAP.get(m, m)
+        for s_idx, run_s in enumerate(m_runs):
+            detail_records.append({
+                "Seed": seed_start + s_idx,
+                "Method": m_label,
+                "Completion (%)": float(run_s.get("completion_rate_pct", 0.0)),
+                "Conflicts": float(run_s.get("total_conflicts", 0)),
+                "Messages": float(run_s.get("total_messages", 0)),
+                "Net Welfare": float(run_s.get("net_welfare", 0.0)),
+            })
+    details_df = pd.DataFrame(detail_records)
+
     return {
         "n_seeds": num_seeds,
         "main_method": METHOD_NAME_MAP.get(alloc_main, alloc_main),
         "main_completion": f"{main_mean:.1f}% ± {ci_main[1] - main_mean:.1f}%",
         "comparisons_table": pd.DataFrame(stats_table),
+        "details_df": details_df,
         "verdict": verdict,
     }
 

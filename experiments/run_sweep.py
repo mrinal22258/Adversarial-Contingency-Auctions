@@ -299,6 +299,9 @@ def run_single_trial(
     row["trial_hash"] = trial_hash
     row["run_id"] = run_id
     row["wall_clock_ms"] = wall_clock_ms
+    row["per_claim_logs"] = list(getattr(engine.allocator, "per_claim_logs", []))
+    row["tv_obs_total"] = len(getattr(engine.allocator, "logged_tv_observations", []))
+    row["tv_obs_adhered"] = sum(1 for tv, eta in getattr(engine.allocator, "logged_tv_observations", []) if tv <= eta)
 
     # Write JSONL record atomically with per-record SHA-256
     if runs_jsonl:

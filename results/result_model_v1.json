@@ -19,7 +19,37 @@
     "conflicts_under_assumption_1": 0,
     "conflicts_across_safe_claims": 330,
     "clopper_pearson_upper_95": 0.00024781675038487716,
-    "clopper_pearson_upper_pct": 0.024781675038487716
+    "clopper_pearson_upper_pct": 0.024781675038487716,
+    "early_n": 11245,
+    "early_upper": 0.026637023289344253,
+    "late_n": 842,
+    "late_upper": 0.35515550653022476,
+    "step_zero_n": 7383,
+    "step_zero_pct": 61.1,
+    "step_zero_upper": 0.0405678529097786,
+    "cutoff_tick": 40,
+    "nominal_n": 11097,
+    "nominal_upper": 0.026992231665001754,
+    "perturb_n": 990,
+    "perturb_upper": 0.30214184956152135,
+    "total_tv_observations": 3481181,
+    "adhered_tv_observations": 2217952,
+    "tv_adherence_pct": 63.7,
+    "tv_violation_pct": 36.3
+  },
+  "safe_claim_evidence": {
+    "aca_safe_conflicts_sum": 11,
+    "aca_safe_conflicts_mean": 0.014666666666666666,
+    "aca_safe_conflicts_ci_half": -0.004666666666666666,
+    "no_margin_safe_conflicts_sum": 3646,
+    "no_margin_safe_conflicts_mean": 4.8613333333333335,
+    "no_margin_safe_conflicts_ci_half": -0.06201666666666705,
+    "safe_conflict_reduction_pct": 99.7,
+    "conflict_free_run_pct": 98.9,
+    "total_safe_claims": 13680,
+    "total_deferred_claims": 77709,
+    "aca_safe_rate_pct": 15.0,
+    "aca_def_rate_pct": 85.0
   },
   "populations": {
     "exploratory_core": {
@@ -8311,7 +8341,71 @@
         "spearman_pvalue": 0.0,
         "interpretation": "Physical collision contacts correlate with recourse detours (r = 0.775, p = 0.0000e+00; rho = 0.747, p = 0.0000e+00), confirming that barrier contacts correspond to detected blockage events that trigger contingency branch executions."
       }
-    }
+    },
+    "detailed_stats": {
+      "ctp_replan": {
+        "welfare_mean": 263.1169728881262,
+        "welfare_ci_half": 19.539725458627263,
+        "contacts_mean": 142.25833333333333,
+        "contacts_ci_half": 37.96510347170116,
+        "conflicts_mean": 0.0,
+        "conflicts_ci_half": 0.0,
+        "completion_mean": 68.40277777777777,
+        "completion_ci_half": 2.1410176345580014
+      },
+      "aca_no_margin": {
+        "welfare_mean": 224.04914295407485,
+        "welfare_ci_half": 18.15094127691685,
+        "contacts_mean": 171.6611111111111,
+        "contacts_ci_half": 40.208157629397554,
+        "conflicts_mean": 66.54722222222222,
+        "conflicts_ci_half": 4.967384119856686,
+        "completion_mean": 68.57638888888889,
+        "completion_ci_half": 2.106350289718104
+      },
+      "cbba_partial_lr": {
+        "welfare_mean": 221.95134934602729,
+        "welfare_ci_half": 18.46147390376677,
+        "contacts_mean": 194.65,
+        "contacts_ci_half": 41.186121407775815,
+        "conflicts_mean": 69.97222222222223,
+        "conflicts_ci_half": 5.274258233559115,
+        "completion_mean": 68.81944444444444,
+        "completion_ci_half": 1.99808710711521
+      },
+      "implicit": {
+        "welfare_mean": 159.18751109696763,
+        "welfare_ci_half": 20.623789552404055,
+        "contacts_mean": 199.775,
+        "contacts_ci_half": 41.92194532358049,
+        "conflicts_mean": 168.58333333333334,
+        "conflicts_ci_half": 3.805489464957331,
+        "completion_mean": 74.86111111111111,
+        "completion_ci_half": 2.011908647537374
+      },
+      "ssi_lr": {
+        "welfare_mean": 132.59558922324055,
+        "welfare_ci_half": 18.015993991572834,
+        "contacts_mean": 143.57222222222222,
+        "contacts_ci_half": 34.3955328156476,
+        "conflicts_mean": 0.0,
+        "conflicts_ci_half": 0.0,
+        "completion_mean": 42.15277777777778,
+        "completion_ci_half": 2.620025951550286
+      },
+      "aca": {
+        "welfare_mean": 260.83371956416255,
+        "welfare_ci_half": 17.78064629220013,
+        "contacts_mean": 158.5638888888889,
+        "contacts_ci_half": 36.23133443153423,
+        "conflicts_mean": 37.53055555555556,
+        "conflicts_ci_half": 3.493194181914068,
+        "completion_mean": 69.44444444444444,
+        "completion_ci_half": 2.0919627862463948
+      }
+    },
+    "reduc_no_margin_pct": 43.6,
+    "reduc_cbba_pr_lr_pct": 46.4
   },
   "vision": {
     "disclaimer": "SYNTHETIC-VISION SIMULATION ONLY -- No physical cameras or robots used.",
@@ -8669,6 +8763,41 @@
       "access_date": "2026-10-07",
       "bytes": 105451,
       "sha256": "26b456a6b5857c8380b0d439978ba2fdb3eb2402c3b0bafad6331fca41d663e1"
+    }
+  },
+  "partitioned_adversary": {
+    "n_instances": 300,
+    "aca_comp_mean": 94.51111111111109,
+    "aca_comp_ci_half": 1.0912636460468812,
+    "aca_welfare_mean": 935.8478189829275,
+    "aca_welfare_ci_half": 28.48373921742169,
+    "aca_safe_conf_mean": 0.0,
+    "aca_safe_conf_ci_half": 0.0,
+    "nomarg_safe_conf_mean": 5.5,
+    "nomarg_safe_conf_ci_half": 0.22144332467329744,
+    "aca_cons_conf_mean": 45.25,
+    "aca_cons_conf_ci_half": 3.9356697123522526,
+    "nomarg_cons_conf_mean": 44.93333333333333,
+    "nomarg_cons_conf_ci_half": 3.9277638463131033,
+    "t3_aca_cons_conf": 47.7,
+    "t3_nomarg_cons_conf": 46.84,
+    "msg_reduction_pct": 12.160481028405567,
+    "threats": {
+      "theta_1": {
+        "aca": 96.26666666666667,
+        "cbba_lr": 88.06666666666666,
+        "diff": 8.200000000000003
+      },
+      "theta_2": {
+        "aca": 94.33333333333331,
+        "cbba_lr": 87.66666666666669,
+        "diff": 6.666666666666629
+      },
+      "theta_3": {
+        "aca": 92.93333333333332,
+        "cbba_lr": 83.93333333333334,
+        "diff": 8.999999999999986
+      }
     }
   }
 }

@@ -81,17 +81,24 @@ def build_result_model() -> Dict[str, Any]:
     adhered_safe = 0
     conflicts_adhered = 0
     conflicts_safe_total = 0
+    early_adhered = 0
+    late_adhered = 0
+    step_zero_adhered = 0
+    nominal_adhered = 0
+    perturb_adhered = 0
     if os.path.exists(claims_jsonl):
         with open(claims_jsonl, "r", encoding="utf-8") as f:
             for line in f:
                 if not line.strip():
                     continue
                 rec = json.loads(line)
+                is_nominal_regime = (rec.get("comm_regime") == "nominal")
                 for c in rec.get("claims", []):
                     tot_claims += 1
                     is_safe = bool(c.get("claimed_safe", False))
                     is_adhered = bool(c.get("tv_le_eta", False))
                     is_conf = bool(c.get("conflicted", False))
+                    step = c.get("step", 0)
                     if is_safe:
                         safe_claims += 1
                         if is_conf:
@@ -100,9 +107,54 @@ def build_result_model() -> Dict[str, Any]:
                             adhered_safe += 1
                             if is_conf:
                                 conflicts_adhered += 1
+                            if step == 0:
+                                step_zero_adhered += 1
+                            if step <= 40:
+                                early_adhered += 1
+                            else:
+                                late_adhered += 1
+                            if is_nominal_regime:
+                                nominal_adhered += 1
+                            else:
+                                perturb_adhered += 1
+
+    def _cp_upper(k: int, n: int) -> float:
+        if n <= 0:
+            return 1.0
+        if k == 0:
+            return float(1.0 - (0.05) ** (1.0 / n))
+        from scipy.stats import beta
+        return float(beta.ppf(0.95, k + 1, n - k))
 
     adherence_rate = adhered_safe / max(1, safe_claims)
-    clopper_pearson = 1.0 - (1.0 - 0.95) ** (1.0 / max(1, adhered_safe)) if adhered_safe > 0 else 1.0
+    clopper_pearson = _cp_upper(conflicts_adhered, adhered_safe)
+    early_upper = _cp_upper(0, early_adhered) * 100.0
+    late_upper = _cp_upper(0, late_adhered) * 100.0
+    step_zero_upper = _cp_upper(0, step_zero_adhered) * 100.0
+    nominal_upper = _cp_upper(0, nominal_adhered) * 100.0
+    perturb_upper = _cp_upper(0, perturb_adhered) * 100.0
+
+    # TV Observations from df_raw
+    tot_tv_obs = int(df_raw["tv_evaluations_count"].sum()) if "tv_evaluations_count" in df_raw.columns else 0
+    adh_tv_obs = int(df_raw["tv_adhered_count"].sum()) if "tv_adhered_count" in df_raw.columns else 0
+    tv_adh_pct = round(adh_tv_obs / max(1, tot_tv_obs) * 100.0, 1)
+    tv_viol_pct = round(100.0 - tv_adh_pct, 1)
+
+    # Safe Claim & Conflict Accounting on core_df
+    aca_core = core_df[core_df["method"] == "aca"]
+    aca_nm_core = core_df[core_df["method"] == "aca_no_margin"]
+    aca_safe_conf_sum = int(aca_core["safe_claim_conflicts"].sum()) if "safe_claim_conflicts" in aca_core.columns else 0
+    aca_safe_conf_mean = float(aca_core["safe_claim_conflicts"].mean()) if "safe_claim_conflicts" in aca_core.columns else 0.0
+    aca_safe_conf_ci_half = float(compute_cell_bootstrap_ci(aca_core["safe_claim_conflicts"].dropna().values)[1] - compute_cell_bootstrap_ci(aca_core["safe_claim_conflicts"].dropna().values)[0]) * 0.5 if "safe_claim_conflicts" in aca_core.columns and len(aca_core) > 0 else 0.0
+    nm_safe_conf_sum = int(aca_nm_core["safe_claim_conflicts"].sum()) if "safe_claim_conflicts" in aca_nm_core.columns else 0
+    nm_safe_conf_mean = float(aca_nm_core["safe_claim_conflicts"].mean()) if "safe_claim_conflicts" in aca_nm_core.columns else 0.0
+    nm_safe_conf_ci_half = float(compute_cell_bootstrap_ci(aca_nm_core["safe_claim_conflicts"].dropna().values)[1] - compute_cell_bootstrap_ci(aca_nm_core["safe_claim_conflicts"].dropna().values)[0]) * 0.5 if "safe_claim_conflicts" in aca_nm_core.columns and len(aca_nm_core) > 0 else 0.0
+    safe_conf_reduc_pct = round((nm_safe_conf_sum - aca_safe_conf_sum) / max(1, nm_safe_conf_sum) * 100.0, 1)
+    conflict_free_pct = round(float((aca_core["safe_claim_conflicts"] == 0).mean() * 100.0), 1) if "safe_claim_conflicts" in aca_core.columns and len(aca_core) > 0 else 100.0
+    total_safe_claims_cnt = int(aca_core["safe_claims"].sum()) if "safe_claims" in aca_core.columns else 0
+    total_def_claims_cnt = int(aca_core["deferred_claims"].sum()) if "deferred_claims" in aca_core.columns else 0
+    aca_safe_rate_pct = round(total_safe_claims_cnt / max(1, total_safe_claims_cnt + total_def_claims_cnt) * 100.0, 1)
+    aca_def_rate_pct = round(100.0 - aca_safe_rate_pct, 1)
 
     model = {
         "version": "2.1.0",
@@ -126,6 +178,36 @@ def build_result_model() -> Dict[str, Any]:
             "conflicts_across_safe_claims": conflicts_safe_total,
             "clopper_pearson_upper_95": clopper_pearson,
             "clopper_pearson_upper_pct": clopper_pearson * 100.0,
+            "early_n": early_adhered,
+            "early_upper": early_upper,
+            "late_n": late_adhered,
+            "late_upper": late_upper,
+            "step_zero_n": step_zero_adhered,
+            "step_zero_pct": round(step_zero_adhered / max(1, adhered_safe) * 100.0, 1),
+            "step_zero_upper": step_zero_upper,
+            "cutoff_tick": 40,
+            "nominal_n": nominal_adhered,
+            "nominal_upper": nominal_upper,
+            "perturb_n": perturb_adhered,
+            "perturb_upper": perturb_upper,
+            "total_tv_observations": tot_tv_obs,
+            "adhered_tv_observations": adh_tv_obs,
+            "tv_adherence_pct": tv_adh_pct,
+            "tv_violation_pct": tv_viol_pct,
+        },
+        "safe_claim_evidence": {
+            "aca_safe_conflicts_sum": aca_safe_conf_sum,
+            "aca_safe_conflicts_mean": aca_safe_conf_mean,
+            "aca_safe_conflicts_ci_half": aca_safe_conf_ci_half,
+            "no_margin_safe_conflicts_sum": nm_safe_conf_sum,
+            "no_margin_safe_conflicts_mean": nm_safe_conf_mean,
+            "no_margin_safe_conflicts_ci_half": nm_safe_conf_ci_half,
+            "safe_conflict_reduction_pct": safe_conf_reduc_pct,
+            "conflict_free_run_pct": conflict_free_pct,
+            "total_safe_claims": total_safe_claims_cnt,
+            "total_deferred_claims": total_def_claims_cnt,
+            "aca_safe_rate_pct": aca_safe_rate_pct,
+            "aca_def_rate_pct": aca_def_rate_pct,
         },
         "populations": {
             "exploratory_core": {
@@ -501,6 +583,86 @@ def build_result_model() -> Dict[str, Any]:
     if os.path.exists(sitl_json):
         with open(sitl_json, "r", encoding="utf-8") as f:
             model["sitl"] = json.load(f)
+
+    sitl_jsonl = os.path.join(REPO_ROOT, "results", "sitl", "sitl_results.jsonl")
+    if os.path.exists(sitl_jsonl):
+        sitl_data = {}
+        with open(sitl_jsonl, "r", encoding="utf-8") as f:
+            for line in f:
+                if not line.strip():
+                    continue
+                rec = json.loads(line)
+                m = rec.get("method")
+                if m:
+                    sitl_data.setdefault(m, []).append(rec)
+        sitl_detailed = {}
+        for m, rows in sitl_data.items():
+            welfs = np.array([r.get("net_welfare", 0.0) for r in rows], dtype=float)
+            contacts = np.array([r.get("physical_collisions", r.get("collisions", r.get("physical_contacts", 0.0))) for r in rows], dtype=float)
+            confs = np.array([r.get("total_conflicts", r.get("conflicts", 0.0)) for r in rows], dtype=float)
+            comps = np.array([r.get("completion_rate_pct", r.get("completion", 0.0)) for r in rows], dtype=float)
+            n_m = len(rows)
+            sitl_detailed[m] = {
+                "welfare_mean": float(np.mean(welfs)),
+                "welfare_ci_half": float(1.96 * np.std(welfs) / np.sqrt(max(1, n_m))),
+                "contacts_mean": float(np.mean(contacts)),
+                "contacts_ci_half": float(1.96 * np.std(contacts) / np.sqrt(max(1, n_m))),
+                "conflicts_mean": float(np.mean(confs)),
+                "conflicts_ci_half": float(1.96 * np.std(confs) / np.sqrt(max(1, n_m))),
+                "completion_mean": float(np.mean(comps)),
+                "completion_ci_half": float(1.96 * np.std(comps) / np.sqrt(max(1, n_m))),
+            }
+        model["sitl"]["detailed_stats"] = sitl_detailed
+        if "aca" in sitl_detailed and "aca_no_margin" in sitl_detailed:
+            nm_conf = sitl_detailed["aca_no_margin"]["conflicts_mean"]
+            aca_conf = sitl_detailed["aca"]["conflicts_mean"]
+            model["sitl"]["reduc_no_margin_pct"] = round((nm_conf - aca_conf) / max(0.001, nm_conf) * 100.0, 1)
+        if "aca" in sitl_detailed and "cbba_partial_lr" in sitl_detailed:
+            cbba_conf = sitl_detailed["cbba_partial_lr"]["conflicts_mean"]
+            aca_conf = sitl_detailed["aca"]["conflicts_mean"]
+            model["sitl"]["reduc_cbba_pr_lr_pct"] = round((cbba_conf - aca_conf) / max(0.001, cbba_conf) * 100.0, 1)
+
+    part_csv = os.path.join(REPO_ROOT, "results", "confirmatory", "partitioned_v5_adversary_eval.csv")
+    if not os.path.exists(part_csv):
+        part_csv = os.path.join(REPO_ROOT, "results", "confirmatory", "partitioned_adversary_eval.csv")
+    if os.path.exists(part_csv):
+        pdf = pd.read_csv(part_csv)
+        p_aca = pdf[pdf["method"] == "aca"]
+        p_cbba = pdf[pdf["method"] == "cbba_lr"]
+        p_noinf = pdf[pdf["method"] == "aca_no_inference"]
+        p_nomarg = pdf[pdf["method"] == "aca_no_margin"]
+        n_inst = len(p_aca)
+        part_summary = {
+            "n_instances": n_inst,
+            "aca_comp_mean": float(p_aca["completion_rate_pct"].mean()),
+            "aca_comp_ci_half": float(1.96 * p_aca["completion_rate_pct"].std() / np.sqrt(max(1, n_inst))),
+            "aca_welfare_mean": float(p_aca["net_welfare"].mean()),
+            "aca_welfare_ci_half": float(1.96 * p_aca["net_welfare"].std() / np.sqrt(max(1, n_inst))),
+            "aca_safe_conf_mean": float(p_aca["safe_claim_conflicts"].mean()),
+            "aca_safe_conf_ci_half": float(1.96 * p_aca["safe_claim_conflicts"].std() / np.sqrt(max(1, n_inst))),
+            "nomarg_safe_conf_mean": float(p_nomarg["safe_claim_conflicts"].mean()),
+            "nomarg_safe_conf_ci_half": float(1.96 * p_nomarg["safe_claim_conflicts"].std() / np.sqrt(max(1, len(p_nomarg)))),
+            "aca_cons_conf_mean": float(p_aca["total_conflicts"].mean()),
+            "aca_cons_conf_ci_half": float(1.96 * p_aca["total_conflicts"].std() / np.sqrt(max(1, n_inst))),
+            "nomarg_cons_conf_mean": float(p_nomarg["total_conflicts"].mean()),
+            "nomarg_cons_conf_ci_half": float(1.96 * p_nomarg["total_conflicts"].std() / np.sqrt(max(1, len(p_nomarg)))),
+            "t3_aca_cons_conf": float(p_aca[p_aca["adversary"] == "theta_3_budgeted_interdiction"]["total_conflicts"].mean()),
+            "t3_nomarg_cons_conf": float(p_nomarg[p_nomarg["adversary"] == "theta_3_budgeted_interdiction"]["total_conflicts"].mean()),
+            "msg_reduction_pct": float((p_noinf["total_messages"].mean() - p_aca["total_messages"].mean()) / max(0.001, p_noinf["total_messages"].mean()) * 100.0),
+            "threats": {}
+        }
+        for adv, key in [("theta_1_stochastic", "theta_1"), ("theta_2_reactive", "theta_2"), ("theta_3_budgeted_interdiction", "theta_3")]:
+            sub_a = p_aca[p_aca["adversary"] == adv]
+            sub_c = p_cbba[p_cbba["adversary"] == adv]
+            m_a = float(sub_a["completion_rate_pct"].mean())
+            m_c = float(sub_c["completion_rate_pct"].mean())
+            part_summary["threats"][key] = {
+                "aca": m_a,
+                "cbba_lr": m_c,
+                "diff": m_a - m_c,
+            }
+        model["partitioned_adversary"] = part_summary
+
     if os.path.exists(vision_json):
         with open(vision_json, "r", encoding="utf-8") as f:
             model["vision"] = json.load(f)

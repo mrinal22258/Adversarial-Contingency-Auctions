@@ -25,6 +25,7 @@ if REPO_ROOT not in sys.path:
     sys.path.insert(0, REPO_ROOT)
 
 import networkx as nx
+import pandas as pd
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response, RedirectResponse
@@ -284,6 +285,7 @@ class SimulateRequest(BaseModel):
     depth: int = Field(default=1, ge=0, le=3)
     commRange: float = Field(default=50.0, ge=0.0, le=500.0)
     pDrop: float = Field(default=0.02, ge=0.0, le=1.0)
+    blockedEdges: Optional[List[List[Any]]] = None
 
 
 class CompareRequest(BaseModel):
@@ -293,6 +295,10 @@ class CompareRequest(BaseModel):
     numRobots: int = Field(default=4, ge=1, le=20)
     numTasks: int = Field(default=15, ge=1, le=100)
     seed: int = Field(default=10001, ge=0)
+    maxSteps: int = Field(default=80, ge=10, le=500)
+    depth: int = Field(default=1, ge=0, le=3)
+    commRange: float = Field(default=50.0, ge=0.0, le=500.0)
+    pDrop: float = Field(default=0.02, ge=0.0, le=1.0)
 
 
 class MonteCarloRequest(BaseModel):
@@ -302,6 +308,10 @@ class MonteCarloRequest(BaseModel):
     numRobots: int = Field(default=4, ge=1, le=20)
     numTasks: int = Field(default=15, ge=1, le=100)
     numTrials: int = Field(default=20, ge=1, le=50)
+    seedBase: int = Field(default=10001, ge=0)
+    maxSteps: int = Field(default=80, ge=10, le=500)
+    commRange: float = Field(default=50.0, ge=0.0, le=500.0)
+    pDrop: float = Field(default=0.02, ge=0.0, le=1.0)
 
 
 @app.get("/hud", include_in_schema=False)
@@ -320,6 +330,7 @@ def _execute_simulation(req: SimulateRequest) -> Dict[str, Any]:
     else:
         fam, nodes, variant = "warehouse_movingai", 125, "20-40-10-2-1"
 
+    custom_blocked = [tuple(e) for e in req.blockedEdges] if req.blockedEdges else None
     res = run_single_simulation(
         graph_family=fam,
         n_nodes=nodes,
@@ -333,6 +344,7 @@ def _execute_simulation(req: SimulateRequest) -> Dict[str, Any]:
         comm_range=req.commRange,
         p_drop=req.pDrop,
         variant=variant,
+        custom_blocked_edges=custom_blocked,
         record_history=True,
     )
 
@@ -424,9 +436,13 @@ def _execute_compare(req: CompareRequest) -> Dict[str, Any]:
         n_nodes=nodes,
         adversary_str=req.adversary,
         selected_allocator_str=req.allocator,
+        comm_range=req.commRange,
+        p_drop=req.pDrop,
         n_robots=req.numRobots,
         n_tasks=req.numTasks,
         seed=req.seed,
+        max_steps=req.maxSteps,
+        contingency_depth=req.depth,
         variant=variant,
     )
 
@@ -469,9 +485,32 @@ def _execute_monte_carlo(req: MonteCarloRequest) -> Dict[str, Any]:
         n_nodes=nodes,
         adversary_str=req.adversary,
         allocator_str=req.allocator,
+        comm_range=req.commRange,
+        p_drop=req.pDrop,
+        n_robots=req.numRobots,
+        n_tasks=req.numTasks,
+        max_steps=req.maxSteps,
         variant=variant,
+        seed_start=req.seedBase,
+        num_seeds=req.numTrials,
     )
-    return {"status": "ok", "summary": mc_res.get("summary", {})}
+
+    comparisons_table = mc_res.get("comparisons_table")
+    table_records = []
+    if isinstance(comparisons_table, pd.DataFrame):
+        table_records = comparisons_table.to_dict(orient="records")
+    elif isinstance(comparisons_table, list):
+        table_records = comparisons_table
+
+    summary = {
+        "n_seeds": mc_res.get("n_seeds", req.numTrials),
+        "main_method": mc_res.get("main_method", req.allocator),
+        "main_completion": mc_res.get("main_completion", "0.0%"),
+        "verdict": mc_res.get("verdict", ""),
+        "comparisons": table_records,
+    }
+
+    return {"status": "ok", "summary": summary}
 
 
 @app.post("/api/monte_carlo")

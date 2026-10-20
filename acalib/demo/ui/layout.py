@@ -139,6 +139,7 @@ def build_app():
                 sim_comps["map_title_md"],
             ],
             scroll_to_output=False,
+            show_progress="hidden",
         )
 
         # 1b. Warehouse coarsening resolution change (updates live base preview)
@@ -147,6 +148,7 @@ def build_app():
             inputs=[sim_comps["map_dropdown"], sim_comps["coarsen_radio"]],
             outputs=[sim_comps["map_plot"], sim_comps["map_title_md"]],
             scroll_to_output=False,
+            show_progress="hidden",
         )
 
         # 1c. Wireless regime preset change (automatically syncs comm range and p_drop sliders)
@@ -155,14 +157,16 @@ def build_app():
             inputs=[sim_comps["comm_regime_dropdown"]],
             outputs=[sim_comps["comm_range_slider"], sim_comps["p_drop_slider"]],
             scroll_to_output=False,
+            show_progress="hidden",
         )
 
         # 2. Allocator dropdown change
         sim_comps["alloc_dropdown"].change(
             update_alloc_choice,
             inputs=[sim_comps["alloc_dropdown"]],
-            outputs=[sim_comps["ablation_note"]],
+            outputs=[sim_comps["ablation_note"], sim_comps["depth_slider"]],
             scroll_to_output=False,
+            show_progress="hidden",
         )
 
         # 3. Run Simulation
@@ -226,6 +230,7 @@ def build_app():
                 sim_comps["kpi_detr"],
             ],
             scroll_to_output=False,
+            show_progress="hidden",
         )
         sim_comps["banner_replay_btn"].click(
             replay_from_start,
@@ -243,6 +248,7 @@ def build_app():
                 sim_comps["kpi_detr"],
             ],
             scroll_to_output=False,
+            show_progress="hidden",
         )
 
         # 5. Timeline scrubber
@@ -270,6 +276,7 @@ def build_app():
                 sim_comps["telemetry_table"],
             ],
             scroll_to_output=False,
+            show_progress="hidden",
         )
 
         # 6. Event filter
@@ -278,6 +285,7 @@ def build_app():
             inputs=[sim_comps["event_filter_radio"], events_state, sim_comps["scrubber"]],
             outputs=[sim_comps["event_log_box"]],
             scroll_to_output=False,
+            show_progress="hidden",
         )
 
         # 7. Step navigation buttons
@@ -286,6 +294,7 @@ def build_app():
             inputs=[sim_comps["scrubber"], history_state],
             outputs=[sim_comps["scrubber"]],
             scroll_to_output=False,
+            show_progress="hidden",
         )
 
         sim_comps["step_fwd_btn"].click(
@@ -293,6 +302,7 @@ def build_app():
             inputs=[sim_comps["scrubber"], history_state],
             outputs=[sim_comps["scrubber"]],
             scroll_to_output=False,
+            show_progress="hidden",
         )
 
         # 8. Autoplay toggle
@@ -306,6 +316,7 @@ def build_app():
             inputs=[timer_running],
             outputs=[timer_running, timer, sim_comps["play_pause_btn"]],
             scroll_to_output=False,
+            show_progress="hidden",
         )
 
         def on_tick(cur, hist):
@@ -321,6 +332,7 @@ def build_app():
             inputs=[sim_comps["scrubber"], history_state],
             outputs=[sim_comps["scrubber"]],
             scroll_to_output=False,
+            show_progress="hidden",
         )
 
         # 9. Paired comparison runners
@@ -403,6 +415,7 @@ def build_app():
             inputs=[history_state, summary_state, env_meta_state],
             outputs=[exp_file_comps["export_file"]],
             scroll_to_output=False,
+            show_progress="hidden",
         )
 
         def trigger_export_csv(hist):
@@ -414,6 +427,7 @@ def build_app():
             inputs=[history_state],
             outputs=[exp_file_comps["export_file"]],
             scroll_to_output=False,
+            show_progress="hidden",
         )
 
         def on_app_load():
