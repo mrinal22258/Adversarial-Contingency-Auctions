@@ -11,15 +11,15 @@
     "ssi_lr"
   ],
   "mean_ranks": {
-    "aca": 3.496,
-    "aca_no_margin": 3.444,
-    "ctp_replan": 3.614,
+    "aca": 3.492,
+    "aca_no_margin": 3.442,
+    "ctp_replan": 3.602,
     "implicit": 2.694,
-    "cbba_lr": 5.194,
-    "cbba_partial_lr": 4.816,
+    "cbba_lr": 5.19,
+    "cbba_partial_lr": 4.838,
     "ssi_lr": 4.742
   },
-  "friedman_stat": 347.3892347125593,
-  "p_value": 5.609568146189036e-72,
+  "friedman_stat": 350.3416643779177,
+  "p_value": 1.3035455125539986e-72,
   "nemenyi_cd": 0.5696695485647248
 }

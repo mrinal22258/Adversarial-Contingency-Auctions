@@ -7,39 +7,39 @@
     },
     "aca_no_margin": {
       "wins": 60,
-      "ties": 141,
-      "losses": 49
+      "ties": 145,
+      "losses": 45
     },
     "ctp_replan": {
-      "wins": 90,
-      "ties": 88,
+      "wins": 91,
+      "ties": 87,
       "losses": 72
     },
     "implicit": {
       "wins": 26,
-      "ties": 132,
-      "losses": 92
+      "ties": 136,
+      "losses": 88
     },
     "cbba_lr": {
-      "wins": 162,
-      "ties": 60,
-      "losses": 28
+      "wins": 161,
+      "ties": 63,
+      "losses": 26
     },
     "cbba_partial_lr": {
       "wins": 149,
-      "ties": 75,
-      "losses": 26
+      "ties": 76,
+      "losses": 25
     },
     "ssi_lr": {
-      "wins": 133,
-      "ties": 68,
-      "losses": 49
+      "wins": 134,
+      "ties": 70,
+      "losses": 46
     }
   },
   "aca_no_margin": {
     "aca": {
-      "wins": 49,
-      "ties": 141,
+      "wins": 45,
+      "ties": 145,
       "losses": 60
     },
     "aca_no_margin": {
@@ -76,8 +76,8 @@
   "ctp_replan": {
     "aca": {
       "wins": 72,
-      "ties": 88,
-      "losses": 90
+      "ties": 87,
+      "losses": 91
     },
     "aca_no_margin": {
       "wins": 78,
@@ -101,8 +101,8 @@
     },
     "cbba_partial_lr": {
       "wins": 127,
-      "ties": 77,
-      "losses": 46
+      "ties": 78,
+      "losses": 45
     },
     "ssi_lr": {
       "wins": 137,
@@ -112,8 +112,8 @@
   },
   "implicit": {
     "aca": {
-      "wins": 92,
-      "ties": 132,
+      "wins": 88,
+      "ties": 136,
       "losses": 26
     },
     "aca_no_margin": {
@@ -149,9 +149,9 @@
   },
   "cbba_lr": {
     "aca": {
-      "wins": 28,
-      "ties": 60,
-      "losses": 162
+      "wins": 26,
+      "ties": 63,
+      "losses": 161
     },
     "aca_no_margin": {
       "wins": 30,
@@ -174,9 +174,9 @@
       "losses": 0
     },
     "cbba_partial_lr": {
-      "wins": 48,
-      "ties": 95,
-      "losses": 107
+      "wins": 46,
+      "ties": 98,
+      "losses": 106
     },
     "ssi_lr": {
       "wins": 101,
@@ -186,8 +186,8 @@
   },
   "cbba_partial_lr": {
     "aca": {
-      "wins": 26,
-      "ties": 75,
+      "wins": 25,
+      "ties": 76,
       "losses": 149
     },
     "aca_no_margin": {
@@ -196,8 +196,8 @@
       "losses": 145
     },
     "ctp_replan": {
-      "wins": 46,
-      "ties": 77,
+      "wins": 45,
+      "ties": 78,
       "losses": 127
     },
     "implicit": {
@@ -206,9 +206,9 @@
       "losses": 162
     },
     "cbba_lr": {
-      "wins": 107,
-      "ties": 95,
-      "losses": 48
+      "wins": 106,
+      "ties": 98,
+      "losses": 46
     },
     "cbba_partial_lr": {
       "wins": 0,
@@ -217,15 +217,15 @@
     },
     "ssi_lr": {
       "wins": 106,
-      "ties": 44,
-      "losses": 100
+      "ties": 45,
+      "losses": 99
     }
   },
   "ssi_lr": {
     "aca": {
-      "wins": 49,
-      "ties": 68,
-      "losses": 133
+      "wins": 46,
+      "ties": 70,
+      "losses": 134
     },
     "aca_no_margin": {
       "wins": 38,
@@ -248,8 +248,8 @@
       "losses": 101
     },
     "cbba_partial_lr": {
-      "wins": 100,
-      "ties": 44,
+      "wins": 99,
+      "ties": 45,
       "losses": 106
     },
     "ssi_lr": {

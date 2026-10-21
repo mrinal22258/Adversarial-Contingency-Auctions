@@ -1,9 +1,9 @@
 {
-  "timestamp_utc": "2026-10-21T09:52:37.975114+00:00",
+  "timestamp_utc": "2026-10-21T13:27:01.638138+00:00",
   "python_version": "3.12.7 | packaged by Anaconda, Inc. | (main, Oct  4 2024, 13:17:27) [MSC v.1929 64 bit (AMD64)]",
   "protocol": "v5",
-  "git_commit": "ff4fd3d220f7e7ef4f371ed9231f671f880ef51c",
-  "git_dirty": true,
+  "git_commit": "c8033f85e731a7f161ba8508c6ad782783bb4e9a",
+  "git_dirty": false,
   "repo_root": ".",
   "steps": {
     "step1_validation": "PASS",
@@ -17,27 +17,27 @@
   },
   "artifacts": {
     "results/raw_results.csv": {
-      "sha256": "24fe41614d55e0f5161c33c1661b53feea3b5487981ea599e7a2dd29bcd82832",
-      "bytes": 6491178
+      "sha256": "6ea11355d9fe5df014778615f7e2149fc6aecadfffd7198e91f4912740b74905",
+      "bytes": 6496027
     },
     "results/confirmatory/heldout_v5_results.csv": {
       "sha256": "a7470feb9f649baabef745b3d041629f8cbfe415c18f605a968b10b7df393ce5",
       "bytes": 1213596
     },
     "results/per_claim_evaluations.jsonl": {
-      "sha256": "b08a804509c356a13962bb6127784815ff8126d029bc7f47a4601b220f9d4f74",
-      "bytes": 7962595
+      "sha256": "16555ff498f049d517bf5cd83af88334ee3b7c5ba4d9638a03c57cdf007c205a",
+      "bytes": 8232927
     },
     "results/sitl/analysis/sitl_vs_graph_summary.json": {
       "sha256": "9bbcfe4d22e552c81ab96be7925df1a5eeadfcc2ac511fd37d9132224cf1cd66",
       "bytes": 12762
     },
     "results/result_model_v1.json": {
-      "sha256": "b44778a7e6216f8cbef3569afa762493463ade3f7055533f57731020fc961175",
-      "bytes": 263304
+      "sha256": "3bd3560cbddecc9a04569cd8c28f64f96607203e8454157f6a0232a4166ad1d1",
+      "bytes": 263512
     },
     "results/numbers.tex": {
-      "sha256": "94873735b701293e9f1c7172b05099969c4114a4de501daa1876afb4448aa95f",
+      "sha256": "a7b5e2bf22a898f79dd90a99fe9ea99335eb758791616a936c6980b5bdeaf871",
       "bytes": 14938
     },
     "results/table_main_results.tex": {
@@ -45,7 +45,7 @@
       "bytes": 3111
     },
     "results/table_stratified.tex": {
-      "sha256": "6b85f0ae3454107f66f4aff1848d256b95e61d6a2ecd2d3761b203f0a912f5a1",
+      "sha256": "83e99d7e2b1cbec13224935c510bfcf3e43a56c587aa96a280644887c572ad59",
       "bytes": 2159
     },
     "results/table_sitl.tex": {
@@ -65,17 +65,17 @@
       "bytes": 7468
     },
     "audit/CLAIM_LEDGER_V2.csv": {
-      "sha256": "ebaf34af26e124c270d8fa25e07b866f6a9bf706d12fd7e68ade2ae757cd153b",
+      "sha256": "aa89bb02dab931dc5e355c7df8f779cbca8b9c797754765329247429f2b57b28",
       "bytes": 4954
     },
     "paper.pdf": {
-      "sha256": "55ccaa637375d8ffcfd7ea555adb201910682d39e4d82982689ff51c86289053",
-      "bytes": 899873
+      "sha256": "2446f11fa31da2131b8d25fc73c6350bc3cceebf81a3197834c51fad9cf22043",
+      "bytes": 901982
     },
     "supplement.pdf": {
-      "sha256": "9bef5ddf781d8f52db79ea1d2007872624471143dc36b0d06a64a2f5a3688148",
-      "bytes": 813819
+      "sha256": "fdb232b9dd0e4b377a02b50e8d2f2b7024c2cc05c57af9c85a37cb32ffe5c66e",
+      "bytes": 813805
     }
   },
-  "duration_sec": 81.08
+  "duration_sec": 99.84
 }
