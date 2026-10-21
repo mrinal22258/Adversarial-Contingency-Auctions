@@ -545,4 +545,57 @@ def test_cache_key_includes_risk_clearance_adversary_budget():
     assert res1["summary"] != res2["summary"]
 
 
+def test_homogeneous_poisson_arrivals_monotonic_and_rate():
+    """Verify Finding 7 fix: poisson_arrivals generator produces monotonically non-decreasing arrival steps."""
+    from experiments.run_sweep import build_crn_environment
+
+    # Test across multiple seeds and rates
+    for seed in [42, 101, 2024]:
+        for rate in [0.5, 1.0, 2.0]:
+            env = build_crn_environment(
+                graph_family="er",
+                n_nodes=35,
+                seed=seed,
+                n_robots=4,
+                n_tasks=20,
+                max_steps=80,
+                task_arrival_mode="poisson",
+                poisson_rate=rate,
+            )
+            tasks = env["tasks"]
+            arrival_steps = [tasks[tid].arrival_step for tid in range(len(tasks))]
+
+            # 1. Non-decreasing check: a_0 <= a_1 <= ...
+            assert arrival_steps[0] == 0, f"Task 0 must arrive at step 0, got {arrival_steps[0]}"
+            for i in range(len(arrival_steps) - 1):
+                assert arrival_steps[i] <= arrival_steps[i + 1], (
+                    f"Arrival steps must be monotonically non-decreasing: {arrival_steps}"
+                )
+
+    # Also test SimulationEngine directly
+    g = nx.path_graph(10)
+    for u, v in g.edges():
+        g[u][v]["weight"] = 1.0
+    nx.set_node_attributes(g, {i: (float(i), 0.0) for i in g.nodes()}, "pos")
+
+    sim = SimulationEngine(
+        graph=g,
+        n_robots=2,
+        n_tasks=1000,
+        task_arrival_mode="poisson",
+        poisson_rate=2.0,
+        seed=12345,
+    )
+    arrivals = [sim.tasks[tid].arrival_step for tid in range(1000)]
+    assert arrivals[0] == 0
+    for i in range(len(arrivals) - 1):
+        assert arrivals[i] <= arrivals[i + 1]
+
+    # Verify inter-arrival distribution mean
+    diffs = np.diff(arrivals)
+    mean_inter_arrival = np.mean(diffs)
+    assert 0.3 <= mean_inter_arrival <= 0.7, f"Mean inter-arrival {mean_inter_arrival} out of expected range for rate=2.0"
+
+
+
 

@@ -347,16 +347,18 @@ class SimulationEngine:
 
     def _generate_tasks(self, nodes_list: List[Any]) -> Dict[int, Task]:
         tasks = {}
+        if self.task_arrival_mode == "poisson":
+            # Standard homogeneous Poisson process: cumulative exponential inter-arrival intervals
+            rate = max(0.1, float(self.poisson_rate))
+            inter_arrivals = self.rng.exponential(1.0 / rate, size=self.n_tasks)
+            arr_steps = np.floor(np.cumsum(inter_arrivals)).astype(int)
+            arr_steps[0] = 0  # Task 0 arrives at step 0; remaining tasks arrive non-decreasingly
+        else:
+            arr_steps = np.zeros(self.n_tasks, dtype=int)
+
         for tid in range(self.n_tasks):
             t_node = nodes_list[int(self.rng.integers(0, len(nodes_list)))]
-            if self.task_arrival_mode == "poisson":
-                # Deterministic Poisson arrival step parameterization: task `tid` arrival step
-                # is drawn from Poisson with mean tid / max(0.1, poisson_rate), maintaining exact
-                # random stream seed alignment across Common Random Number (CRN) benchmark sweeps.
-                arr_step = int(self.rng.poisson(tid / max(0.1, self.poisson_rate)))
-            else:
-                arr_step = 0  # Batch arrival at start
-
+            arr_step = int(arr_steps[tid])
             tasks[tid] = Task(
                 task_id=tid,
                 node=t_node,
@@ -365,6 +367,7 @@ class SimulationEngine:
                 deadline=arr_step + self.task_deadline,
             )
         return tasks
+
 
     def reset(self, max_steps: Optional[int] = None) -> "SimulationEngine":
         """Initialize or reset simulation state and metrics."""

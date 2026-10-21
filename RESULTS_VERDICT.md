@@ -12,17 +12,17 @@ Generated directly from executed raw runs, matched independent instance-level te
 |---|---|---|---|---|---|---|---|---|---|---|
 | H1 | Recourse Efficacy (ACA vs ACA-d0) | completion_rate_pct | 250 instances | 0.61 | 0.0 [0.0, 0.0] | 0.106 | 8.4181e-05 | 1.6836e-04 | 5.0508e-04 | **NOT SUPPORTED / PARITY** |
 | H2 | Level Execution (ACA vs cbba_lr) | completion_rate_pct | 250 instances | 6.38 | 5.56 [4.44, 6.67] | 0.405 | 7.1755e-24 | 4.3053e-23 | 4.3053e-23 | **SIGNIFICANT DIFFERENCE (ACA HIGHER)** |
-| H2 | Level Execution (ACA vs cbba_partial_lr) | completion_rate_pct | 250 instances | 5.06 | 3.89 [3.33, 4.92] | 0.308 | 6.4410e-22 | 3.2205e-21 | 3.8646e-21 | **SIGNIFICANT DIFFERENCE (ACA HIGHER)** |
+| H2 | Level Execution (ACA vs cbba_partial_lr) | completion_rate_pct | 250 instances | 5.11 | 4.09 [3.33, 5.0] | 0.312 | 3.5323e-22 | 1.7662e-21 | 2.1194e-21 | **SIGNIFICANT DIFFERENCE (ACA HIGHER)** |
 | H2 | Level Execution (ACA vs ssi_lr) | completion_rate_pct | 250 instances | 8.64 | 6.67 [4.44, 8.89] | 0.304 | 1.7693e-18 | 7.0772e-18 | 1.0616e-17 | **SIGNIFICANT DIFFERENCE (ACA HIGHER)** |
 | H2_REGIME | Lossy Regime Resilience (p_drop in [0.2, 0.4]) | completion_rate_pct | 50 instances | 5.8 | 5.0 [1.67, 8.33] | 0.298 | 2.3225e-04 | 2.3225e-04 | 0.0014 | **SUPPORTED (ACA SUPERIOR)** |
-| H2_CTP | Comparator Evaluation (ACA vs CTP Replan) | completion_rate_pct | 250 instances | -0.34 | 0.0 [0.0, 0.91] | 0.019 | 0.4389 | 0.5016 | N/A | **PARITY (NO SIGNIFICANT DIFFERENCE)** |
+| H2_CTP | Comparator Evaluation (ACA vs CTP Replan) | completion_rate_pct | 250 instances | -0.33 | 0.0 [0.0, 0.83] | 0.019 | 0.4624 | 0.5284 | N/A | **PARITY (NO SIGNIFICANT DIFFERENCE)** |
 | H2_IMPLICIT | Comparator Evaluation (ACA vs Implicit) | completion_rate_pct | 250 instances | -1.26 | -1.11 [-1.11, 0.0] | -0.139 | 5.7492e-06 | 9.1987e-06 | N/A | **SIGNIFICANT DIFFERENCE (COMPARATOR HIGHER)** |
-| H3 | Welfare Non-Inferiority (ACA vs best literature baseline: cbba_partial_lr) | net_welfare | 250 instances | 16.99 | 16.99 [2.54, 31.43] | 0.041 | 1.3836e-05 | 4.1508e-05 | 8.3017e-05 | **NON-INFERIOR / EQUIVALENT (SUPPORTED)** |
+| H3 | Welfare Non-Inferiority (ACA vs best literature baseline: cbba_partial_lr) | net_welfare | 250 instances | 17.42 | 17.42 [2.98, 31.86] | 0.041 | 1.7117e-05 | 5.1352e-05 | 1.0270e-04 | **NON-INFERIOR / EQUIVALENT (SUPPORTED)** |
 | H4 | Pinsker Margin Safe Conflict Reduction | safe_claim_conflicts | 250 instances | -5.145 | -5.167 [-5.333, -5.0] | -1.0 | 3.5279e-43 | 1.4111e-42 | N/A | **SUPPORTED (SIGNIFICANT REDUCTION)** |
 | H4_COMPLETION | Pinsker Margin Completion Equivalence (TOST 5pp) | completion_rate_pct | 250 instances | 0.39 | 0.39 [-0.02, 0.8] | 0.019 | 1.8606e-49 | 1.4884e-48 | N/A | **NON-INFERIOR / EQUIVALENT (SUPPORTED)** |
 | H5 | Bayesian Inference Advantage (ACA vs ACA-NoInference) | completion_rate_pct | 250 instances | -0.0 | 0.0 [0.0, 0.0] | -0.008 | 0.7024 | 0.7024 | N/A | **NOT SUPPORTED / PARITY** |
 | H6 | Communication Efficiency (ACA vs CBBA) | total_messages | 250 instances | -95.46 | -92.0 [-108.67, -76.0] | -0.421 | 2.2104e-23 | 4.4208e-23 | N/A | **SUPPORTED (SIGNIFICANT REDUCTION)** |
-| H7 | Assumption 1 Empirical TV Adherence (TV <= eta_eff vs 0.90) | tv_bound_adherence_rate | 250 instances | 0.0669 | 0.9669 [0.9626, 0.9712] | 0.0 | 1.3020e-38 | 3.4721e-38 | N/A | **SUPPORTED (ADHERES TO BOUND)** |
+| H7 | Assumption 1 Empirical TV Adherence (TV <= eta_eff vs 0.90) | tv_bound_adherence_rate | 250 instances | 0.067 | 0.967 [0.9626, 0.9712] | 0.0 | 1.2871e-38 | 3.4323e-38 | N/A | **SUPPORTED (ADHERES TO BOUND)** |
 | H7_CONFLICT_FREE_RATE | Conflict-Free-Run Rate (0 Safe-Claim Conflicts) | conflict_free_run_rate | 1,650 runs | 0.1 | 1.0 [0.9982, 1.0] | 0.0 | N/A | N/A | N/A | **DESCRIPTIVE (100.00% CONFLICT-FREE)** |
 | H8 | Robustness on theta_4 (ACA vs best ctp_replan) | completion_rate_pct | 250 instances | -1.17 | 0.0 [0.0, 0.0] | -0.05 | 0.0105 | 0.0140 | N/A | **SIGNIFICANT DIFFERENCE (COMPARATOR HIGHER)** |
 
@@ -40,25 +40,25 @@ Generated directly from executed raw runs, matched independent instance-level te
 
 - **H1 (Recourse Efficacy (ACA vs ACA-d0))** [N=250 instances; n=50 per family]: completion_rate_pct mean difference = +0.61 (HL median diff = +0.00, 95% CI [0.0, 0.0], Cliff's delta = 0.106, adjusted p = 1.6836e-04). Verdict: **NOT SUPPORTED / PARITY**.
 - **H2 (Level Execution (ACA vs cbba_lr))** [N=250 instances; n=50 per family]: completion_rate_pct mean difference = +6.38 (HL median diff = +5.56, 95% CI [4.44, 6.67], Cliff's delta = 0.405, adjusted p = 4.3053e-23). Verdict: **SIGNIFICANT DIFFERENCE (ACA HIGHER)**.
-- **H2 (Level Execution (ACA vs cbba_partial_lr))** [N=250 instances; n=50 per family]: completion_rate_pct mean difference = +5.06 (HL median diff = +3.89, 95% CI [3.33, 4.92], Cliff's delta = 0.308, adjusted p = 3.2205e-21). Verdict: **SIGNIFICANT DIFFERENCE (ACA HIGHER)**.
+- **H2 (Level Execution (ACA vs cbba_partial_lr))** [N=250 instances; n=50 per family]: completion_rate_pct mean difference = +5.11 (HL median diff = +4.09, 95% CI [3.33, 5.0], Cliff's delta = 0.312, adjusted p = 1.7662e-21). Verdict: **SIGNIFICANT DIFFERENCE (ACA HIGHER)**.
 - **H2 (Level Execution (ACA vs ssi_lr))** [N=250 instances; n=50 per family]: completion_rate_pct mean difference = +8.64 (HL median diff = +6.67, 95% CI [4.44, 8.89], Cliff's delta = 0.304, adjusted p = 7.0772e-18). Verdict: **SIGNIFICANT DIFFERENCE (ACA HIGHER)**.
 - **H2_REGIME (Lossy Regime Resilience (p_drop in [0.2, 0.4]))** [N=50 instances; n=50 per family]: completion_rate_pct mean difference = +5.80 (HL median diff = +5.00, 95% CI [1.67, 8.33], Cliff's delta = 0.298, adjusted p = 2.3225e-04). Verdict: **SUPPORTED (ACA SUPERIOR)**.
-- **H2_CTP (Comparator Evaluation (ACA vs CTP Replan))** [N=250 instances; n=50 per family]: completion_rate_pct mean difference = -0.34 (HL median diff = +0.00, 95% CI [0.0, 0.91], Cliff's delta = 0.019, adjusted p = 0.5016). Verdict: **PARITY (NO SIGNIFICANT DIFFERENCE)**.
+- **H2_CTP (Comparator Evaluation (ACA vs CTP Replan))** [N=250 instances; n=50 per family]: completion_rate_pct mean difference = -0.33 (HL median diff = +0.00, 95% CI [0.0, 0.83], Cliff's delta = 0.019, adjusted p = 0.5284). Verdict: **PARITY (NO SIGNIFICANT DIFFERENCE)**.
 - **H2_IMPLICIT (Comparator Evaluation (ACA vs Implicit))** [N=250 instances; n=50 per family]: completion_rate_pct mean difference = -1.26 (HL median diff = -1.11, 95% CI [-1.11, 0.0], Cliff's delta = -0.139, adjusted p = 9.1987e-06). Verdict: **SIGNIFICANT DIFFERENCE (COMPARATOR HIGHER)**.
-- **H3 (Welfare Non-Inferiority (ACA vs best literature baseline: cbba_partial_lr))** [N=250 instances; n=50 per family]: net_welfare mean difference = +16.99 (HL median diff = +16.99, 95% CI [2.54, 31.43], Cliff's delta = 0.041, adjusted p = 4.1508e-05). Verdict: **NON-INFERIOR / EQUIVALENT (SUPPORTED)**.
+- **H3 (Welfare Non-Inferiority (ACA vs best literature baseline: cbba_partial_lr))** [N=250 instances; n=50 per family]: net_welfare mean difference = +17.42 (HL median diff = +17.42, 95% CI [2.98, 31.86], Cliff's delta = 0.041, adjusted p = 5.1352e-05). Verdict: **NON-INFERIOR / EQUIVALENT (SUPPORTED)**.
 - **H4 (Pinsker Margin Safe Conflict Reduction)** [N=250 instances; n=50 per family]: safe_claim_conflicts mean difference = -5.14 (HL median diff = -5.17, 95% CI [-5.333, -5.0], Cliff's delta = -1.000, adjusted p = 1.4111e-42). Verdict: **SUPPORTED (SIGNIFICANT REDUCTION)**.
 - **H4_COMPLETION (Pinsker Margin Completion Equivalence (TOST 5pp))** [N=250 instances; n=50 per family]: completion_rate_pct mean difference = +0.39 (HL median diff = +0.39, 95% CI [-0.02, 0.8], Cliff's delta = 0.019, adjusted p = 1.4884e-48). Verdict: **NON-INFERIOR / EQUIVALENT (SUPPORTED)**.
 - **H5 (Bayesian Inference Advantage (ACA vs ACA-NoInference))** [N=250 instances; n=50 per family]: completion_rate_pct mean difference = -0.00 (HL median diff = +0.00, 95% CI [0.0, 0.0], Cliff's delta = -0.008, adjusted p = 0.7024). Verdict: **NOT SUPPORTED / PARITY**.
 - **H6 (Communication Efficiency (ACA vs CBBA))** [N=250 instances; n=50 per family]: total_messages mean difference = -95.46 (HL median diff = -92.00, 95% CI [-108.67, -76.0], Cliff's delta = -0.421, adjusted p = 4.4208e-23). Verdict: **SUPPORTED (SIGNIFICANT REDUCTION)**.
-- **H7 (Assumption 1 Empirical TV Adherence (TV <= eta_eff vs 0.90))** [N=250 instances; n=50 per family]: tv_bound_adherence_rate mean difference = +0.0669 (Bootstrap Mean = 0.9669, 95% CI [0.9626, 0.9712], Cliff's delta = 0.000, adjusted p = 3.4721e-38). Verdict: **SUPPORTED (ADHERES TO BOUND)**.
+- **H7 (Assumption 1 Empirical TV Adherence (TV <= eta_eff vs 0.90))** [N=250 instances; n=50 per family]: tv_bound_adherence_rate mean difference = +0.0670 (Bootstrap Mean = 0.9670, 95% CI [0.9626, 0.9712], Cliff's delta = 0.000, adjusted p = 3.4323e-38). Verdict: **SUPPORTED (ADHERES TO BOUND)**.
 - **H7_CONFLICT_FREE_RATE (Conflict-Free-Run Rate (0 Safe-Claim Conflicts))** [N=1,650 runs]: conflict_free_run_rate = 1.0000 (95% CI [0.9982, 1.0], Cliff's delta = 0.000). Verdict: **DESCRIPTIVE (100.00% CONFLICT-FREE)**.
 - **H8 (Robustness on theta_4 (ACA vs best ctp_replan))** [N=250 instances; n=50 per family]: completion_rate_pct mean difference = -1.17 (HL median diff = +0.00, 95% CI [0.0, 0.0], Cliff's delta = -0.050, adjusted p = 0.0140). Verdict: **SIGNIFICANT DIFFERENCE (COMPARATOR HIGHER)**.
 
 ### Step 4B Dedicated Methodological Analyses
 
 #### 1. Baseline Comparator Evaluation: ACA vs CBBA-PR+LR (H2)
-- **Statistical Significance Status**: STATISTICALLY SIGNIFICANT under primary Holm step-down ($p_{\text{adj}} = 3.2205e-21$), and Bonferroni ($p_{\text{bonf}} = 3.8646e-21$).
-- **Observed Effect**: Completion difference is +5.06 pp (HL median diff +3.89 [3.33, 4.92]), showing that when CBBA-PR is equipped with identical local recourse execution (+LR), ACA and CBBA-PR+LR achieve approximate performance parity.
+- **Statistical Significance Status**: STATISTICALLY SIGNIFICANT under primary Holm step-down ($p_{\text{adj}} = 1.7662e-21$), and Bonferroni ($p_{\text{bonf}} = 2.1194e-21$).
+- **Observed Effect**: Completion difference is +5.11 pp (HL median diff +4.09 [3.33, 5.0]), showing that when CBBA-PR is equipped with identical local recourse execution (+LR), ACA and CBBA-PR+LR achieve approximate performance parity.
 - **Per-Regime Breakdown**:
   - Nominal/Benign Comm: ACA 96.07% vs CBBA-PR+LR 90.88% (+5.19 pp difference)
   - Range-Constrained Comm: ACA 93.27% vs CBBA-PR+LR 89.40% (+3.87 pp difference)
@@ -67,23 +67,23 @@ Generated directly from executed raw runs, matched independent instance-level te
 #### 2. Pinsker Claim Margin Efficacy & Cost Decomposition (H4)
 - **Safe-Claim Conflict Reduction**: 0 total safe-claim conflicts for ACA vs 3,859 for ACA-no-margin (100.0% reduction; Wilcoxon $p = 3.5279e-43$).
 - **Conflicts Per Claimed Task**: 0.0000 conflicts/safe claim (ACA) vs 3,859 safe conflicts (ACA-no-margin).
-- **Total Conflicts (All Types)**: 76,087 (ACA) vs 33,026 (ACA-no-margin). ACA incurs negotiation conflicts during fallback consensus but isolates safe claims.
-- **Conservative Deferral Rate**: ACA safely claims 11,334 tasks and conservatively defers 684,140 tasks to consensus negotiation (Deferral Rate: 98.37%).
-- **Completion Preservation & Cost**: ACA completes 95.34% of tasks vs 95.48% for ACA-no-margin (-0.14 pp completion difference, reflecting the cost of conservative deferral). Equivalence confirmed via TOST within 5.0 pp margin ($p_{\text{TOST}} = 1.8606e-49$).
+- **Total Conflicts (All Types)**: 75,662 (ACA) vs 33,026 (ACA-no-margin). ACA incurs negotiation conflicts during fallback consensus but isolates safe claims.
+- **Conservative Deferral Rate**: ACA safely claims 11,343 tasks and conservatively defers 683,044 tasks to consensus negotiation (Deferral Rate: 98.37%).
+- **Completion Preservation & Cost**: ACA completes 95.36% of tasks vs 95.48% for ACA-no-margin (-0.11 pp completion difference, reflecting the cost of conservative deferral). Equivalence confirmed via TOST within 5.0 pp margin ($p_{\text{TOST}} = 1.8606e-49$).
 
 #### 3. Assumption 1 Empirical Total Variation Adherence (H7) & Theorem 1
 - **Three Hierarchical Adherence Levels**:
-  1. **Level 1 (Per-Evaluation Adherence)**: 98.08% (764,061 of 779,036 periodic belief evaluations across all timesteps and tasks satisfy $\mathrm{TV}(B_s, \hat{B}_s) \le \eta_{\text{eff}}$). Definition: Fraction of all periodic belief tracking checks where peer estimation error is bounded.
-  2. **Level 2 (Per-Instance Adherence)**: 96.69% (Independent Instance Bootstrap 95% CI: [0.9626, 0.9712], $N = 250$). Definition: Mean across independent benchmark instances $(G, \text{seed})$ of the instance-level adherence proportion.
-  3. **Level 3 (Per-Safe-Claim Adherence)**: 99.37% (28,338 of 28,518 safe claims satisfy $\mathrm{TV} \le \eta_{\text{eff}}$ at the moment of local claiming). Definition: Fraction of executed safe claims where peer belief error at the instant of claiming satisfies Assumption 1. **This is the exact condition that Theorem 1 directly conditions on.**
-- **Hypothesis Test vs Pre-Declared Threshold 0.90**: **SUPPORTED (ADHERES TO BOUND)** ($p = 1.3020e-38$, one-sided Wilcoxon signed-rank test across independent instances). Assumption 1 is an idealized theoretical model that is frequently violated empirically, necessitating the conservative consensus fallback.
-- **Theorem 1 Empirical Verification**: Across all 28,338 safe claims where $\mathrm{TV} \le \eta_{\text{eff}}$, exactly **0 double-claim conflicts occurred** (0.0000% conflict rate; exact one-sided 95% Clopper-Pearson upper bound: 0.0106%). Because Assumption 1 holds on 99.4% of safe claims, the evidence supporting conflict-freedom is strictly **empirical**.
+  1. **Level 1 (Per-Evaluation Adherence)**: 98.08% (762,851 of 777,752 periodic belief evaluations across all timesteps and tasks satisfy $\mathrm{TV}(B_s, \hat{B}_s) \le \eta_{\text{eff}}$). Definition: Fraction of all periodic belief tracking checks where peer estimation error is bounded.
+  2. **Level 2 (Per-Instance Adherence)**: 96.70% (Independent Instance Bootstrap 95% CI: [0.9626, 0.9712], $N = 250$). Definition: Mean across independent benchmark instances $(G, \text{seed})$ of the instance-level adherence proportion.
+  3. **Level 3 (Per-Safe-Claim Adherence)**: 99.04% (11,234 of 11,343 safe claims satisfy $\mathrm{TV} \le \eta_{\text{eff}}$ at the moment of local claiming). Definition: Fraction of executed safe claims where peer belief error at the instant of claiming satisfies Assumption 1. **This is the exact condition that Theorem 1 directly conditions on.**
+- **Hypothesis Test vs Pre-Declared Threshold 0.90**: **SUPPORTED (ADHERES TO BOUND)** ($p = 1.2871e-38$, one-sided Wilcoxon signed-rank test across independent instances). Assumption 1 is an idealized theoretical model that is frequently violated empirically, necessitating the conservative consensus fallback.
+- **Theorem 1 Empirical Verification**: Across all 11,234 safe claims where $\mathrm{TV} \le \eta_{\text{eff}}$, exactly **0 double-claim conflicts occurred** (0.0000% conflict rate; exact one-sided 95% Clopper-Pearson upper bound: 0.0267%). Because Assumption 1 holds on 99.0% of safe claims, the evidence supporting conflict-freedom is strictly **empirical**.
 - **Theorem 1 Breakdown by Allocation Time Step**:
-  - Early Claims ($t = 0$, Initial Round): $n = 27,248$, 0 conflicts, exact 95% one-sided upper CI: 0.0110% (1.0994e-04).
-  - Late Claims ($t > 0$, Dynamic Recourse): $n = 1,090$, 0 conflicts, exact 95% one-sided upper CI: 0.2745% (2.7446e-03).
+  - Early Claims ($t = 0$, Initial Round): $n = 10,566$, 0 conflicts, exact 95% one-sided upper CI: 0.0283% (2.8349e-04).
+  - Late Claims ($t > 0$, Dynamic Recourse): $n = 668$, 0 conflicts, exact 95% one-sided upper CI: 0.4475% (4.4746e-03).
 - **Theorem 1 Breakdown by Communication Regime**:
-  - Nominal Regime: $n = 20,532$, 0 conflicts, exact 95% one-sided upper CI: 0.0146% (1.4589e-04).
-  - Perturbation & Degraded Regimes (OFAT Range, Loss, Partition, Poisson): $n = 7,806$, 0 conflicts, exact 95% one-sided upper CI: 0.0384% (3.8370e-04).
+  - Nominal Regime: $n = 5,720$, 0 conflicts, exact 95% one-sided upper CI: 0.0524% (5.2359e-04).
+  - Perturbation & Degraded Regimes (OFAT Range, Loss, Partition, Poisson): $n = 5,514$, 0 conflicts, exact 95% one-sided upper CI: 0.0543% (5.4315e-04).
 - **Conflict-Free-Run Rate (Reported Separately as Distinct Descriptive Metric)**: Despite Assumption 1 violations, ACA achieves a **100.00% conflict-free-run rate** (1,650 of 1,650 ACA runs have 0 safe-claim conflicts; Clopper-Pearson 95% CI: [99.82%, 100.00%]), demonstrating that conservative margin inflation prevents coordination failures even under imperfect state estimation.
 
 ---

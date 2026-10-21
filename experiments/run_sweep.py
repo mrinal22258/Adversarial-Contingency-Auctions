@@ -133,16 +133,18 @@ def build_crn_environment(
 
     # 3. Tasks
     tasks = {}
+    if task_arrival_mode == "poisson":
+        # Standard homogeneous Poisson process: cumulative exponential inter-arrival intervals
+        rate = max(0.1, float(poisson_rate))
+        inter_arrivals = rng_tasks.exponential(1.0 / rate, size=n_tasks)
+        arr_steps = np.floor(np.cumsum(inter_arrivals)).astype(int)
+        arr_steps[0] = 0  # Task 0 arrives at step 0; remaining tasks arrive non-decreasingly
+    else:
+        arr_steps = np.zeros(n_tasks, dtype=int)
+
     for tid in range(n_tasks):
         t_node = nodes_list[int(rng_tasks.integers(0, len(nodes_list)))]
-        # Deterministic Poisson arrival step parameterization: task `tid` arrival step
-        # is drawn from Poisson with mean tid / max(0.1, poisson_rate), maintaining exact
-        # random stream seed alignment across Common Random Number (CRN) benchmark sweeps.
-        arr_step = (
-            int(rng_tasks.poisson(tid / max(0.1, poisson_rate)))
-            if task_arrival_mode == "poisson"
-            else 0
-        )
+        arr_step = int(arr_steps[tid])
         tasks[tid] = Task(
             task_id=tid,
             node=t_node,
@@ -150,6 +152,7 @@ def build_crn_environment(
             arrival_step=arr_step,
             deadline=arr_step + task_deadline,
         )
+
 
     # 4. Risky edge selection & pre-drawn blockage uniforms
     all_edges = sorted([canonical_edge(u, v) for u, v in graph.edges()])

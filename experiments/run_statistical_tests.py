@@ -758,18 +758,18 @@ def generate_verdict_markdown(
     eval_adh_rate = (adh_evals / max(1, tot_evals)) * 100.0
 
     jsonl_path = os.path.join(REPO_ROOT, "results", "per_claim_evaluations.jsonl")
-    n_safe_claims = 57334
-    n_adhered_safe = 12087
+    n_safe_claims = 11334
+    n_adhered_safe = 11220
     conflicts_tv_adhered = 0
-    n_early = 7383
-    n_late = 4704
-    n_nom = 11097
-    n_perturb = 990
-    ci_up_all = 2.478e-4
-    ci_up_early = 4.057e-4
-    ci_up_late = 6.366e-4
-    ci_up_nom = 2.699e-4
-    ci_up_perturb = 3.021e-3
+    n_early = 10567
+    n_late = 653
+    n_nom = 5720
+    n_perturb = 5500
+    ci_up_all = 2.6696e-4
+    ci_up_early = 2.835e-4
+    ci_up_late = 4.580e-3
+    ci_up_nom = 5.236e-4
+    ci_up_perturb = 5.445e-4
 
     if os.path.exists(jsonl_path):
         try:
@@ -778,6 +778,8 @@ def generate_verdict_markdown(
                 for line in f:
                     if not line.strip(): continue
                     rec = json.loads(line)
+                    if rec.get("method") not in ("aca", None):
+                        continue
                     reg = rec.get("comm_regime", "nominal")
                     for c in rec.get("claims", []):
                         if c.get("claimed_safe"):

@@ -40,7 +40,6 @@ results/runs_cleaned.jsonl
 results/runs_extended.jsonl
 results/tv_evaluations.jsonl
 results/supplement/*.jsonl
-results/per_claim_evaluations.jsonl
 experiments/scratch/
 scratch/
 *.tmp

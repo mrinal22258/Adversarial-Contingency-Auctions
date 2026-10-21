@@ -36,13 +36,15 @@ def test_theorem1_empirical_guarantee():
             if not line.strip():
                 continue
             rec = json.loads(line)
+            if rec.get("method") not in ("aca", None):
+                continue
             for c in rec.get("claims", []):
                 if c.get("claimed_safe") and c.get("tv_le_eta"):
                     tv_le_eta_count += 1
                     if c.get("conflicted"):
                         conflicts_count += 1
 
-    assert tv_le_eta_count > 0, "Expected non-zero claims satisfying TV <= eta_eff"
+    assert tv_le_eta_count == 11234, f"Expected 11,234 ACA adhered safe claims, got {tv_le_eta_count}"
     assert conflicts_count == 0, (
         f"Theorem 1 violation! Observed {conflicts_count} conflicts out of {tv_le_eta_count} claims with TV <= eta_eff."
     )
@@ -87,3 +89,36 @@ def test_conflict_free_run_rate_distinct_descriptive_row():
     assert cfr_rows.iloc[0]["metric"] == "conflict_free_run_rate"
     assert cfr_rows.iloc[0]["tier"] == "descriptive"
     assert cfr_rows.iloc[0]["mean_aca"] > 0.90, "Conflict-free rate should be high (> 90%)"
+
+
+def test_cross_artifact_theorem1_consistency():
+    """
+    Cross-artifact consistency test: Ensure README.md, RESULTS_VERDICT.md,
+    docs/PAPER_CLAIMS.md, and results/numbers.tex match result_model_v1.json
+    and contain NO stale uncalibrated or pooled numbers (21.08%, 12,087, 106,214, 28,338, 28,518).
+    """
+    model_path = "results/result_model_v1.json"
+    assert os.path.exists(model_path), f"Missing {model_path}"
+    with open(model_path, "r", encoding="utf-8") as f:
+        model = json.load(f)
+
+    th1 = model["theorem_1_evidence"]
+    assert th1["claimed_safe"] == 11343
+    assert th1["tv_le_eta_subset"] == 11234
+    assert th1["conflicts_under_assumption_1"] == 0
+
+    stale_patterns = ["21.08%", "12,087", "106,214", "28,338", "28,518"]
+    artifacts = [
+        "README.md",
+        "RESULTS_VERDICT.md",
+        "docs/PAPER_CLAIMS.md",
+        "results/numbers.tex",
+    ]
+
+    for art in artifacts:
+        assert os.path.exists(art), f"Artifact {art} does not exist"
+        with open(art, "r", encoding="utf-8") as f:
+            content = f.read()
+        for pat in stale_patterns:
+            assert pat not in content, f"Stale pattern '{pat}' found in {art}!"
+

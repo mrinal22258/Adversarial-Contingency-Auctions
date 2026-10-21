@@ -211,6 +211,24 @@ def render_readme(
         "alpha_significance": "0.05",
     }
 
+    # Theorem 1 dynamic shortcuts
+    th1_data = model.get("theorem_1_evidence", model.get("theorem_1", {}))
+    if th1_data:
+        shortcuts["th1.safe_claims"] = f"{th1_data.get('claimed_safe', 0):,}"
+        shortcuts["th1.adhered_safe_claims"] = f"{th1_data.get('tv_le_eta_subset', 0):,}"
+        shortcuts["th1.adherence_per_claim_pct"] = f"{th1_data.get('adherence_pct', 0.0):.2f}"
+        shortcuts["th1.conflicts_adhered"] = str(th1_data.get("conflicts_under_assumption_1", 0))
+        shortcuts["th1.clopper_pearson_upper_pct"] = f"{th1_data.get('clopper_pearson_upper_pct', 0.0):.3f}"
+        shortcuts["th1.total_tv_observations"] = f"{th1_data.get('total_tv_observations', 0):,}"
+        shortcuts["th1.adhered_tv_observations"] = f"{th1_data.get('adhered_tv_observations', 0):,}"
+        shortcuts["th1.tv_adherence_pct"] = f"{th1_data.get('tv_adherence_pct', 0.0):.2f}"
+        shortcuts["th1.adherence_per_instance_pct"] = f"{th1_data.get('adherence_per_instance_pct', 0.0):.2f}"
+        shortcuts["th1.adherence_per_instance_ci_low"] = f"{th1_data.get('adherence_per_instance_ci_low', 0.0):.2f}"
+        shortcuts["th1.adherence_per_instance_ci_high"] = f"{th1_data.get('adherence_per_instance_ci_high', 0.0):.2f}"
+        shortcuts["th1.n_instances"] = str(th1_data.get("n_instances", 0))
+        shortcuts["th1.pval_adherence_instance_null"] = str(th1_data.get("pval_adherence_instance_null", "< 0.001"))
+        shortcuts["th1.fixed_threshold_baseline_adherence_pct"] = f"{th1_data.get('fixed_threshold_baseline_adherence_pct', 21.1):.1f}"
+
     # Populations
     pops = model.get("populations", {})
     for pop_key, pop_data in pops.items():

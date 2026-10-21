@@ -78,3 +78,36 @@ def test_numbers_macro_completeness():
 
     missing = [m for m in used if m not in defined]
     assert len(missing) == 0, f"Macros used in paper.tex but missing from numbers.tex: {missing}"
+
+
+@pytest.mark.core
+def test_generate_numbers_fails_on_missing_key(tmp_path):
+    from tools.generate_numbers_from_model import generate_numbers
+    model_path = os.path.join(REPO_ROOT, "results", "result_model_v1.json")
+    with open(model_path, "r", encoding="utf-8") as f:
+        model = json.load(f)
+
+    # 1. Test deleting pval_adherence_instance_null raises KeyError
+    m1 = json.loads(json.dumps(model))
+    del m1["theorem_1_evidence"]["pval_adherence_instance_null"]
+    p1 = tmp_path / "model1.json"
+    p1.write_text(json.dumps(m1), encoding="utf-8")
+    with pytest.raises(KeyError):
+        generate_numbers(model_path=str(p1), out_path=str(tmp_path / "out1.tex"))
+
+    # 2. Test deleting adherence_pct raises KeyError
+    m2 = json.loads(json.dumps(model))
+    del m2["theorem_1_evidence"]["adherence_pct"]
+    p2 = tmp_path / "model2.json"
+    p2.write_text(json.dumps(m2), encoding="utf-8")
+    with pytest.raises(KeyError):
+        generate_numbers(model_path=str(p2), out_path=str(tmp_path / "out2.tex"))
+
+    # 3. Test deleting claimed_safe raises KeyError
+    m3 = json.loads(json.dumps(model))
+    del m3["theorem_1_evidence"]["claimed_safe"]
+    p3 = tmp_path / "model3.json"
+    p3.write_text(json.dumps(m3), encoding="utf-8")
+    with pytest.raises(KeyError):
+        generate_numbers(model_path=str(p3), out_path=str(tmp_path / "out3.tex"))
+

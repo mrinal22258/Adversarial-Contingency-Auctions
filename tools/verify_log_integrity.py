@@ -144,6 +144,7 @@ def verify_log_integrity(
 
     is_clean = (
         hashes_present_and_valid
+        and not (require_record_hashes and missing_record_hashes > 0)
         and (csv_row_count == 0 or len(csv_hashes) > 0)
         and (valid_records == 0 or len(jsonl_hashes) > 0)
         and malformed_lines == 0

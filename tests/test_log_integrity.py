@@ -137,3 +137,25 @@ def test_missing_trial_hash_fails_closed():
         with pytest.raises(ValueError, match="Strict validation failed"):
             verify_log_integrity(csv_p, jsonl_p, strict=True)
 
+
+def test_non_strict_require_record_hashes_fails_when_missing():
+    """Verify Finding 8: when require_record_hashes=True and strict=False, missing record_sha256 marks is_clean=False."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        csv_p = os.path.join(tmpdir, "test.csv")
+        jsonl_p = os.path.join(tmpdir, "test.jsonl")
+
+        # trial_hash is present and matching, but record_sha256 is missing
+        records = [
+            {"trial_hash": f"hash_{i}", "metric": float(i)}
+            for i in range(10)
+        ]
+        pd.DataFrame(records).to_csv(csv_p, index=False)
+        with open(jsonl_p, "w", encoding="utf-8") as f:
+            for r in records:
+                f.write(json.dumps(r) + "\n")
+
+        res = verify_log_integrity(csv_p, jsonl_p, strict=False, require_record_hashes=True)
+        assert res["missing_record_hashes"] > 0
+        assert res["is_clean"] is False, "is_clean must be False when require_record_hashes=True and record_sha256 is absent"
+
+

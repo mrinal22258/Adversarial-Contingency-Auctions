@@ -48,13 +48,19 @@ def build_result_model() -> Dict[str, Any]:
     sitl_json = os.path.join(REPO_ROOT, "results", "sitl", "analysis", "sitl_vs_graph_summary.json")
     vision_json = os.path.join(REPO_ROOT, "results", "sitl", "vision", "vision_metrics.json")
     manifest_json = os.path.join(REPO_ROOT, "data", "maps", "manifest.json")
+    claims_jsonl = os.path.join(REPO_ROOT, "results", "per_claim_evaluations.jsonl")
+
+    # Fail closed if required empirical input files are missing
+    if not os.path.exists(raw_csv):
+        raise FileNotFoundError(f"Required empirical input file not found: {raw_csv}")
+    if not os.path.exists(claims_jsonl):
+        raise FileNotFoundError(f"Required empirical input file not found: {claims_jsonl}")
 
     raw_hash = compute_sha256(raw_csv)
     v5_hash = compute_sha256(v5_csv)
     sitl_hash = compute_sha256(sitl_json)
     vision_hash = compute_sha256(vision_json)
     manifest_hash = compute_sha256(manifest_json)
-    claims_jsonl = os.path.join(REPO_ROOT, "results", "per_claim_evaluations.jsonl")
     claims_hash = compute_sha256(claims_jsonl)
 
     pilot_csv = os.path.join(REPO_ROOT, "results", "pilot", "stage4_pilot_results.csv")
@@ -86,9 +92,8 @@ def build_result_model() -> Dict[str, Any]:
     step_zero_adhered = 0
     nominal_adhered = 0
     perturb_adhered = 0
-    if os.path.exists(claims_jsonl):
-        with open(claims_jsonl, "r", encoding="utf-8") as f:
-            for line in f:
+    with open(claims_jsonl, "r", encoding="utf-8") as f:
+        for line in f:
                 if not line.strip():
                     continue
                 rec = json.loads(line)
@@ -152,7 +157,11 @@ def build_result_model() -> Dict[str, Any]:
     boot_means = [np.mean(rng.choice(arr_inst, size=len(arr_inst), replace=True)) for _ in range(10000)]
     inst_ci_low = float(np.percentile(boot_means, 2.5)) * 100.0
     inst_ci_high = float(np.percentile(boot_means, 97.5)) * 100.0
-    pval_adherence_instance_null = "< 0.001"
+    from scipy.stats import wilcoxon
+    w_res = wilcoxon(arr_inst - 0.90, alternative="greater")
+    w_stat = float(w_res.statistic)
+    w_pval = float(w_res.pvalue)
+    pval_adherence_instance_null = "< 0.001" if w_pval < 0.001 else f"{w_pval:.3f}"
 
     # Safe Claim & Conflict Accounting on core_df and aca_all_raw
     aca_core = core_df[core_df["method"] == "aca"]
@@ -210,6 +219,8 @@ def build_result_model() -> Dict[str, Any]:
         "adherence_per_instance_ci_low": round(inst_ci_low, 1),
         "adherence_per_instance_ci_high": round(inst_ci_high, 1),
         "n_instances": len(arr_inst),
+        "adherence_wilcoxon_stat": w_stat,
+        "pval_adherence_instance_exact": w_pval,
         "pval_adherence_instance_null": pval_adherence_instance_null,
         # Theoretical Reference Constants
         "fixed_threshold_baseline_adherence_pct": 21.1,
