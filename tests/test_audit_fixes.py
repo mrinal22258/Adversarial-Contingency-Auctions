@@ -442,3 +442,107 @@ def test_diagnostic_subtabs_headless_render():
     assert "heldout_results_table" in res_comps
     assert "export_json_btn" in exp_export_comps
 
+
+def test_future_task_arrivals_not_terminated_prematurely():
+    """Verify audit fix: engine does not terminate when active_available_tasks is temporarily empty while future tasks exist."""
+    g = nx.path_graph(5)
+    for u, v in g.edges():
+        g[u][v]["weight"] = 1.0
+    nx.set_node_attributes(g, {i: (float(i), 0.0) for i in g.nodes()}, "pos")
+
+    custom_tasks = {
+        0: Task(task_id=0, node=2, reward=100.0, arrival_step=0, deadline=50),
+        1: Task(task_id=1, node=4, reward=100.0, arrival_step=5, deadline=50),
+    }
+
+    engine = SimulationEngine(
+        graph=g,
+        adversary_type=AdversaryType.STOCHASTIC,
+        allocator_type="aca",
+        n_robots=1,
+        n_tasks=2,
+        task_deadline=50,
+        max_steps=30,
+        custom_start_nodes=[0],
+        custom_tasks=custom_tasks,
+        risk_fraction=0.0,
+        seed=42,
+    )
+
+    metrics = engine.run(max_steps=30)
+    assert metrics.completed_tasks == 2, f"Expected 2 completed tasks, got {metrics.completed_tasks}"
+    assert metrics.makespan >= 6, f"Expected makespan >= 6, got {metrics.makespan}"
+
+
+def test_history_length_matches_makespan_seed_1001():
+    """Verify audit fix: runner history frame count matches makespan without off-by-one extra frame."""
+    from acalib.demo.runner import run_single_simulation
+
+    res = run_single_simulation(
+        graph_family="warehouse_movingai",
+        n_nodes=38,
+        variant="10-20-10-2-1",
+        adversary_str="Reactive (Corridor Interdiction)",
+        allocator_str="ACA (Ours)",
+        n_robots=2,
+        n_tasks=4,
+        max_steps=15,
+        seed=1001,
+        record_history=True,
+    )
+    assert len(res["history"]) == res["summary"]["makespan"] == 14
+
+    # Also verify seeds 1000, 1002, 1003
+    for s in [1000, 1002, 1003]:
+        r = run_single_simulation(
+            graph_family="warehouse_movingai",
+            n_nodes=38,
+            variant="10-20-10-2-1",
+            adversary_str="Reactive (Corridor Interdiction)",
+            allocator_str="ACA (Ours)",
+            n_robots=2,
+            n_tasks=4,
+            max_steps=15,
+            seed=s,
+            record_history=True,
+        )
+        assert len(r["history"]) == r["summary"]["makespan"]
+
+
+def test_cache_key_includes_risk_clearance_adversary_budget():
+    """Verify audit fix: runner cache key differentiates risk_fraction, clearance_rate, and adversary_budget_k."""
+    from acalib.demo.runner import run_single_simulation, _RUN_CACHE
+
+    res1 = run_single_simulation(
+        graph_family="grid",
+        n_nodes=25,
+        adversary_str="smart_static",
+        allocator_str="aca",
+        seed=5555,
+        max_steps=30,
+        risk_fraction=0.10,
+        clearance_rate=0.05,
+        adversary_budget_k=2,
+        record_history=False,
+    )
+
+    res2 = run_single_simulation(
+        graph_family="grid",
+        n_nodes=25,
+        adversary_str="smart_static",
+        allocator_str="aca",
+        seed=5555,
+        max_steps=30,
+        risk_fraction=0.50,
+        clearance_rate=0.40,
+        adversary_budget_k=8,
+        record_history=False,
+    )
+
+    # Both runs should be in cache under distinct keys
+    assert res1 is not res2
+    # Differing risk_fraction and budget produce distinct environment risky edges and metric outcomes
+    assert res1["summary"] != res2["summary"]
+
+
+

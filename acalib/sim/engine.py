@@ -350,6 +350,9 @@ class SimulationEngine:
         for tid in range(self.n_tasks):
             t_node = nodes_list[int(self.rng.integers(0, len(nodes_list)))]
             if self.task_arrival_mode == "poisson":
+                # Deterministic Poisson arrival step parameterization: task `tid` arrival step
+                # is drawn from Poisson with mean tid / max(0.1, poisson_rate), maintaining exact
+                # random stream seed alignment across Common Random Number (CRN) benchmark sweeps.
                 arr_step = int(self.rng.poisson(tid / max(0.1, self.poisson_rate)))
             else:
                 arr_step = 0  # Batch arrival at start
@@ -394,6 +397,7 @@ class SimulationEngine:
 
         # 1. Update active tasks based on arrivals & deadlines
         active_available_tasks = {}
+        has_future_tasks = False
         for tid, t in self.tasks.items():
             if t.completed:
                 continue
@@ -406,8 +410,10 @@ class SimulationEngine:
                 continue
             if step >= t.arrival_step:
                 active_available_tasks[tid] = t
+            else:
+                has_future_tasks = True
 
-        if not active_available_tasks:
+        if not active_available_tasks and not has_future_tasks:
             self.metrics.makespan = step
             return False
 
@@ -445,7 +451,7 @@ class SimulationEngine:
         )
         robot_pos_dict = {rid: r.pos for rid, r in self.robots.items()}
 
-        if unassigned or replans_pending or stranded_replan or step % 10 == 0:
+        if len(active_available_tasks) > 0 and (unassigned or replans_pending or stranded_replan or step % 10 == 0):
             alloc_res = self.allocator.allocate_round(
                 tasks=active_available_tasks,
                 current_step=step,

@@ -135,6 +135,9 @@ def build_crn_environment(
     tasks = {}
     for tid in range(n_tasks):
         t_node = nodes_list[int(rng_tasks.integers(0, len(nodes_list)))]
+        # Deterministic Poisson arrival step parameterization: task `tid` arrival step
+        # is drawn from Poisson with mean tid / max(0.1, poisson_rate), maintaining exact
+        # random stream seed alignment across Common Random Number (CRN) benchmark sweeps.
         arr_step = (
             int(rng_tasks.poisson(tid / max(0.1, poisson_rate)))
             if task_arrival_mode == "poisson"

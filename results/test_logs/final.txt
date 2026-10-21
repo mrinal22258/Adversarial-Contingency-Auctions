@@ -1,11 +1,58 @@
-﻿........................................................................ [ 41%]
-........................................................................ [ 83%]
-.............................                                            [100%]
+============================= test session starts =============================
+platform win32 -- Python 3.12.7, pytest-9.1.1, pluggy-1.5.0
+rootdir: C:\Users\krmri\Downloads\Adversarial-Contingency-Auctions-main\Adversarial-Contingency-Auctions-main
+configfile: pyproject.toml
+testpaths: tests
+plugins: anyio-4.6.2, cov-7.1.0, typeguard-4.3.0
+collected 272 items / 56 deselected / 216 selected
+
+tests\test_api_endpoints.py ....................                         [  9%]
+tests\test_audit_fixes.py ..............                                 [ 15%]
+tests\test_audit_regression.py ..........                                [ 20%]
+tests\test_audit_remediation.py ......                                   [ 23%]
+tests\test_bayes.py .......                                              [ 26%]
+tests\test_build_manifest.py .                                           [ 26%]
+tests\test_cbba.py .                                                     [ 27%]
+tests\test_claim_ledger.py ............                                  [ 32%]
+tests\test_comm_degradation_mechanism.py ..                              [ 33%]
+tests\test_confirmatory_naming.py ..                                     [ 34%]
+tests\test_consensus_regression.py ..                                    [ 35%]
+tests\test_contingency.py .                                              [ 36%]
+tests\test_contingency_tree.py ....                                      [ 37%]
+tests\test_dynamic_narrative.py ..                                       [ 38%]
+tests\test_env.py ....                                                   [ 40%]
+tests\test_gate4_negative.py ....                                        [ 42%]
+tests\test_gate5_protocol_and_smoke.py .....                             [ 44%]
+tests\test_gate6_manuscript_ui_docs.py ......                            [ 47%]
+tests\test_gitinfo.py ......                                             [ 50%]
+tests\test_golden_trace.py .                                             [ 50%]
+tests\test_hazard_interface.py ...                                       [ 52%]
+tests\test_lint_paper.py .......                                         [ 55%]
+tests\test_log_integrity.py .....                                        [ 57%]
+tests\test_pinsker_margin.py ..                                          [ 58%]
+tests\test_policy_equivalence.py .......                                 [ 62%]
+tests\test_population.py .....                                           [ 64%]
+tests\test_prereg_v6_seeds.py ...                                        [ 65%]
+tests\test_public_surfaces.py .......                                    [ 68%]
+tests\test_readme_and_numbers_linter.py .....                            [ 71%]
+tests\test_real_maps.py .....                                            [ 73%]
+tests\test_real_trace_adversary.py .                                     [ 74%]
+tests\test_result_model.py ..                                            [ 75%]
+tests\test_runner_protocol.py ........                                   [ 78%]
+tests\test_simulation.py .........                                       [ 82%]
+tests\test_stabilization.py .                                            [ 83%]
+tests\test_stage1_provenance_and_stats.py ...............                [ 90%]
+tests\test_stage4_method_improvement.py ...                              [ 91%]
+tests\test_stats.py ......                                               [ 94%]
+tests\test_sweep_crn_and_comms.py ...                                    [ 95%]
+tests\test_theorem1_empirical.py ...                                     [ 97%]
+tests\test_theorem3_montecarlo.py ......                                 [100%]
+
 ============================== warnings summary ===============================
 tests/test_stage1_provenance_and_stats.py::test_compute_paired_statistics_independent_n
 tests/test_stage1_provenance_and_stats.py::test_compute_paired_statistics_independent_n
-  [REDACTED_USER]\anaconda3\Lib\site-packages\scipy\stats\_axis_nan_policy.py:531: RuntimeWarning: Precision loss occurred in moment calculation due to catastrophic cancellation. This occurs when the data are nearly identical. Results may be unreliable.
+  C:\Users\krmri\anaconda3\Lib\site-packages\scipy\stats\_axis_nan_policy.py:531: RuntimeWarning: Precision loss occurred in moment calculation due to catastrophic cancellation. This occurs when the data are nearly identical. Results may be unreliable.
     res = hypotest_fun_out(*samples, **kwds)
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
-173 passed, 54 deselected, 2 warnings in 52.39s
+=============== 216 passed, 56 deselected, 2 warnings in 40.58s ===============

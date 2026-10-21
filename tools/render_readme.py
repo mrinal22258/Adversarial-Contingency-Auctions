@@ -34,27 +34,32 @@ def parse_latest_test_log(logs_dir: str = TEST_LOGS_DIR) -> Dict[str, Any]:
     if not os.path.exists(logs_dir):
         return default
 
-    # Prefer final.txt or gate-6.txt, or most recent
-    candidates = sorted(glob.glob(os.path.join(logs_dir, "*.txt")), key=os.path.getmtime, reverse=True)
-    if not candidates:
-        return default
-
-    chosen_file = candidates[0]
-    for c in candidates:
-        if "final" in os.path.basename(c) or "gate-6" in os.path.basename(c):
-            chosen_file = c
-            break
+    # Prefer final.txt over gate-6.txt whenever it exists, otherwise gate-6.txt or most recent
+    final_file = os.path.join(logs_dir, "final.txt")
+    if os.path.exists(final_file):
+        chosen_file = final_file
+    else:
+        candidates = sorted(glob.glob(os.path.join(logs_dir, "*.txt")), key=os.path.getmtime, reverse=True)
+        if not candidates:
+            return default
+        chosen_file = candidates[0]
+        for c in candidates:
+            if "gate-6" in os.path.basename(c):
+                chosen_file = c
+                break
 
     try:
         with open(chosen_file, "r", encoding="utf-8") as f:
             content = f.read()
-        clean_match = re.search(r"(?:^|\n)(?:=+\s*)?(\d+)\s+passed,\s+(\d+)\s+deselected(?:,\s+(\d+)\s+warnings?)?(?:\s+in\s+([\d\.]+s))?", content)
+        clean_match = re.search(r"(?:^|\n)(?:=+\s*)?(\d+)\s+passed(?:,\s+(\d+)\s+deselected)?(?:,\s+(\d+)\s+warnings?)?(?:\s+in\s+([\d\.]+s))?", content)
         if clean_match and "failed" not in content.splitlines()[-1]:
             passed = int(clean_match.group(1))
-            deselected = int(clean_match.group(2))
+            deselected = int(clean_match.group(2)) if clean_match.group(2) else 0
             warnings = int(clean_match.group(3)) if clean_match.group(3) else 0
             dur = clean_match.group(4) if clean_match.group(4) else ""
-            summary = f"{passed} passed, {deselected} deselected"
+            summary = f"{passed} passed"
+            if deselected:
+                summary += f", {deselected} deselected"
             if warnings:
                 summary += f", {warnings} warnings"
             return {

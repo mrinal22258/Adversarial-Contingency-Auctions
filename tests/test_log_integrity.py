@@ -113,3 +113,27 @@ def test_atomic_writer_concurrency():
 
         assert valid_count == total_records, f"Expected {total_records} valid lines, got {valid_count}"
         assert len(set(all_hashes)) == total_records, "All trial hashes should be unique"
+
+
+def test_missing_trial_hash_fails_closed():
+    """Verify audit fix: CSV/JSONL pairs lacking trial_hash fail closed in both strict and non-strict modes."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        csv_p = os.path.join(tmpdir, "no_hashes.csv")
+        jsonl_p = os.path.join(tmpdir, "no_hashes.jsonl")
+
+        # Create CSV and JSONL without trial_hash column/field
+        records = [{"metric_a": 10.0, "metric_b": 20.0} for _ in range(10)]
+        pd.DataFrame(records).to_csv(csv_p, index=False)
+        with open(jsonl_p, "w", encoding="utf-8") as f:
+            for r in records:
+                f.write(json.dumps(r) + "\n")
+
+        # Non-strict check MUST return is_clean == False
+        res = verify_log_integrity(csv_p, jsonl_p, strict=False)
+        assert res["is_clean"] is False, "Must fail closed (is_clean=False) when trial_hash is absent"
+        assert res["csv_unique_hashes"] == 0
+
+        # Strict check MUST raise ValueError
+        with pytest.raises(ValueError, match="Strict validation failed"):
+            verify_log_integrity(csv_p, jsonl_p, strict=True)
+

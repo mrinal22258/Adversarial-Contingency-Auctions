@@ -16,6 +16,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+import json
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, REPO_ROOT)
@@ -437,12 +438,23 @@ def plot_ablation_suite(raw_df: pd.DataFrame, out_dirs: list):
 
 def plot_theorem1_assumption1_validation(out_dirs: list):
     """Figure: Assumption 1 adherence across three levels and conditional Theorem 1 conflict-freedom."""
+    model_path = os.path.join(REPO_ROOT, "results", "result_model_v1.json")
+    if os.path.exists(model_path):
+        with open(model_path, "r", encoding="utf-8") as f:
+            model = json.load(f)
+        th1 = model.get("theorem_1", {})
+    else:
+        th1 = {}
+
     fig, axes = plt.subplots(1, 2, figsize=(IEEE_DOUBLE_COL_WIDTH, 2.5))
 
     # Panel (a): Assumption 1 Adherence: Fixed Threshold vs Lemma 1 Analytical Drift Bound
     levels = ["Level 1\n(Per-Eval)", "Level 2\n(Per-Instance)", "Level 3\n(Per-Safe-Claim)"]
     uncalibrated_rates = [65.11, 56.05, 21.08]
-    lemma1_rates = [100.0, 100.0, 100.0]
+    l1_rate = th1.get("adherence_per_eval_pct", 98.08)
+    l2_rate = th1.get("adherence_per_instance_pct", 96.69)
+    l3_rate = th1.get("adherence_pct", 98.99)
+    lemma1_rates = [l1_rate, l2_rate, l3_rate]
 
     x = np.arange(len(levels))
     width = 0.35
@@ -462,11 +474,29 @@ def plot_theorem1_assumption1_validation(out_dirs: list):
     for bar, val in zip(bars_uncal, uncalibrated_rates):
         axes[0].text(bar.get_x() + bar.get_width() / 2.0, val + 2.0, f"{val:.1f}%", ha="center", va="bottom", fontsize=8.0, fontweight="bold")
     for bar, val in zip(bars_lem, lemma1_rates):
-        axes[0].text(bar.get_x() + bar.get_width() / 2.0, val + 2.0, f"{val:.0f}%", ha="center", va="bottom", fontsize=8.0, fontweight="bold")
+        axes[0].text(bar.get_x() + bar.get_width() / 2.0, val + 2.0, f"{val:.1f}%", ha="center", va="bottom", fontsize=8.0, fontweight="bold")
 
     # Panel (b): Empirical Double-Claim Conflict Rate when TV <= eta_eff
-    regimes = ["All Safe Claims\n(n = 12,087)", "Nominal\n(n = 11,097)", "Degraded\n(n = 990)", "Early t=0\n(n = 7,383)", "Late t>0\n(n = 4,704)"]
-    upper_bounds = [0.0248, 0.0270, 0.3021, 0.0406, 0.0637]
+    total_safe = th1.get("tv_le_eta_subset", 11220)
+    nom_n = th1.get("nominal_n", 5720)
+    pert_n = th1.get("perturb_n", 5500)
+    early_n = th1.get("early_n", 11206)
+    late_n = th1.get("late_n", 14)
+
+    all_ub = th1.get("clopper_pearson_upper_pct", 0.0267)
+    nom_ub = th1.get("nominal_upper", 0.0524)
+    pert_ub = th1.get("perturb_upper", 0.0545)
+    early_ub = th1.get("early_upper", 0.0267)
+    late_ub = th1.get("late_upper", 19.2636)
+
+    regimes = [
+        f"All Safe Claims\n(n = {total_safe:,})",
+        f"Nominal\n(n = {nom_n:,})",
+        f"Perturbed\n(n = {pert_n:,})",
+        f"Early t=0\n(n = {early_n:,})",
+        f"Late t>0\n(n = {late_n:,})",
+    ]
+    upper_bounds = [all_ub, nom_ub, pert_ub, early_ub, late_ub]
 
     y_pos = np.arange(len(regimes))
     axes[1].barh(y_pos, upper_bounds, color=OKABE_ITO["bluish_green"], alpha=0.75, height=0.55)
@@ -478,7 +508,10 @@ def plot_theorem1_assumption1_validation(out_dirs: list):
     axes[1].grid(True, linestyle=":", alpha=0.5, axis="x")
 
     for i, ub in enumerate(upper_bounds):
-        axes[1].text(ub + 0.01, i, f"0 conflicts (UB: {ub:.3f}%)", va="center", fontsize=8.0)
+        if ub > 0.40:
+            axes[1].text(0.38, i, f"0 conf. (UB: {ub:.1f}%)", va="center", ha="right", fontsize=7.5, color="#1b4d3e", fontweight="bold")
+        else:
+            axes[1].text(ub + 0.01, i, f"0 conf. (UB: {ub:.3f}%)", va="center", fontsize=8.0)
 
     plt.tight_layout()
     for out_dir in out_dirs:
@@ -487,8 +520,8 @@ def plot_theorem1_assumption1_validation(out_dirs: list):
         png = os.path.join(out_dir, "fig_theorem1_assumption1.png")
         fig.savefig(pdf, bbox_inches="tight", pad_inches=0.04)
         fig.savefig(png, dpi=400, bbox_inches="tight", pad_inches=0.04)
-        write_figure_provenance(pdf, ["results/per_claim_evaluations.jsonl"], 12087)
-        write_figure_provenance(png, ["results/per_claim_evaluations.jsonl"], 12087)
+        write_figure_provenance(pdf, ["results/per_claim_evaluations.jsonl"], total_safe)
+        write_figure_provenance(png, ["results/per_claim_evaluations.jsonl"], total_safe)
     plt.close(fig)
     print("Generated Fig: Theorem 1 & Assumption 1 Validation")
 

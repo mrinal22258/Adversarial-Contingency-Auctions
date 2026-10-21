@@ -31,7 +31,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.concurrency import run_in_threadpool
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 import uvicorn
 import gradio as gr
 
@@ -88,23 +88,101 @@ app.add_middleware(
 )
 
 
-@app.middleware("http")
-async def security_and_size_middleware(request: Request, call_next):
+MAX_BODY_SIZE = 1_048_576  # 1 MiB
+
+
+class SecurityAndSizeMiddleware:
     """Enforce body payload size cap and standard security headers (P4, F-25)."""
-    content_length = request.headers.get("content-length")
-    if content_length:
-        try:
-            if int(content_length) > 1_048_576:  # 1MB cap
-                return JSONResponse(
-                    status_code=413,
-                    content={"detail": "Request payload exceeds 1MB limit."},
-                )
-        except ValueError:
-            pass
-    response = await call_next(request)
-    response.headers["X-Content-Type-Options"] = "nosniff"
-    response.headers["X-Frame-Options"] = "DENY"
-    return response
+    def __init__(self, app):
+        self.app = app
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
+
+        headers = dict(scope.get("headers", []))
+        cl_raw = headers.get(b"content-length")
+        security_headers = [
+            (b"x-content-type-options", b"nosniff"),
+            (b"x-frame-options", b"DENY"),
+        ]
+
+        async def send_error_response(status_code: int, detail: str):
+            body = json.dumps({"detail": detail}).encode("utf-8")
+            resp_headers = list(security_headers) + [
+                (b"content-type", b"application/json"),
+                (b"content-length", str(len(body)).encode("ascii")),
+            ]
+            await send({
+                "type": "http.response.start",
+                "status": status_code,
+                "headers": resp_headers,
+            })
+            await send({
+                "type": "http.response.body",
+                "body": body,
+            })
+
+        if cl_raw is not None:
+            try:
+                cl = int(cl_raw.decode("latin1"))
+                if cl < 0:
+                    await send_error_response(400, "Invalid Content-Length header.")
+                    return
+                if cl > MAX_BODY_SIZE:
+                    await send_error_response(413, "Request payload exceeds 1MB limit.")
+                    return
+            except ValueError:
+                await send_error_response(400, "Malformed Content-Length header.")
+                return
+
+        # Read and buffer request body chunks up to MAX_BODY_SIZE + 1
+        body_chunks = []
+        total_bytes = 0
+        more_body = True
+        while more_body:
+            message = await receive()
+            if message["type"] == "http.request":
+                chunk = message.get("body", b"")
+                total_bytes += len(chunk)
+                if total_bytes > MAX_BODY_SIZE:
+                    await send_error_response(413, "Request payload exceeds 1MB limit.")
+                    return
+                body_chunks.append(message)
+                more_body = message.get("more_body", False)
+            elif message["type"] == "http.disconnect":
+                return
+            else:
+                body_chunks.append(message)
+                break
+
+        # Replay buffered messages to downstream handlers
+        idx = 0
+        async def replay_receive():
+            nonlocal idx
+            if idx < len(body_chunks):
+                msg = body_chunks[idx]
+                idx += 1
+                return msg
+            return {"type": "http.request", "body": b"", "more_body": False}
+
+        async def send_wrapper(message):
+            if message["type"] == "http.response.start":
+                resp_headers = list(message.get("headers", []))
+                existing = {h[0].lower() for h in resp_headers}
+                if b"x-content-type-options" not in existing:
+                    resp_headers.append((b"x-content-type-options", b"nosniff"))
+                if b"x-frame-options" not in existing:
+                    resp_headers.append((b"x-frame-options", b"DENY"))
+                message = dict(message)
+                message["headers"] = resp_headers
+            await send(message)
+
+        await self.app(scope, replay_receive, send_wrapper)
+
+
+app.add_middleware(SecurityAndSizeMiddleware)
 
 
 @app.exception_handler(Exception)
@@ -285,7 +363,24 @@ class SimulateRequest(BaseModel):
     depth: int = Field(default=1, ge=0, le=3)
     commRange: float = Field(default=50.0, ge=0.0, le=500.0)
     pDrop: float = Field(default=0.02, ge=0.0, le=1.0)
-    blockedEdges: Optional[List[List[Any]]] = None
+    blockedEdges: Optional[List[Any]] = None
+
+    @field_validator("blockedEdges")
+    @classmethod
+    def validate_blocked_edges(cls, v):
+        if v is None:
+            return v
+        if not isinstance(v, list):
+            raise ValueError("blockedEdges must be a list of edges")
+        cleaned = []
+        for item in v:
+            if not isinstance(item, (list, tuple)) or len(item) != 2:
+                raise ValueError(f"Each blocked edge must be a list or tuple of length 2, got {item}")
+            u, w = item
+            if type(u) is not int or type(w) is not int:
+                raise ValueError(f"Edge nodes must be strict integers, got {item}")
+            cleaned.append([u, w])
+        return cleaned
 
 
 class CompareRequest(BaseModel):
@@ -331,6 +426,26 @@ def _execute_simulation(req: SimulateRequest) -> Dict[str, Any]:
         fam, nodes, variant = "warehouse_movingai", 125, "20-40-10-2-1"
 
     custom_blocked = [tuple(e) for e in req.blockedEdges] if req.blockedEdges else None
+    prebuilt_env = None
+    if custom_blocked:
+        from experiments.run_sweep import build_crn_environment
+        prebuilt_env = build_crn_environment(
+            graph_family=fam,
+            n_nodes=nodes,
+            seed=req.seed,
+            n_robots=req.numRobots,
+            n_tasks=req.numTasks,
+            max_steps=req.maxSteps,
+            variant=variant,
+        )
+        topo_graph = prebuilt_env["graph"]
+        for u, v in custom_blocked:
+            if u not in topo_graph or v not in topo_graph or not topo_graph.has_edge(u, v):
+                raise HTTPException(
+                    status_code=422,
+                    detail=f"Blocked edge ({u}, {v}) does not exist in topology '{req.topology}'."
+                )
+
     res = run_single_simulation(
         graph_family=fam,
         n_nodes=nodes,
@@ -344,6 +459,7 @@ def _execute_simulation(req: SimulateRequest) -> Dict[str, Any]:
         comm_range=req.commRange,
         p_drop=req.pDrop,
         variant=variant,
+        prebuilt_env=prebuilt_env,
         custom_blocked_edges=custom_blocked,
         record_history=True,
     )

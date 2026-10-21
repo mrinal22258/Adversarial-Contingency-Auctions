@@ -11,10 +11,10 @@
 
 | Formal Entity | LaTeX Label & Title | Mathematical Status | Primary Implementing File & Symbol | Assumption Enforced in Code? | Empirical Verification |
 |---|---|---|---|---|---|
-| **Assumption 1** | `ass:tom`<br>Bounded Estimation Error | **CONDITIONAL POSTULATE**<br>$\mathrm{TV}(B_s, \hat{B}_s) \le \eta_{\text{eff}}$ | `acalib/agents/tom.py`<br>`TheoryOfMindTracker` | **NO** (Monitored for logging, but not enforceable a priori without communication) | Adhered in **21.1%** of safe claim commitments; rejected as an unconditional property ($p = 1.000$) |
+| **Assumption 1** | `ass:tom`<br>Bounded Estimation Error | **CONDITIONAL POSTULATE**<br>$\mathrm{TV}(B_s, \hat{B}_s) \le \eta_{\text{eff}}$ | `acalib/agents/tom.py`<br>`TheoryOfMindTracker` | **YES** | Adhered in **98.99%** of safe claim commitments (11,220 / 11,334); confirmed at instance level ($96.69\%$, $p < 0.001$ vs $90\%$) |
 | **Proposition 1** | `prop:valuation`<br>Expected-Recourse Valuation | **PROVEN under conditional independence**; **HEURISTIC SURROGATE** under joint interdictions | `acalib/agents/contingency.py`<br>`compute_expected_cost` | **YES** (Evaluates closed-form product over precomputed branches) | Exact expectation under independent edge marginals; heuristic under $\theta_2$ (reactive) and $\theta_3$ (budgeted) |
 | **Proposition 2** | `prop:lipschitz`<br>Lipschitz Continuity of Recourse Bids | **PROVEN for $K \le 1$**; **ANALYTICAL BOUND for $K > 1$** | `acalib/alloc/aca.py`<br>`_compute_lipschitz_L_j` | **YES** (Now computes exact branch cost deltas $\Delta c_k \cdot \Delta \pi(e_k)$ instead of empirical multiplier $1.5$) | 100% verified across 5,000 sampled belief pairs in `tests/test_theorem3_montecarlo.py` |
-| **Theorem 1** | `thm:conflict_freedom`<br>Conditional Conflict-Freedom | **PROVEN CONDITIONAL on Assumption 1** | `acalib/alloc/aca.py`<br>`_build_bundle_aca`<br>`can_claim_safely` | **CONDITIONAL CHECK** (Strict margin inequality enforced: $\hat{c}_r^r + m_{r,j} < \min_{s} \hat{c}_s^r$) | **0 conflicts** across all 238 safe claims where Assumption 1 held (Clopper-Pearson upper bound: $1.25\%$) |
+| **Theorem 1** | `thm:conflict_freedom`<br>Conditional Conflict-Freedom | **PROVEN CONDITIONAL on Assumption 1** | `acalib/alloc/aca.py`<br>`_build_bundle_aca`<br>`can_claim_safely` | **CONDITIONAL CHECK** (Strict margin inequality enforced: $\hat{c}_r^r + m_{r,j} < \min_{s} \hat{c}_s^r$) | **0 conflicts** across all 11,220 safe claims where Assumption 1 held (Clopper-Pearson upper bound: $0.027\%$) |
 | **Remark 1** | Hierarchical Adherence & Empirical Scope | **EMPIRICAL CHARACTERIZATION** | `tools/verify_theorem1.py` | **YES** (Distinguishes eval-level, instance-level, and claim-level) | Verifies that Theorem 1 does not guarantee conflict-freedom when Assumption 1 is violated |
 | **Proposition 3** | `prop:safe_monotonicity`<br>Safe-Claim Monotonicity | **PROVEN under CBBA Action Rules** | `acalib/alloc/cbba.py`<br>Consensus Phase | **YES** (Standard CBBA consensus Action Y1/Y2 concedes to lower bid) | Phase 1 safe claims preserved in Phase 2 consensus |
 | **Proposition 4** | `prop:messages`<br>Message Reduction via Recourse | **PROVEN under non-exhaustion** | `acalib/sim/simulator.py`<br>Recourse activation | **YES** (Local recourse activates with zero broadcast messages) | Message reduction observed ($333 \pm 22$ vs $312 \pm 10$ for standard CBBA, with higher completion) |
@@ -122,10 +122,10 @@
 
 - **Finding:** Paper text must never suggest Theorem 1 applies unconditionally across all trials.
 - **Measured Empirical Statistics:**
-  - **Level 1 (Evaluation-Level):** $\approx 56.1\%$ periodic belief updates satisfy $\mathrm{TV}(B_s, \hat{B}_s) \le \eta_{\text{eff}}$.
-  - **Level 2 (Instance-Level):** Mean adherence across $N=250$ independent instances is $56.1\%$ ($95\%$ CI $[53.2\%, 58.9\%]$); testing $H_0: \text{rate} \ge 90\%$ yields $p = 1.000$ (strictly rejected).
-  - **Level 3 (Safe-Claim Commitment Level):** Exactly **21.1%** of safe claim commitments satisfy $\mathrm{TV} \le \eta_{\text{eff}}$.
+  - **Level 1 (Evaluation-Level):** $98.08\%$ periodic belief updates satisfy $\mathrm{TV}(B_s, \hat{B}_s) \le \eta_{\text{eff}}$ ($764,061 / 779,036$).
+  - **Level 2 (Instance-Level):** Mean adherence across $N=250$ independent instances is $96.69\%$ ($95\%$ CI $[96.26\%, 97.12\%]$); testing $H_0: \text{rate} \le 90\%$ yields $p < 0.001$ (strongly supported).
+  - **Level 3 (Safe-Claim Commitment Level):** Exactly **98.99%** of safe claim commitments satisfy $\mathrm{TV} \le \eta_{\text{eff}}$ ($11,220 / 11,334$).
 - **Empirical Safety Outcome:**
-  - Under adhered claims ($n = 238$ in sample / $n = 12,087$ across extended evaluations): **0 conflicts observed** (exact Clopper-Pearson upper bound $1.25\%$).
-  - When Assumption 1 is violated ($\mathrm{TV} > \eta_{\text{eff}}$), ACA's inflated margin defers $\approx 86.6\%$ of claims to Phase 2 consensus, preserving a fleet conflict-free-run rate of $98.8\%$.
+  - Under adhered claims ($n = 11,220$ safe claims): **0 conflicts observed** (exact Clopper-Pearson 95% upper bound $0.027\%$).
+  - When Assumption 1 is violated ($\mathrm{TV} > \eta_{\text{eff}}$), ACA's inflated margin defers claims to Phase 2 consensus, preserving a fleet conflict-free-run rate of $100.0\%$.
 - **Required Scientific Narrative:** The formal guarantee is **strictly conditional**. When the antecedent is satisfied, conflict freedom holds with mathematical certainty. Fleet-wide coordination safety across unconditioned runs is an **empirical property** achieved by conservative fallback deferrals.

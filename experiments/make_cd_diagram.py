@@ -11,6 +11,7 @@ Visualizes Friedman + Nemenyi post-hoc ranking results:
 import os
 import sys
 import json
+import numpy as np
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt

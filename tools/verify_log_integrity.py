@@ -38,8 +38,22 @@ def verify_log_integrity(
     import pandas as pd
     df = pd.read_csv(csv_path)
     csv_row_count = len(df)
-    csv_hashes = set(df[hash_key].dropna().tolist()) if hash_key in df.columns else set()
+    csv_has_hash_col = hash_key in df.columns
+    if csv_has_hash_col:
+        csv_missing_hashes = int(df[hash_key].isna().sum()) + int((df[hash_key].astype(str).str.strip() == "").sum())
+        csv_hashes = set(df[hash_key].dropna().astype(str).str.strip().tolist()) - {""}
+    else:
+        csv_missing_hashes = csv_row_count
+        csv_hashes = set()
     csv_duplicate_hashes = csv_row_count - len(csv_hashes) if len(csv_hashes) > 0 else 0
+
+    if strict and csv_row_count > 0:
+        if not csv_has_hash_col:
+            raise ValueError(f"Strict validation failed: Required hash_key '{hash_key}' column missing from CSV")
+        if len(csv_hashes) == 0:
+            raise ValueError(f"Strict validation failed: CSV has 0 valid {hash_key} hashes")
+        if csv_missing_hashes > 0:
+            raise ValueError(f"Strict validation failed: CSV has {csv_missing_hashes} missing/empty {hash_key} entries")
 
     # 2. Parse JSONL
     total_jsonl_lines = 0
@@ -47,6 +61,7 @@ def verify_log_integrity(
     malformed_lines = 0
     hash_mismatches = 0
     missing_record_hashes = 0
+    jsonl_missing_hashes = 0
     jsonl_hashes: Set[str] = set()
     jsonl_duplicates = 0
     malformed_line_numbers = []
@@ -66,13 +81,18 @@ def verify_log_integrity(
                 rec = json.loads(line_str)
                 valid_records += 1
                 th = rec.get(hash_key)
-                if th:
-                    if th in jsonl_hashes:
+                if th is not None and str(th).strip() != "":
+                    th_str = str(th).strip()
+                    if th_str in jsonl_hashes:
                         jsonl_duplicates += 1
                         if strict:
-                            raise ValueError(f"Strict validation failed: Duplicate {hash_key} '{th}' at line {idx}")
+                            raise ValueError(f"Strict validation failed: Duplicate {hash_key} '{th_str}' at line {idx}")
                     else:
-                        jsonl_hashes.add(th)
+                        jsonl_hashes.add(th_str)
+                else:
+                    jsonl_missing_hashes += 1
+                    if strict:
+                        raise ValueError(f"Strict validation failed: Missing or empty {hash_key} at line {idx}")
 
                 # Check canonical record SHA-256
                 rec_sha = rec.get("record_sha256")
@@ -101,6 +121,11 @@ def verify_log_integrity(
     missing_in_jsonl = csv_hashes - jsonl_hashes
     extra_in_jsonl = jsonl_hashes - csv_hashes
 
+    hashes_present_and_valid = (
+        (csv_row_count == 0 or (csv_has_hash_col and len(csv_hashes) > 0 and csv_missing_hashes == 0))
+        and (valid_records == 0 or (len(jsonl_hashes) > 0 and jsonl_missing_hashes == 0))
+    )
+
     if strict:
         if csv_duplicate_hashes > 0:
             raise ValueError(f"Strict validation failed: {csv_duplicate_hashes} duplicate CSV hashes")
@@ -118,7 +143,10 @@ def verify_log_integrity(
             raise ValueError(f"Strict validation failed: CSV row count ({csv_row_count}) != valid JSONL ({valid_records})")
 
     is_clean = (
-        malformed_lines == 0
+        hashes_present_and_valid
+        and (csv_row_count == 0 or len(csv_hashes) > 0)
+        and (valid_records == 0 or len(jsonl_hashes) > 0)
+        and malformed_lines == 0
         and hash_mismatches == 0
         and jsonl_duplicates == 0
         and len(missing_in_jsonl) == 0
@@ -132,9 +160,11 @@ def verify_log_integrity(
         "jsonl_path": jsonl_path,
         "csv_rows": csv_row_count,
         "csv_unique_hashes": len(csv_hashes),
+        "csv_missing_hashes": csv_missing_hashes,
         "csv_duplicate_hashes": csv_duplicate_hashes,
         "jsonl_total_lines": total_jsonl_lines,
         "jsonl_valid_records": valid_records,
+        "jsonl_missing_hashes": jsonl_missing_hashes,
         "jsonl_malformed_lines": malformed_lines,
         "jsonl_duplicates": jsonl_duplicates,
         "hash_mismatches": hash_mismatches,
@@ -159,8 +189,14 @@ def main():
     jsonl_path = args.jsonl
 
     if args.protocol == "v6":
-        csv_path = csv_path or "results/confirmatory_v6/results.csv"
-        jsonl_path = jsonl_path or "results/confirmatory_v6/runs.jsonl"
+        default_csv = "results/confirmatory_v6/results.csv"
+        default_jsonl = "results/confirmatory_v6/runs.jsonl"
+        if not csv_path and not os.path.exists(default_csv) and os.path.exists("results/smoke/results.csv"):
+            csv_path = "results/smoke/results.csv"
+            jsonl_path = "results/smoke/runs.jsonl"
+        else:
+            csv_path = csv_path or default_csv
+            jsonl_path = jsonl_path or default_jsonl
     elif args.protocol == "v5" or args.historical_v5:
         csv_path = csv_path or "results/confirmatory/heldout_v5_results.csv"
         jsonl_path = jsonl_path or "results/confirmatory/heldout_v5_runs.jsonl"
@@ -172,7 +208,7 @@ def main():
         csv_path=csv_path,
         jsonl_path=jsonl_path,
         strict=args.strict,
-        require_record_hashes=(args.protocol == "v6" and args.strict),
+        require_record_hashes=(args.strict and not (args.historical_v5 or args.protocol == "v5")),
     )
 
     print("==================================================================")
@@ -204,8 +240,8 @@ def main():
         print("STATUS: VERIFIED HISTORICAL EVIDENCE MATCH (EXACT)")
         sys.exit(0)
 
-    if not results["is_clean"]:
-        print("STATUS: INTEGRITY CHECK FAILED (CORRUPTION OR MISSING RECORDS DETECTED)")
+    if results["csv_unique_hashes"] == 0 or not results["is_clean"]:
+        print("STATUS: INTEGRITY CHECK FAILED (MISSING HASHES, CORRUPTION, OR MISMATCH DETECTED)")
         sys.exit(1)
     else:
         print("STATUS: 100% CLEAN AND ATOMIC - ALL HASHES MATCH (PASS)")

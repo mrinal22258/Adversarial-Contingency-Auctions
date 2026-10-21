@@ -225,6 +225,9 @@ def run_single_simulation(
         int(seed),
         int(max_steps),
         int(c_depth),
+        float(risk_fraction),
+        float(clearance_rate),
+        int(adversary_budget_k),
         str(variant),
         blocked_key,
         bool(record_history),
@@ -288,6 +291,9 @@ def run_single_simulation(
         cont = engine.step(step)
         if step_callback is not None:
             step_callback(step, max_steps)
+
+        if not cont:
+            break
 
         if record_history:
             blocked_edges = list(engine.blockage_process.get_active_blockages())
@@ -353,9 +359,6 @@ def run_single_simulation(
             prev_blocked = curr_blocked_set
             prev_conflicts = engine.metrics.cumulative_conflicts
             prev_deferred = engine.metrics.deferred_claims
-
-        if not cont:
-            break
 
     # Finalize
     final_metrics = engine.finalize()

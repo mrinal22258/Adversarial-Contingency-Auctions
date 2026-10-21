@@ -1,10 +1,10 @@
 {
   "figure_file": "static/images/fig_theorem1_assumption1.png",
-  "git_commit": "908f09638dadf9ba686b85b966442bb3ba94d6e0",
+  "git_commit": "ff4fd3d220f7e7ef4f371ed9231f671f880ef51c",
   "source_files": [
     "results/per_claim_evaluations.jsonl"
   ],
-  "n_instances": 12087,
+  "n_instances": 11220,
   "generator_script": "make_figures.py",
   "metadata": {}
 }

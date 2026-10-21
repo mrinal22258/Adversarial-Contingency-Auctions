@@ -353,6 +353,55 @@ def test_api_monte_carlo_execution(client):
     assert isinstance(summary["comparisons"], list)
 
 
+def test_blocked_edges_validation_audit_cases(client):
+    """Verify all 4 audit cases of invalid blockedEdges are rejected with HTTP 422."""
+    base_payload = {
+        "topology": "warehouse_small",
+        "numRobots": 2,
+        "numTasks": 2,
+        "maxSteps": 10,
+        "seed": 10001,
+    }
+
+    # Case 1: single element list
+    r1 = client.post("/api/simulate", json={**base_payload, "blockedEdges": [[1]]})
+    assert r1.status_code == 422
+
+    # Case 2: 3-element list
+    r2 = client.post("/api/simulate", json={**base_payload, "blockedEdges": [[1, 2, 3]]})
+    assert r2.status_code == 422
+
+    # Case 3: string endpoints
+    r3 = client.post("/api/simulate", json={**base_payload, "blockedEdges": [["x", "y"]]})
+    assert r3.status_code == 422
+
+    # Case 4: non-existent edge in graph topology
+    r4 = client.post("/api/simulate", json={**base_payload, "blockedEdges": [[999, 1000]]})
+    assert r4.status_code == 422
+
+
+def test_streaming_payload_cap_without_content_length(client):
+    """Verify streaming body-size enforcement rejects >1MB payload even when Content-Length is spoofed or absent."""
+    oversized_data = b"x" * 1_200_000
+
+    # Spoofed understated Content-Length header
+    resp_spoofed = client.post(
+        "/api/simulate",
+        content=oversized_data,
+        headers={"content-type": "application/json", "content-length": "10"},
+    )
+    assert resp_spoofed.status_code == 413
+    assert resp_spoofed.headers.get("x-content-type-options") == "nosniff"
+    assert resp_spoofed.headers.get("x-frame-options") == "DENY"
+
+    # Normal health check still returns 200 with security headers
+    resp_health = client.get("/api/health")
+    assert resp_health.status_code == 200
+    assert resp_health.headers.get("x-content-type-options") == "nosniff"
+    assert resp_health.headers.get("x-frame-options") == "DENY"
+
+
+
 
 
 

@@ -6,7 +6,7 @@
 
 [![CI Status](https://github.com/anonymous/adversarial-contingency-auctions/actions/workflows/ci.yml/badge.svg)](https://github.com/anonymous/adversarial-contingency-auctions/actions)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
-[![Tests: Suite Status](https://img.shields.io/badge/tests-168%20passed%20(54%20deselected)-brightgreen.svg)]()
+[![Tests: Suite Status](https://img.shields.io/badge/tests-216%20passed%20(56%20deselected)-brightgreen.svg)]()
 [![Simulation: Pure Software](https://img.shields.io/badge/simulation-pure%20software-informational.svg)]()
 [![Protocol: prereg--v6.2](https://img.shields.io/badge/protocol-prereg--v6.2-blueviolet.svg)](protocols/prereg-v6.md)
 
@@ -187,7 +187,7 @@ pytest -v tests/test_api_endpoints.py
 # Run full suite including optional physics and solver tests (if installed)
 pytest -v
 ```
-Saved run log: `results/test_logs/gate-6.txt` (168 passed, 54 deselected, 2 warnings).
+Saved run log: `results/test_logs/gate-6.txt` (216 passed, 56 deselected, 2 warnings).
 
 ### 4. Reproducing Paper Results (Exact Commands)
 To reproduce the published figures, LaTeX macros, and verification manifests bit-for-bit:

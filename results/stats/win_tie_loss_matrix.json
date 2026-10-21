@@ -6,41 +6,41 @@
       "losses": 0
     },
     "aca_no_margin": {
-      "wins": 59,
-      "ties": 138,
-      "losses": 53
+      "wins": 60,
+      "ties": 141,
+      "losses": 49
     },
     "ctp_replan": {
-      "wins": 87,
-      "ties": 89,
-      "losses": 74
+      "wins": 90,
+      "ties": 88,
+      "losses": 72
     },
     "implicit": {
       "wins": 26,
-      "ties": 129,
-      "losses": 95
+      "ties": 132,
+      "losses": 92
     },
     "cbba_lr": {
-      "wins": 161,
-      "ties": 58,
-      "losses": 31
+      "wins": 162,
+      "ties": 60,
+      "losses": 28
     },
     "cbba_partial_lr": {
-      "wins": 146,
-      "ties": 77,
-      "losses": 27
+      "wins": 149,
+      "ties": 75,
+      "losses": 26
     },
     "ssi_lr": {
-      "wins": 132,
-      "ties": 65,
-      "losses": 53
+      "wins": 133,
+      "ties": 68,
+      "losses": 49
     }
   },
   "aca_no_margin": {
     "aca": {
-      "wins": 53,
-      "ties": 138,
-      "losses": 59
+      "wins": 49,
+      "ties": 141,
+      "losses": 60
     },
     "aca_no_margin": {
       "wins": 0,
@@ -48,9 +48,9 @@
       "losses": 0
     },
     "ctp_replan": {
-      "wins": 86,
-      "ties": 87,
-      "losses": 77
+      "wins": 84,
+      "ties": 88,
+      "losses": 78
     },
     "implicit": {
       "wins": 21,
@@ -63,8 +63,8 @@
       "losses": 30
     },
     "cbba_partial_lr": {
-      "wins": 146,
-      "ties": 64,
+      "wins": 145,
+      "ties": 65,
       "losses": 40
     },
     "ssi_lr": {
@@ -75,14 +75,14 @@
   },
   "ctp_replan": {
     "aca": {
-      "wins": 74,
-      "ties": 89,
-      "losses": 87
+      "wins": 72,
+      "ties": 88,
+      "losses": 90
     },
     "aca_no_margin": {
-      "wins": 77,
-      "ties": 87,
-      "losses": 86
+      "wins": 78,
+      "ties": 88,
+      "losses": 84
     },
     "ctp_replan": {
       "wins": 0,
@@ -96,24 +96,24 @@
     },
     "cbba_lr": {
       "wins": 155,
-      "ties": 47,
-      "losses": 48
+      "ties": 49,
+      "losses": 46
     },
     "cbba_partial_lr": {
-      "wins": 126,
-      "ties": 76,
-      "losses": 48
+      "wins": 127,
+      "ties": 77,
+      "losses": 46
     },
     "ssi_lr": {
-      "wins": 136,
+      "wins": 137,
       "ties": 59,
-      "losses": 55
+      "losses": 54
     }
   },
   "implicit": {
     "aca": {
-      "wins": 95,
-      "ties": 129,
+      "wins": 92,
+      "ties": 132,
       "losses": 26
     },
     "aca_no_margin": {
@@ -149,9 +149,9 @@
   },
   "cbba_lr": {
     "aca": {
-      "wins": 31,
-      "ties": 58,
-      "losses": 161
+      "wins": 28,
+      "ties": 60,
+      "losses": 162
     },
     "aca_no_margin": {
       "wins": 30,
@@ -159,8 +159,8 @@
       "losses": 159
     },
     "ctp_replan": {
-      "wins": 48,
-      "ties": 47,
+      "wins": 46,
+      "ties": 49,
       "losses": 155
     },
     "implicit": {
@@ -174,9 +174,9 @@
       "losses": 0
     },
     "cbba_partial_lr": {
-      "wins": 49,
+      "wins": 48,
       "ties": 95,
-      "losses": 106
+      "losses": 107
     },
     "ssi_lr": {
       "wins": 101,
@@ -186,19 +186,19 @@
   },
   "cbba_partial_lr": {
     "aca": {
-      "wins": 27,
-      "ties": 77,
-      "losses": 146
+      "wins": 26,
+      "ties": 75,
+      "losses": 149
     },
     "aca_no_margin": {
       "wins": 40,
-      "ties": 64,
-      "losses": 146
+      "ties": 65,
+      "losses": 145
     },
     "ctp_replan": {
-      "wins": 48,
-      "ties": 76,
-      "losses": 126
+      "wins": 46,
+      "ties": 77,
+      "losses": 127
     },
     "implicit": {
       "wins": 14,
@@ -206,9 +206,9 @@
       "losses": 162
     },
     "cbba_lr": {
-      "wins": 106,
+      "wins": 107,
       "ties": 95,
-      "losses": 49
+      "losses": 48
     },
     "cbba_partial_lr": {
       "wins": 0,
@@ -223,9 +223,9 @@
   },
   "ssi_lr": {
     "aca": {
-      "wins": 53,
-      "ties": 65,
-      "losses": 132
+      "wins": 49,
+      "ties": 68,
+      "losses": 133
     },
     "aca_no_margin": {
       "wins": 38,
@@ -233,9 +233,9 @@
       "losses": 128
     },
     "ctp_replan": {
-      "wins": 55,
+      "wins": 54,
       "ties": 59,
-      "losses": 136
+      "losses": 137
     },
     "implicit": {
       "wins": 11,
