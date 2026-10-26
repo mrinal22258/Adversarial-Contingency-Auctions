@@ -42,6 +42,7 @@ class TheoryOfMindTracker:
         gamma_obs: float = 0.35,
         log_lambda_max: Optional[float] = None,
         partition_mode: bool = False,
+        enforce_analytical_bounds: bool = False,
     ):
         self.robot_id = robot_id
         self.fleet_ids = [rid for rid in fleet_ids if rid != robot_id]
@@ -49,6 +50,7 @@ class TheoryOfMindTracker:
         self.eta = eta  # eta_0 base measurement error
         self.gamma_obs = gamma_obs
         self.partition_mode = partition_mode
+        self.enforce_analytical_bounds = enforce_analytical_bounds
         if log_lambda_max is not None:
             self.log_lambda_max = float(log_lambda_max)
         elif partition_mode:

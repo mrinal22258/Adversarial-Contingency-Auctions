@@ -724,7 +724,11 @@ def run_20_seeds_action(
     summary_df = pd.DataFrame(summary_rows)
 
     box_data = [df_20[df_20["Method"] == m]["Completion (%)"].values for m in methods]
-    bp = ax.boxplot(box_data, patch_artist=True, labels=methods, widths=0.45)
+    boxplot_kwargs = {"patch_artist": True, "widths": 0.45}
+    try:
+        bp = ax.boxplot(box_data, tick_labels=methods, **boxplot_kwargs)
+    except TypeError:
+        bp = ax.boxplot(box_data, labels=methods, **boxplot_kwargs)
     for patch, m in zip(bp["boxes"], methods):
         color = colors.get(m, "#4f46e5")
         patch.set_facecolor(color)

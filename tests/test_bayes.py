@@ -138,3 +138,37 @@ def test_calibration_brier_and_reliability():
     assert freqs[0] == 0.0
     assert freqs[1] == 1.0
 
+
+def test_enforce_analytical_bounds_strictly_obeys_eta_eff():
+    """Verify Item 1: with enforce_analytical_bounds=True, single-step TV shift strictly obeys eta_eff."""
+    from acalib.agents.tom import compute_analytical_eta_eff
+
+    filter_inst = BayesianTypeFilter(enforce_analytical_bounds=True)
+    # Test across multiple prior distributions including extreme edge cases
+    test_priors = [
+        np.array([0.05, 0.90, 0.05]),
+        np.array([0.90, 0.05, 0.05]),
+        np.array([0.01, 0.01, 0.98]),
+        np.array([1.0 / 3.0, 1.0 / 3.0, 1.0 / 3.0]),
+    ]
+    eta_eff_1 = compute_analytical_eta_eff(staleness=1)
+
+    for i, prior in enumerate(test_priors):
+        filter_inst.set_belief_vector(prior)
+        b_init = filter_inst.get_belief_vector()
+        # Worst-case observation: open edge with robot count 3.0 (reactive hazard 1.0)
+        filter_inst.update_observation(
+            step=100 + i,
+            edge=(i, i + 1),
+            observed_state=EdgeState.OPEN,
+            prior_state=EdgeState.OPEN,
+            edge_robot_count=3.0,
+            is_targeted_by_interdiction=False,
+            vulnerability_class=0,
+        )
+        b_post = filter_inst.get_belief_vector()
+        tv_shift = compute_tv_distance(b_init, b_post)
+        assert tv_shift <= eta_eff_1, (
+            f"Prior {prior}: TV shift {tv_shift:.4f} exceeded analytical bound eta_eff {eta_eff_1:.4f}"
+        )
+

@@ -221,18 +221,19 @@ def compute_cluster_paired_test(
     pair_df = pd.DataFrame({"diff": diffs, "cluster": cluster_a})
     cluster_diffs = pair_df.groupby("cluster")["diff"].mean().values
     
-    if len(cluster_diffs) > 1 and not np.allclose(cluster_diffs, 0.0):
+    c_mean = float(np.mean(cluster_diffs)) if len(cluster_diffs) > 0 else 0.0
+    has_variance = len(cluster_diffs) > 1 and not np.allclose(cluster_diffs, cluster_diffs[0])
+    if has_variance and not np.allclose(cluster_diffs, 0.0):
         t_res = stats.ttest_1samp(cluster_diffs, 0.0)
         cluster_t_stat, cluster_p = float(t_res.statistic), float(t_res.pvalue)
-        c_mean = float(np.mean(cluster_diffs))
         c_se = float(stats.sem(cluster_diffs))
         t_crit = float(stats.t.ppf(0.975, df=len(cluster_diffs) - 1))
         cl_low = float(c_mean - t_crit * c_se)
         cl_high = float(c_mean + t_crit * c_se)
         cl_half = float(t_crit * c_se)
     else:
-        cluster_t_stat, cluster_p = 0.0, 1.0
-        c_mean = float(np.mean(cluster_diffs)) if len(cluster_diffs) > 0 else 0.0
+        cluster_t_stat = (float("inf") if c_mean > 0 else -float("inf")) if len(cluster_diffs) > 1 and not np.allclose(cluster_diffs, 0.0) else 0.0
+        cluster_p = 0.0 if not np.allclose(cluster_diffs, 0.0) else 1.0
         cl_low, cl_high, cl_half = c_mean, c_mean, 0.0
 
     _, cell_low, cell_high = compute_cell_bootstrap_ci(diffs)

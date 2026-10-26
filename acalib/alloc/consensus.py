@@ -184,9 +184,14 @@ def execute_consensus_exchange(
                 continue
             sender_k = msg.sender_id
             k_data = msg.payload
-            y_k = k_data.get("y", {})
-            z_k = k_data.get("z", {})
-            s_k = k_data.get("s", {})
+            raw_y = k_data.get("y", {})
+            raw_z = k_data.get("z", {})
+            raw_s = k_data.get("s", {})
+
+            # Normalize incoming keys to integers for serialization immunity
+            y_k = {int(k): float(v) for k, v in raw_y.items()}
+            z_k = {int(k): int(v) for k, v in raw_z.items()}
+            s_k = {int(k): int(v) for k, v in raw_s.items()}
 
             if handle_extra_payload_fn is not None:
                 handle_extra_payload_fn(rid, sender_k, k_data)

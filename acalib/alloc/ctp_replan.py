@@ -75,7 +75,10 @@ class CTPReplanAllocator(BaseAllocator):
             if robot.replan_requests:
                 round_replans += len(robot.replan_requests)
                 # In CTP, the blocked edge is marked in robot's local map
-                if robot.path_index < len(robot.active_path) - 1:
+                if getattr(robot, "last_blocked_edge", None) is not None:
+                    self.known_blocked_edges[rid].add(robot.last_blocked_edge)
+                    robot.last_blocked_edge = None
+                elif robot.path_index < len(robot.active_path) - 1:
                     u = robot.active_path[robot.path_index]
                     v = robot.active_path[robot.path_index + 1]
                     self.known_blocked_edges[rid].add(canonical_edge(u, v))

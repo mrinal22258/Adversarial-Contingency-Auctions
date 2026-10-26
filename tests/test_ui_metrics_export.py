@@ -119,3 +119,28 @@ def test_ui_kpi_metrics_match_raw_and_export():
     assert len(df_csv) == len(history)
     assert "conflicts" in df_csv.columns
     assert "completed_tasks" in df_csv.columns
+
+
+def test_ui_run_20_seeds_action_no_deprecation_warnings():
+    """Verify run_20_seeds_action produces boxplot with zero MatplotlibDeprecationWarnings."""
+    import warnings
+    from acalib.demo.ui.callbacks import run_20_seeds_action
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", category=DeprecationWarning)
+        summary_df, fig = run_20_seeds_action(
+            map_choice="MovingAI Warehouse 10-20-10-2-1 (real MAPF benchmark)",
+            coarsen_choice="~38 nodes (B=8)",
+            robots=2,
+            tasks=3,
+            adv_choice="Reactive (Corridor Interdiction)",
+            alloc_choice="ACA (Ours)",
+            max_steps=5,
+            comm_regime="benign (50m, 2% loss)",
+            comm_range=50.0,
+            p_drop=0.02,
+            seed=101,
+            progress=lambda frac, desc=None: None,
+        )
+        assert summary_df is not None
+        assert fig is not None

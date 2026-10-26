@@ -49,12 +49,18 @@ class BayesianTypeFilter:
         default_p0: float = 0.15,
         reactive_alpha: float = 0.35,
         interdiction_pcut: float = 0.85,
+        enforce_analytical_bounds: bool = False,
+        lambda_max: float = 17.0,
+        gamma_obs: float = 0.35,
     ):
         self.types = list(CanonicalTypeList)
         self.clearance_rate = clearance_rate
         self.default_p0 = default_p0
         self.reactive_alpha = reactive_alpha
         self.interdiction_pcut = interdiction_pcut
+        self.enforce_analytical_bounds = enforce_analytical_bounds
+        self.lambda_max = lambda_max
+        self.gamma_obs = gamma_obs
 
         self.frozen: bool = False
         self._processed_observations: Set[Tuple[int, Tuple[Any, Any]]] = set()
@@ -163,6 +169,7 @@ class BayesianTypeFilter:
         edge_robot_count: float = 0.0,
         is_targeted_by_interdiction: bool = False,
         vulnerability_class: int = 0,
+        enforce_analytical_bounds: Optional[bool] = None,
     ) -> None:
         """
         Bayesian update upon observing edge at a specific step.
@@ -210,6 +217,22 @@ class BayesianTypeFilter:
                     likelihood = 1.0 - pi_blocked
 
             likelihoods[t] = max(1e-6, likelihood)
+
+        # Enforce analytical bound on likelihood ratio if configured
+        use_bound_enforcement = (
+            enforce_analytical_bounds
+            if enforce_analytical_bounds is not None
+            else self.enforce_analytical_bounds
+        )
+        if use_bound_enforcement:
+            effective_lambda = min(
+                self.lambda_max,
+                float(np.exp(self.gamma_obs * np.log(max(1.0001, self.lambda_max))))
+            )
+            max_lh = max(likelihoods.values())
+            min_allowed = max_lh / max(1.0, effective_lambda)
+            for t in self.types:
+                likelihoods[t] = max(likelihoods[t], min_allowed)
 
         # Bayes rule
         for t in self.types:
@@ -305,7 +328,8 @@ def compute_reliability_curve(
     bin_counts = []
 
     for low, high in zip(bins[:-1], bins[1:]):
-        mask = (p >= low) & (p <= high if high == 1.0 else p < high)
+        upper_bound = (p <= high) if np.isclose(high, 1.0) else (p < high)
+        mask = (p >= low) & upper_bound
         count = int(np.sum(mask))
         bin_counts.append(count)
         if count > 0:

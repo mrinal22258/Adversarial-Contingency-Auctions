@@ -1,9 +1,11 @@
 # ACA Audit Repair Status Report (FIX_REPORT.md)
 
-**Branch:** `fix/audit-repairs`  
+> **Historical Audit Record:** Superseded by the current result model in results/result_model.json and RESULTS_VERDICT.md.
+
+**Branch:** `audit-remediation` (historical branch: `fix/audit-repairs`)  
 **Audit Reference:** `ACA_End_to_End_Audit_2026-10-13.md`  
 **Protocol Freeze Tag:** `prereg-v6.2`  
-**Final Test Suite Status:** `173 passed, 0 failed, 54 deselected, 2 warnings in results/test_logs/final.txt`
+**Final Test Suite Status:** `249 passed, 0 failed, 30 deselected, 2 warnings in results/test_logs/final.txt`
 
 ---
 
@@ -42,7 +44,7 @@
 ### Exact Pytest Summary Line
 From `results/test_logs/final.txt` (UTF-8 encoded):
 ```text
-173 passed, 54 deselected, 2 warnings in 35.51s
+249 passed, 30 deselected, 2 warnings in 54.88s
 ```
 
 ### Explanation of Deselected Tests (54 total)
@@ -67,7 +69,7 @@ RuntimeWarning: Precision loss occurred in moment calculation due to catastrophi
 1. **Exploratory Main Grid Findings:** On the balanced nominal benchmark grid ($N = 250$ independent clusters, 750 paired trials), ACA achieves an exploratory completion gain of $+2.14$ percentage points over CBBA+LR ($p = 0.004$ under cluster-level Holm adjustment).
 2. **Out-of-Sample Protocol v5 Headline Reversal:** On held-out un-tuned seeds 101–130 ($N = 450$ instances, 3,600 trials), when baseline CBBA is equipped with local recourse (+LR), **CBBA+LR outperforms ACA** on task completion ($94.67\%$ vs. $92.40\%$, paired difference $+2.22$ pp) and net welfare ($958.9$ vs. $937.4$) with fewer conflicts ($25.48$ vs. $39.66$). This establishes that local detour execution is the primary driver of corridor completion, while ACA's primary scientific advantage is safe decentralized coordination via the Pinsker margin under communication constraints.
 3. **Pinsker Margin Trade-Off:** The Pinsker claim margin reduces total conflicts by $20.6\%$ ($39.66$ vs. $49.93$, $p < 0.001$) relative to unregularized coordination, at a modest, non-significant completion difference ($-1.08$ pp, $p_{\text{adj}} = 0.091$).
-4. **Conditional Safety Guarantee (Theorem 1):** Under the ACA Lemma 1 analytical drift bound ($\eta_{\text{eff}}$), adherence holds in $98.99\%$ of safe claims ($11,220$ / $11,334$ commitments) with exactly $0$ / $11,220$ conflicts ($95\%$ one-sided Clopper-Pearson bound $\le 0.027\%$), while periodic evaluations achieve $98.08\%$ adherence across $779,036$ checks ($96.69\%$ per instance across $N = 250$ instances, $p < 0.001$).
+4. **Conditional Safety Guarantee (Theorem 1):** Under the ACA Lemma 1 analytical drift bound ($\eta_{\text{eff}}$), holding conditionally under bounded observation rates and bounded likelihood ratios, adherence holds in $99.04\%$ of safe claims ($11,234$ / $11,343$ commitments) with exactly $0$ / $11,234$ conflicts ($95\%$ one-sided Clopper-Pearson bound $\le 0.027\%$), while periodic evaluations achieve $98.08\%$ adherence across $762,851$ / $777,752$ checks ($96.7\%$ per instance across $N = 250$ instances, $p < 0.001$).
 5. **Decentralized Superiority over SSI:** ACA decisively outperforms Single-Item Auctions ($+11.96$ pp completion, $p < 10^{-25}$).
 6. **Physical Simulation Domain Gap:** Software-in-the-Loop continuous physics introduces an average completion drop of $\approx 18.9$ pp and rank invariance failure across simulation fidelities ($\rho = 0.486, p = 0.328$). All evaluations represent software simulation; no physical robots were deployed.
 

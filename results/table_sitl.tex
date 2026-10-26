@@ -1,19 +1,19 @@
 \begin{table}[htbp]
 \centering
-\caption{Software-in-the-Loop (SITL) Physics Simulation vs.\ Discrete Graph Simulation ($N = 360$ Paired Trials per Method on Real Maps).}
+\caption{Software-in-the-Loop (SITL) Physics Simulation vs.\ Discrete Graph Simulation ($N = 360$ total trials across 60 paired physical instances per method on real maps). $p$-val evaluates paired completion difference vs.\ ACA (paired Wilcoxon signed-rank test with Holm--Bonferroni multiple-testing correction across baselines).}
 \label{tab:sitl_results}
 \renewcommand{\arraystretch}{0.92}
 \resizebox{\columnwidth}{!}{%
-\begin{tabular}{@{\hskip 2pt}l@{\hskip 4pt}c@{\hskip 4pt}c@{\hskip 4pt}c@{\hskip 4pt}c@{\hskip 4pt}c@{\hskip 2pt}c@{}}
+\begin{tabular}{@{\hskip 2pt}l@{\hskip 3pt}c@{\hskip 3pt}c@{\hskip 3pt}c@{\hskip 3pt}c@{\hskip 3pt}c@{\hskip 3pt}c@{\hskip 3pt}c@{}}
 \toprule
-\textbf{Method} & \textbf{SITL (\%)} & \textbf{Graph (\%)} & \textbf{Gap (pp)} & \textbf{$p$-val} & \textbf{Contacts} & \textbf{Conflicts} \\
+\textbf{Method} & \textbf{SITL (\%)} & \textbf{Graph (\%)} & \textbf{Gap (pp)} & \textbf{Net Welfare} & \textbf{Contacts} & \textbf{Conflicts} & \textbf{$p$-val} \\
 \midrule
-\textbf{ACA (Ours)} & 69.4 $\pm$ 20.3 & 88.4 $\pm$ 16.7 & -18.9 & -- & 158.6 & 37.5 \\
-ACA (No Margin Ablation) & 68.6 $\pm$ 20.4 & 88.6 $\pm$ 14.9 & -20.1 & 0.8358 & 171.7 & 66.5 \\
-CBBA-PR (+LR) & 68.8 $\pm$ 19.4 & 90.3 $\pm$ 13.7 & -21.5 & 0.8358 & 194.7 & 70.0 \\
-CTP Replan & 68.4 $\pm$ 20.8 & 91.3 $\pm$ 15.7 & -22.9 & 0.8358 & 142.3 & 0.0 \\
-Implicit (No Consensus) \cite{alighanbari2005implicit} & 74.9 $\pm$ 19.5 & 92.1 $\pm$ 13.7 & -17.2 & $< 10^{-4}$ & 199.8 & 168.6 \\
-SSI (+LR) & 42.2 $\pm$ 25.4 & 72.2 $\pm$ 30.1 & -30.1 & $< 10^{-4}$ & 143.6 & 0.0 \\
+\textbf{ACA (Ours)} & 69.4 $\pm$ 20.3 & 88.4 $\pm$ 16.7 & -18.9 & 261 $\pm$ 18 & 158.6 $\pm$ 36.2 & 37.5 $\pm$ 3.5 & -- \\
+ACA (No Margin Ablation) & 68.6 $\pm$ 20.4 & 88.6 $\pm$ 14.9 & -20.1 & 224 $\pm$ 18 & 171.7 $\pm$ 40.2 & 66.5 $\pm$ 5.0 & 0.8358 \\
+CBBA-PR (+LR) & 68.8 $\pm$ 19.4 & 90.3 $\pm$ 13.7 & -21.5 & 222 $\pm$ 18 & 194.7 $\pm$ 41.2 & 70.0 $\pm$ 5.3 & 0.8358 \\
+CTP Replan & 68.4 $\pm$ 20.8 & 91.3 $\pm$ 15.7 & -22.9 & 263 $\pm$ 20 & 142.3 $\pm$ 38.0 & 0.0 & 0.8358 \\
+Implicit (No Consensus) \cite{alighanbari2005implicit} & 74.9 $\pm$ 19.5 & 92.1 $\pm$ 13.7 & -17.2 & 159 $\pm$ 21 & 199.8 $\pm$ 41.9 & 168.6 $\pm$ 3.8 & $< 10^{-4}$ \\
+SSI (+LR) & 42.2 $\pm$ 25.4 & 72.2 $\pm$ 30.1 & -30.1 & 133 $\pm$ 18 & 143.6 $\pm$ 34.4 & 0.0 & $< 10^{-4}$ \\
 \bottomrule
 \end{tabular}%
 }

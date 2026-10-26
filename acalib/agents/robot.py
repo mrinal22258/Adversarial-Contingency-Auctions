@@ -5,6 +5,7 @@ Theory of Mind peer tracking, local contingency recourse pivoting, and task exec
 
 from typing import Dict, List, Tuple, Optional, Any, Set
 import logging
+import math
 import networkx as nx
 
 from ..env.adversaries import canonical_edge, get_edge_vulnerability_class
@@ -36,6 +37,8 @@ class RobotAgent:
         risky_edges: Optional[Set[Tuple[Any, Any]]] = None,
         max_deep_branches: Optional[int] = 2,
         partition_mode: bool = False,
+        enforce_analytical_bounds: bool = False,
+        gamma_obs: float = 0.35,
     ):
         self.robot_id = robot_id
         self.current_node = start_node
@@ -48,14 +51,23 @@ class RobotAgent:
         self.risky_edges = risky_edges
         self.max_deep_branches = max_deep_branches
         self.partition_mode = partition_mode
+        self.enforce_analytical_bounds = enforce_analytical_bounds
+        self.gamma_obs = gamma_obs
 
         # Node coordinates
         pos_dict = nx.get_node_attributes(graph, "pos")
         self.pos = pos_dict.get(start_node, (0.0, 0.0))
 
         # Core reasoning modules
-        self.type_filter = BayesianTypeFilter()
-        self.tom_tracker = TheoryOfMindTracker(robot_id, fleet_ids, eta=eta, partition_mode=partition_mode)
+        self.type_filter = BayesianTypeFilter(enforce_analytical_bounds=enforce_analytical_bounds)
+        self.tom_tracker = TheoryOfMindTracker(
+            robot_id,
+            fleet_ids,
+            eta=eta,
+            gamma_obs=gamma_obs,
+            partition_mode=partition_mode,
+            enforce_analytical_bounds=enforce_analytical_bounds,
+        )
         self.pinsker_calc = PinskerMarginCalculator(eta=eta)
         self.planner = ContingencyPlanner(
             graph,
@@ -86,8 +98,17 @@ class RobotAgent:
         self.current_node = start_node
         pos_dict = nx.get_node_attributes(self.graph, "pos")
         self.pos = pos_dict.get(start_node, (0.0, 0.0))
-        self.type_filter = BayesianTypeFilter()
-        self.tom_tracker = TheoryOfMindTracker(self.robot_id, self.fleet_ids, eta=self.eta)
+        self.type_filter = BayesianTypeFilter(
+            enforce_analytical_bounds=self.enforce_analytical_bounds
+        )
+        self.tom_tracker = TheoryOfMindTracker(
+            self.robot_id,
+            self.fleet_ids,
+            eta=self.eta,
+            gamma_obs=self.gamma_obs,
+            partition_mode=self.partition_mode,
+            enforce_analytical_bounds=self.enforce_analytical_bounds,
+        )
         self.bundle.clear()
         self.assigned_plans.clear()
         self.active_task_id = None
@@ -151,6 +172,9 @@ class RobotAgent:
         all_known = set(self.known_edge_states.keys()) or set(canonical_edge(x, y) for x, y in self.graph.edges())
         targeted_cut = compute_interdiction_cut(self.graph, all_known, fleet_states)
 
+        obs_count = 0
+        max_obs = max(1, int(math.floor(self.tom_tracker.gamma_obs * 1.0))) if self.enforce_analytical_bounds else None
+
         for (u, v), (mx, my) in edge_midpoints.items():
             dx = rx - mx
             dy = ry - my
@@ -164,15 +188,18 @@ class RobotAgent:
                 is_targeted = c_e in targeted_cut
                 v_class = get_edge_vulnerability_class(self.graph, c_e)
 
-                self.type_filter.update_observation(
-                    step=step,
-                    edge=c_e,
-                    observed_state=curr_state,
-                    prior_state=prior_state,
-                    edge_robot_count=edge_robot_count,
-                    is_targeted_by_interdiction=is_targeted,
-                    vulnerability_class=v_class,
-                )
+                if not self.enforce_analytical_bounds or (max_obs is not None and obs_count < max_obs):
+                    self.type_filter.update_observation(
+                        step=step,
+                        edge=c_e,
+                        observed_state=curr_state,
+                        prior_state=prior_state,
+                        edge_robot_count=edge_robot_count,
+                        is_targeted_by_interdiction=is_targeted,
+                        vulnerability_class=v_class,
+                        enforce_analytical_bounds=self.enforce_analytical_bounds,
+                    )
+                    obs_count += 1
                 self.known_edge_states[c_e] = curr_state
 
     def get_edge_marginals(self, fleet_states: Optional[Dict[int, Any]] = None) -> Dict[Tuple[Any, Any], float]:

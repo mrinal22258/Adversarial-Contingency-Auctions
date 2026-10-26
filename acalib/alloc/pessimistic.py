@@ -66,11 +66,19 @@ class PessimisticRobustAllocator(CBBAAllocator):
             return tot
 
         curr_cost = path_dist(bundle)
-        cand_bundle = bundle + [task.task_id]
-        new_cost = path_dist(cand_bundle)
-        cost_inc = new_cost - curr_cost
-        score = max(0.0, task.reward - cost_inc)
-        return score, len(bundle)
+        best_score = -float("inf")
+        best_idx = len(bundle)
+
+        for idx in range(len(bundle) + 1):
+            cand_bundle = bundle[:idx] + [task.task_id] + bundle[idx:]
+            cand_cost = path_dist(cand_bundle)
+            cost_increase = cand_cost - curr_cost
+            score = task.reward - cost_increase
+            if score > best_score:
+                best_score = score
+                best_idx = idx
+
+        return max(0.0, best_score), best_idx
 
 
 class ClairvoyantGreedyAllocator(BaseAllocator):

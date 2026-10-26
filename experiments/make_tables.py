@@ -181,9 +181,10 @@ def generate_main_results_table(
     latex_lines = [
         "\\begin{table*}[t]",
         "\\centering",
-        f"\\caption{{Main Benchmark Results Across Graph Topologies and Adversary Types (Mean $\\pm$ 95\\% Cluster Bootstrap CI, Balanced Core Grid, $N = {n_trials}$ Paired Trials per Method Across 250 Independent Instances).",
+        f"\\caption{{Main Benchmark Results Across Graph Topologies and Adversary Types (Mean $\\pm$ 95\\% Cluster Bootstrap CI, Balanced Core Grid, $N = {n_trials}$ Paired Benchmark Trials Across 250 Independent Map-Seed Instances [50 Seeds $\\times$ 5 Topologies $\\times$ 3 Adversaries]).",
         "$^\\dagger$ denotes statistically significant difference vs.\\ ACA ($p < 0.05$, cluster-level paired $t$-test with Holm--Bonferroni correction; unit = graph\\_family $\\times$ seed).}",
         "\\label{tab:main_results}",
+        "\\resizebox{\\textwidth}{!}{%",
         "\\begin{tabular}{lcccccc}",
         "\\toprule",
         "\\textbf{Method} & \\textbf{Completion (\\%)} & \\textbf{Net Welfare} & \\textbf{Distinct Conf.} & \\textbf{Total Conf.} & \\textbf{Messages} & \\textbf{Tick RT (ms)} \\\\",
@@ -225,7 +226,10 @@ def generate_main_results_table(
             if m in stats_results and col in stats_results[m]:
                 is_sig = stats_results[m][col]["cluster_sig"]
                 if is_sig:
-                    entry += "$^\\dagger$"
+                    if entry.endswith("$"):
+                        entry = entry[:-1] + "^\\dagger$"
+                    else:
+                        entry += "$^\\dagger$"
 
             row_entries.append(entry)
 
@@ -238,7 +242,8 @@ def generate_main_results_table(
 
     latex_lines.extend([
         "\\bottomrule",
-        "\\end{tabular}",
+        "\\end{tabular}%",
+        "}",
         "\\end{table*}",
     ])
 
@@ -378,24 +383,34 @@ def generate_sitl_table(
         first_m = next(iter(method_summary.values()))
         n_trials_per_m = first_m.get("n_trials", 360)
 
+    detailed_stats = {}
+    rm_path = os.path.join(REPO_ROOT, "results", "result_model_v1.json")
+    if os.path.exists(rm_path):
+        try:
+            with open(rm_path, "r", encoding="utf-8") as f:
+                rm_obj = json.load(f)
+            detailed_stats = rm_obj.get("sitl", {}).get("detailed_stats", rm_obj.get("detailed_stats", {}))
+        except Exception:
+            pass
+
     latex_lines = [
         "\\begin{table}[htbp]",
         "\\centering",
-        f"\\caption{{Software-in-the-Loop (SITL) Physics Simulation vs.\\ Discrete Graph Simulation ($N = {n_trials_per_m}$ Paired Trials per Method on Real Maps).}}",
+        "\\caption{Software-in-the-Loop (SITL) Physics Simulation vs.\\ Discrete Graph Simulation ($N = 360$ total trials across 60 paired physical instances per method on real maps). $p$-val evaluates paired completion difference vs.\\ ACA (paired Wilcoxon signed-rank test with Holm--Bonferroni multiple-testing correction across baselines).}",
         "\\label{tab:sitl_results}",
         "\\renewcommand{\\arraystretch}{0.92}",
         "\\resizebox{\\columnwidth}{!}{%",
-        "\\begin{tabular}{@{\\hskip 2pt}l@{\\hskip 4pt}c@{\\hskip 4pt}c@{\\hskip 4pt}c@{\\hskip 4pt}c@{\\hskip 4pt}c@{\\hskip 2pt}c@{}}",
+        "\\begin{tabular}{@{\\hskip 2pt}l@{\\hskip 3pt}c@{\\hskip 3pt}c@{\\hskip 3pt}c@{\\hskip 3pt}c@{\\hskip 3pt}c@{\\hskip 3pt}c@{\\hskip 3pt}c@{}}",
         "\\toprule",
-        "\\textbf{Method} & \\textbf{SITL (\\%)} & \\textbf{Graph (\\%)} & \\textbf{Gap (pp)} & \\textbf{$p$-val} & \\textbf{Contacts} & \\textbf{Conflicts} \\\\",
+        "\\textbf{Method} & \\textbf{SITL (\\%)} & \\textbf{Graph (\\%)} & \\textbf{Gap (pp)} & \\textbf{Net Welfare} & \\textbf{Contacts} & \\textbf{Conflicts} & \\textbf{$p$-val} \\\\",
         "\\midrule",
     ]
 
     md_lines = [
-        f"### SITL Physics Simulation vs. Discrete Graph Simulation ($N = {n_trials_per_m}$ Paired Trials per Method)",
+        f"### SITL Physics Simulation vs. Discrete Graph Simulation ($N = {n_trials_per_m}$ Total Trials Across 60 Paired Physical Instances for 6 Methods)",
         "",
-        "| Method | SITL Comp. (%) | Graph Comp. (%) | Domain Gap (pp) | vs. ACA ($p$) | Phys. Collisions | Abstract Conf. |",
-        "|:-------|:--------------:|:---------------:|:---------------:|:-------------:|:----------------:|:--------------:|",
+        "| Method | SITL Comp. (%) | Graph Comp. (%) | Domain Gap (pp) | Net Welfare | Contacts | Conflicts | vs. ACA ($p$) |",
+        "|:-------|:--------------:|:---------------:|:---------------:|:-----------:|:--------:|:---------:|:-------------:|",
     ]
 
     for m, stats in method_summary.items():
@@ -431,26 +446,38 @@ def generate_sitl_table(
             pval = pair_info.get("holm_adj_pvalue", pair_info.get("wilcoxon_pvalue", 1.0))
             p_val_str = f"{pval:.4f}" if pval >= 0.0001 else "$< 10^{-4}$"
 
-        phys_col = stats.get("collisions_mean", 0.0)
-        abs_conf = stats.get("conflicts_mean", 0.0)
+        ds = detailed_stats.get(m, {})
+        w_mean = ds.get("welfare_mean", stats.get("welfare_mean", 0.0))
+        w_ci = ds.get("welfare_ci_half", 0.0)
+        w_str = f"{w_mean:.0f} $\\pm$ {w_ci:.0f}" if w_ci > 0 else f"{w_mean:.0f}"
+
+        c_mean = ds.get("contacts_mean", stats.get("collisions_mean", 0.0))
+        c_ci = ds.get("contacts_ci_half", 0.0)
+        c_str = f"{c_mean:.1f} $\\pm$ {c_ci:.1f}" if c_ci > 0 else f"{c_mean:.1f}"
+
+        cf_mean = ds.get("conflicts_mean", stats.get("conflicts_mean", 0.0))
+        cf_ci = ds.get("conflicts_ci_half", 0.0)
+        cf_str = f"{cf_mean:.1f} $\\pm$ {cf_ci:.1f}" if cf_ci > 0 else f"{cf_mean:.1f}"
 
         tex_row = [
             label,
             f"{sitl_mean:.1f} $\\pm$ {sitl_std:.1f}",
             f"{g_mean:.1f} $\\pm$ {g_std:.1f}",
             f"{gap:+.1f}",
+            w_str,
+            c_str,
+            cf_str,
             p_val_str,
-            f"{phys_col:.1f}",
-            f"{abs_conf:.1f}",
         ]
         md_row = [
             clean_label,
             f"{sitl_mean:.1f} ± {sitl_std:.1f}",
             f"{g_mean:.1f} ± {g_std:.1f}",
             f"{gap:+.1f}",
+            w_str.replace("$", "").replace("\\pm", "±"),
+            c_str.replace("$", "").replace("\\pm", "±"),
+            cf_str.replace("$", "").replace("\\pm", "±"),
             p_val_str.replace("$", "").replace("\\", ""),
-            f"{phys_col:.1f}",
-            f"{abs_conf:.1f}",
         ]
 
         latex_lines.append(" & ".join(tex_row) + " \\\\")

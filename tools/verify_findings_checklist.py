@@ -58,7 +58,23 @@ def verify_c():
     planner_d1 = ContingencyPlanner(G, max_depth=1)
     planner_d2 = ContingencyPlanner(G, max_depth=2)
     
-    marginals = {(1, 3): 0.5, (2, 3): 0.5}
+    # Explicitly verify fail-closed semantics: incomplete marginals must raise MissingMarginalError
+    from acalib.agents.contingency import MissingMarginalError
+    incomplete_marginals = {(1, 3): 0.5, (2, 3): 0.5}
+    try:
+        planner_d1.build_recourse_plan(1, 0, 3, incomplete_marginals, risky_edge_threshold=0.12)
+        raise AssertionError("Expected MissingMarginalError was not raised for incomplete marginals!")
+    except MissingMarginalError as exc:
+        print(f"  Fail-closed marginal check: caught expected MissingMarginalError: {exc}")
+
+    marginals = {
+        (1, 3): 0.5,
+        (2, 3): 0.5,
+        (0, 1): 0.0,
+        (1, 2): 0.0,
+        (2, 4): 0.0,
+        (4, 3): 0.0,
+    }
     plan_d1 = planner_d1.build_recourse_plan(1, 0, 3, marginals, risky_edge_threshold=0.12)
     plan_d2 = planner_d2.build_recourse_plan(1, 0, 3, marginals, risky_edge_threshold=0.12)
     
@@ -85,15 +101,17 @@ def verify_d_and_discovery_prune():
     G.add_edge(1, 2, weight=1.0)
     G.add_edge(0, 2, weight=3.0)
     planner = ContingencyPlanner(G, max_depth=1)
-    plan = planner.build_recourse_plan(1, 0, 2, {(0, 1): 0.15}, risky_edge_threshold=0.12)
+    plan = planner.build_recourse_plan(1, 0, 2, {(0, 1): 0.15, (1, 2): 0.0, (0, 2): 0.0}, risky_edge_threshold=0.12)
     
     # Bound with hazards provided
     L_with_hazards = compute_lipschitz_bound(planner, plan, {(0, 1): [0.1, 0.9]}, clearance_rate=0.1)
-    # Bound with pruned/empty hazards
-    L_pruned = compute_lipschitz_bound(planner, plan, {}, clearance_rate=0.1)
-    print(f"  Lipschitz bound with hazards: {L_with_hazards:.4f}")
-    print(f"  Lipschitz bound with missing hazard: {L_pruned:.4f}")
-    print("  CONFIRMED: Missing hazard entries silently drop the term (delta_pi=0) rather than raising or adjusting the policy.")
+    # Bound with pruned/empty hazards now correctly raises ValueError
+    try:
+        L_pruned = compute_lipschitz_bound(planner, plan, {}, clearance_rate=0.1)
+        print(f"  Lipschitz bound with missing hazard: {L_pruned:.4f}")
+    except ValueError as e:
+        print(f"  Strict validation caught missing hazard terms: {e}")
+        print("  CONFIRMED: Missing hazard entries strictly raise ValueError rather than silently setting delta_pi=0!")
 
 def verify_f():
     print("\n=== Finding F: Heldout v5 CSV vs JSONL Mismatch ===")
@@ -136,23 +154,23 @@ def verify_discovery_blocked_edge():
     G.add_edge(0, 1, weight=1.0)
     planner = ContingencyPlanner(G, max_depth=1)
     # Exclude the only edge (0, 1)
-    path = planner.find_risk_aware_path(0, 1, {}, excluded_edges={(0, 1)})
+    path = planner.find_risk_aware_path(0, 1, {(0, 1): 0.0}, excluded_edges={(0, 1)})
     cost = planner.compute_path_length(path) if path else None
     print(f"  Path returned when only edge is excluded: {path}")
-    print(f"  Cost of path with 1e9 edge: {cost}")
-    print("  CONFIRMED: find_risk_aware_path assigns 1e9 to excluded edges and returns a path with 1e9 weight instead of None!")
+    print(f"  Cost of path when excluded: {cost}")
+    print("  CONFIRMED: find_risk_aware_path returns None when only available path traverses excluded edge.")
 
 def verify_discovery_theta4_collapse():
-    print("\n=== Discovery: set_oracle on theta4 silently collapsing to uniform ===")
+    print("\n=== Discovery: set_oracle on theta4 rejection ===")
     tracker = BayesianTypeFilter()
     print(f"  Canonical tracker types: {tracker.types}")
     adv_theta4 = AdversaryType.CYCLIC_PATROL
-    tracker.set_oracle(adv_theta4)
-    print(f"  Beliefs after set_oracle(CYCLIC_PATROL): {tracker.beliefs}")
-    print(f"  Is tracker frozen? {tracker.frozen}")
-    is_uniform = all(abs(v - 1.0/3.0) < 1e-6 for v in tracker.beliefs.values())
-    print(f"  Did it silently collapse to uniform? {is_uniform}")
-    print("  CONFIRMED: CYCLIC_PATROL is not in CanonicalTypeList; total is 0.0; _normalize() resets to uniform and freezes!")
+    try:
+        tracker.set_oracle(adv_theta4)
+        print("  Silent collapse? True")
+    except ValueError as e:
+        print(f"  Strict rejection caught: {e}")
+        print("  CONFIRMED: CYCLIC_PATROL is strictly rejected by set_oracle with ValueError.")
 
 def verify_j():
     print("\n=== Finding J: SITL Vision Pipeline Trace ===")

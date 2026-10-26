@@ -114,6 +114,7 @@ class LocalRecourseExecutor:
                                 return
 
             # All recourse branches exhausted or contingency_depth == 0
+            robot.last_blocked_edge = c_e
             robot.tree_cursor = None
             robot.status = "EXHAUSTED_NEEDS_REPLAN"
             robot.replan_requests.append(robot.active_task_id)

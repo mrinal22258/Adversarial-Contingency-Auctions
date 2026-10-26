@@ -448,22 +448,20 @@ def plot_theorem1_assumption1_validation(out_dirs: list):
 
     fig, axes = plt.subplots(1, 2, figsize=(IEEE_DOUBLE_COL_WIDTH, 2.5))
 
-    # Panel (a): Assumption 1 Adherence: Fixed Threshold vs Lemma 1 Analytical Drift Bound
+    # Panel (a): Assumption 1 Adherence across Three Operational Levels
     levels = ["Level 1\n(Per-Eval)", "Level 2\n(Per-Instance)", "Level 3\n(Per-Safe-Claim)"]
-    uncalibrated_rates = [65.11, 56.05, 21.08]
     l1_rate = th1.get("adherence_per_eval_pct", 98.08)
     l2_rate = th1.get("adherence_per_instance_pct", 96.69)
     l3_rate = th1.get("adherence_pct", 98.99)
     lemma1_rates = [l1_rate, l2_rate, l3_rate]
 
     x = np.arange(len(levels))
-    width = 0.35
+    width = 0.45
 
-    bars_uncal = axes[0].bar(x - width/2, uncalibrated_rates, width, label="Fixed Thresh. (Uncal.)", color=OKABE_ITO["orange"], alpha=0.85)
-    bars_lem = axes[0].bar(x + width/2, lemma1_rates, width, label=r"Lemma 1 Bound ($\eta_{\mathrm{eff}}$)", color=OKABE_ITO["bluish_green"], alpha=0.85)
+    bars_lem = axes[0].bar(x, lemma1_rates, width, label=r"Lemma 1 Bound ($\eta_{\mathrm{eff}}$)", color=OKABE_ITO["bluish_green"], alpha=0.85)
 
-    axes[0].set_ylabel(r"Adherence Rate $\mathrm{TV} \leq \eta$ (%)")
-    axes[0].set_title(r"(a) Assumption 1 Adherence: Fixed vs. Lemma 1")
+    axes[0].set_ylabel(r"Adherence Rate $\mathrm{TV} \leq \eta_{\mathrm{eff}}$ (%)")
+    axes[0].set_title(r"(a) Assumption 1 Adherence by Level")
     axes[0].set_xticks(x)
     axes[0].set_xticklabels(levels)
     axes[0].set_ylim(0, 145)
@@ -471,8 +469,6 @@ def plot_theorem1_assumption1_validation(out_dirs: list):
     axes[0].grid(True, linestyle=":", alpha=0.5, axis="y")
     axes[0].legend(loc="upper center", ncol=2, fontsize=7.5, framealpha=0.9)
 
-    for bar, val in zip(bars_uncal, uncalibrated_rates):
-        axes[0].text(bar.get_x() + bar.get_width() / 2.0, val + 2.0, f"{val:.1f}%", ha="center", va="bottom", fontsize=8.0, fontweight="bold")
     for bar, val in zip(bars_lem, lemma1_rates):
         axes[0].text(bar.get_x() + bar.get_width() / 2.0, val + 2.0, f"{val:.1f}%", ha="center", va="bottom", fontsize=8.0, fontweight="bold")
 

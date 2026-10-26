@@ -702,7 +702,9 @@ def _collect_leaf_costs(
     leaf_costs: List[float],
 ) -> None:
     if node.is_recovery or not node.path:
-        eff_rec = node.recovery_cost if getattr(node, "recovery_cost", 0.0) > 0 else max(float(planner.exhaustion_penalty), 2.0 * float(node.cost))
+        # Invariant: recovery leaf nodes explicitly store exhaustion penalty in recovery_cost upon construction
+        rec_val = getattr(node, "recovery_cost", 0.0)
+        eff_rec = float(rec_val) if rec_val > 0.0 else float(planner.exhaustion_penalty)
         leaf_costs.append(prefix_cost + eff_rec)
         return
 
@@ -824,13 +826,14 @@ def compute_lipschitz_bound(
         cum_cost += w
         prefix_map[v_node] = cum_cost
 
-    # Helper to recursively collect path contrasts: |c(u_0 -> u_k) + c(D_k) - c(P_j)| * Delta_pi(e_k)
+    # Helper to recursively collect path contrasts: M_k * Delta_pi(e_k) where M_k = max_{m >= k} Delta C_m
     def _collect_tree_contrasts(node: RecourseTreeNode, prefix_cost: float) -> float:
         contr = 0.0
         if node.is_recovery or not node.path:
             return 0.0
 
         dist_to_u = 0.0
+        edge_data: List[Tuple[float, float, Optional[RecourseTreeNode], float]] = []
         for i in range(len(node.path) - 1):
             u_node, v_node = node.path[i], node.path[i + 1]
             c_edge = canonical_edge(u_node, v_node)
@@ -844,20 +847,28 @@ def compute_lipschitz_bound(
                     leaves: List[float] = []
                     _collect_leaf_costs(child, planner, branch_prefix, leaves)
                     delta_c = max((abs(lf - primary_cost) for lf in leaves), default=eff_pen)
-                    contr += delta_c * d_pi
-                    # Recurse into child detour branch for deeper nested risky edges
-                    contr += _collect_tree_contrasts(child, branch_prefix)
+                    edge_data.append((delta_c, d_pi, child, branch_prefix))
                 else:
                     c_branch = branch_prefix + eff_pen
-                    contr += abs(c_branch - primary_cost) * d_pi
+                    delta_c = abs(c_branch - primary_cost)
+                    edge_data.append((delta_c, d_pi, None, branch_prefix))
 
             dist_to_u += w_edge
+
+        # Proposition 2: Apply backward recursion telescoping bound M_k = max_{m >= k} Delta C_m
+        for k, (delta_c, d_pi, child, branch_prefix) in enumerate(edge_data):
+            M_k = max(item[0] for item in edge_data[k:])
+            contr += M_k * d_pi
+            if child is not None:
+                # Recurse into child detour branch for deeper nested risky edges
+                contr += _collect_tree_contrasts(child, branch_prefix)
+
         return contr
 
     if recourse_plan.tree is not None:
         L_contrast = _collect_tree_contrasts(recourse_plan.tree, 0.0)
     else:
-        L_contrast = 0.0
+        seq_items: List[Tuple[float, float]] = []
         for e in tree_risky_edges:
             c_e = canonical_edge(e[0], e[1])
             delta_pi = edge_spread.get(c_e, 0.0)
@@ -886,7 +897,12 @@ def compute_lipschitz_bound(
                 c_branch = c_prefix + eff_pen
 
             delta_c = abs(c_branch - primary_cost)
-            L_contrast += delta_c * delta_pi
+            seq_items.append((delta_c, delta_pi))
+
+        L_contrast = 0.0
+        for k in range(len(seq_items)):
+            M_k = max(item[0] for item in seq_items[k:])
+            L_contrast += M_k * seq_items[k][1]
 
     if L_contrast > 0.0:
         return float(L_contrast)

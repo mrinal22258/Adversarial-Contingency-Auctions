@@ -414,8 +414,9 @@ class CyclicPatrolAdversary(Adversary):
 
     def _init_bottlenecks(self, graph: nx.Graph, risky_edges: Set[Tuple[Any, Any]]) -> None:
         edge_bc = nx.edge_betweenness_centrality(graph, weight="weight")
+        canonical_risky = sorted(list({canonical_edge(*e) for e in risky_edges}))
         self._ordered_bottlenecks = sorted(
-            risky_edges,
+            canonical_risky,
             key=lambda e: edge_bc.get(e, edge_bc.get((e[1], e[0]), 0.0)),
             reverse=True,
         )
@@ -437,16 +438,16 @@ class CyclicPatrolAdversary(Adversary):
 
         idx_offset = (step // self.cycle_period) % n
         active_window = set(
-            self._ordered_bottlenecks[(idx_offset + i) % n]
+            canonical_edge(*self._ordered_bottlenecks[(idx_offset + i) % n])
             for i in range(min(self.budget_k, n))
         )
 
         hazards = {}
         for e in risky_edges:
-            if e in active_window:
-                hazards[e] = 0.90
-            else:
-                hazards[e] = 0.02
+            c_e = canonical_edge(*e)
+            val = 0.90 if c_e in active_window else 0.02
+            hazards[e] = val
+            hazards[c_e] = val
         return hazards
 
 

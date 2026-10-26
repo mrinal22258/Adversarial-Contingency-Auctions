@@ -47,6 +47,8 @@ from acalib.demo.runner import (
     run_single_simulation,
     run_paired_comparison,
     run_20_seeds_paired,
+    parse_allocator_name,
+    parse_adversary_name,
 )
 from acalib.demo.narrate import generate_event_log
 
@@ -108,6 +110,18 @@ class SecurityAndSizeMiddleware:
             (b"x-frame-options", b"DENY"),
         ]
 
+        async def send_wrapper(message):
+            if message["type"] == "http.response.start":
+                resp_headers = list(message.get("headers", []))
+                existing = {h[0].lower() for h in resp_headers}
+                if b"x-content-type-options" not in existing:
+                    resp_headers.append((b"x-content-type-options", b"nosniff"))
+                if b"x-frame-options" not in existing:
+                    resp_headers.append((b"x-frame-options", b"DENY"))
+                message = dict(message)
+                message["headers"] = resp_headers
+            await send(message)
+
         async def send_error_response(status_code: int, detail: str):
             body = json.dumps({"detail": detail}).encode("utf-8")
             resp_headers = list(security_headers) + [
@@ -137,6 +151,11 @@ class SecurityAndSizeMiddleware:
                 await send_error_response(400, "Malformed Content-Length header.")
                 return
 
+        method = scope.get("method", "GET").upper()
+        if method in ("GET", "HEAD", "OPTIONS") and cl_raw is None:
+            await self.app(scope, receive, send_wrapper)
+            return
+
         # Read and buffer request body chunks up to MAX_BODY_SIZE + 1
         body_chunks = []
         total_bytes = 0
@@ -165,19 +184,7 @@ class SecurityAndSizeMiddleware:
                 msg = body_chunks[idx]
                 idx += 1
                 return msg
-            return {"type": "http.request", "body": b"", "more_body": False}
-
-        async def send_wrapper(message):
-            if message["type"] == "http.response.start":
-                resp_headers = list(message.get("headers", []))
-                existing = {h[0].lower() for h in resp_headers}
-                if b"x-content-type-options" not in existing:
-                    resp_headers.append((b"x-content-type-options", b"nosniff"))
-                if b"x-frame-options" not in existing:
-                    resp_headers.append((b"x-frame-options", b"DENY"))
-                message = dict(message)
-                message["headers"] = resp_headers
-            await send(message)
+            return await receive()
 
         await self.app(scope, replay_receive, send_wrapper)
 
@@ -304,10 +311,18 @@ async def api_version():
     }
 
 
-# Mount static directory for repository images, diagrams, and assets
+# Mount static directory for repository images, diagrams, and assets (with Gradio static fallback)
+class CompositeStaticFiles(StaticFiles):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        import gradio.routes
+        gradio_static = os.path.join(gradio.routes.STATIC_TEMPLATE_LIB, "frontend", "static")
+        if os.path.isdir(gradio_static) and gradio_static not in self.all_directories:
+            self.all_directories.append(gradio_static)
+
 static_dir = os.path.join(REPO_ROOT, "static")
 if os.path.isdir(static_dir):
-    app.mount("/static", StaticFiles(directory=static_dir), name="static")
+    app.mount("/static", CompositeStaticFiles(directory=static_dir), name="static")
 
 # Thread-safe in-memory storage for real simulation runs (F-04)
 class RunStore:
@@ -365,6 +380,24 @@ class SimulateRequest(BaseModel):
     pDrop: float = Field(default=0.02, ge=0.0, le=1.0)
     blockedEdges: Optional[List[Any]] = None
 
+    @field_validator("allocator")
+    @classmethod
+    def validate_allocator(cls, v: str) -> str:
+        try:
+            parse_allocator_name(v)
+            return v
+        except ValueError as e:
+            raise ValueError(str(e)) from e
+
+    @field_validator("adversary")
+    @classmethod
+    def validate_adversary(cls, v: str) -> str:
+        try:
+            parse_adversary_name(v)
+            return v
+        except ValueError as e:
+            raise ValueError(str(e)) from e
+
     @field_validator("blockedEdges")
     @classmethod
     def validate_blocked_edges(cls, v):
@@ -395,6 +428,24 @@ class CompareRequest(BaseModel):
     commRange: float = Field(default=50.0, ge=0.0, le=500.0)
     pDrop: float = Field(default=0.02, ge=0.0, le=1.0)
 
+    @field_validator("allocator")
+    @classmethod
+    def validate_allocator(cls, v: str) -> str:
+        try:
+            parse_allocator_name(v)
+            return v
+        except ValueError as e:
+            raise ValueError(str(e)) from e
+
+    @field_validator("adversary")
+    @classmethod
+    def validate_adversary(cls, v: str) -> str:
+        try:
+            parse_adversary_name(v)
+            return v
+        except ValueError as e:
+            raise ValueError(str(e)) from e
+
 
 class MonteCarloRequest(BaseModel):
     topology: Literal["boston", "warehouse_small", "warehouse_large"] = "boston"
@@ -407,6 +458,24 @@ class MonteCarloRequest(BaseModel):
     maxSteps: int = Field(default=80, ge=10, le=500)
     commRange: float = Field(default=50.0, ge=0.0, le=500.0)
     pDrop: float = Field(default=0.02, ge=0.0, le=1.0)
+
+    @field_validator("allocator")
+    @classmethod
+    def validate_allocator(cls, v: str) -> str:
+        try:
+            parse_allocator_name(v)
+            return v
+        except ValueError as e:
+            raise ValueError(str(e)) from e
+
+    @field_validator("adversary")
+    @classmethod
+    def validate_adversary(cls, v: str) -> str:
+        try:
+            parse_adversary_name(v)
+            return v
+        except ValueError as e:
+            raise ValueError(str(e)) from e
 
 
 @app.get("/hud", include_in_schema=False)
@@ -510,8 +579,8 @@ def _execute_simulation(req: SimulateRequest) -> Dict[str, Any]:
             "application": "ACA Mission Control",
             "protocol": PROTOCOL_FULL_NAME,
             "topology": req.topology,
-            "allocator": req.allocator,
-            "adversary": req.adversary,
+            "allocator": parse_allocator_name(req.allocator),
+            "adversary": parse_adversary_name(req.adversary),
             "numRobots": req.numRobots,
             "numTasks": req.numTasks,
             "seed": req.seed,
@@ -630,6 +699,7 @@ def _execute_monte_carlo(req: MonteCarloRequest) -> Dict[str, Any]:
 
 
 @app.post("/api/monte_carlo")
+@app.post("/api/monte-carlo")
 async def api_monte_carlo(req: MonteCarloRequest, request: Request):
     """Run 20-seed Monte Carlo sweep under Common Random Numbers."""
     client_ip = request.client.host if request.client else "127.0.0.1"

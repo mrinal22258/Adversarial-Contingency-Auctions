@@ -139,10 +139,17 @@ REV_ADV_MAP["Stochastic"] = "theta_1_stochastic"
 REV_ADV_MAP["Reactive"] = "theta_2_reactive"
 REV_ADV_MAP["Budgeted Interdiction"] = "theta_3_budgeted_interdiction"
 REV_ADV_MAP["Cyclic Patrol"] = "theta_4_cyclic_patrol"
+REV_ADV_MAP["smart_static"] = "theta_3_budgeted_interdiction"
+
+
+CANONICAL_ALLOCATORS = set(METHOD_NAME_MAP.keys())
+CANONICAL_ADVERSARIES = set(ADVERSARY_NAME_MAP.keys())
 
 
 def parse_allocator_name(alloc_input: str) -> str:
-    """Normalize user-facing or internal allocator name."""
+    """Normalize user-facing or internal allocator name. Raises ValueError if unknown."""
+    if not isinstance(alloc_input, str):
+        raise ValueError(f"Allocator name must be a string, got {type(alloc_input)}")
     if alloc_input in METHOD_NAME_MAP:
         return alloc_input
     if alloc_input in REV_METHOD_MAP:
@@ -157,16 +164,81 @@ def parse_allocator_name(alloc_input: str) -> str:
     )
     if cleaned in REV_METHOD_MAP:
         return REV_METHOD_MAP[cleaned]
-    return cleaned
+    if cleaned in METHOD_NAME_MAP:
+        return cleaned
+    raise ValueError(f"Unknown allocator type: '{alloc_input}'")
 
 
 def parse_adversary_name(adv_input: str) -> str:
-    """Normalize user-facing or internal adversary name."""
+    """Normalize user-facing or internal adversary name. Raises ValueError if unknown."""
+    if not isinstance(adv_input, str):
+        raise ValueError(f"Adversary name must be a string, got {type(adv_input)}")
     if adv_input in ADVERSARY_NAME_MAP:
         return adv_input
     if adv_input in REV_ADV_MAP:
         return REV_ADV_MAP[adv_input]
-    return "theta_2_reactive"
+    cleaned = (
+        adv_input.lower()
+        .replace(" ", "_")
+        .replace("-", "_")
+        .replace("(", "")
+        .replace(")", "")
+        .replace("/", "_")
+    )
+    if cleaned in REV_ADV_MAP:
+        return REV_ADV_MAP[cleaned]
+    if cleaned in ADVERSARY_NAME_MAP:
+        return cleaned
+    raise ValueError(f"Unknown adversary type: '{adv_input}'")
+
+
+def _build_simulation_cache_key(
+    graph_family: str,
+    n_nodes: int,
+    adv_type_str: str,
+    alloc_type: str,
+    comm_regime: str,
+    comm_range: float,
+    p_drop: float,
+    n_robots: int,
+    n_tasks: int,
+    seed: int,
+    max_steps: int,
+    c_depth: int,
+    risk_fraction: float = 0.25,
+    clearance_rate: float = 0.15,
+    adversary_budget_k: int = 4,
+    variant: str = "10-20-10-2-1",
+    custom_blocked_edges: Optional[Any] = None,
+    record_history: bool = True,
+    record_traces: bool = True,
+) -> tuple:
+    blocked_key = (
+        tuple(sorted(tuple(sorted((u, v))) for u, v in custom_blocked_edges))
+        if custom_blocked_edges
+        else ()
+    )
+    return (
+        str(graph_family).lower(),
+        int(n_nodes),
+        str(adv_type_str),
+        str(alloc_type),
+        str(comm_regime),
+        float(comm_range),
+        float(p_drop),
+        int(n_robots),
+        int(n_tasks),
+        int(seed),
+        int(max_steps),
+        int(c_depth),
+        float(risk_fraction),
+        float(clearance_rate),
+        int(adversary_budget_k),
+        str(variant),
+        blocked_key,
+        bool(record_history),
+        bool(record_traces),
+    )
 
 
 def run_single_simulation(
@@ -211,27 +283,26 @@ def run_single_simulation(
     else:
         c_depth = 0
 
-    blocked_key = tuple(sorted(tuple(sorted((u, v))) for u, v in custom_blocked_edges)) if custom_blocked_edges else ()
-    cache_key = (
-        str(graph_family).lower(),
-        int(n_nodes),
-        str(adv_type_str),
-        str(alloc_type),
-        str(comm_regime),
-        float(comm_range),
-        float(p_drop),
-        int(n_robots),
-        int(n_tasks),
-        int(seed),
-        int(max_steps),
-        int(c_depth),
-        float(risk_fraction),
-        float(clearance_rate),
-        int(adversary_budget_k),
-        str(variant),
-        blocked_key,
-        bool(record_history),
-        bool(record_traces),
+    cache_key = _build_simulation_cache_key(
+        graph_family=graph_family,
+        n_nodes=n_nodes,
+        adv_type_str=adv_type_str,
+        alloc_type=alloc_type,
+        comm_regime=comm_regime,
+        comm_range=comm_range,
+        p_drop=p_drop,
+        n_robots=n_robots,
+        n_tasks=n_tasks,
+        seed=seed,
+        max_steps=max_steps,
+        c_depth=c_depth,
+        risk_fraction=risk_fraction,
+        clearance_rate=clearance_rate,
+        adversary_budget_k=adversary_budget_k,
+        variant=variant,
+        custom_blocked_edges=custom_blocked_edges,
+        record_history=record_history,
+        record_traces=record_traces,
     )
     if prebuilt_env is None and cache_key in _RUN_CACHE:
         if step_callback is not None:
@@ -284,6 +355,7 @@ def run_single_simulation(
     prev_blocked = set()
     prev_conflicts = 0
     prev_deferred = 0
+    prev_alloc_rounds = 0
 
     engine.reset(max_steps=max_steps)
 
@@ -334,6 +406,7 @@ def run_single_simulation(
 
             conflicts_this_tick = engine.metrics.cumulative_conflicts - prev_conflicts
             deferred_this_tick = engine.metrics.deferred_claims - prev_deferred
+            allocation_ran_this_tick = engine.metrics.allocation_rounds > prev_alloc_rounds
             total_msgs = engine.comm_net.total_messages_sent
             welfare = engine.metrics.total_reward - engine.metrics.total_travel_distance
 
@@ -347,6 +420,7 @@ def run_single_simulation(
                 "completed_tasks": engine.metrics.completed_tasks,
                 "conflicts": engine.metrics.cumulative_conflicts,
                 "conflicts_this_tick": conflicts_this_tick,
+                "allocation_ran_this_tick": allocation_ran_this_tick,
                 "messages": total_msgs,
                 "travel": float(engine.metrics.total_travel_distance),
                 "welfare": float(welfare),
@@ -359,6 +433,7 @@ def run_single_simulation(
             prev_blocked = curr_blocked_set
             prev_conflicts = engine.metrics.cumulative_conflicts
             prev_deferred = engine.metrics.deferred_claims
+            prev_alloc_rounds = engine.metrics.allocation_rounds
 
     # Finalize
     final_metrics = engine.finalize()
@@ -411,6 +486,12 @@ def get_cached_run(
     max_steps: int = DEFAULT_MAX_STEPS,
     contingency_depth: int = 1,
     variant: str = "10-20-10-2-1",
+    risk_fraction: float = 0.25,
+    clearance_rate: float = 0.15,
+    adversary_budget_k: int = 4,
+    custom_blocked_edges: Optional[List[Tuple[Any, Any]]] = None,
+    record_history: bool = True,
+    record_traces: bool = True,
 ) -> Dict[str, Any]:
     """Retrieve run from cache or execute and populate."""
     adv_type_str = parse_adversary_name(adversary_str)
@@ -424,23 +505,26 @@ def get_cached_run(
     else:
         c_depth = 0
 
-    cache_key = (
-        str(graph_family).lower(),
-        int(n_nodes),
-        str(adv_type_str),
-        str(alloc_type),
-        str(comm_regime),
-        float(comm_range),
-        float(p_drop),
-        int(n_robots),
-        int(n_tasks),
-        int(seed),
-        int(max_steps),
-        int(c_depth),
-        str(variant),
-        (),
-        True,
-        False,
+    cache_key = _build_simulation_cache_key(
+        graph_family=graph_family,
+        n_nodes=n_nodes,
+        adv_type_str=adv_type_str,
+        alloc_type=alloc_type,
+        comm_regime=comm_regime,
+        comm_range=comm_range,
+        p_drop=p_drop,
+        n_robots=n_robots,
+        n_tasks=n_tasks,
+        seed=seed,
+        max_steps=max_steps,
+        c_depth=c_depth,
+        risk_fraction=risk_fraction,
+        clearance_rate=clearance_rate,
+        adversary_budget_k=adversary_budget_k,
+        variant=variant,
+        custom_blocked_edges=custom_blocked_edges,
+        record_history=record_history,
+        record_traces=record_traces,
     )
     if cache_key in _RUN_CACHE:
         return _RUN_CACHE[cache_key]
@@ -458,8 +542,13 @@ def get_cached_run(
         seed=seed,
         max_steps=max_steps,
         contingency_depth=contingency_depth,
+        risk_fraction=risk_fraction,
+        clearance_rate=clearance_rate,
+        adversary_budget_k=adversary_budget_k,
         variant=variant,
-        record_history=True,
+        custom_blocked_edges=custom_blocked_edges,
+        record_history=record_history,
+        record_traces=record_traces,
     )
     _RUN_CACHE[cache_key] = res
     return res

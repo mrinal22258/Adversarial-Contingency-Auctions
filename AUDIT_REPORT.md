@@ -1,5 +1,7 @@
 # Comprehensive Audit Report: Adversarial Contingency Auctions (ACA)
 
+> **Historical Audit Record:** Superseded by the current result model in results/result_model.json and RESULTS_VERDICT.md.
+
 **Auditor:** Skeptical Senior Robotics Researcher, Theory Auditor & Statistical Reviewer  
 **Repository:** Adversarial-Contingency-Auctions (ACA)  
 **Evaluated Branch:** `fix/audit-repairs` (branched from `6cabf8ca417b25102dc74d3cf4e750fa2c495f8e`)  

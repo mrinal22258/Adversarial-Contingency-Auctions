@@ -3,30 +3,45 @@
 *.log
 *.out
 *.toc
+*.lof
+*.lot
 *.bbl
 *.blg
 *.synctex.gz
 *.fdb_latexmk
 *.fls
 results/figures/rendered_pages/
+# Explicitly track canonical PDF deliverables
+!paper.pdf
+!supplement.pdf
 
-# Python artifacts
+# Python artifacts & virtual environments
 __pycache__/
 *.pyc
 *.py[cod]
 *$py.class
 *.egg-info/
 .pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
 /venv/
+/.venv/
 /env/
 /venv_core/
-.env
 cache/
 results/raw/
 
-# OS & Environment artifacts
+# Local environment variables & secrets
+.env
+.env.*
+*.local
+
+# OS & Editor artifacts
 .DS_Store
 Thumbs.db
+desktop.ini
 .vscode/
 .idea/
 powershell.bat
@@ -46,6 +61,7 @@ scratch/
 *.bak
 *.orig
 *.swp
+*.swo
 *~
 release/
 ui.zip

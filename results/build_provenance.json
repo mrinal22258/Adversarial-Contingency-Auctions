@@ -1,9 +1,9 @@
 {
-  "timestamp_utc": "2026-10-21T13:27:01.638138+00:00",
+  "timestamp_utc": "2026-10-26T06:00:02.250899+00:00",
   "python_version": "3.12.7 | packaged by Anaconda, Inc. | (main, Oct  4 2024, 13:17:27) [MSC v.1929 64 bit (AMD64)]",
   "protocol": "v5",
-  "git_commit": "c8033f85e731a7f161ba8508c6ad782783bb4e9a",
-  "git_dirty": false,
+  "git_commit": "0f92ffb1c0310e673c00436a6b8d280596fc7c1b",
+  "git_dirty": true,
   "repo_root": ".",
   "steps": {
     "step1_validation": "PASS",
@@ -33,24 +33,24 @@
       "bytes": 12762
     },
     "results/result_model_v1.json": {
-      "sha256": "3bd3560cbddecc9a04569cd8c28f64f96607203e8454157f6a0232a4166ad1d1",
-      "bytes": 263512
+      "sha256": "80a1a9e77c0789cd8ba8b241cf259456cd3685811b9eaa97cfb7e4df24ba4a9f",
+      "bytes": 263732
     },
     "results/numbers.tex": {
-      "sha256": "a7b5e2bf22a898f79dd90a99fe9ea99335eb758791616a936c6980b5bdeaf871",
-      "bytes": 14938
+      "sha256": "1ff9fdfbecbdf98ba3945813686eb346aead62661ddbbfd509100430ce81da2c",
+      "bytes": 15031
     },
     "results/table_main_results.tex": {
-      "sha256": "eacffacd67e2ff118e8241a23ac79421060605f8856650cdc569b76948417482",
-      "bytes": 3111
+      "sha256": "ee50df8158980455b9c7189bbdcf737639adb68c8505a454c71c857276533698",
+      "bytes": 3080
     },
     "results/table_stratified.tex": {
       "sha256": "83e99d7e2b1cbec13224935c510bfcf3e43a56c587aa96a280644887c572ad59",
       "bytes": 2159
     },
     "results/table_sitl.tex": {
-      "sha256": "58e2964bad29a56786be6f0ab77008cba7b171be068c2cd944ae92bb82f387da",
-      "bytes": 1164
+      "sha256": "6f46490cd252b2e531e270a7acb613d5368a50f0749afb410eb54be5221461f8",
+      "bytes": 1591
     },
     "results/table_heldout_v5.tex": {
       "sha256": "70d3dce311f0b4bd29064af82b34b99dca1fbaadb6818975a8d088b80a665811",
@@ -69,13 +69,13 @@
       "bytes": 4954
     },
     "paper.pdf": {
-      "sha256": "2446f11fa31da2131b8d25fc73c6350bc3cceebf81a3197834c51fad9cf22043",
-      "bytes": 901982
+      "sha256": "c33ea3440f2459b465e2d7a27f357ffb34d10829af7277a72e8b2f86d188b6dc",
+      "bytes": 904247
     },
     "supplement.pdf": {
-      "sha256": "fdb232b9dd0e4b377a02b50e8d2f2b7024c2cc05c57af9c85a37cb32ffe5c66e",
-      "bytes": 813805
+      "sha256": "3dac96c306ba1e6567e2b866c57d5f9d2fae135a377299df021487dbe6a2f9ea",
+      "bytes": 813643
     }
   },
-  "duration_sec": 99.84
+  "duration_sec": 98.53
 }

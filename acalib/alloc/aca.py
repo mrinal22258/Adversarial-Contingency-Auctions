@@ -5,7 +5,7 @@ and Rare Bounded Re-auctions (Theorem 4).
 """
 
 import math
-from typing import Dict, List, Tuple, Optional, Any
+from typing import Dict, List, Tuple, Optional, Any, Set
 import numpy as np
 import networkx as nx
 
@@ -51,6 +51,7 @@ class ACAAllocator(CBBAAllocator):
         partition_mode: bool = False,
     ):
         super().__init__(graph, robots, comm_net, bundle_limit)
+        self.fleet_ids: List[int] = sorted(list(robots.keys()))
         self.delta_map = delta_map
         self.enable_margin = enable_margin
         self.contingency_depth = contingency_depth

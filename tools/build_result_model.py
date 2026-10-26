@@ -145,8 +145,8 @@ def build_result_model() -> Dict[str, Any]:
     aca_all_raw = df_raw[df_raw["method"] == "aca"]
     tot_tv_obs = int(aca_all_raw["tv_evaluations_count"].sum()) if "tv_evaluations_count" in aca_all_raw.columns else 0
     adh_tv_obs = int(aca_all_raw["tv_adhered_count"].sum()) if "tv_adhered_count" in aca_all_raw.columns else 0
-    tv_adh_pct = round(adh_tv_obs / max(1, tot_tv_obs) * 100.0, 1)
-    tv_viol_pct = round(100.0 - tv_adh_pct, 1)
+    tv_adh_pct = round(adh_tv_obs / max(1, tot_tv_obs) * 100.0, 2)
+    tv_viol_pct = round(100.0 - tv_adh_pct, 2)
 
     # Level 2: Per-Instance Adherence across independent (graph_family, seed) instances (N=250)
     inst_tv = aca_all_raw.groupby(["graph_family", "seed"])[["tv_evaluations_count", "tv_adhered_count"]].sum()
@@ -222,9 +222,13 @@ def build_result_model() -> Dict[str, Any]:
         "adherence_wilcoxon_stat": w_stat,
         "pval_adherence_instance_exact": w_pval,
         "pval_adherence_instance_null": pval_adherence_instance_null,
-        # Theoretical Reference Constants
+        # Theoretical Reference & Historical Baseline Constants
+        # Note: 21.1% represents the historical pre-calibration ACA baseline snapshot adherence
+        # (provenance: audit/baseline_snapshot/results/numbers.tex:84), not an independent experimental run.
         "fixed_threshold_baseline_adherence_pct": 21.1,
+        "historical_baseline_snapshot_adherence_pct": 21.1,
         "lemma_one_analytical_adherence_pct": 100.0,
+        "lemma_one_theoretical_coverage_pct": 100.0,
     }
 
     sc_evidence = {

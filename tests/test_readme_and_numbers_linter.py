@@ -34,17 +34,39 @@ def test_readme_matches_render_output():
 
 @pytest.mark.core
 def test_missing_model_field_fails_rendering(tmp_path):
-    """Verify that a template with a non-existent placeholder field causes render_readme to fail."""
-    bad_template = tmp_path / "bad_template.md"
-    bad_template.write_text("# Test\n\nCompletion: {{non_existent_population.foo.metric_mean}}%\n", encoding="utf-8")
+    """Verify that deleting a required metric like tv_adherence_pct causes render_readme to fail."""
+    import json
+    model_path = REPO_ROOT / "results" / "result_model_v1.json"
+    with open(model_path, "r", encoding="utf-8") as f:
+        full_model = json.load(f)
 
-    out_file = tmp_path / "out_readme.md"
+    bad_model = copy.deepcopy(full_model)
+    th1_sec = bad_model.get("theorem_1_evidence", bad_model.get("theorem_1", {}))
+    assert "tv_adherence_pct" in th1_sec, "Baseline result model must contain tv_adherence_pct"
+    del th1_sec["tv_adherence_pct"]
+
     with pytest.raises(KeyError) as exc_info:
-        render_readme(
-            template_path=str(bad_template),
-            out_path=str(out_file),
-        )
-    assert "unresolved placeholder" in str(exc_info.value).lower()
+        render_readme(model_override=bad_model, write_to_file=False)
+    assert "tv_adherence_pct" in str(exc_info.value)
+
+
+@pytest.mark.core
+def test_missing_or_invalid_test_log_fails_rendering(tmp_path):
+    """Verify that missing or unparseable test logs cause render_readme / parse_latest_test_log to fail."""
+    from tools.render_readme import parse_latest_test_log
+
+    # Empty directory with no test log files
+    empty_dir = tmp_path / "empty_logs"
+    empty_dir.mkdir()
+    with pytest.raises(FileNotFoundError):
+        parse_latest_test_log(logs_dir=str(empty_dir))
+
+    # Invalid directory with garbage text log
+    bad_log_dir = tmp_path / "bad_logs"
+    bad_log_dir.mkdir()
+    (bad_log_dir / "final.txt").write_text("Corrupted log without pass line\n", encoding="utf-8")
+    with pytest.raises(RuntimeError):
+        parse_latest_test_log(logs_dir=str(bad_log_dir))
 
 
 @pytest.mark.core

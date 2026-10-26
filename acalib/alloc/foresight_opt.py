@@ -124,8 +124,16 @@ class ForesightOptAllocator(BaseAllocator):
             for j in range(n_tasks):
                 d = dist_matrix.get((f"r_{r}", f"t_{j}"), 1000.0)
                 is_first = model.NewBoolVar(f"first_{j}_{r}")
-                model.Add(pos[j] == 0).OnlyEnforceIf(is_first)
-                model.Add(x[j, r] == 1).OnlyEnforceIf(is_first)
+                is_pos_zero = model.NewBoolVar(f"pos0_{j}_{r}")
+                model.Add(pos[j] == 0).OnlyEnforceIf(is_pos_zero)
+                model.Add(pos[j] != 0).OnlyEnforceIf(is_pos_zero.Not())
+
+                # Forward: is_first => (pos[j] == 0 and x[j, r] == 1)
+                model.AddImplication(is_first, is_pos_zero)
+                model.AddImplication(is_first, x[j, r])
+                # Reverse: (pos[j] == 0 and x[j, r] == 1) => is_first
+                model.AddBoolOr([is_pos_zero.Not(), x[j, r].Not(), is_first])
+
                 obj_terms.append(-int(d * SCALE) * is_first)
 
         model.Maximize(sum(obj_terms))

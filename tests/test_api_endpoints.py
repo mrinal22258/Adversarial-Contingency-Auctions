@@ -401,6 +401,37 @@ def test_streaming_payload_cap_without_content_length(client):
     assert resp_health.headers.get("x-frame-options") == "DENY"
 
 
+def test_unknown_adversary_and_allocator_rejected_422(client):
+    """Verify that unknown adversary and unknown allocator names return HTTP 422 across endpoints."""
+    # /api/simulate
+    r_sim_adv = client.post("/api/simulate", json={"adversary": "DefinitelyNotAnAdversary"})
+    assert r_sim_adv.status_code == 422, f"Expected 422, got {r_sim_adv.status_code}"
+
+    r_sim_alloc = client.post("/api/simulate", json={"allocator": "DefinitelyNotAnAllocator"})
+    assert r_sim_alloc.status_code == 422, f"Expected 422, got {r_sim_alloc.status_code}"
+
+    # /api/compare
+    r_comp_adv = client.post("/api/compare", json={"adversary": "DefinitelyNotAnAdversary"})
+    assert r_comp_adv.status_code == 422, f"Expected 422, got {r_comp_adv.status_code}"
+
+    r_comp_alloc = client.post("/api/compare", json={"allocator": "DefinitelyNotAnAllocator"})
+    assert r_comp_alloc.status_code == 422, f"Expected 422, got {r_comp_alloc.status_code}"
+
+    # /api/monte-carlo and /api/monte_carlo
+    r_mc_adv = client.post("/api/monte-carlo", json={"adversary": "DefinitelyNotAnAdversary"})
+    assert r_mc_adv.status_code == 422, f"Expected 422, got {r_mc_adv.status_code}"
+
+    r_mc_alloc = client.post("/api/monte-carlo", json={"allocator": "DefinitelyNotAnAllocator"})
+    assert r_mc_alloc.status_code == 422, f"Expected 422, got {r_mc_alloc.status_code}"
+
+    r_mc_adv2 = client.post("/api/monte_carlo", json={"adversary": "DefinitelyNotAnAdversary"})
+    assert r_mc_adv2.status_code == 422, f"Expected 422, got {r_mc_adv2.status_code}"
+
+    r_mc_alloc2 = client.post("/api/monte_carlo", json={"allocator": "DefinitelyNotAnAllocator"})
+    assert r_mc_alloc2.status_code == 422, f"Expected 422, got {r_mc_alloc2.status_code}"
+
+
+
 
 
 

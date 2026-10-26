@@ -22,17 +22,17 @@ RESULT_MODEL_PATH = os.path.join(REPO_ROOT, "results", "result_model_v1.json")
 TEST_LOGS_DIR = os.path.join(REPO_ROOT, "results", "test_logs")
 
 
+def require_metric(data: Dict[str, Any], key: str, context: str = "model") -> Any:
+    """Strict lookup helper that raises KeyError if a required metric is missing or None."""
+    if key not in data or data[key] is None:
+        raise KeyError(f"Required empirical metric '{key}' missing or None in '{context}'")
+    return data[key]
+
+
 def parse_latest_test_log(logs_dir: str = TEST_LOGS_DIR) -> Dict[str, Any]:
     """Parse the most recent test log in results/test_logs/ for passed/deselected counts."""
-    default = {
-        "passed": 173,
-        "deselected": 54,
-        "warnings": 2,
-        "duration": "35.00s",
-        "summary_line": "173 passed, 54 deselected, 2 warnings",
-    }
     if not os.path.exists(logs_dir):
-        return default
+        raise FileNotFoundError(f"Test logs directory does not exist: {logs_dir}")
 
     # Prefer final.txt over gate-6.txt whenever it exists, otherwise gate-6.txt or most recent
     final_file = os.path.join(logs_dir, "final.txt")
@@ -41,7 +41,7 @@ def parse_latest_test_log(logs_dir: str = TEST_LOGS_DIR) -> Dict[str, Any]:
     else:
         candidates = sorted(glob.glob(os.path.join(logs_dir, "*.txt")), key=os.path.getmtime, reverse=True)
         if not candidates:
-            return default
+            raise FileNotFoundError(f"No test log text files found in {logs_dir}")
         chosen_file = candidates[0]
         for c in candidates:
             if "gate-6" in os.path.basename(c):
@@ -51,35 +51,32 @@ def parse_latest_test_log(logs_dir: str = TEST_LOGS_DIR) -> Dict[str, Any]:
     try:
         with open(chosen_file, "r", encoding="utf-8") as f:
             content = f.read()
-        clean_match = re.search(r"(?:^|\n)(?:=+\s*)?(\d+)\s+passed(?:,\s+(\d+)\s+deselected)?(?:,\s+(\d+)\s+warnings?)?(?:\s+in\s+([\d\.]+s))?", content)
-        if clean_match and "failed" not in content.splitlines()[-1]:
-            passed = int(clean_match.group(1))
-            deselected = int(clean_match.group(2)) if clean_match.group(2) else 0
-            warnings = int(clean_match.group(3)) if clean_match.group(3) else 0
-            dur = clean_match.group(4) if clean_match.group(4) else ""
-            summary = f"{passed} passed"
-            if deselected:
-                summary += f", {deselected} deselected"
-            if warnings:
-                summary += f", {warnings} warnings"
-            return {
-                "passed": passed,
-                "deselected": deselected,
-                "warnings": warnings,
-                "duration": dur,
-                "summary_line": summary,
-            }
-            return {
-                "passed": passed,
-                "deselected": deselected,
-                "warnings": warnings,
-                "duration": dur,
-                "summary_line": summary,
-            }
-    except Exception:
-        pass
+    except Exception as e:
+        raise RuntimeError(f"Failed to read test log from {chosen_file}: {e}") from e
 
-    return default
+    clean_match = re.search(
+        r"(?:^|\n)(?:=+\s*)?(\d+)\s+passed(?:,\s+(\d+)\s+deselected)?(?:,\s+(\d+)\s+warnings?)?(?:\s+in\s+([\d\.]+s))?",
+        content,
+    )
+    if clean_match and "failed" not in (content.splitlines()[-1] if content.splitlines() else ""):
+        passed = int(clean_match.group(1))
+        deselected = int(clean_match.group(2)) if clean_match.group(2) else 0
+        warnings = int(clean_match.group(3)) if clean_match.group(3) else 0
+        dur = clean_match.group(4) if clean_match.group(4) else ""
+        summary = f"{passed} passed"
+        if deselected > 0:
+            summary += f", {deselected} deselected"
+        if warnings > 0:
+            summary += f", {warnings} warning{'s' if warnings > 1 else ''}"
+        return {
+            "passed": passed,
+            "deselected": deselected,
+            "warnings": warnings,
+            "duration": dur,
+            "summary_line": summary,
+            "source_log": os.path.basename(chosen_file),
+        }
+    raise RuntimeError(f"Could not parse valid passed test counts from test log: {chosen_file}")
 
 
 def build_populations_table(model: Dict[str, Any]) -> str:
@@ -176,20 +173,24 @@ def render_readme(
     model_path: str = RESULT_MODEL_PATH,
     out_path: Optional[str] = OUTPUT_README_PATH,
     write_to_file: bool = True,
+    model_override: Optional[Dict[str, Any]] = None,
+    test_logs_dir: str = TEST_LOGS_DIR,
 ) -> str:
     """Render README.md from template and result model."""
     if not os.path.exists(template_path):
         raise FileNotFoundError(f"Template not found: {template_path}")
-    if not os.path.exists(model_path):
-        raise FileNotFoundError(f"Result model not found: {model_path}")
+    if model_override is not None:
+        model = model_override
+    else:
+        if not os.path.exists(model_path):
+            raise FileNotFoundError(f"Result model not found: {model_path}")
+        with open(model_path, "r", encoding="utf-8") as f:
+            model = json.load(f)
+
+    test_info = parse_latest_test_log(logs_dir=test_logs_dir)
 
     with open(template_path, "r", encoding="utf-8") as f:
         template = f.read()
-
-    with open(model_path, "r", encoding="utf-8") as f:
-        model = json.load(f)
-
-    test_info = parse_latest_test_log()
 
     # Pre-calculate semantic shortcuts
     v5_metrics = model.get("metrics", {}).get("heldout_v5", {})
@@ -212,22 +213,25 @@ def render_readme(
     }
 
     # Theorem 1 dynamic shortcuts
-    th1_data = model.get("theorem_1_evidence", model.get("theorem_1", {}))
-    if th1_data:
-        shortcuts["th1.safe_claims"] = f"{th1_data.get('claimed_safe', 0):,}"
-        shortcuts["th1.adhered_safe_claims"] = f"{th1_data.get('tv_le_eta_subset', 0):,}"
-        shortcuts["th1.adherence_per_claim_pct"] = f"{th1_data.get('adherence_pct', 0.0):.2f}"
-        shortcuts["th1.conflicts_adhered"] = str(th1_data.get("conflicts_under_assumption_1", 0))
-        shortcuts["th1.clopper_pearson_upper_pct"] = f"{th1_data.get('clopper_pearson_upper_pct', 0.0):.3f}"
-        shortcuts["th1.total_tv_observations"] = f"{th1_data.get('total_tv_observations', 0):,}"
-        shortcuts["th1.adhered_tv_observations"] = f"{th1_data.get('adhered_tv_observations', 0):,}"
-        shortcuts["th1.tv_adherence_pct"] = f"{th1_data.get('tv_adherence_pct', 0.0):.2f}"
-        shortcuts["th1.adherence_per_instance_pct"] = f"{th1_data.get('adherence_per_instance_pct', 0.0):.2f}"
-        shortcuts["th1.adherence_per_instance_ci_low"] = f"{th1_data.get('adherence_per_instance_ci_low', 0.0):.2f}"
-        shortcuts["th1.adherence_per_instance_ci_high"] = f"{th1_data.get('adherence_per_instance_ci_high', 0.0):.2f}"
-        shortcuts["th1.n_instances"] = str(th1_data.get("n_instances", 0))
-        shortcuts["th1.pval_adherence_instance_null"] = str(th1_data.get("pval_adherence_instance_null", "< 0.001"))
-        shortcuts["th1.fixed_threshold_baseline_adherence_pct"] = f"{th1_data.get('fixed_threshold_baseline_adherence_pct', 21.1):.1f}"
+    th1_data = model.get("theorem_1_evidence", model.get("theorem_1"))
+    if not th1_data:
+        raise KeyError("Required section 'theorem_1_evidence' or 'theorem_1' missing from result model")
+
+    shortcuts["th1.safe_claims"] = f"{require_metric(th1_data, 'claimed_safe', 'th1'):,}"
+    shortcuts["th1.adhered_safe_claims"] = f"{require_metric(th1_data, 'tv_le_eta_subset', 'th1'):,}"
+    shortcuts["th1.adherence_per_claim_pct"] = f"{require_metric(th1_data, 'adherence_pct', 'th1'):.2f}"
+    shortcuts["th1.conflicts_adhered"] = str(require_metric(th1_data, 'conflicts_under_assumption_1', 'th1'))
+    shortcuts["th1.clopper_pearson_upper_pct"] = f"{require_metric(th1_data, 'clopper_pearson_upper_pct', 'th1'):.3f}"
+    shortcuts["th1.total_tv_observations"] = f"{require_metric(th1_data, 'total_tv_observations', 'th1'):,}"
+    shortcuts["th1.adhered_tv_observations"] = f"{require_metric(th1_data, 'adhered_tv_observations', 'th1'):,}"
+    shortcuts["th1.tv_adherence_pct"] = f"{require_metric(th1_data, 'tv_adherence_pct', 'th1'):.2f}"
+    shortcuts["th1.tv_violation_pct"] = f"{require_metric(th1_data, 'tv_violation_pct', 'th1'):.2f}"
+    shortcuts["th1.adherence_per_instance_pct"] = f"{require_metric(th1_data, 'adherence_per_instance_pct', 'th1'):.2f}"
+    shortcuts["th1.adherence_per_instance_ci_low"] = f"{require_metric(th1_data, 'adherence_per_instance_ci_low', 'th1'):.2f}"
+    shortcuts["th1.adherence_per_instance_ci_high"] = f"{require_metric(th1_data, 'adherence_per_instance_ci_high', 'th1'):.2f}"
+    shortcuts["th1.n_instances"] = str(require_metric(th1_data, 'n_instances', 'th1'))
+    shortcuts["th1.pval_adherence_instance_null"] = str(require_metric(th1_data, 'pval_adherence_instance_null', 'th1'))
+    shortcuts["th1.fixed_threshold_baseline_adherence_pct"] = f"{require_metric(th1_data, 'fixed_threshold_baseline_adherence_pct', 'th1'):.1f}"
 
     # Populations
     pops = model.get("populations", {})
