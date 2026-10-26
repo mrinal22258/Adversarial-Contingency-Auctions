@@ -104,7 +104,7 @@ def compute_plan_hash(plan: RecoursePlan) -> str:
 def get_marginals_token(edge_marginals: Dict[Tuple[Any, Any], float]) -> int:
     return hash(
         frozenset(
-            (canonical_edge(u, v), round(float(prob), 12))
+            (canonical_edge(u, v), round(float(prob), 8))
             for (u, v), prob in edge_marginals.items()
         )
     )

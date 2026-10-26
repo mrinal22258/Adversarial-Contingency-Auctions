@@ -382,7 +382,7 @@ def build_results_view():
                 )
 
             with gr.Tab("🔒 2. Table III: Protocol v5 Confirmatory Held-Out (N = 450)"):
-                gr.Markdown(f"Pre-registered confirmatory evaluation on un-tuned seeds 101–130 ($N = 450$ matched instances) loaded directly from `results/table_heldout_v5.tex` (source data SHA-256: `{heldout_hash}`).")
+                gr.Markdown(f"Pre-registered confirmatory evaluation on un-tuned seeds 101–130 ($N = 450$ matched instances) loaded from `results/table_heldout_v5.tex` and verified against canonical `results/result_model_v1.json` (source data SHA-256: `{heldout_hash}`).")
                 components["heldout_results_table"] = gr.DataFrame(
                     value=heldout_df,
                     interactive=False,

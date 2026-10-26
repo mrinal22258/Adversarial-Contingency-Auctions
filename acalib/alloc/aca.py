@@ -181,12 +181,12 @@ class ACAAllocator(CBBAAllocator):
     ) -> float:
         """Compute Lipschitz bound for a specific robot on task j."""
         cache_key = (task.task_id, robot_id)
-        if recourse_plan is None and hasattr(self, "_round_lip_robot_cache") and cache_key in self._round_lip_robot_cache:
+        if hasattr(self, "_round_lip_robot_cache") and cache_key in self._round_lip_robot_cache:
             return self._round_lip_robot_cache[cache_key]
 
         robot = self.robots[robot_id]
         if fleet_states is None:
-            fleet_states = {r_id: r.get_state_summary() for r_id, r in self.robots.items()}
+            fleet_states = getattr(self, "_round_fleet_states", None) or {r_id: r.get_state_summary() for r_id, r in self.robots.items()}
 
         if recourse_plan is None and hasattr(self, "_round_plan_cache") and cache_key in self._round_plan_cache:
             recourse_plan = self._round_plan_cache[cache_key]
@@ -233,7 +233,7 @@ class ACAAllocator(CBBAAllocator):
                 all_active_risky.append(c_e)
 
         if not all_active_risky:
-            if recourse_plan is None and hasattr(self, "_round_lip_robot_cache"):
+            if hasattr(self, "_round_lip_robot_cache"):
                 self._round_lip_robot_cache[cache_key] = 0.0
             return 0.0
 
@@ -265,7 +265,7 @@ class ACAAllocator(CBBAAllocator):
             clearance_rate=mu,
             partition_mode=getattr(self, "partition_mode", False),
         )
-        if recourse_plan is None and hasattr(self, "_round_lip_robot_cache"):
+        if hasattr(self, "_round_lip_robot_cache"):
             self._round_lip_robot_cache[cache_key] = val
         return val
 
@@ -404,18 +404,22 @@ class ACAAllocator(CBBAAllocator):
                         peer_costs.append(peer_cost_cache[pc_key])
 
                     min_peer_cost = min(peer_costs) if peer_costs else float("inf")
-                    L_r = self._compute_lipschitz_for_robot(
-                        task, robot_id, recourse_plan=recourse_plan, fleet_states=fleet_states
-                    )
-                    peer_Ls = [
-                        self._compute_lipschitz_for_robot(
-                            task, peer_id, recourse_plan=None, fleet_states=fleet_states
+                    if tid in lipschitz_cache:
+                        L_r, max_peer_L, L_j = lipschitz_cache[tid]
+                    else:
+                        L_r = self._compute_lipschitz_for_robot(
+                            task, robot_id, recourse_plan=recourse_plan, fleet_states=fleet_states
                         )
-                        for peer_id in self.fleet_ids
-                        if peer_id != robot_id
-                    ]
-                    max_peer_L = max(peer_Ls) if peer_Ls else 0.0
-                    L_j = max(L_r, max_peer_L)
+                        peer_Ls = [
+                            self._compute_lipschitz_for_robot(
+                                task, peer_id, recourse_plan=None, fleet_states=fleet_states
+                            )
+                            for peer_id in self.fleet_ids
+                            if peer_id != robot_id
+                        ]
+                        max_peer_L = max(peer_Ls) if peer_Ls else 0.0
+                        L_j = max(L_r, max_peer_L)
+                        lipschitz_cache[tid] = (L_r, max_peer_L, L_j)
 
                     if self.fixed_margin is not None:
                         margin = float(self.fixed_margin)
@@ -546,12 +550,18 @@ class ACAAllocator(CBBAAllocator):
         def deadband_fn(receiver_id: int, sender_id: int, tid: int) -> float:
             if not self.enable_margin:
                 return 0.0
+            memo_key = (receiver_id, tid)
+            if hasattr(self, "_round_deadband_cache") and memo_key in self._round_deadband_cache:
+                return self._round_deadband_cache[memo_key]
+
             task = None
             if tasks is not None and tid in tasks:
                 task = tasks[tid]
             elif hasattr(self, "_active_tasks") and getattr(self, "_active_tasks") is not None and tid in self._active_tasks:
                 task = self._active_tasks[tid]
             if task is None:
+                if hasattr(self, "_round_deadband_cache"):
+                    self._round_deadband_cache[memo_key] = 0.0
                 return 0.0
 
             robot = self.robots[receiver_id]
@@ -567,7 +577,10 @@ class ACAAllocator(CBBAAllocator):
             max_kl = robot.tom_tracker.get_max_kl(my_belief)
             eta_eff = robot.tom_tracker.get_effective_eta(current_step)
             base_m = robot.pinsker_calc.compute_margin(L_j, max_kl, eta=eta_eff, max_peer_L=max_peer_L)
-            return float(self.kappa_hyst * base_m)
+            val = float(self.kappa_hyst * base_m)
+            if hasattr(self, "_round_deadband_cache"):
+                self._round_deadband_cache[memo_key] = val
+            return val
 
         return execute_consensus_exchange(
             fleet_ids=self.fleet_ids,
@@ -635,6 +648,7 @@ class ACAAllocator(CBBAAllocator):
         self._round_lip_robot_cache = {}
         self._round_lip_L_j_cache = {}
         self._round_peer_cost_cache = {}
+        self._round_deadband_cache = {}
         self._round_fleet_states = {r_id: r.get_state_summary() for r_id, r in self.robots.items()}
 
         # Clean up completed tasks from tables and robot bundles
