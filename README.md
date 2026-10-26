@@ -1,4 +1,16 @@
+---
+title: Adversarial Contingency Auctions
+emoji: 🤖
+colorFrom: indigo
+colorTo: purple
+sdk: gradio
+sdk_version: 6.28.0
+app_file: app.py
+pinned: false
+license: mit
+---
 <!-- GENERATED FILE: DO NOT EDIT DIRECTLY. Edit README.template.md and run tools/render_readme.py -->
+
 
 # Adversarial Contingency Auctions (ACA)
 

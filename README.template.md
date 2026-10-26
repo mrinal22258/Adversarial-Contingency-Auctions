@@ -1,3 +1,15 @@
+---
+title: Adversarial Contingency Auctions
+emoji: 🤖
+colorFrom: indigo
+colorTo: purple
+sdk: gradio
+sdk_version: 6.28.0
+app_file: app.py
+pinned: false
+license: mit
+---
+
 # Adversarial Contingency Auctions (ACA)
 
 > Decentralized Multi-Robot Task Allocation under Strategic Blockages and Divergent Beliefs

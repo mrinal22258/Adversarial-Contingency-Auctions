@@ -781,7 +781,7 @@ app = gr.mount_gradio_app(
 
 if __name__ == "__main__":
     server_port = int(os.environ.get("PORT", 7860))
-    server_name = os.environ.get("HOST", os.environ.get("GRADIO_SERVER_NAME", "127.0.0.1"))
+    server_name = os.environ.get("HOST", os.environ.get("GRADIO_SERVER_NAME", "0.0.0.0"))
     print(f"[*] Starting ACA Mission Control on {server_name}:{server_port}...")
     print(f"[*] Dashboard Viewport: http://{server_name}:{server_port}/")
     uvicorn.run(app, host=server_name, port=server_port, log_level="info")

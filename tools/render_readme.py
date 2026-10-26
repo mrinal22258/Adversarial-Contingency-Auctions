@@ -325,7 +325,11 @@ def render_readme(
         raise ValueError(f"Unfilled template placeholders remaining in output: {remaining}")
 
     header = "<!-- GENERATED FILE: DO NOT EDIT DIRECTLY. Edit README.template.md and run tools/render_readme.py -->\n\n"
-    final_output = header + rendered
+    frontmatter_match = re.match(r"^(---\r?\n.*?\r?\n---\r?\n)(.*)$", rendered, re.DOTALL)
+    if frontmatter_match:
+        final_output = frontmatter_match.group(1) + header + frontmatter_match.group(2)
+    else:
+        final_output = header + rendered
 
     if write_to_file and out_path:
         with open(out_path, "w", encoding="utf-8") as f:
