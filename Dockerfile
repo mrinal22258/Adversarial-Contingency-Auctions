@@ -6,8 +6,6 @@ WORKDIR /app
 # Set container execution flags
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    GRADIO_SERVER_NAME="0.0.0.0" \
-    GRADIO_SERVER_PORT=7860 \
     HOST="0.0.0.0" \
     PORT=7860
 

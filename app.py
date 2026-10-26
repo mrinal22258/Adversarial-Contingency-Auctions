@@ -24,6 +24,9 @@ REPO_ROOT = os.path.dirname(os.path.abspath(__file__))
 if REPO_ROOT not in sys.path:
     sys.path.insert(0, REPO_ROOT)
 
+# Prevent Gradio from attempting to bind an independent port when mounted under FastAPI/Uvicorn
+os.environ.pop("GRADIO_SERVER_PORT", None)
+
 import networkx as nx
 import pandas as pd
 from fastapi import FastAPI, HTTPException, Request
@@ -784,4 +787,11 @@ if __name__ == "__main__":
     server_name = os.environ.get("HOST", os.environ.get("GRADIO_SERVER_NAME", "0.0.0.0"))
     print(f"[*] Starting ACA Mission Control on {server_name}:{server_port}...")
     print(f"[*] Dashboard Viewport: http://{server_name}:{server_port}/")
-    uvicorn.run(app, host=server_name, port=server_port, log_level="info")
+    try:
+        uvicorn.run(app, host=server_name, port=server_port, log_level="info")
+    except OSError as e:
+        if "address already in use" in str(e).lower() or getattr(e, "errno", None) in (48, 98, 10048):
+            print(f"[!] Port {server_port} already in use; launching via demo.launch()...")
+            demo.launch(server_name=server_name, server_port=server_port, share=False)
+        else:
+            raise
