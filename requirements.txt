@@ -1,5 +1,16 @@
-# Complete installation compatibility manifest for ACA
-# Pulls core runtime dependencies + optional extras + demo dependencies
--r requirements-core.txt
--r requirements-extras.txt
+# Core runtime and demo dependencies for Adversarial Contingency Auctions (ACA)
+# Fully compatible with both local installation and cloud hosting (Hugging Face Spaces)
+numpy>=1.20
+scipy>=1.9.0
+networkx>=3.0
+pandas>=1.3
+pyyaml>=6.0
+matplotlib>=3.5
+seaborn>=0.11.0
+statsmodels>=0.13.0
+fastapi>=0.100.0
+uvicorn>=0.20.0
+pydantic>=2.0.0
+pyarrow>=12.0.0
 gradio>=6.0.0,<7.0.0
+httpx>=0.24.0
