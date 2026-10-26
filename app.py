@@ -783,15 +783,12 @@ app = gr.mount_gradio_app(
 )
 
 if __name__ == "__main__":
-    server_port = int(os.environ.get("PORT", 7860))
-    server_name = os.environ.get("HOST", os.environ.get("GRADIO_SERVER_NAME", "0.0.0.0"))
-    print(f"[*] Starting ACA Mission Control on {server_name}:{server_port}...")
-    print(f"[*] Dashboard Viewport: http://{server_name}:{server_port}/")
-    try:
+    if os.environ.get("SPACE_ID"):
+        # Native Hugging Face Spaces launch
+        demo.launch()
+    else:
+        server_port = int(os.environ.get("PORT", 7860))
+        server_name = os.environ.get("HOST", os.environ.get("GRADIO_SERVER_NAME", "0.0.0.0"))
+        print(f"[*] Starting ACA Mission Control on {server_name}:{server_port}...")
+        print(f"[*] Dashboard Viewport: http://{server_name}:{server_port}/")
         uvicorn.run(app, host=server_name, port=server_port, log_level="info")
-    except OSError as e:
-        if "address already in use" in str(e).lower() or getattr(e, "errno", None) in (48, 98, 10048):
-            print(f"[!] Port {server_port} already in use; launching via demo.launch()...")
-            demo.launch(server_name=server_name, server_port=server_port, share=False)
-        else:
-            raise
