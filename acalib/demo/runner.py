@@ -673,13 +673,18 @@ def get_paper_aggregate_comparison(graph_family: str, variant: str = "10-20-10-2
             conf_mean = group["total_conflicts"].mean()
             conf_ci = bootstrap_ci(group["total_conflicts"].values)
 
+            comp_half = 0.5 * (comp_ci[2] - comp_ci[1])
+            welfare_half = 0.5 * (welfare_ci[2] - welfare_ci[1])
+            msg_half = 0.5 * (msg_ci[2] - msg_ci[1])
+            conf_half = 0.5 * (conf_ci[2] - conf_ci[1])
+
             records.append({
                 "Method": METHOD_NAME_MAP.get(method, method),
                 "Instances": n_inst,
-                "Completion (%)": f"{comp_mean:.1f} ± {comp_ci[1] - comp_mean:.1f}",
-                "Net Welfare": f"{welfare_mean:.0f} ± {welfare_ci[1] - welfare_mean:.0f}",
-                "Total Messages": f"{msg_mean:.0f} ± {msg_ci[1] - msg_mean:.0f}",
-                "Total Conflicts": f"{conf_mean:.1f} ± {conf_ci[1] - conf_mean:.1f}",
+                "Completion (%)": f"{comp_mean:.1f} ± {comp_half:.1f}",
+                "Net Welfare": f"{welfare_mean:.0f} ± {welfare_half:.0f}",
+                "Total Messages": f"{msg_mean:.0f} ± {msg_half:.0f}",
+                "Total Conflicts": f"{conf_mean:.1f} ± {conf_half:.1f}",
             })
         return pd.DataFrame(records)
     except Exception:
@@ -883,9 +888,10 @@ def run_20_seeds_paired(
                 else:
                     t += 1
 
+        m_comp_half = 0.5 * (ci_m_comp[2] - ci_m_comp[1])
         stats_table.append({
             "Baseline": METHOD_NAME_MAP.get(m, m),
-            "Completion (%)": f"{m_mean_comp:.1f}% ± {ci_m_comp[1] - m_mean_comp:.1f}%",
+            "Completion (%)": f"{m_mean_comp:.1f}% ± {m_comp_half:.1f}%",
             "Paired W/T/L (ACA vs Baseline)": f"{w}W / {t}T / {loss_cnt}L",
         })
 
@@ -919,10 +925,11 @@ def run_20_seeds_paired(
             })
     details_df = pd.DataFrame(detail_records)
 
+    main_comp_half = 0.5 * (ci_main[2] - ci_main[1])
     return {
         "n_seeds": num_seeds,
         "main_method": METHOD_NAME_MAP.get(alloc_main, alloc_main),
-        "main_completion": f"{main_mean:.1f}% ± {ci_main[1] - main_mean:.1f}%",
+        "main_completion": f"{main_mean:.1f}% ± {main_comp_half:.1f}%",
         "comparisons_table": pd.DataFrame(stats_table),
         "details_df": details_df,
         "verdict": verdict,

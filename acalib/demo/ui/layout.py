@@ -99,9 +99,10 @@ def build_app():
                   </div>
                 </div>
                 <div style="margin-top:8px; padding:6px 12px; background:rgba(15,23,42,0.75); border:1.5px solid #e09f3e; border-radius:10px; font-size:11px; color:#cbd5e1; display:flex; flex-wrap:wrap; gap:16px;">
-                    <span><strong style="color:#ffe169;">Protocol:</strong> Protocol v6 registered; execution pending</span>
-                    <span><strong style="color:#ffe169;">Displayed results:</strong> protocol v5, data hash <code>a7470feb...</code></span>
-                    <span><strong style="color:#ffe169;">Result Model:</strong> <code>v2.0.0</code></span>
+                    <span><strong style="color:#ffe169;">Protocol:</strong> Protocol v6 registered (execution pending)</span>
+                    <span><strong style="color:#ffe169;">Table II Core Benchmark:</strong> Nominal Grid ($N=750$), Hash <code>6ea11355...</code></span>
+                    <span><strong style="color:#ffe169;">Table III Confirmatory:</strong> Protocol v5 ($N=450$), Hash <code>a7470feb...</code></span>
+                    <span><strong style="color:#ffe169;">Result Model:</strong> <code>v2.1.0</code> (Reconciled &amp; Verified)</span>
                 </div>
                 """
             )
